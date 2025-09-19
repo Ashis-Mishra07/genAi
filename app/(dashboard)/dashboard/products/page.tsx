@@ -473,11 +473,14 @@ export default function ProductsPage() {
     <div className="p-6 space-y-6 bg-black min-h-screen">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-orange-400">Products</h1>
-          <p className="text-gray-400">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent">
+            Products
+          </h1>
+          <p className="text-gray-400 text-lg">
             Manage your artisan products with AI-powered features
           </p>
+          <div className="h-1 w-32 bg-gradient-to-r from-orange-400 to-transparent rounded-full"></div>
         </div>
         <Button
           onClick={() => setShowAddModal(true)}
@@ -488,7 +491,8 @@ export default function ProductsPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-gray-900 rounded-lg border border-gray-700 p-4">
+      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl border border-gray-800 p-4 shadow-xl backdrop-blur-sm relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600"></div>
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">

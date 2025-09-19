@@ -107,6 +107,23 @@ export default function OrdersPage() {
     }
   };
 
+  const getStatusTopBarColor = (status: string) => {
+    switch (status) {
+      case "DELIVERED":
+        return "bg-gradient-to-r from-green-400 via-green-500 to-green-600";
+      case "SHIPPED":
+        return "bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600";
+      case "CONFIRMED":
+        return "bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600";
+      case "PENDING":
+        return "bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600";
+      case "CANCELLED":
+        return "bg-gradient-to-r from-red-400 via-red-500 to-red-600";
+      default:
+        return "bg-gradient-to-r from-gray-400 via-gray-500 to-gray-600";
+    }
+  };
+
   // Modal handler functions
   const handleViewOrder = (order: Order) => {
     setSelectedOrder(order);
@@ -363,11 +380,14 @@ export default function OrdersPage() {
     <div className="bg-black min-h-screen p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-orange-400">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent">
             Orders Management
           </h1>
-          <p className="text-gray-400 mt-1">Track and manage customer orders</p>
+          <p className="text-gray-400 text-lg">
+            Track and manage customer orders
+          </p>
+          <div className="h-1 w-32 bg-gradient-to-r from-orange-400 to-transparent rounded-full"></div>
         </div>
         <div className="text-sm text-gray-400">
           Total Orders: {orders.length}
@@ -386,7 +406,8 @@ export default function OrdersPage() {
             return (
               <div
                 key={status}
-                className="bg-gray-900 border border-gray-800 rounded-lg p-4 hover:border-orange-500/50 transition-colors">
+                className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 rounded-xl p-4 hover:border-orange-500/50 transition-all duration-300 shadow-xl backdrop-blur-sm relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600"></div>
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-gray-400 text-sm capitalize">
@@ -394,7 +415,9 @@ export default function OrdersPage() {
                     </p>
                     <p className="text-white text-2xl font-bold">{count}</p>
                   </div>
-                  <Icon className="h-8 w-8 text-orange-400" />
+                  <div className="h-12 w-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <Icon className="h-6 w-6 text-white" />
+                  </div>
                 </div>
               </div>
             );
@@ -403,7 +426,8 @@ export default function OrdersPage() {
       </div>
 
       {/* Search and Filter */}
-      <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 mb-6">
+      <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 rounded-xl p-4 mb-6 shadow-xl backdrop-blur-sm relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600"></div>
         <div className="flex flex-col md:flex-row gap-4">
           {/* Search */}
           <div className="flex-1 relative">
@@ -437,7 +461,8 @@ export default function OrdersPage() {
 
       {/* Orders Grid */}
       {filteredOrders.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-12 text-center">
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 rounded-xl p-12 text-center shadow-xl backdrop-blur-sm relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-400 via-gray-500 to-gray-600"></div>
           <Package className="h-12 w-12 text-gray-600 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-300 mb-2">
             No orders found
@@ -453,12 +478,15 @@ export default function OrdersPage() {
           {filteredOrders.map((order) => {
             const statusConfig = getStatusConfig(order.status);
             const StatusIcon = statusConfig.icon;
+            const topBarColor = getStatusTopBarColor(order.status);
 
             return (
               <div
                 key={order.id}
-                className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-orange-500/50 transition-all duration-300 cursor-pointer"
+                className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 rounded-xl p-6 hover:border-orange-500/50 transition-all duration-300 cursor-pointer shadow-xl backdrop-blur-sm relative overflow-hidden"
                 onClick={() => handleViewOrder(order)}>
+                <div
+                  className={`absolute top-0 left-0 w-full h-1 ${topBarColor}`}></div>
                 {/* Order Header */}
                 <div className="flex items-center justify-between mb-4">
                   <div>
