@@ -1,29 +1,35 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  Package, 
-  ShoppingCart, 
-  TrendingUp, 
+import { useState, useEffect } from "react";
+import {
+  Package,
+  ShoppingCart,
+  TrendingUp,
   Users,
   MessageSquare,
   Sparkles,
   Plus,
-  Eye
-} from 'lucide-react';
+  Eye,
+} from "lucide-react";
 
 // Dashboard stats component
-function StatsCard({ title, value, icon: Icon, change, changeType }: {
+function StatsCard({
+  title,
+  value,
+  icon: Icon,
+  change,
+  changeType,
+}: {
   title: string;
   value: string;
   icon: React.ElementType;
   change: string;
-  changeType: 'positive' | 'negative' | 'neutral';
+  changeType: "positive" | "negative" | "neutral";
 }) {
   const changeColor = {
-    positive: 'text-green-400',
-    negative: 'text-red-400',
-    neutral: 'text-gray-400'
+    positive: "text-green-400",
+    negative: "text-red-400",
+    neutral: "text-gray-400",
   }[changeType];
 
   return (
@@ -40,7 +46,9 @@ function StatsCard({ title, value, icon: Icon, change, changeType }: {
           </div>
         </div>
         <div className="mt-4 flex items-center">
-          <span className={`text-sm font-semibold ${changeColor}`}>{change}</span>
+          <span className={`text-sm font-semibold ${changeColor}`}>
+            {change}
+          </span>
           <span className="text-sm text-gray-400 ml-2">from last month</span>
         </div>
       </div>
@@ -51,10 +59,30 @@ function StatsCard({ title, value, icon: Icon, change, changeType }: {
 // Recent activity component
 function RecentActivity() {
   const activities = [
-    { id: 1, type: 'order', message: 'New order #1234 received', time: '2 minutes ago' },
-    { id: 2, type: 'product', message: 'Product "Handwoven Scarf" updated', time: '1 hour ago' },
-    { id: 3, type: 'chat', message: 'AI generated cultural story for pottery', time: '2 hours ago' },
-    { id: 4, type: 'order', message: 'Order #1230 shipped', time: '5 hours ago' },
+    {
+      id: 1,
+      type: "order",
+      message: "New order #1234 received",
+      time: "2 minutes ago",
+    },
+    {
+      id: 2,
+      type: "product",
+      message: 'Product "Handwoven Scarf" updated',
+      time: "1 hour ago",
+    },
+    {
+      id: 3,
+      type: "chat",
+      message: "AI generated cultural story for pottery",
+      time: "2 hours ago",
+    },
+    {
+      id: 4,
+      type: "order",
+      message: "Order #1230 shipped",
+      time: "5 hours ago",
+    },
   ];
 
   return (
@@ -65,9 +93,15 @@ function RecentActivity() {
         {activities.map((activity) => (
           <div key={activity.id} className="flex items-center space-x-3">
             <div className="h-8 w-8 bg-orange-500/20 rounded-full flex items-center justify-center">
-              {activity.type === 'order' && <ShoppingCart className="h-4 w-4 text-orange-500" />}
-              {activity.type === 'product' && <Package className="h-4 w-4 text-orange-500" />}
-              {activity.type === 'chat' && <MessageSquare className="h-4 w-4 text-orange-500" />}
+              {activity.type === "order" && (
+                <ShoppingCart className="h-4 w-4 text-orange-500" />
+              )}
+              {activity.type === "product" && (
+                <Package className="h-4 w-4 text-orange-500" />
+              )}
+              {activity.type === "chat" && (
+                <MessageSquare className="h-4 w-4 text-orange-500" />
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm text-gray-300">{activity.message}</p>
@@ -93,7 +127,9 @@ function QuickActions() {
         </button>
         <button className="flex items-center justify-center p-3 border border-gray-600 rounded-lg hover:bg-gray-800 hover:border-orange-500 transition-colors">
           <MessageSquare className="h-5 w-5 text-gray-400 mr-2" />
-          <span className="text-sm font-medium text-gray-300">AI Assistant</span>
+          <span className="text-sm font-medium text-gray-300">
+            AI Assistant
+          </span>
         </button>
         <button className="flex items-center justify-center p-3 border border-gray-600 rounded-lg hover:bg-gray-800 hover:border-orange-500 transition-colors">
           <Eye className="h-5 w-5 text-gray-400 mr-2" />
@@ -110,20 +146,20 @@ function QuickActions() {
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
-    totalProducts: '0',
-    totalOrders: '0',
-    totalRevenue: '₹0',
-    activeChats: '0'
+    totalProducts: "0",
+    totalOrders: "0",
+    totalRevenue: "₹0",
+    activeChats: "0",
   });
 
   useEffect(() => {
     // Simulate loading stats
     setTimeout(() => {
       setStats({
-        totalProducts: '12',
-        totalOrders: '8',
-        totalRevenue: '₹15,240',
-        activeChats: '3'
+        totalProducts: "12",
+        totalOrders: "8",
+        totalRevenue: "₹15,240",
+        activeChats: "3",
       });
     }, 1000);
   }, []);
@@ -135,9 +171,12 @@ export default function DashboardPage() {
         <div className="flex items-center space-x-3">
           <Sparkles className="h-8 w-8" />
           <div>
-            <h1 className="text-2xl font-bold">Welcome to Your AI-Powered Marketplace</h1>
+            <h1 className="text-2xl font-bold">
+              Welcome to Your AI-Powered Marketplace
+            </h1>
             <p className="text-orange-100 mt-1">
-              Manage your artisan products with the help of AI for cultural storytelling, pricing, and marketing.
+              Manage your artisan products with the help of AI for cultural
+              storytelling, pricing, and marketing.
             </p>
           </div>
         </div>
@@ -184,7 +223,9 @@ export default function DashboardPage() {
       {/* AI Features Showcase */}
       <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 rounded-xl p-6 hover:border-orange-500/50 transition-all duration-300 shadow-xl backdrop-blur-sm relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 via-blue-500 to-purple-600"></div>
-        <h3 className="text-lg font-medium text-white mb-4">AI-Powered Features</h3>
+        <h3 className="text-lg font-medium text-white mb-4">
+          AI-Powered Features
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="text-center p-4 bg-gradient-to-br from-orange-500/10 to-orange-600/5 rounded-lg hover:from-orange-500/20 hover:to-orange-600/10 transition-all duration-300 border border-orange-500/20 group">
             <div className="relative mb-3">
@@ -193,7 +234,9 @@ export default function DashboardPage() {
               </div>
               <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
             </div>
-            <h4 className="font-medium text-white mb-2">Cultural Storytelling</h4>
+            <h4 className="font-medium text-white mb-2">
+              Cultural Storytelling
+            </h4>
             <p className="text-sm text-gray-400">
               AI generates authentic cultural stories for your products
             </p>

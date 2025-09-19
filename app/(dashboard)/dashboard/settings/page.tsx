@@ -245,7 +245,7 @@ export default function SettingsPage() {
           {/* Notification Settings */}
           {activeTab === "notifications" && (
             <div className="space-y-6">
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-xl font-semibold text-white">
                 Notification Preferences
               </h2>
 
@@ -253,12 +253,12 @@ export default function SettingsPage() {
                 {Object.entries(settings.notifications).map(([key, value]) => (
                   <div
                     key={key}
-                    className="flex items-center justify-between py-3 border-b border-gray-200">
+                    className="flex items-center justify-between py-4 px-4 bg-gradient-to-r from-gray-800/30 to-gray-800/10 rounded-lg border border-gray-800/50 hover:border-gray-700/50 transition-all duration-300">
                     <div>
-                      <h3 className="font-medium text-gray-900 capitalize">
+                      <h3 className="font-medium text-white capitalize">
                         {key.replace(/([A-Z])/g, " $1").trim()} Notifications
                       </h3>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-gray-400">
                         {key === "email" && "Receive notifications via email"}
                         {key === "push" &&
                           "Receive push notifications in browser"}
@@ -277,7 +277,7 @@ export default function SettingsPage() {
                         }
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
                     </label>
                   </div>
                 ))}
@@ -289,16 +289,16 @@ export default function SettingsPage() {
           {activeTab === "ai" && (
             <div className="space-y-6">
               <div className="flex items-center space-x-2">
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-xl font-semibold text-white">
                   AI Assistant Settings
                 </h2>
-                <Key className="h-5 w-5 text-blue-600" />
+                <Key className="h-5 w-5 text-orange-400" />
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="bg-gradient-to-r from-orange-500/10 to-orange-600/5 border border-orange-500/20 rounded-lg p-4">
                 <div className="flex items-center space-x-2">
-                  <AlertCircle className="h-5 w-5 text-blue-600" />
-                  <p className="text-sm text-blue-800">
+                  <AlertCircle className="h-5 w-5 text-orange-400" />
+                  <p className="text-sm text-orange-300">
                     Configure how AI tools assist with your marketplace
                     operations
                   </p>
@@ -309,14 +309,14 @@ export default function SettingsPage() {
                 {Object.entries(settings.ai).map(([key, value]) => (
                   <div
                     key={key}
-                    className="flex items-center justify-between py-3 border-b border-gray-200">
+                    className="flex items-center justify-between py-4 px-4 bg-gradient-to-r from-gray-800/30 to-gray-800/10 rounded-lg border border-gray-800/50 hover:border-gray-700/50 transition-all duration-300">
                     <div>
-                      <h3 className="font-medium text-gray-900">
+                      <h3 className="font-medium text-white">
                         {key
                           .replace(/([A-Z])/g, " $1")
                           .replace(/^./, (str) => str.toUpperCase())}
                       </h3>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-gray-400">
                         {key === "autoGenerateStories" &&
                           "Automatically generate cultural stories for new products"}
                         {key === "voiceLanguageDetection" &&
@@ -336,7 +336,7 @@ export default function SettingsPage() {
                         }
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
                     </label>
                   </div>
                 ))}
@@ -347,13 +347,13 @@ export default function SettingsPage() {
           {/* Marketplace Settings */}
           {activeTab === "marketplace" && (
             <div className="space-y-6">
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-xl font-semibold text-white">
                 Marketplace Configuration
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     Default Currency
                   </label>
                   <select
@@ -365,7 +365,7 @@ export default function SettingsPage() {
                         e.target.value
                       )
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
                     <option value="INR">Indian Rupee (₹)</option>
                     <option value="USD">US Dollar ($)</option>
                     <option value="EUR">Euro (€)</option>
@@ -374,7 +374,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     Shipping Calculation
                   </label>
                   <select
@@ -386,7 +386,7 @@ export default function SettingsPage() {
                         e.target.value
                       )
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white">
                     <option value="weight">By Weight</option>
                     <option value="distance">By Distance</option>
                     <option value="flat">Flat Rate</option>
@@ -395,12 +395,12 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between py-3 border-b border-gray-200">
+              <div className="flex items-center justify-between py-4 px-4 bg-gradient-to-r from-gray-800/30 to-gray-800/10 rounded-lg border border-gray-800/50 hover:border-gray-700/50 transition-all duration-300">
                 <div>
-                  <h3 className="font-medium text-gray-900">
+                  <h3 className="font-medium text-white">
                     Tax Included in Prices
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-400">
                     Include tax in displayed product prices
                   </p>
                 </div>
@@ -417,7 +417,7 @@ export default function SettingsPage() {
                     }
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
                 </label>
               </div>
             </div>
@@ -426,52 +426,60 @@ export default function SettingsPage() {
           {/* Security Settings */}
           {activeTab === "security" && (
             <div className="space-y-6">
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-xl font-semibold text-white">
                 Security & Privacy
               </h2>
 
               <div className="space-y-4">
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <h3 className="font-medium text-gray-900 mb-2">
-                    Change Password
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-4">
+                <div className="bg-gradient-to-r from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-6 border border-orange-500/20 hover:border-orange-500/40 transition-all duration-300">
+                  <div className="mb-4 pb-2 border-b-2 border-orange-500">
+                    <h3 className="text-lg font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 bg-clip-text text-transparent">
+                      Change Password
+                    </h3>
+                  </div>
+                  <p className="text-sm text-gray-400 mb-4">
                     Update your account password
                   </p>
-                  <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                  <button className="px-6 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg transition-all duration-200 shadow-lg">
                     Change Password
                   </button>
                 </div>
 
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <h3 className="font-medium text-gray-900 mb-2">
-                    Two-Factor Authentication
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-4">
+                <div className="bg-gradient-to-r from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-6 border border-orange-500/20 hover:border-orange-500/40 transition-all duration-300">
+                  <div className="mb-4 pb-2 border-b-2 border-orange-500">
+                    <h3 className="text-lg font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 bg-clip-text text-transparent">
+                      Two-Factor Authentication
+                    </h3>
+                  </div>
+                  <p className="text-sm text-gray-400 mb-4">
                     Add an extra layer of security to your account
                   </p>
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                  <button className="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all duration-200 shadow-lg">
                     Enable 2FA
                   </button>
                 </div>
 
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <h3 className="font-medium text-gray-900 mb-2">API Keys</h3>
-                  <p className="text-sm text-gray-600 mb-4">
+                <div className="bg-gradient-to-r from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-6 border border-orange-500/20 hover:border-orange-500/40 transition-all duration-300">
+                  <div className="mb-4 pb-2 border-b-2 border-orange-500">
+                    <h3 className="text-lg font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 bg-clip-text text-transparent">
+                      API Keys
+                    </h3>
+                  </div>
+                  <p className="text-sm text-gray-400 mb-4">
                     Manage your AI service API keys
                   </p>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg border border-gray-700/50">
+                      <span className="text-sm text-gray-300">
                         Gemini AI API
                       </span>
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                      <span className="text-xs bg-green-500/20 text-green-400 px-3 py-1 rounded-full border border-green-500/30">
                         Connected
                       </span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">OpenAI API</span>
-                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                    <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg border border-gray-700/50">
+                      <span className="text-sm text-gray-300">OpenAI API</span>
+                      <span className="text-xs bg-yellow-500/20 text-yellow-400 px-3 py-1 rounded-full border border-yellow-500/30">
                         Not configured
                       </span>
                     </div>
