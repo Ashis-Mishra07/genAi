@@ -1,34 +1,40 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign, 
-  Package, 
-  Users, 
+import { useState, useEffect } from "react";
+import {
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  Package,
+  Users,
   ShoppingCart,
   BarChart3,
   PieChart,
   Calendar,
-  Download
-} from 'lucide-react';
+  Download,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 interface AnalyticsData {
   revenue: {
     total: number;
     change: number;
-    trend: 'up' | 'down';
-    monthly: { month: string; value: number; }[];
+    trend: "up" | "down";
+    monthly: {
+      month: string;
+      actual: number;
+      estimated: number;
+    }[];
   };
   orders: {
     total: number;
     change: number;
-    trend: 'up' | 'down';
+    trend: "up" | "down";
   };
   products: {
     total: number;
-    topSelling: { name: string; sales: number; revenue: number; }[];
+    topSelling: { name: string; sales: number; revenue: number }[];
   };
   categories: {
     name: string;
@@ -45,8 +51,13 @@ interface AnalyticsData {
 
 export default function AnalyticsPage() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
-  const [timeRange, setTimeRange] = useState('7d');
+  const [timeRange, setTimeRange] = useState("7d");
   const [isLoading, setIsLoading] = useState(true);
+
+  // Pagination states
+  const [currentProductsPage, setCurrentProductsPage] = useState(1);
+  const [currentCategoriesPage, setCurrentCategoriesPage] = useState(1);
+  const itemsPerPage = 3;
 
   useEffect(() => {
     loadAnalytics();
@@ -61,49 +72,49 @@ export default function AnalyticsPage() {
           revenue: {
             total: 45280,
             change: 12.5,
-            trend: 'up',
+            trend: "up",
             monthly: [
-              { month: 'Jan', value: 15200 },
-              { month: 'Feb', value: 18600 },
-              { month: 'Mar', value: 22100 },
-              { month: 'Apr', value: 28400 },
-              { month: 'May', value: 31200 },
-              { month: 'Jun', value: 45280 }
-            ]
+              { month: "Jan", actual: 15200, estimated: 18000 },
+              { month: "Feb", actual: 18600, estimated: 20500 },
+              { month: "Mar", actual: 22100, estimated: 24000 },
+              { month: "Apr", actual: 28400, estimated: 30000 },
+              { month: "May", actual: 31200, estimated: 33500 },
+              { month: "Jun", actual: 45280, estimated: 42000 },
+            ],
           },
           orders: {
             total: 127,
             change: 8.3,
-            trend: 'up'
+            trend: "up",
           },
           products: {
             total: 24,
             topSelling: [
-              { name: 'Handwoven Cotton Scarf', sales: 45, revenue: 56250 },
-              { name: 'Clay Pottery Bowl', sales: 32, revenue: 27200 },
-              { name: 'Silver Filigree Earrings', sales: 28, revenue: 22400 },
-              { name: 'Kashmiri Shawl', sales: 15, revenue: 48000 },
-              { name: 'Brass Lamp', sales: 12, revenue: 18000 }
-            ]
+              { name: "Handwoven Cotton Scarf", sales: 45, revenue: 56250 },
+              { name: "Clay Pottery Bowl", sales: 32, revenue: 27200 },
+              { name: "Silver Filigree Earrings", sales: 28, revenue: 22400 },
+              { name: "Kashmiri Shawl", sales: 15, revenue: 48000 },
+              { name: "Brass Lamp", sales: 12, revenue: 18000 },
+            ],
           },
           categories: [
-            { name: 'Textiles', sales: 89, percentage: 35 },
-            { name: 'Pottery', sales: 56, percentage: 22 },
-            { name: 'Jewelry', sales: 43, percentage: 17 },
-            { name: 'Metalwork', sales: 38, percentage: 15 },
-            { name: 'Woodwork', sales: 29, percentage: 11 }
+            { name: "Textiles", sales: 89, percentage: 35 },
+            { name: "Pottery", sales: 56, percentage: 22 },
+            { name: "Jewelry", sales: 43, percentage: 17 },
+            { name: "Metalwork", sales: 38, percentage: 15 },
+            { name: "Woodwork", sales: 29, percentage: 11 },
           ],
           aiUsage: {
             storiesGenerated: 156,
             imagesAnalyzed: 89,
             voiceProcessed: 234,
-            pricingSuggestions: 67
-          }
+            pricingSuggestions: 67,
+          },
         });
         setIsLoading(false);
       }, 1000);
     } catch (error) {
-      console.error('Error loading analytics:', error);
+      console.error("Error loading analytics:", error);
       setIsLoading(false);
     }
   };
@@ -120,25 +131,29 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="p-6 space-y-6 bg-black min-h-screen">
+    <div className="p-6 space-y-4 bg-black min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-orange-400">Analytics</h1>
-          <p className="text-gray-400">Track your marketplace performance and AI usage</p>
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent">
+            Analytics Dashboard
+          </h1>
+          <p className="text-gray-400 text-lg">
+            Track your marketplace performance and AI usage
+          </p>
+          <div className="h-1 w-32 bg-gradient-to-r from-orange-400 to-transparent rounded-full"></div>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-4">
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
-            className="px-3 py-2 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-800 text-gray-300"
-          >
+            className="px-4 py-3 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-800 text-gray-300 shadow-lg backdrop-blur-sm">
             <option value="7d">Last 7 days</option>
             <option value="30d">Last 30 days</option>
             <option value="90d">Last 3 months</option>
             <option value="1y">Last year</option>
           </select>
-          <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          <button className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-300 shadow-lg hover:shadow-orange-500/25 transform hover:scale-105">
             <Download className="h-4 w-4" />
             <span>Export</span>
           </button>
@@ -147,185 +162,604 @@ export default function AnalyticsPage() {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold text-gray-900">₹{analytics.revenue.total.toLocaleString()}</p>
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 rounded-xl p-6 hover:border-orange-500/50 transition-all duration-300 shadow-xl backdrop-blur-sm relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-400 mb-1">
+                  Total Revenue
+                </p>
+                <p className="text-3xl font-bold text-white">
+                  ₹{analytics.revenue.total.toLocaleString()}
+                </p>
+              </div>
+              <div className="h-14 w-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                <DollarSign className="h-7 w-7 text-white" />
+              </div>
             </div>
-            <div className="h-12 w-12 bg-green-50 rounded-lg flex items-center justify-center">
-              <DollarSign className="h-6 w-6 text-green-600" />
+            <div className="mt-4 flex items-center">
+              {analytics.revenue.trend === "up" ? (
+                <TrendingUp className="h-4 w-4 text-green-400" />
+              ) : (
+                <TrendingDown className="h-4 w-4 text-red-400" />
+              )}
+              <span
+                className={`text-sm font-semibold ml-2 ${
+                  analytics.revenue.trend === "up"
+                    ? "text-green-400"
+                    : "text-red-400"
+                }`}>
+                {analytics.revenue.change}%
+              </span>
+              <span className="text-sm text-gray-400 ml-2">vs last period</span>
             </div>
-          </div>
-          <div className="mt-4 flex items-center">
-            {analytics.revenue.trend === 'up' ? (
-              <TrendingUp className="h-4 w-4 text-green-600" />
-            ) : (
-              <TrendingDown className="h-4 w-4 text-red-600" />
-            )}
-            <span className={`text-sm font-medium ml-1 ${
-              analytics.revenue.trend === 'up' ? 'text-green-600' : 'text-red-600'
-            }`}>
-              {analytics.revenue.change}%
-            </span>
-            <span className="text-sm text-gray-500 ml-1">vs last period</span>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Orders</p>
-              <p className="text-2xl font-bold text-gray-900">{analytics.orders.total}</p>
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 rounded-xl p-6 hover:border-orange-500/50 transition-all duration-300 shadow-xl backdrop-blur-sm relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-400 mb-1">
+                  Total Orders
+                </p>
+                <p className="text-3xl font-bold text-white">
+                  {analytics.orders.total}
+                </p>
+              </div>
+              <div className="h-14 w-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                <ShoppingCart className="h-7 w-7 text-white" />
+              </div>
             </div>
-            <div className="h-12 w-12 bg-blue-50 rounded-lg flex items-center justify-center">
-              <ShoppingCart className="h-6 w-6 text-blue-600" />
+            <div className="mt-4 flex items-center">
+              <TrendingUp className="h-4 w-4 text-green-400" />
+              <span className="text-sm font-semibold text-green-400 ml-2">
+                {analytics.orders.change}%
+              </span>
+              <span className="text-sm text-gray-400 ml-2">vs last period</span>
             </div>
-          </div>
-          <div className="mt-4 flex items-center">
-            <TrendingUp className="h-4 w-4 text-green-600" />
-            <span className="text-sm font-medium text-green-600 ml-1">
-              {analytics.orders.change}%
-            </span>
-            <span className="text-sm text-gray-500 ml-1">vs last period</span>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Active Products</p>
-              <p className="text-2xl font-bold text-gray-900">{analytics.products.total}</p>
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 rounded-xl p-6 hover:border-orange-500/50 transition-all duration-300 shadow-xl backdrop-blur-sm relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-400 mb-1">
+                  Active Products
+                </p>
+                <p className="text-3xl font-bold text-white">
+                  {analytics.products.total}
+                </p>
+              </div>
+              <div className="h-14 w-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Package className="h-7 w-7 text-white" />
+              </div>
             </div>
-            <div className="h-12 w-12 bg-purple-50 rounded-lg flex items-center justify-center">
-              <Package className="h-6 w-6 text-purple-600" />
+            <div className="mt-4">
+              <span className="text-sm text-gray-400 bg-gray-800/50 px-3 py-1 rounded-full">
+                Across 5 categories
+              </span>
             </div>
-          </div>
-          <div className="mt-4">
-            <span className="text-sm text-gray-500">Across 5 categories</span>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">AI Stories Generated</p>
-              <p className="text-2xl font-bold text-gray-900">{analytics.aiUsage.storiesGenerated}</p>
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 rounded-xl p-6 hover:border-orange-500/50 transition-all duration-300 shadow-xl backdrop-blur-sm relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-400 mb-1">
+                  AI Stories Generated
+                </p>
+                <p className="text-3xl font-bold text-white">
+                  {analytics.aiUsage.storiesGenerated}
+                </p>
+              </div>
+              <div className="h-14 w-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                <BarChart3 className="h-7 w-7 text-white" />
+              </div>
             </div>
-            <div className="h-12 w-12 bg-orange-50 rounded-lg flex items-center justify-center">
-              <BarChart3 className="h-6 w-6 text-orange-600" />
+            <div className="mt-4">
+              <span className="text-sm text-gray-400 bg-gray-800/50 px-3 py-1 rounded-full">
+                Cultural narratives
+              </span>
             </div>
-          </div>
-          <div className="mt-4">
-            <span className="text-sm text-gray-500">Cultural narratives</span>
           </div>
         </div>
       </div>
 
       {/* Revenue Chart */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-medium text-gray-900">Revenue Trend</h3>
-          <BarChart3 className="h-5 w-5 text-gray-400" />
-        </div>
-        <div className="h-64 flex items-end space-x-2">
-          {analytics.revenue.monthly.map((month, index) => {
-            const maxValue = Math.max(...analytics.revenue.monthly.map(m => m.value));
-            const height = (month.value / maxValue) * 100;
-            return (
-              <div key={index} className="flex-1 flex flex-col items-center">
-                <div className="w-full bg-gray-200 rounded-t">
-                  <div
-                    className="bg-blue-600 rounded-t transition-all duration-500"
-                    style={{ height: `${height}%` }}
-                  ></div>
-                </div>
-                <span className="text-xs text-gray-500 mt-2">{month.month}</span>
-                <span className="text-xs font-medium text-gray-900">₹{(month.value / 1000).toFixed(0)}k</span>
+      <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 rounded-xl p-8 hover:border-orange-500/50 transition-all duration-300 shadow-xl backdrop-blur-sm relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600"></div>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-3">
+            <div className="h-10 w-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+              <BarChart3 className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-white">
+                Revenue Trend
+              </h3>
+              <p className="text-sm text-gray-400">
+                Monthly performance overview
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2 bg-gray-800/50 rounded-lg px-3 py-2">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <div className="h-3 w-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full"></div>
+                <span className="text-sm text-gray-400">Actual</span>
               </div>
-            );
-          })}
+              <div className="flex items-center space-x-2">
+                <div className="h-3 w-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
+                <span className="text-sm text-gray-400">Estimated</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Graph Container with Grid */}
+        <div className="relative">
+          {/* Background Grid */}
+          <div className="absolute inset-0 grid grid-cols-12 grid-rows-6 opacity-20">
+            {/* Horizontal grid lines */}
+            {[...Array(7)].map((_, i) => (
+              <div
+                key={`h-${i}`}
+                className="col-span-12 border-t border-gray-600/30"
+                style={{ gridRow: i + 1 }}
+              />
+            ))}
+            {/* Vertical grid lines */}
+            {[...Array(13)].map((_, i) => (
+              <div
+                key={`v-${i}`}
+                className="row-span-6 border-l border-gray-600/30"
+                style={{ gridColumn: i + 1 }}
+              />
+            ))}
+          </div>
+
+          {/* Chart Area */}
+          <div className="relative">
+            {/* Chart Bars */}
+            <div className="h-64 flex items-end justify-between px-8 py-4">
+              {analytics.revenue.monthly.map((month, index) => {
+                const maxValue = Math.max(
+                  ...analytics.revenue.monthly.flatMap((m) => [
+                    m.actual,
+                    m.estimated,
+                  ])
+                );
+                const actualHeight = (month.actual / maxValue) * 200; // Reduced height for space
+                const estimatedHeight = (month.estimated / maxValue) * 200; // Reduced height for space
+
+                return (
+                  <div
+                    key={index}
+                    className="flex flex-col items-center group cursor-pointer flex-1 max-w-[120px]">
+                    {/* Bars Container */}
+                    <div
+                      className="relative flex flex-col-reverse items-center"
+                      style={{ height: "200px" }}>
+                      <div className="flex items-end justify-center space-x-2 w-full">
+                        {/* Actual Revenue Bar */}
+                        <div
+                          className="w-6 bg-gradient-to-t from-orange-600 via-orange-500 to-orange-400 rounded-t-lg transition-all duration-700 ease-out hover:from-orange-500 hover:to-orange-300 shadow-xl relative overflow-hidden"
+                          style={{
+                            height: `${actualHeight}px`,
+                            boxShadow: "0 0 20px rgba(251, 146, 60, 0.4)",
+                            filter:
+                              "drop-shadow(0 4px 15px rgba(251, 146, 60, 0.3))",
+                          }}>
+                          {/* Shimmer effect */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 transform -skew-y-12"></div>
+                        </div>
+
+                        {/* Estimated Revenue Bar */}
+                        <div
+                          className="w-6 bg-gradient-to-t from-blue-600 via-blue-500 to-blue-400 rounded-t-lg transition-all duration-700 ease-out hover:from-blue-500 hover:to-blue-300 shadow-xl relative overflow-hidden"
+                          style={{
+                            height: `${estimatedHeight}px`,
+                            boxShadow: "0 0 20px rgba(59, 130, 246, 0.4)",
+                            filter:
+                              "drop-shadow(0 4px 15px rgba(59, 130, 246, 0.3))",
+                          }}>
+                          {/* Shimmer effect */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 transform -skew-y-12"></div>
+                        </div>
+                      </div>
+
+                      {/* Tooltip */}
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-4 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
+                        <div className="bg-gray-900 border border-gray-700 text-white px-4 py-3 rounded-xl text-sm whitespace-nowrap shadow-2xl backdrop-blur-sm">
+                          <div className="space-y-1">
+                            <div className="flex items-center space-x-2">
+                              <div className="h-2 w-2 bg-orange-400 rounded-full"></div>
+                              <span className="text-gray-300">
+                                Actual: ₹{month.actual.toLocaleString()}
+                              </span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <div className="h-2 w-2 bg-blue-400 rounded-full"></div>
+                              <span className="text-gray-300">
+                                Estimated: ₹{month.estimated.toLocaleString()}
+                              </span>
+                            </div>
+                            <div className="text-center text-gray-400 text-xs mt-2 pt-2 border-t border-gray-700">
+                              {month.month}
+                            </div>
+                          </div>
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Labels Section - Separate from chart */}
+            <div className="flex items-center justify-between px-8 pt-2">
+              {analytics.revenue.monthly.map((month, index) => (
+                <div key={index} className="flex-1 max-w-[120px] text-center">
+                  <span className="text-sm text-gray-400 block font-medium">
+                    {month.month}
+                  </span>
+                  <div className="flex items-center justify-center space-x-2 mt-1">
+                    <span className="text-xs font-semibold text-orange-400 bg-gray-800/50 px-2 py-1 rounded-lg">
+                      ₹{(month.actual / 1000).toFixed(0)}k
+                    </span>
+                    <span className="text-xs font-semibold text-blue-400 bg-gray-800/50 px-2 py-1 rounded-lg">
+                      ₹{(month.estimated / 1000).toFixed(0)}k
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Y-axis labels */}
+          <div className="absolute left-0 top-0 h-64 flex flex-col justify-between py-4">
+            {[...Array(6)].map((_, i) => {
+              const maxValue = Math.max(
+                ...analytics.revenue.monthly.flatMap((m) => [
+                  m.actual,
+                  m.estimated,
+                ])
+              );
+              const value = (maxValue / 5) * (5 - i);
+              return (
+                <div
+                  key={i}
+                  className="text-sm text-gray-400 -ml-2 bg-gray-900/80 px-2 py-1 rounded">
+                  {(value / 1000).toFixed(0)}k
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
       {/* Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Top Selling Products */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Top Selling Products</h3>
-          <div className="space-y-4">
-            {analytics.products.topSelling.map((product, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <span className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600">
-                    {index + 1}
-                  </span>
-                  <div>
-                    <p className="font-medium text-gray-900">{product.name}</p>
-                    <p className="text-sm text-gray-500">{product.sales} sales</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-medium text-gray-900">₹{product.revenue.toLocaleString()}</p>
-                </div>
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 rounded-xl p-4 hover:border-orange-500/50 transition-all duration-300 shadow-xl backdrop-blur-sm relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600"></div>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2">
+              <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                <Package className="h-4 w-4 text-white" />
               </div>
+              <div>
+                <h3 className="text-base font-semibold text-white">
+                  Top Selling Products
+                </h3>
+                <p className="text-xs text-gray-400">Best performing items</p>
+              </div>
+            </div>
+
+            {/* Pagination Controls */}
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={() =>
+                  setCurrentProductsPage((prev) => Math.max(prev - 1, 1))
+                }
+                disabled={currentProductsPage === 1}
+                className="p-1.5 rounded-lg bg-gray-800/50 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+                <ChevronLeft className="h-3 w-3 text-gray-400" />
+              </button>
+              <span className="text-xs text-gray-400 min-w-[45px] text-center">
+                {currentProductsPage}/
+                {Math.ceil(analytics.products.topSelling.length / itemsPerPage)}
+              </span>
+              <button
+                onClick={() =>
+                  setCurrentProductsPage((prev) =>
+                    Math.min(
+                      prev + 1,
+                      Math.ceil(
+                        analytics.products.topSelling.length / itemsPerPage
+                      )
+                    )
+                  )
+                }
+                disabled={
+                  currentProductsPage >=
+                  Math.ceil(analytics.products.topSelling.length / itemsPerPage)
+                }
+                className="p-1.5 rounded-lg bg-gray-800/50 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+                <ChevronRight className="h-3 w-3 text-gray-400" />
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            {analytics.products.topSelling
+              .slice(
+                (currentProductsPage - 1) * itemsPerPage,
+                currentProductsPage * itemsPerPage
+              )
+              .map((product, index) => {
+                const actualIndex =
+                  (currentProductsPage - 1) * itemsPerPage + index;
+                return (
+                  <div
+                    key={actualIndex}
+                    className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-800/30 to-gray-800/10 rounded-lg hover:from-gray-800/50 hover:to-gray-800/20 transition-all duration-300 border border-gray-800/50 group">
+                    <div className="flex items-center space-x-3">
+                      <div className="relative">
+                        <span className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center text-xs font-bold text-white shadow-lg">
+                          {actualIndex + 1}
+                        </span>
+                        <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg blur-md opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+                      </div>
+                      <div>
+                        <p className="font-medium text-white group-hover:text-orange-400 transition-colors duration-300 text-sm">
+                          {product.name}
+                        </p>
+                        <div className="flex items-center space-x-2 mt-0.5">
+                          <p className="text-xs text-gray-400">
+                            {product.sales} sales
+                          </p>
+                          <div className="h-1 w-1 bg-gray-600 rounded-full"></div>
+                          <p className="text-xs text-green-400 font-medium">
+                            +12%
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-green-400 text-sm">
+                        ₹{product.revenue.toLocaleString()}
+                      </p>
+                      <p className="text-xs text-gray-400">revenue</p>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+
+          {/* Page Indicators */}
+          <div className="flex justify-center mt-3 space-x-1">
+            {[
+              ...Array(
+                Math.ceil(analytics.products.topSelling.length / itemsPerPage)
+              ),
+            ].map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentProductsPage(i + 1)}
+                className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
+                  currentProductsPage === i + 1
+                    ? "bg-orange-500 w-4"
+                    : "bg-gray-600 hover:bg-gray-500"
+                }`}
+              />
             ))}
           </div>
         </div>
 
         {/* Category Distribution */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Sales by Category</h3>
-          <div className="space-y-4">
-            {analytics.categories.map((category, index) => (
-              <div key={index} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-900">{category.name}</span>
-                  <span className="text-sm text-gray-500">{category.percentage}%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${category.percentage}%` }}
-                  ></div>
-                </div>
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 rounded-xl p-4 hover:border-orange-500/50 transition-all duration-300 shadow-xl backdrop-blur-sm relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600"></div>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2">
+              <div className="h-8 w-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <PieChart className="h-4 w-4 text-white" />
               </div>
+              <div>
+                <h3 className="text-base font-semibold text-white">
+                  Sales by Category
+                </h3>
+                <p className="text-xs text-gray-400">Distribution overview</p>
+              </div>
+            </div>
+
+            {/* Pagination Controls */}
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={() =>
+                  setCurrentCategoriesPage((prev) => Math.max(prev - 1, 1))
+                }
+                disabled={currentCategoriesPage === 1}
+                className="p-1.5 rounded-lg bg-gray-800/50 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+                <ChevronLeft className="h-3 w-3 text-gray-400" />
+              </button>
+              <span className="text-xs text-gray-400 min-w-[45px] text-center">
+                {currentCategoriesPage}/
+                {Math.ceil(analytics.categories.length / itemsPerPage)}
+              </span>
+              <button
+                onClick={() =>
+                  setCurrentCategoriesPage((prev) =>
+                    Math.min(
+                      prev + 1,
+                      Math.ceil(analytics.categories.length / itemsPerPage)
+                    )
+                  )
+                }
+                disabled={
+                  currentCategoriesPage >=
+                  Math.ceil(analytics.categories.length / itemsPerPage)
+                }
+                className="p-1.5 rounded-lg bg-gray-800/50 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+                <ChevronRight className="h-3 w-3 text-gray-400" />
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {analytics.categories
+              .slice(
+                (currentCategoriesPage - 1) * itemsPerPage,
+                currentCategoriesPage * itemsPerPage
+              )
+              .map((category, index) => (
+                <div
+                  key={index}
+                  className="space-y-2 p-3 bg-gradient-to-r from-gray-800/20 to-transparent rounded-lg border border-gray-800/30 hover:border-gray-700/50 transition-all duration-300">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className="h-2.5 w-2.5 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full shadow-lg"></div>
+                      <span className="text-sm font-semibold text-white">
+                        {category.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-orange-400 font-bold">
+                        {category.percentage}%
+                      </span>
+                      <span className="text-xs text-gray-400 bg-gray-800/50 px-1.5 py-0.5 rounded-full">
+                        {category.sales} sales
+                      </span>
+                    </div>
+                  </div>
+                  <div className="relative w-full bg-gray-700/50 rounded-full h-3 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-orange-500 via-orange-400 to-orange-300 h-3 rounded-full transition-all duration-1000 ease-out shadow-lg relative overflow-hidden"
+                      style={{
+                        width: `${category.percentage}%`,
+                        boxShadow: "0 0 10px rgba(251, 146, 60, 0.4)",
+                      }}>
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-60 animate-pulse"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+
+          {/* Page Indicators */}
+          <div className="flex justify-center mt-3 space-x-1">
+            {[
+              ...Array(Math.ceil(analytics.categories.length / itemsPerPage)),
+            ].map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentCategoriesPage(i + 1)}
+                className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
+                  currentCategoriesPage === i + 1
+                    ? "bg-purple-500 w-4"
+                    : "bg-gray-600 hover:bg-gray-500"
+                }`}
+              />
             ))}
           </div>
         </div>
       </div>
 
       {/* AI Usage Stats */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-6">AI Tool Usage</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="text-center">
-            <div className="h-16 w-16 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-3">
-              <BarChart3 className="h-8 w-8 text-purple-600" />
-            </div>
-            <p className="text-2xl font-bold text-gray-900">{analytics.aiUsage.storiesGenerated}</p>
-            <p className="text-sm text-gray-600">Stories Generated</p>
+      <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 rounded-xl p-4 hover:border-orange-500/50 transition-all duration-300 shadow-xl backdrop-blur-sm relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 via-blue-500 to-purple-600"></div>
+        <div className="flex items-center space-x-2 mb-4">
+          <div className="h-8 w-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center">
+            <BarChart3 className="h-4 w-4 text-white" />
           </div>
-          <div className="text-center">
-            <div className="h-16 w-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Package className="h-8 w-8 text-green-600" />
-            </div>
-            <p className="text-2xl font-bold text-gray-900">{analytics.aiUsage.imagesAnalyzed}</p>
-            <p className="text-sm text-gray-600">Images Analyzed</p>
+          <div>
+            <h3 className="text-base font-semibold text-white">
+              AI Tool Usage
+            </h3>
+            <p className="text-xs text-gray-400">
+              Intelligent automation metrics
+            </p>
           </div>
-          <div className="text-center">
-            <div className="h-16 w-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Users className="h-8 w-8 text-blue-600" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div className="text-center p-4 bg-gradient-to-br from-purple-500/10 to-purple-600/5 rounded-lg hover:from-purple-500/20 hover:to-purple-600/10 transition-all duration-300 border border-purple-500/20 group">
+            <div className="relative mb-3">
+              <div className="h-12 w-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto shadow-xl">
+                <BarChart3 className="h-6 w-6 text-white" />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
             </div>
-            <p className="text-2xl font-bold text-gray-900">{analytics.aiUsage.voiceProcessed}</p>
-            <p className="text-sm text-gray-600">Voice Messages</p>
+            <div className="space-y-1">
+              <p className="text-2xl font-bold text-white group-hover:text-purple-400 transition-colors duration-300">
+                {analytics.aiUsage.storiesGenerated}
+              </p>
+              <p className="text-xs text-gray-400 font-medium">
+                Stories Generated
+              </p>
+              <div className="h-0.5 w-8 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full mx-auto opacity-60"></div>
+            </div>
           </div>
-          <div className="text-center">
-            <div className="h-16 w-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-3">
-              <DollarSign className="h-8 w-8 text-orange-600" />
+
+          <div className="text-center p-4 bg-gradient-to-br from-green-500/10 to-green-600/5 rounded-lg hover:from-green-500/20 hover:to-green-600/10 transition-all duration-300 border border-green-500/20 group">
+            <div className="relative mb-3">
+              <div className="h-12 w-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mx-auto shadow-xl">
+                <Package className="h-6 w-6 text-white" />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-green-600 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
             </div>
-            <p className="text-2xl font-bold text-gray-900">{analytics.aiUsage.pricingSuggestions}</p>
-            <p className="text-sm text-gray-600">Pricing Suggestions</p>
+            <div className="space-y-1">
+              <p className="text-2xl font-bold text-white group-hover:text-green-400 transition-colors duration-300">
+                {analytics.aiUsage.imagesAnalyzed}
+              </p>
+              <p className="text-xs text-gray-400 font-medium">
+                Images Analyzed
+              </p>
+              <div className="h-0.5 w-8 bg-gradient-to-r from-green-500 to-green-600 rounded-full mx-auto opacity-60"></div>
+            </div>
+          </div>
+
+          <div className="text-center p-4 bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-lg hover:from-blue-500/20 hover:to-blue-600/10 transition-all duration-300 border border-blue-500/20 group">
+            <div className="relative mb-3">
+              <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto shadow-xl">
+                <Users className="h-6 w-6 text-white" />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-2xl font-bold text-white group-hover:text-blue-400 transition-colors duration-300">
+                {analytics.aiUsage.voiceProcessed}
+              </p>
+              <p className="text-xs text-gray-400 font-medium">
+                Voice Messages
+              </p>
+              <div className="h-0.5 w-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mx-auto opacity-60"></div>
+            </div>
+          </div>
+
+          <div className="text-center p-4 bg-gradient-to-br from-orange-500/10 to-orange-600/5 rounded-lg hover:from-orange-500/20 hover:to-orange-600/10 transition-all duration-300 border border-orange-500/20 group">
+            <div className="relative mb-3">
+              <div className="h-12 w-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mx-auto shadow-xl">
+                <DollarSign className="h-6 w-6 text-white" />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-2xl font-bold text-white group-hover:text-orange-400 transition-colors duration-300">
+                {analytics.aiUsage.pricingSuggestions}
+              </p>
+              <p className="text-xs text-gray-400 font-medium">
+                Pricing Suggestions
+              </p>
+              <div className="h-0.5 w-8 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full mx-auto opacity-60"></div>
+            </div>
           </div>
         </div>
       </div>
