@@ -40,7 +40,7 @@ model Product {
   instagramUrl   String?  // Instagram post URL
   instagramId    String?  // Instagram media ID
   category       String?
-  tags           String[] // Array of tags
+  // tags           String[] // Array of tags
   materials      String?  // Product materials
   culture        String?  // Cultural heritage
   artistName     String?  // Artist/creator name
