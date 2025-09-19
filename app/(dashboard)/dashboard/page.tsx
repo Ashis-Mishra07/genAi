@@ -167,7 +167,7 @@ export default function DashboardPage() {
   return (
     <div className="p-6 space-y-6 bg-black min-h-screen">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-orange-600 to-orange-500 rounded-lg p-6 text-black">
+      <div className="bg-gradient-to-r from-orange-500 to-orange-300 rounded-lg p-6 text-black">
         <div className="flex items-center space-x-3">
           <Sparkles className="h-8 w-8" />
           <div>

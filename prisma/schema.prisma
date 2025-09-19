@@ -6,23 +6,35 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-// User model for artisan authentication
+// User model with multi-role authentication
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  phone     String?
-  language  String   @default("en")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(cuid())
+  email        String   @unique
+  password     String?  // Optional for admin (uses passcode)
+  name         String?
+  phone        String?
+  role         UserRole @default(CUSTOMER)
+  language     String   @default("en")
+  isActive     Boolean  @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Artisan specific fields
+  specialty    String?  // For artisans
+  location     String?  // For artisans
+  bio          String?  // For artisans
+  avatar       String?  // Profile image
 
   // Relations
-  products Product[]
-  orders   Order[]
+  products          Product[]
+  orders            Order[]
+  sentMessages      ChatMessage[] @relation("MessageSender")
+  chatParticipants  ChatRoomParticipant[]
 
   @@map("users")
 }
@@ -113,6 +125,53 @@ model ProductInquiry {
   @@map("product_inquiries")
 }
 
+// Chat models for user communication
+model ChatRoom {
+  id           String   @id @default(cuid())
+  name         String?
+  isGroup      Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  participants ChatRoomParticipant[]
+  messages     ChatMessage[]
+
+  @@map("chat_rooms")
+}
+
+model ChatRoomParticipant {
+  id       String @id @default(cuid())
+  joinedAt DateTime @default(now())
+
+  // Relations
+  roomId String
+  room   ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  userId String
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@map("chat_room_participants")
+}
+
+model ChatMessage {
+  id          String      @id @default(cuid())
+  content     String?
+  messageType MessageType @default(TEXT)
+  imageUrl    String?
+  status      MessageStatus @default(SENT)
+  metadata    Json?
+  createdAt   DateTime    @default(now())
+
+  // Relations
+  roomId   String
+  room     ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  senderId String
+  sender   User     @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
+}
+
 // Chat history for MCP interactions
 model ChatHistory {
   id        String   @id @default(cuid())
@@ -127,6 +186,12 @@ model ChatHistory {
 }
 
 // Enums
+enum UserRole {
+  ADMIN
+  ARTISAN
+  CUSTOMER
+}
+
 enum OrderStatus {
   PENDING
   CONFIRMED
@@ -156,4 +221,16 @@ enum InquiryStatus {
   NEGOTIATING
   CONVERTED
   LOST
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  SYSTEM
 }
