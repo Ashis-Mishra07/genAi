@@ -27,19 +27,22 @@ function StatsCard({ title, value, icon: Icon, change, changeType }: {
   }[changeType];
 
   return (
-    <div className="bg-gray-900 rounded-lg shadow-sm border border-gray-700 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-400">{title}</p>
-          <p className="text-2xl font-bold text-orange-400">{value}</p>
+    <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 rounded-xl p-6 hover:border-orange-500/50 transition-all duration-300 shadow-xl backdrop-blur-sm relative overflow-hidden group">
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <div className="relative z-10">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-400 mb-1">{title}</p>
+            <p className="text-3xl font-bold text-white">{value}</p>
+          </div>
+          <div className="h-14 w-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+            <Icon className="h-7 w-7 text-white" />
+          </div>
         </div>
-        <div className="h-12 w-12 bg-orange-500/20 rounded-lg flex items-center justify-center">
-          <Icon className="h-6 w-6 text-orange-500" />
+        <div className="mt-4 flex items-center">
+          <span className={`text-sm font-semibold ${changeColor}`}>{change}</span>
+          <span className="text-sm text-gray-400 ml-2">from last month</span>
         </div>
-      </div>
-      <div className="mt-4 flex items-center">
-        <span className={`text-sm font-medium ${changeColor}`}>{change}</span>
-        <span className="text-sm text-gray-500 ml-1">from last month</span>
       </div>
     </div>
   );
@@ -55,8 +58,9 @@ function RecentActivity() {
   ];
 
   return (
-    <div className="bg-gray-900 rounded-lg shadow-sm border border-gray-700 p-6">
-      <h3 className="text-lg font-medium text-orange-400 mb-4">Recent Activity</h3>
+    <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 rounded-xl p-6 hover:border-orange-500/50 transition-all duration-300 shadow-xl backdrop-blur-sm relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600"></div>
+      <h3 className="text-lg font-medium text-white mb-4">Recent Activity</h3>
       <div className="space-y-4">
         {activities.map((activity) => (
           <div key={activity.id} className="flex items-center space-x-3">
@@ -79,8 +83,9 @@ function RecentActivity() {
 // Quick actions component
 function QuickActions() {
   return (
-    <div className="bg-gray-900 rounded-lg shadow-sm border border-gray-700 p-6">
-      <h3 className="text-lg font-medium text-orange-400 mb-4">Quick Actions</h3>
+    <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 rounded-xl p-6 hover:border-orange-500/50 transition-all duration-300 shadow-xl backdrop-blur-sm relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600"></div>
+      <h3 className="text-lg font-medium text-white mb-4">Quick Actions</h3>
       <div className="grid grid-cols-2 gap-3">
         <button className="flex items-center justify-center p-3 border border-gray-600 rounded-lg hover:bg-gray-800 hover:border-orange-500 transition-colors">
           <Plus className="h-5 w-5 text-gray-400 mr-2" />
@@ -177,33 +182,43 @@ export default function DashboardPage() {
       </div>
 
       {/* AI Features Showcase */}
-      <div className="bg-gray-900 rounded-lg shadow-sm border border-gray-700 p-6">
-        <h3 className="text-lg font-medium text-orange-400 mb-4">AI-Powered Features</h3>
+      <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 rounded-xl p-6 hover:border-orange-500/50 transition-all duration-300 shadow-xl backdrop-blur-sm relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 via-blue-500 to-purple-600"></div>
+        <h3 className="text-lg font-medium text-white mb-4">AI-Powered Features</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 border border-gray-700 rounded-lg bg-gray-800">
-            <div className="h-10 w-10 bg-orange-500/20 rounded-lg flex items-center justify-center mb-3">
-              <MessageSquare className="h-5 w-5 text-orange-500" />
+          <div className="text-center p-4 bg-gradient-to-br from-orange-500/10 to-orange-600/5 rounded-lg hover:from-orange-500/20 hover:to-orange-600/10 transition-all duration-300 border border-orange-500/20 group">
+            <div className="relative mb-3">
+              <div className="h-12 w-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mx-auto shadow-xl">
+                <MessageSquare className="h-6 w-6 text-white" />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
             </div>
-            <h4 className="font-medium text-orange-400">Cultural Storytelling</h4>
-            <p className="text-sm text-gray-400 mt-1">
+            <h4 className="font-medium text-white mb-2">Cultural Storytelling</h4>
+            <p className="text-sm text-gray-400">
               AI generates authentic cultural stories for your products
             </p>
           </div>
-          <div className="p-4 border border-gray-700 rounded-lg bg-gray-800">
-            <div className="h-10 w-10 bg-green-500/20 rounded-lg flex items-center justify-center mb-3">
-              <TrendingUp className="h-5 w-5 text-green-400" />
+          <div className="text-center p-4 bg-gradient-to-br from-green-500/10 to-green-600/5 rounded-lg hover:from-green-500/20 hover:to-green-600/10 transition-all duration-300 border border-green-500/20 group">
+            <div className="relative mb-3">
+              <div className="h-12 w-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mx-auto shadow-xl">
+                <TrendingUp className="h-6 w-6 text-white" />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-green-600 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
             </div>
-            <h4 className="font-medium text-orange-400">Smart Pricing</h4>
-            <p className="text-sm text-gray-400 mt-1">
+            <h4 className="font-medium text-white mb-2">Smart Pricing</h4>
+            <p className="text-sm text-gray-400">
               Analyze market trends and suggest optimal pricing
             </p>
           </div>
-          <div className="p-4 border border-gray-700 rounded-lg bg-gray-800">
-            <div className="h-10 w-10 bg-blue-500/20 rounded-lg flex items-center justify-center mb-3">
-              <Sparkles className="h-5 w-5 text-blue-400" />
+          <div className="text-center p-4 bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-lg hover:from-blue-500/20 hover:to-blue-600/10 transition-all duration-300 border border-blue-500/20 group">
+            <div className="relative mb-3">
+              <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto shadow-xl">
+                <Sparkles className="h-6 w-6 text-white" />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
             </div>
-            <h4 className="font-medium text-orange-400">Voice Processing</h4>
-            <p className="text-sm text-gray-400 mt-1">
+            <h4 className="font-medium text-white mb-2">Voice Processing</h4>
+            <p className="text-sm text-gray-400">
               Multilingual voice input and translation support
             </p>
           </div>
