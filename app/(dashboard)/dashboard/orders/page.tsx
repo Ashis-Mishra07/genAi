@@ -1,52 +1,155 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  Package, 
-  Clock, 
-  CheckCircle, 
-  XCircle, 
+import { useState, useEffect } from "react";
+import {
+  Package,
+  Clock,
+  CheckCircle,
+  XCircle,
   Truck,
   Search,
   Filter,
   Eye,
-  MoreHorizontal
-} from 'lucide-react';
+  Edit3,
+  Trash2,
+  IndianRupee,
+  DollarSign,
+  User,
+  MapPin,
+  ShoppingBag,
+  X,
+  Calendar,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Order {
   id: number;
   order_number: string;
-  status: 'PENDING' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+  status: "PENDING" | "CONFIRMED" | "SHIPPED" | "DELIVERED" | "CANCELLED";
   total_amount: number;
   currency: string;
   customer_name: string;
   customer_email: string;
+  customer_phone: string;
   shipping_address: string;
   items: OrderItem[];
   created_at: string;
   updated_at: string;
+  delivery_date?: string;
+  tracking_number?: string;
 }
 
 interface OrderItem {
   id: number;
   product_name: string;
+  product_image?: string;
   quantity: number;
   price: number;
+  total: number;
 }
-
-const statusConfig = {
-  PENDING: { color: 'bg-yellow-100 text-yellow-800', icon: Clock },
-  CONFIRMED: { color: 'bg-blue-100 text-blue-800', icon: CheckCircle },
-  SHIPPED: { color: 'bg-purple-100 text-purple-800', icon: Truck },
-  DELIVERED: { color: 'bg-green-100 text-green-800', icon: CheckCircle },
-  CANCELLED: { color: 'bg-red-100 text-red-800', icon: XCircle }
-};
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
+
+  // Modal states
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  // Helper function to render currency icon
+  const renderCurrencyIcon = (currency: string) => {
+    if (currency === "INR") {
+      return <IndianRupee className="h-4 w-4" />;
+    } else if (currency === "$" || currency === "USD") {
+      return <DollarSign className="h-4 w-4" />;
+    } else {
+      return currency;
+    }
+  };
+
+  // Helper function to get status colors and icons
+  const getStatusConfig = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return {
+          color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+          icon: Clock,
+        };
+      case "CONFIRMED":
+        return {
+          color: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+          icon: CheckCircle,
+        };
+      case "SHIPPED":
+        return {
+          color: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+          icon: Truck,
+        };
+      case "DELIVERED":
+        return {
+          color: "bg-green-500/20 text-green-400 border-green-500/30",
+          icon: Package,
+        };
+      case "CANCELLED":
+        return {
+          color: "bg-red-500/20 text-red-400 border-red-500/30",
+          icon: XCircle,
+        };
+      default:
+        return {
+          color: "bg-gray-500/20 text-gray-400 border-gray-500/30",
+          icon: Clock,
+        };
+    }
+  };
+
+  // Modal handler functions
+  const handleViewOrder = (order: Order) => {
+    setSelectedOrder(order);
+    setShowViewModal(true);
+  };
+
+  const handleEditOrder = (order: Order) => {
+    setSelectedOrder(order);
+    setShowEditModal(true);
+  };
+
+  const handleDeleteOrder = (order: Order) => {
+    setSelectedOrder(order);
+    setShowDeleteModal(true);
+  };
+
+  const closeModals = () => {
+    setShowViewModal(false);
+    setShowEditModal(false);
+    setShowDeleteModal(false);
+    setSelectedOrder(null);
+  };
+
+  const confirmDelete = () => {
+    if (selectedOrder) {
+      setOrders(orders.filter((o) => o.id !== selectedOrder.id));
+      closeModals();
+    }
+  };
+
+  const updateOrderStatus = (orderId: number, newStatus: Order["status"]) => {
+    setOrders(
+      orders.map((order) =>
+        order.id === orderId
+          ? {
+              ...order,
+              status: newStatus,
+              updated_at: new Date().toISOString(),
+            }
+          : order
+      )
+    );
+  };
 
   useEffect(() => {
     loadOrders();
@@ -55,142 +158,262 @@ export default function OrdersPage() {
   const loadOrders = async () => {
     try {
       setIsLoading(true);
-      // Simulate API call with sample data
+      // Simulate API call with comprehensive dummy data
       setTimeout(() => {
         setOrders([
           {
             id: 1,
-            order_number: 'ORD-2024-001',
-            status: 'CONFIRMED',
-            total_amount: 2650,
-            currency: 'INR',
-            customer_name: 'Priya Sharma',
-            customer_email: 'priya@example.com',
-            shipping_address: '123 Main Street, Mumbai, Maharashtra 400001',
+            order_number: "ORD-2024-001",
+            status: "DELIVERED",
+            total_amount: 15000.0,
+            currency: "INR",
+            customer_name: "Priya Sharma",
+            customer_email: "priya.sharma@email.com",
+            customer_phone: "+91-9876543210",
+            shipping_address:
+              "123 Heritage Lane, Vasant Vihar, New Delhi, Delhi 110057",
+            delivery_date: "2024-01-20T14:30:00Z",
+            tracking_number: "TRK1234567890",
             items: [
-              { id: 1, product_name: 'Handwoven Cotton Scarf', quantity: 2, price: 1250 },
-              { id: 2, product_name: 'Silver Earrings', quantity: 1, price: 150 }
+              {
+                id: 1,
+                product_name: "Handwoven Banarasi Silk Saree",
+                product_image:
+                  "https://images.unsplash.com/photo-1646282994816-a8078310f263?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8SGFuZHdvdmVuJTIwQmFuYXJhc2klMjBTaWxrJTIwU2FyZWV8ZW58MHx8MHx8fDA%3D",
+                quantity: 1,
+                price: 15000.0,
+                total: 15000.0,
+              },
             ],
-            created_at: '2024-01-20T10:30:00Z',
-            updated_at: '2024-01-20T14:15:00Z'
+            created_at: "2024-01-15T10:30:00Z",
+            updated_at: "2024-01-20T14:30:00Z",
           },
           {
             id: 2,
-            order_number: 'ORD-2024-002',
-            status: 'SHIPPED',
-            total_amount: 850,
-            currency: 'INR',
-            customer_name: 'Rajesh Kumar',
-            customer_email: 'rajesh@example.com',
-            shipping_address: '456 Garden Road, Delhi, Delhi 110001',
+            order_number: "ORD-2024-002",
+            status: "SHIPPED",
+            total_amount: 3500.0,
+            currency: "INR",
+            customer_name: "Rajesh Kumar",
+            customer_email: "rajesh.kumar@craftworks.in",
+            customer_phone: "+91-9876543211",
+            shipping_address:
+              "456 Craft Street, Bandra West, Mumbai, Maharashtra 400050",
+            tracking_number: "TRK1234567891",
             items: [
-              { id: 3, product_name: 'Clay Pottery Bowl', quantity: 1, price: 850 }
+              {
+                id: 2,
+                product_name: "Blue Pottery Dinner Set",
+                product_image:
+                  "https://images.unsplash.com/photo-1724709162118-60c05c4c3fcf?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fEJsdWUlMjBQb3R0ZXJ5JTIwRGlubmVyJTIwU2V0fGVufDB8fDB8fHww",
+                quantity: 1,
+                price: 3500.0,
+                total: 3500.0,
+              },
             ],
-            created_at: '2024-01-18T15:45:00Z',
-            updated_at: '2024-01-19T09:20:00Z'
+            created_at: "2024-01-18T15:45:00Z",
+            updated_at: "2024-01-19T09:20:00Z",
           },
           {
             id: 3,
-            order_number: 'ORD-2024-003',
-            status: 'PENDING',
-            total_amount: 3200,
-            currency: 'INR',
-            customer_name: 'Anita Patel',
-            customer_email: 'anita@example.com',
-            shipping_address: '789 Heritage Lane, Ahmedabad, Gujarat 380001',
+            order_number: "ORD-2024-003",
+            status: "CONFIRMED",
+            total_amount: 8500.0,
+            currency: "INR",
+            customer_name: "Meera Patel",
+            customer_email: "meera.patel@handicrafts.in",
+            customer_phone: "+91-9876543212",
+            shipping_address:
+              "789 Artisan Colony, CG Road, Ahmedabad, Gujarat 380009",
             items: [
-              { id: 4, product_name: 'Handwoven Kashmiri Shawl', quantity: 1, price: 3200 }
+              {
+                id: 3,
+                product_name: "Kundan Meenakari Necklace",
+                product_image:
+                  "https://images.unsplash.com/photo-1665680707488-e7939a4a0af8?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8S3VuZGFuJTIwTWVlbmFrYXJpJTIwTmVja2xhY2V8ZW58MHx8MHx8fDA%3D",
+                quantity: 1,
+                price: 8500.0,
+                total: 8500.0,
+              },
             ],
-            created_at: '2024-01-22T08:15:00Z',
-            updated_at: '2024-01-22T08:15:00Z'
-          }
+            created_at: "2024-01-20T09:15:00Z",
+            updated_at: "2024-01-20T11:30:00Z",
+          },
+          {
+            id: 4,
+            order_number: "ORD-2024-004",
+            status: "PENDING",
+            total_amount: 2800.0,
+            currency: "INR",
+            customer_name: "Arjun Singh",
+            customer_email: "arjun.singh@pottery.in",
+            customer_phone: "+91-9876543213",
+            shipping_address:
+              "321 Temple Road, Koramangala, Bangalore, Karnataka 560034",
+            items: [
+              {
+                id: 4,
+                product_name: "Sandalwood Carved Lord Ganesha",
+                product_image:
+                  "https://plus.unsplash.com/premium_photo-1721001474738-a185f420308f?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8U2FuZGFsd29vZCUyMENhcnZlZCUyMExvcmQlMjBHYW5lc2hhfGVufDB8fDB8fHww",
+                quantity: 1,
+                price: 2800.0,
+                total: 2800.0,
+              },
+            ],
+            created_at: "2024-01-22T11:20:00Z",
+            updated_at: "2024-01-22T11:20:00Z",
+          },
+          {
+            id: 5,
+            order_number: "ORD-2024-005",
+            status: "CANCELLED",
+            total_amount: 1200.0,
+            currency: "INR",
+            customer_name: "Lakshmi Reddy",
+            customer_email: "lakshmi.reddy@textiles.in",
+            customer_phone: "+91-9876543214",
+            shipping_address:
+              "654 Culture Avenue, T. Nagar, Chennai, Tamil Nadu 600017",
+            items: [
+              {
+                id: 5,
+                product_name: "Brass Tanjore Plate Set",
+                product_image:
+                  "https://images.unsplash.com/photo-1652960018678-1f19799996c5?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fEJyYXNzJTIwVGFuam9yZSUyMFBsYXRlJTIwU2V0fGVufDB8fDB8fHww",
+                quantity: 1,
+                price: 1200.0,
+                total: 1200.0,
+              },
+            ],
+            created_at: "2024-01-25T16:30:00Z",
+            updated_at: "2024-01-26T10:15:00Z",
+          },
+          {
+            id: 6,
+            order_number: "ORD-2024-006",
+            status: "DELIVERED",
+            total_amount: 5300.0,
+            currency: "INR",
+            customer_name: "Anita Mehta",
+            customer_email: "anita.mehta@boutique.in",
+            customer_phone: "+91-9988776655",
+            shipping_address:
+              "567 Fashion Street, Linking Road, Mumbai, Maharashtra 400050",
+            delivery_date: "2024-01-30T16:45:00Z",
+            tracking_number: "TRK1234567892",
+            items: [
+              {
+                id: 6,
+                product_name: "Blue Pottery Dinner Set",
+                quantity: 1,
+                price: 3500.0,
+                total: 3500.0,
+              },
+              {
+                id: 7,
+                product_name: "Brass Tanjore Plate Set",
+                quantity: 1,
+                price: 1200.0,
+                total: 1200.0,
+              },
+              {
+                id: 8,
+                product_name: "Handicraft Bundle",
+                quantity: 1,
+                price: 600.0,
+                total: 600.0,
+              },
+            ],
+            created_at: "2024-01-28T09:00:00Z",
+            updated_at: "2024-01-30T16:45:00Z",
+          },
         ]);
         setIsLoading(false);
       }, 1000);
     } catch (error) {
-      console.error('Error loading orders:', error);
+      console.error("Error loading orders:", error);
       setIsLoading(false);
     }
   };
 
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.order_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.customer_email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+  // Filter orders based on search and status
+  const filteredOrders = orders.filter((order) => {
+    const matchesSearch =
+      order.order_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.customer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.customer_email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus =
+      statusFilter === "all" || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const updateOrderStatus = async (orderId: number, newStatus: Order['status']) => {
-    try {
-      // In a real app, this would be an API call
-      setOrders(prev => prev.map(order => 
-        order.id === orderId 
-          ? { ...order, status: newStatus, updated_at: new Date().toISOString() }
-          : order
-      ));
-    } catch (error) {
-      console.error('Error updating order status:', error);
-    }
-  };
-
   if (isLoading) {
     return (
-      <div className="p-6 flex items-center justify-center">
+      <div className="bg-black min-h-screen p-6 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading orders...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-400 mx-auto"></div>
+          <p className="mt-2 text-gray-400">Loading orders...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6 bg-black min-h-screen">
+    <div className="bg-black min-h-screen p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-orange-400">Orders</h1>
-          <p className="text-gray-400">Manage customer orders and track fulfillment</p>
+          <h1 className="text-3xl font-bold text-orange-400">
+            Orders Management
+          </h1>
+          <p className="text-gray-400 mt-1">Track and manage customer orders</p>
         </div>
-        <div className="flex items-center space-x-2 text-sm text-gray-400">
-          <span>Total Orders: {orders.length}</span>
+        <div className="text-sm text-gray-400">
+          Total Orders: {orders.length}
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {Object.entries(statusConfig).map(([status, config]) => {
-          const count = orders.filter(order => order.status === status).length;
-          const Icon = config.icon;
-          return (
-            <div key={status} className="bg-white rounded-lg border border-gray-200 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 capitalize">
-                    {status.toLowerCase()}
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">{count}</p>
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+        {["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"].map(
+          (status) => {
+            const count = orders.filter(
+              (order) => order.status === status
+            ).length;
+            const config = getStatusConfig(status);
+            const Icon = config.icon;
+            return (
+              <div
+                key={status}
+                className="bg-gray-900 border border-gray-800 rounded-lg p-4 hover:border-orange-500/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm capitalize">
+                      {status.toLowerCase()}
+                    </p>
+                    <p className="text-white text-2xl font-bold">{count}</p>
+                  </div>
+                  <Icon className="h-8 w-8 text-orange-400" />
                 </div>
-                <Icon className="h-8 w-8 text-gray-400" />
               </div>
-            </div>
-          );
-        })}
+            );
+          }
+        )}
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+      {/* Search and Filter */}
+      <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 mb-6">
+        <div className="flex flex-col md:flex-row gap-4">
           {/* Search */}
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Search orders, customers..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Search orders, customers, emails..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white placeholder-gray-400"
             />
           </div>
 
@@ -200,114 +423,417 @@ export default function OrdersPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
-            >
+              className="pl-10 pr-8 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white appearance-none min-w-[150px]">
               <option value="all">All Statuses</option>
-              {Object.keys(statusConfig).map(status => (
-                <option key={status} value={status}>
-                  {status.charAt(0) + status.slice(1).toLowerCase()}
-                </option>
-              ))}
+              <option value="PENDING">Pending</option>
+              <option value="CONFIRMED">Confirmed</option>
+              <option value="SHIPPED">Shipped</option>
+              <option value="DELIVERED">Delivered</option>
+              <option value="CANCELLED">Cancelled</option>
             </select>
           </div>
         </div>
       </div>
 
-      {/* Orders List */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        {filteredOrders.length === 0 ? (
-          <div className="text-center py-12">
-            <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
-            <p className="text-gray-600">
-              {searchTerm || statusFilter !== 'all' 
-                ? 'Try adjusting your search or filters'
-                : 'Orders will appear here when customers make purchases'
-              }
-            </p>
+      {/* Orders Grid */}
+      {filteredOrders.length === 0 ? (
+        <div className="bg-gray-900 border border-gray-800 rounded-lg p-12 text-center">
+          <Package className="h-12 w-12 text-gray-600 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-300 mb-2">
+            No orders found
+          </h3>
+          <p className="text-gray-400">
+            {searchQuery || statusFilter !== "all"
+              ? "Try adjusting your search or filters"
+              : "Orders will appear here when customers make purchases"}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {filteredOrders.map((order) => {
+            const statusConfig = getStatusConfig(order.status);
+            const StatusIcon = statusConfig.icon;
+
+            return (
+              <div
+                key={order.id}
+                className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-orange-500/50 transition-all duration-300 cursor-pointer"
+                onClick={() => handleViewOrder(order)}>
+                {/* Order Header */}
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">
+                      {order.order_number}
+                    </h3>
+                    <p className="text-gray-400 text-sm">
+                      {new Date(order.created_at).toLocaleDateString("en-IN", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </p>
+                  </div>
+                  <span
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${statusConfig.color}`}>
+                    <StatusIcon className="h-3 w-3 mr-1" />
+                    {order.status.toLowerCase()}
+                  </span>
+                </div>
+
+                {/* Customer Info */}
+                <div className="flex items-center mb-4">
+                  <User className="h-4 w-4 text-gray-400 mr-2" />
+                  <div>
+                    <p className="text-white font-medium">
+                      {order.customer_name}
+                    </p>
+                    <p className="text-gray-400 text-sm">
+                      {order.customer_email}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Order Items */}
+                <div className="mb-4">
+                  <div className="flex items-center text-gray-400 text-sm mb-2">
+                    <ShoppingBag className="h-4 w-4 mr-1" />
+                    {order.items.length} item(s)
+                  </div>
+                  {order.items.slice(0, 2).map((item, index) => (
+                    <div key={index} className="text-sm text-gray-300 truncate">
+                      {item.quantity}x {item.product_name}
+                    </div>
+                  ))}
+                  {order.items.length > 2 && (
+                    <div className="text-sm text-gray-400">
+                      +{order.items.length - 2} more items
+                    </div>
+                  )}
+                </div>
+
+                {/* Total Amount */}
+                <div className="flex items-center justify-between border-t border-gray-800 pt-4">
+                  <div className="flex items-center text-green-400 font-semibold">
+                    {renderCurrencyIcon(order.currency)}
+                    <span className="ml-1">
+                      {order.total_amount.toLocaleString("en-IN")}
+                    </span>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewOrder(order);
+                      }}
+                      className="text-orange-400 hover:text-orange-300 hover:bg-orange-400/10 p-2">
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditOrder(order);
+                      }}
+                      className="text-blue-400 hover:text-blue-300 hover:bg-blue-400/10 p-2">
+                      <Edit3 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteOrder(order);
+                      }}
+                      className="text-red-400 hover:text-red-300 hover:bg-red-400/10 p-2">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Tracking Info */}
+                {order.tracking_number && (
+                  <div className="mt-3 pt-3 border-t border-gray-800">
+                    <div className="flex items-center text-sm text-gray-400">
+                      <Truck className="h-4 w-4 mr-2" />
+                      Tracking: {order.tracking_number}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* View Order Modal */}
+      {showViewModal && selectedOrder && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-900 border border-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-gray-800">
+              <h2 className="text-xl font-semibold text-white">
+                Order Details
+              </h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={closeModals}
+                className="text-gray-400 hover:text-white">
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Order Info */}
+              <div>
+                <h3 className="text-lg font-semibold text-orange-400 mb-3">
+                  Order Information
+                </h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-400">Order Number</p>
+                    <p className="text-white font-medium">
+                      {selectedOrder.order_number}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400">Status</p>
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${
+                        getStatusConfig(selectedOrder.status).color
+                      }`}>
+                      {selectedOrder.status}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-gray-400">Order Date</p>
+                    <p className="text-white">
+                      {new Date(selectedOrder.created_at).toLocaleString(
+                        "en-IN"
+                      )}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400">Last Updated</p>
+                    <p className="text-white">
+                      {new Date(selectedOrder.updated_at).toLocaleString(
+                        "en-IN"
+                      )}
+                    </p>
+                  </div>
+                  {selectedOrder.tracking_number && (
+                    <div className="col-span-2">
+                      <p className="text-gray-400">Tracking Number</p>
+                      <p className="text-white font-medium">
+                        {selectedOrder.tracking_number}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Customer Info */}
+              <div>
+                <h3 className="text-lg font-semibold text-orange-400 mb-3">
+                  Customer Information
+                </h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center">
+                    <User className="h-4 w-4 text-gray-400 mr-2" />
+                    <span className="text-white">
+                      {selectedOrder.customer_name}
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-gray-400 mr-6">Email:</span>
+                    <span className="text-white">
+                      {selectedOrder.customer_email}
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-gray-400 mr-6">Phone:</span>
+                    <span className="text-white">
+                      {selectedOrder.customer_phone}
+                    </span>
+                  </div>
+                  <div className="flex items-start">
+                    <MapPin className="h-4 w-4 text-gray-400 mr-2 mt-0.5" />
+                    <span className="text-white">
+                      {selectedOrder.shipping_address}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Items */}
+              <div>
+                <h3 className="text-lg font-semibold text-orange-400 mb-3">
+                  Order Items
+                </h3>
+                <div className="space-y-3">
+                  {selectedOrder.items.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between bg-gray-800 p-3 rounded-lg">
+                      <div className="flex items-center">
+                        {item.product_image && (
+                          <img
+                            src={item.product_image}
+                            alt={item.product_name}
+                            className="w-12 h-12 rounded-lg object-cover mr-3"
+                          />
+                        )}
+                        <div>
+                          <p className="text-white font-medium">
+                            {item.product_name}
+                          </p>
+                          <p className="text-gray-400 text-sm">
+                            Qty: {item.quantity}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-white font-medium flex items-center">
+                          {renderCurrencyIcon(selectedOrder.currency)}
+                          <span className="ml-1">
+                            {item.price.toLocaleString("en-IN")}
+                          </span>
+                        </p>
+                        <p className="text-gray-400 text-sm flex items-center">
+                          {renderCurrencyIcon(selectedOrder.currency)}
+                          {item.total.toLocaleString("en-IN")}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Total */}
+              <div className="border-t border-gray-800 pt-4">
+                <div className="flex items-center justify-between text-lg font-semibold">
+                  <span className="text-white">Total Amount:</span>
+                  <span className="text-green-400 flex items-center">
+                    {renderCurrencyIcon(selectedOrder.currency)}
+                    <span className="ml-1">
+                      {selectedOrder.total_amount.toLocaleString("en-IN")}
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Order
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Customer
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Total
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredOrders.map((order) => {
-                  const StatusIcon = statusConfig[order.status].icon;
+        </div>
+      )}
+
+      {/* Edit Status Modal */}
+      {showEditModal && selectedOrder && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-900 border border-gray-800 rounded-lg max-w-md w-full">
+            <div className="flex items-center justify-between p-6 border-b border-gray-800">
+              <h2 className="text-xl font-semibold text-white">
+                Update Order Status
+              </h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={closeModals}
+                className="text-gray-400 hover:text-white">
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            <div className="p-6">
+              <div className="mb-4">
+                <p className="text-gray-400 mb-2">
+                  Order: {selectedOrder.order_number}
+                </p>
+                <p className="text-white mb-4">
+                  Customer: {selectedOrder.customer_name}
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {[
+                  "PENDING",
+                  "CONFIRMED",
+                  "SHIPPED",
+                  "DELIVERED",
+                  "CANCELLED",
+                ].map((status) => {
+                  const config = getStatusConfig(status);
+                  const StatusIcon = config.icon;
                   return (
-                    <tr key={order.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {order.order_number}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {order.items.length} item(s)
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {order.customer_name}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {order.customer_email}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConfig[order.status].color}`}>
-                          <StatusIcon className="h-3 w-3 mr-1" />
-                          {order.status.toLowerCase()}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ₹{order.total_amount.toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(order.created_at).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex items-center justify-end space-x-2">
-                          <button className="text-blue-600 hover:text-blue-900">
-                            <Eye className="h-4 w-4" />
-                          </button>
-                          <div className="relative">
-                            <button className="text-gray-400 hover:text-gray-600">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
+                    <button
+                      key={status}
+                      onClick={() => {
+                        updateOrderStatus(
+                          selectedOrder.id,
+                          status as Order["status"]
+                        );
+                        closeModals();
+                      }}
+                      className={`w-full flex items-center p-3 rounded-lg border transition-colors ${
+                        selectedOrder.status === status
+                          ? "border-orange-500 bg-orange-500/10"
+                          : "border-gray-700 hover:border-gray-600 bg-gray-800"
+                      }`}>
+                      <StatusIcon className="h-5 w-5 mr-3 text-orange-400" />
+                      <span className="text-white font-medium">{status}</span>
+                    </button>
                   );
                 })}
-              </tbody>
-            </table>
+              </div>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && selectedOrder && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-900 border border-gray-800 rounded-lg max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center mb-4">
+                <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-500/20">
+                  <Trash2 className="h-6 w-6 text-red-400" />
+                </div>
+              </div>
+
+              <div className="text-center">
+                <h3 className="text-lg font-medium text-white mb-2">
+                  Delete Order
+                </h3>
+                <p className="text-gray-400 mb-6">
+                  Are you sure you want to delete order{" "}
+                  <span className="font-medium text-white">
+                    {selectedOrder.order_number}
+                  </span>
+                  ? This action cannot be undone.
+                </p>
+
+                <div className="flex space-x-3">
+                  <Button
+                    variant="ghost"
+                    onClick={closeModals}
+                    className="flex-1 text-gray-400 hover:text-white hover:bg-gray-800">
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={confirmDelete}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white">
+                    Delete Order
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
