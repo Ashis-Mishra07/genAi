@@ -16,7 +16,10 @@ import {
   Weight,
   Save,
   Eye,
+  Camera,
+  X,
 } from "lucide-react";
+import { useLanguage } from "@/lib/language/LanguageContext";
 
 interface ProductFormData {
   name: string;
@@ -42,6 +45,7 @@ export default function EditProductPage() {
   const router = useRouter();
   const params = useParams();
   const productId = params.id as string;
+  const { t } = useLanguage();
   
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingProduct, setIsLoadingProduct] = useState(true);
@@ -69,16 +73,16 @@ export default function EditProductPage() {
   });
 
   const categories = [
-    "Textiles & Fabrics",
-    "Jewelry & Accessories",
-    "Pottery & Ceramics",
-    "Wood Crafts",
-    "Metal Work",
-    "Paintings & Art",
-    "Home Decor",
-    "Traditional Wear",
-    "Sculptures",
-    "Other",
+    { key: "textilesAndFabrics", label: t("textilesAndFabrics") },
+    { key: "jewelryAndAccessories", label: t("jewelryAndAccessories") },
+    { key: "potteryAndCeramics", label: t("potteryAndCeramics") },
+    { key: "woodCrafts", label: t("woodCrafts") },
+    { key: "metalWork", label: t("metalWork") },
+    { key: "paintingsAndArt", label: t("paintingsAndArt") },
+    { key: "homeDecor", label: t("homeDecor") },
+    { key: "traditionalWear", label: t("traditionalWear") },
+    { key: "sculptures", label: t("sculptures") },
+    { key: "other", label: t("other") },
   ];
 
   // Load product data
@@ -199,104 +203,106 @@ export default function EditProductPage() {
 
   if (isLoadingProduct) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div>
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-slate-400">Loading product...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
+    <div className="min-h-screen bg-slate-900">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
+      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <button
+              onClick={() => router.back()}
+              className="flex items-center text-slate-400 hover:text-white transition-colors mr-4">
+              <ArrowLeft className="h-5 w-5 mr-2" />
+              {t('back')}
+            </button>
             <div className="flex items-center">
-              <button
-                onClick={() => router.back()}
-                className="flex items-center text-gray-600 hover:text-gray-900 mr-4">
-                <ArrowLeft className="h-5 w-5 mr-2" />
-                Back
-              </button>
-              <div className="flex items-center">
-                <Package className="h-8 w-8 text-orange-500 mr-3" />
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Edit Product
-                </h1>
-              </div>
+              <Package className="h-8 w-8 text-orange-500 mr-3" />
+              <h1 className="text-2xl font-bold text-white">
+                {t('editProduct')}
+              </h1>
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Status Messages */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-600">{error}</p>
-          </div>
-        )}
-        
-        {success && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-green-600">{success}</p>
-          </div>
-        )}
+      <div className="p-6">
+        <div className="max-w-4xl mx-auto">
+          {/* Status Messages */}
+          {error && (
+            <div className="mb-6 bg-red-500/20 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg">
+              {error}
+            </div>
+          )}
+          
+          {success && (
+            <div className="mb-6 bg-green-500/20 border border-green-500/50 text-green-400 px-4 py-3 rounded-lg">
+              {success}
+            </div>
+          )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic Information */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
               <Type className="h-5 w-5 mr-2 text-orange-500" />
-              Basic Information
+              {t('basicInformation')}
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Product Name *
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  {t('productName')} *
                 </label>
                 <input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                   placeholder="Enter product name"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  {t('category')}
                 </label>
                 <select
                   name="category"
                   value={formData.category}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
-                  <option value="">Select category</option>
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
+                  <option value="">{t('selectCategory')}</option>
                   {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
+                    <option key={category.key} value={category.key}>
+                      {category.label}
                     </option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Price *
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  {t('price')} *
                 </label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <DollarSign className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                   <input
                     type="number"
                     name="price"
                     value={formData.price}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    className="w-full pl-10 pr-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                     placeholder="0.00"
                     min="0"
                     step="0.01"
@@ -306,14 +312,14 @@ export default function EditProductPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Currency
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  {t('currency')}
                 </label>
                 <select
                   name="currency"
                   value={formData.currency}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
                   <option value="INR">INR (₹)</option>
                   <option value="USD">USD ($)</option>
                   <option value="EUR">EUR (€)</option>
@@ -321,15 +327,15 @@ export default function EditProductPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Stock Quantity
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  {t('stockQuantity')}
                 </label>
                 <input
                   type="number"
                   name="stockQuantity"
                   value={formData.stockQuantity}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                   min="0"
                 />
               </div>
@@ -341,9 +347,9 @@ export default function EditProductPage() {
                     name="isActive"
                     checked={formData.isActive}
                     onChange={handleInputChange}
-                    className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                    className="rounded border-slate-600 text-orange-500 focus:ring-orange-500 bg-slate-700"
                   />
-                  <span className="ml-2 text-sm text-gray-700">Active</span>
+                  <span className="ml-2 text-sm text-slate-300">{t('active')}</span>
                 </label>
                 
                 <label className="flex items-center">
@@ -352,46 +358,46 @@ export default function EditProductPage() {
                     name="isFeatured"
                     checked={formData.isFeatured}
                     onChange={handleInputChange}
-                    className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                    className="rounded border-slate-600 text-orange-500 focus:ring-orange-500 bg-slate-700"
                   />
-                  <span className="ml-2 text-sm text-gray-700">Featured</span>
+                  <span className="ml-2 text-sm text-slate-300">{t('featured')}</span>
                 </label>
               </div>
             </div>
           </div>
 
           {/* Description & Story */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
               <FileText className="h-5 w-5 mr-2 text-orange-500" />
-              Description & Story
+              {t('descriptionStory')}
             </h2>
             
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Product Description
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  {t('productDescription')}
                 </label>
                 <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                   placeholder="Describe your product..."
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Cultural Story
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  {t('culturalStory')}
                 </label>
                 <textarea
                   name="story"
                   value={formData.story}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                   placeholder="Tell the cultural story behind your product..."
                 />
               </div>
@@ -399,79 +405,79 @@ export default function EditProductPage() {
           </div>
 
           {/* Product Details */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
               <Tag className="h-5 w-5 mr-2 text-orange-500" />
-              Product Details
+              {t('productDetails')}
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Materials
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  {t('materials')}
                 </label>
                 <input
                   type="text"
                   name="materials"
                   value={formData.materials}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                   placeholder="e.g., Cotton, Silk, Wood"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Cultural Origin
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  {t('culturalOrigin')}
                 </label>
                 <input
                   type="text"
                   name="culture"
                   value={formData.culture}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                   placeholder="e.g., Rajasthani, Bengali"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Artist Name
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  {t('artistName')}
                 </label>
                 <input
                   type="text"
                   name="artistName"
                   value={formData.artistName}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                   placeholder="Creator's name"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Dimensions
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  {t('dimensions')}
                 </label>
                 <input
                   type="text"
                   name="dimensions"
                   value={formData.dimensions}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                   placeholder="e.g., 30cm x 20cm x 5cm"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Weight
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  {t('weight')}
                 </label>
                 <input
                   type="text"
                   name="weight"
                   value={formData.weight}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                   placeholder="e.g., 500g"
                 />
               </div>
@@ -479,51 +485,51 @@ export default function EditProductPage() {
           </div>
 
           {/* Images & Links */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
               <Upload className="h-5 w-5 mr-2 text-orange-500" />
-              Images & Links
+              {t('imagesLinks')}
             </h2>
             
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Product Image URL
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  {t('productImageUrl')}
                 </label>
                 <input
                   type="url"
                   name="imageUrl"
                   value={formData.imageUrl}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                   placeholder="https://example.com/image.jpg"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Marketing Poster URL
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  {t('marketingPosterUrl')}
                 </label>
                 <input
                   type="url"
                   name="posterUrl"
                   value={formData.posterUrl}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                   placeholder="https://example.com/poster.jpg"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Instagram Post URL
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  {t('instagramPostUrl')}
                 </label>
                 <input
                   type="url"
                   name="instagramUrl"
                   value={formData.instagramUrl}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                   placeholder="https://instagram.com/p/..."
                 />
               </div>
@@ -535,17 +541,17 @@ export default function EditProductPage() {
             <button
               type="button"
               onClick={handlePreview}
-              className="flex items-center px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+              className="flex items-center px-6 py-3 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">
               <Eye className="h-4 w-4 mr-2" />
-              Preview
+              {t('preview')}
             </button>
 
             <div className="flex space-x-4">
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-                Cancel
+                className="px-6 py-3 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">
+                {t('cancel')}
               </button>
               
               <button
@@ -557,12 +563,13 @@ export default function EditProductPage() {
                 ) : (
                   <Save className="h-4 w-4 mr-2" />
                 )}
-                {isLoading ? "Updating..." : "Update Product"}
+                {isLoading ? t('updating') : t('updateProduct')}
               </button>
             </div>
           </div>
         </form>
       </div>
     </div>
+  </div>
   );
 }

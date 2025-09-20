@@ -3,12 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Palette,
   Package,
-  MessageSquare,
-  TrendingUp,
-  Settings,
-  LogOut,
   Plus,
   Eye,
   Edit,
@@ -16,14 +11,21 @@ import {
   Heart,
   DollarSign,
   Users,
+  TrendingUp,
+  X,
+  Calendar,
+  Tag,
+  MapPin,
 } from "lucide-react";
 import { useTranslation } from "@/lib/i18n/hooks";
-import LanguageSelector from "@/components/ui/language-selector";
+import { useLanguage } from "@/lib/language/LanguageContext";
 
 interface Product {
   id: string;
   name: string;
   price: number;
+  description?: string;
+  category?: string;
   imageUrl?: string;
   isActive: boolean;
   createdAt: string;
@@ -38,10 +40,11 @@ interface Stats {
 
 export default function ArtisanDashboard() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t } = useLanguage();
   const [user, setUser] = useState<any>(null);
   const [products, setProducts] = useState<Product[]>([]);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [showProductModal, setShowProductModal] = useState(false);
   const [stats, setStats] = useState<Stats>({
     totalProducts: 0,
     activeProducts: 0,
@@ -75,7 +78,7 @@ export default function ArtisanDashboard() {
     try {
       setIsLoading(true);
       
-      // Get token from localStorage
+      // Get token from localStorage or cookies
       const token = localStorage.getItem("auth_token") || localStorage.getItem("accessToken");
       
       if (!token) {
@@ -84,7 +87,7 @@ export default function ArtisanDashboard() {
         return;
       }
 
-      console.log('Fetching user data with token:', token.substring(0, 20) + '...');
+      console.log('Fetching user data...');
 
       // Fetch user info
       const userResponse = await fetch("/api/auth/me", {
@@ -92,6 +95,7 @@ export default function ArtisanDashboard() {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
         },
+        credentials: 'include',
       });
 
       console.log('User API response:', userResponse.status);
@@ -102,8 +106,6 @@ export default function ArtisanDashboard() {
         setUser(userData.user);
       } else {
         console.error('Failed to fetch user data:', userResponse.status);
-        const errorData = await userResponse.text();
-        console.error('Error details:', errorData);
         
         if (userResponse.status === 401) {
           // Token might be expired, redirect to login
@@ -121,6 +123,7 @@ export default function ArtisanDashboard() {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
         },
+        credentials: 'include',
       });
 
       console.log('Products API response:', productsResponse.status);
@@ -134,6 +137,8 @@ export default function ArtisanDashboard() {
           id: product.id,
           name: product.name,
           price: product.price,
+          description: product.description,
+          category: product.category,
           imageUrl: product.imageUrl,
           isActive: product.isActive,
           createdAt: product.createdAt,
@@ -164,69 +169,16 @@ export default function ArtisanDashboard() {
     }
   };
 
-  const handleLogout = async () => {
-    if (isLoggingOut) return;
-    
-    setIsLoggingOut(true);
-    try {
-      const token = localStorage.getItem('accessToken');
-      const refreshToken = localStorage.getItem('refreshToken');
-      
-      // Call logout API
-      const response = await fetch('/api/auth/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          refreshToken,
-          logoutAll: false
-        })
-      });
-
-      // Clear local storage regardless of API response
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("user_role");
-      localStorage.removeItem("user_id");
-      
-      // Redirect to home page
-      router.push('/');
-      
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Still clear local storage and redirect on error
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("user_role");
-      localStorage.removeItem("user_id");
-      router.push('/');
-    } finally {
-      setIsLoggingOut(false);
-    }
-  };
-
   const handleAddProduct = () => {
     router.push("/artisan/products/new");
   };
 
-  const handleViewMessages = () => {
-    router.push("/artisan/messages");
-  };
-
-  const handleViewFeedback = () => {
-    router.push("/artisan/feedback");
-  };
-
-  const handleViewAnalytics = () => {
-    router.push("/artisan/analytics");
-  };
-
   const handleViewProduct = (productId: string) => {
-    router.push(`/products/${productId}`);
+    const product = products.find(p => p.id === productId);
+    if (product) {
+      setSelectedProduct(product);
+      setShowProductModal(true);
+    }
   };
 
   const handleEditProduct = (productId: string) => {
@@ -239,8 +191,9 @@ export default function ArtisanDashboard() {
         const response = await fetch(`/api/products/${productId}`, {
           method: "DELETE",
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+            Authorization: `Bearer ${localStorage.getItem("auth_token") || localStorage.getItem("accessToken")}`,
           },
+          credentials: 'include',
         });
 
         if (response.ok) {
@@ -254,169 +207,124 @@ export default function ArtisanDashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div>
-        <p className="mt-4 text-gray-600">{t('loadingDashboard')}</p>
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-slate-400">{t('loadingDashboard')}</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
+    <div className="min-h-screen bg-slate-900">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center">
-              <div className="flex items-center">
-                <Palette className="h-8 w-8 text-orange-500 mr-3" />
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">
-                    {t('artisanStudio')}
-                  </h1>
-                  <p className="text-sm text-gray-600">
-                    {t('welcomeBack')}, {user?.name || user?.email || 'Artisan'}
-                    {user?.location && ` from ${user.location}`}
-                  </p>
-                  {/* Debug info - remove in production */}
-                  {process.env.NODE_ENV === 'development' && (
-                    <div className="text-xs text-gray-400 mt-1">
-                      Debug: User loaded: {user ? 'Yes' : 'No'} | 
-                      Name: {user?.name || 'None'} | 
-                      Email: {user?.email || 'None'}
-                    </div>
-                  )}
-                </div>
+      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-white">{t('artisanStudio')}</h1>
+            <p className="text-slate-400">
+              {t('welcomeBack')}, {user?.name || user?.email || 'Artisan'}
+              {user?.location && ` from ${user.location}`}
+            </p>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3 bg-slate-700 rounded-lg px-3 py-2">
+              <div className="h-8 w-8 bg-orange-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-medium">
+                  {user?.name?.charAt(0).toUpperCase() || 'A'}
+                </span>
               </div>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <LanguageSelector />
-              <button 
-                onClick={() => router.push("/artisan/messages")}
-                className="p-2 text-gray-400 hover:text-gray-500 relative">
-                <MessageSquare className="h-6 w-6" />
-                {/* Add notification badge if needed */}
-              </button>
-              <button 
-                onClick={() => router.push("/artisan/profile")}
-                className="p-2 text-gray-400 hover:text-gray-500">
-                <Settings className="h-6 w-6" />
-              </button>
-              
-              {/* User avatar/info */}
-              <div className="flex items-center space-x-3">
-                <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                  <p className="text-xs text-gray-500">{user?.specialty}</p>
-                </div>
-                <div className="h-8 w-8 bg-orange-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">
-                    {user?.name?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
+              <div className="text-right">
+                <p className="text-sm font-medium text-white">{user?.name || 'Artisan'}</p>
+                <p className="text-xs text-slate-400">{user?.specialty || 'Creative Artist'}</p>
               </div>
-              
-              <button
-                onClick={handleLogout}
-                disabled={isLoggingOut}
-                className={`p-2 transition-colors ${
-                  isLoggingOut
-                    ? "text-gray-500 cursor-not-allowed"
-                    : "text-gray-400 hover:text-red-500"
-                }`}
-                title="Sign Out"
-              >
-                {isLoggingOut ? (
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
-                ) : (
-                  <LogOut className="h-6 w-6" />
-                )}
-              </button>
             </div>
           </div>
         </div>
-      </header>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      </div>
+      
+      {/* Main Content */}
+      <div className="p-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
             <div className="flex items-center">
               <Package className="h-8 w-8 text-orange-500" />
               <div className="ml-4">
-                <p className="text-2xl font-semibold text-gray-900">
+                <p className="text-2xl font-semibold text-white">
                   {stats.totalProducts}
                 </p>
-                <p className="text-gray-600">{t('totalProducts')}</p>
+                <p className="text-slate-400">{t('totalProducts')}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
             <div className="flex items-center">
               <Heart className="h-8 w-8 text-green-500" />
               <div className="ml-4">
-                <p className="text-2xl font-semibold text-gray-900">
+                <p className="text-2xl font-semibold text-white">
                   {stats.activeProducts}
                 </p>
-                <p className="text-gray-600">{t('activeProducts')}</p>
+                <p className="text-slate-400">{t('activeProducts')}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
             <div className="flex items-center">
               <Eye className="h-8 w-8 text-blue-500" />
               <div className="ml-4">
-                <p className="text-2xl font-semibold text-gray-900">
+                <p className="text-2xl font-semibold text-white">
                   {stats.totalViews}
                 </p>
-                <p className="text-gray-600">{t('totalViews')}</p>
+                <p className="text-slate-400">{t('totalViews')}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
             <div className="flex items-center">
               <DollarSign className="h-8 w-8 text-purple-500" />
               <div className="ml-4">
-                <p className="text-2xl font-semibold text-gray-900">
+                <p className="text-2xl font-semibold text-white">
                   {stats.totalOrders}
                 </p>
-                <p className="text-gray-600">{t('totalOrders')}</p>
+                <p className="text-slate-400">{t('totalOrders')}</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow mb-8 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="bg-slate-800 border border-slate-700 rounded-lg mb-8 p-6">
+          <h2 className="text-lg font-semibold text-white mb-4">
             {t('quickActions')}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <button 
               onClick={handleAddProduct}
-              className="flex items-center justify-center p-4 border-2 border-dashed border-orange-300 rounded-lg text-orange-600 hover:border-orange-500 hover:text-orange-700 transition-colors">
+              className="flex items-center justify-center p-4 border-2 border-dashed border-orange-500/30 rounded-lg text-orange-400 hover:border-orange-500/60 hover:text-orange-300 transition-colors bg-orange-500/5">
               <Plus className="h-6 w-6 mr-2" />
               {t('createProduct')}
             </button>
             <button 
-              onClick={handleViewMessages}
-              className="flex items-center justify-center p-4 border-2 border-dashed border-blue-300 rounded-lg text-blue-600 hover:border-blue-500 hover:text-blue-700 transition-colors">
-              <MessageSquare className="h-6 w-6 mr-2" />
+              onClick={() => router.push("/artisan/messages")}
+              className="flex items-center justify-center p-4 border-2 border-dashed border-blue-500/30 rounded-lg text-blue-400 hover:border-blue-500/60 hover:text-blue-300 transition-colors bg-blue-500/5">
+              <Users className="h-6 w-6 mr-2" />
               {t('chatWithCustomers')}
             </button>
             <button 
-              onClick={handleViewFeedback}
-              className="flex items-center justify-center p-4 border-2 border-dashed border-purple-300 rounded-lg text-purple-600 hover:border-purple-500 hover:text-purple-700 transition-colors">
+              onClick={() => router.push("/artisan/feedback")}
+              className="flex items-center justify-center p-4 border-2 border-dashed border-purple-500/30 rounded-lg text-purple-400 hover:border-purple-500/60 hover:text-purple-300 transition-colors bg-purple-500/5">
               <Heart className="h-6 w-6 mr-2" />
               {t('customerFeedback')}
             </button>
             <button 
-              onClick={handleViewAnalytics}
-              className="flex items-center justify-center p-4 border-2 border-dashed border-green-300 rounded-lg text-green-600 hover:border-green-500 hover:text-green-700 transition-colors">
+              onClick={() => router.push("/artisan/analytics")}
+              className="flex items-center justify-center p-4 border-2 border-dashed border-green-500/30 rounded-lg text-green-400 hover:border-green-500/60 hover:text-green-300 transition-colors bg-green-500/5">
               <TrendingUp className="h-6 w-6 mr-2" />
               {t('viewAnalytics')}
             </button>
@@ -424,9 +332,9 @@ export default function ArtisanDashboard() {
         </div>
 
         {/* Products Grid */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-gray-900">
+        <div className="bg-slate-800 border border-slate-700 rounded-lg">
+          <div className="px-6 py-4 border-b border-slate-700 flex justify-between items-center">
+            <h2 className="text-lg font-semibold text-white">
               {t('recentProducts')}
             </h2>
             <button 
@@ -440,11 +348,11 @@ export default function ArtisanDashboard() {
           <div className="p-6">
             {products.length === 0 ? (
               <div className="text-center py-12">
-                <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                <Package className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-white mb-2">
                   {t('noProducts')}
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-slate-400 mb-4">
                   {t('startCreating')}
                 </p>
                 <button 
@@ -458,8 +366,8 @@ export default function ArtisanDashboard() {
                 {products.map((product) => (
                   <div
                     key={product.id}
-                    className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-                    <div className="aspect-w-16 aspect-h-9 bg-gray-200">
+                    className="bg-slate-700 border border-slate-600 rounded-lg overflow-hidden hover:border-orange-500/50 transition-all hover:shadow-lg">
+                    <div className="aspect-w-16 aspect-h-9 bg-slate-600">
                       {product.imageUrl ? (
                         <img
                           src={product.imageUrl}
@@ -467,26 +375,28 @@ export default function ArtisanDashboard() {
                           className="w-full h-48 object-cover"
                         />
                       ) : (
-                        <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                          <Package className="h-8 w-8 text-gray-400" />
+                        <div className="w-full h-48 bg-slate-600 flex items-center justify-center">
+                          <Package className="h-8 w-8 text-slate-400" />
                         </div>
                       )}
                     </div>
 
                     <div className="p-4">
-                      <h3 className="font-medium text-gray-900 mb-1">
+                      <h3 
+                        className="font-medium text-white mb-1 cursor-pointer hover:text-orange-400 transition-colors"
+                        onClick={() => handleViewProduct(product.id)}>
                         {product.name}
                       </h3>
-                      <p className="text-lg font-semibold text-orange-600 mb-2">
-                        ₹{product.price}
+                      <p className="text-lg font-semibold text-orange-400 mb-2">
+                        ₹{product.price.toLocaleString()}
                       </p>
 
                       <div className="flex items-center justify-between">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             product.isActive
-                              ? "bg-green-100 text-green-800"
-                              : "bg-gray-100 text-gray-800"
+                              ? "bg-green-500/10 text-green-400 border border-green-500/20"
+                              : "bg-slate-500/10 text-slate-400 border border-slate-500/20"
                           }`}>
                           {product.isActive ? t('active') : t('inactive')}
                         </span>
@@ -494,19 +404,19 @@ export default function ArtisanDashboard() {
                         <div className="flex space-x-2">
                           <button 
                             onClick={() => handleViewProduct(product.id)}
-                            className="p-1 text-gray-400 hover:text-blue-500"
+                            className="p-1 text-slate-400 hover:text-blue-400 transition-colors"
                             title={t('viewProduct')}>
                             <Eye className="h-4 w-4" />
                           </button>
                           <button 
                             onClick={() => handleEditProduct(product.id)}
-                            className="p-1 text-gray-400 hover:text-green-500"
+                            className="p-1 text-slate-400 hover:text-green-400 transition-colors"
                             title={t('editProduct')}>
                             <Edit className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleDeleteProduct(product.id)}
-                            className="p-1 text-gray-400 hover:text-red-500"
+                            className="p-1 text-slate-400 hover:text-red-400 transition-colors"
                             title={t('deleteProduct')}>
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -520,6 +430,143 @@ export default function ArtisanDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Product Detail Modal */}
+      {showProductModal && selectedProduct && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 border border-slate-700 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-slate-700 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-white">Product Details</h2>
+              <button
+                onClick={() => setShowProductModal(false)}
+                className="p-2 text-slate-400 hover:text-white transition-colors">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6">
+              {/* Product Image */}
+              <div className="mb-6">
+                {selectedProduct.imageUrl ? (
+                  <img
+                    src={selectedProduct.imageUrl}
+                    alt={selectedProduct.name}
+                    className="w-full h-64 object-cover rounded-lg bg-slate-700"
+                  />
+                ) : (
+                  <div className="w-full h-64 bg-slate-700 flex items-center justify-center rounded-lg">
+                    <Package className="h-16 w-16 text-slate-400" />
+                  </div>
+                )}
+              </div>
+
+              {/* Product Info */}
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-2xl font-bold text-white mb-2">
+                    {selectedProduct.name}
+                  </h3>
+                  <p className="text-3xl font-bold text-orange-400">
+                    ₹{selectedProduct.price.toLocaleString()}
+                  </p>
+                </div>
+
+                {selectedProduct.description && (
+                  <div>
+                    <h4 className="text-lg font-semibold text-white mb-2 flex items-center">
+                      <Package className="h-5 w-5 mr-2" />
+                      Description
+                    </h4>
+                    <p className="text-slate-300 leading-relaxed">
+                      {selectedProduct.description}
+                    </p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {selectedProduct.category && (
+                    <div className="bg-slate-700 border border-slate-600 rounded-lg p-4">
+                      <div className="flex items-center text-slate-300">
+                        <Tag className="h-5 w-5 mr-2 text-blue-400" />
+                        <span className="font-medium">Category</span>
+                      </div>
+                      <p className="text-white mt-1">{selectedProduct.category}</p>
+                    </div>
+                  )}
+
+                  <div className="bg-slate-700 border border-slate-600 rounded-lg p-4">
+                    <div className="flex items-center text-slate-300">
+                      <Calendar className="h-5 w-5 mr-2 text-green-400" />
+                      <span className="font-medium">Created</span>
+                    </div>
+                    <p className="text-white mt-1">
+                      {new Date(selectedProduct.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  <div className="bg-slate-700 border border-slate-600 rounded-lg p-4">
+                    <div className="flex items-center text-slate-300">
+                      <Heart className="h-5 w-5 mr-2 text-purple-400" />
+                      <span className="font-medium">Status</span>
+                    </div>
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${
+                        selectedProduct.isActive
+                          ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                          : "bg-slate-500/20 text-slate-400 border border-slate-500/30"
+                      }`}>
+                      {selectedProduct.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+
+                  <div className="bg-slate-700 border border-slate-600 rounded-lg p-4">
+                    <div className="flex items-center text-slate-300">
+                      <DollarSign className="h-5 w-5 mr-2 text-yellow-400" />
+                      <span className="font-medium">Product ID</span>
+                    </div>
+                    <p className="text-white mt-1 text-sm font-mono">
+                      {selectedProduct.id}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-700">
+                <button
+                  onClick={() => setShowProductModal(false)}
+                  className="px-6 py-2 text-slate-400 border border-slate-600 rounded-lg hover:text-white hover:border-slate-500 transition-colors">
+                  Close
+                </button>
+                
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => {
+                      setShowProductModal(false);
+                      router.push(`/products/${selectedProduct.id}`);
+                    }}
+                    className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center">
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Live
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setShowProductModal(false);
+                      handleEditProduct(selectedProduct.id);
+                    }}
+                    className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors flex items-center">
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Product
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

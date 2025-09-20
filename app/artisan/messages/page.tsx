@@ -457,46 +457,43 @@ Product Data: ${JSON.stringify(product)}`;
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-orange-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-center">
-          <MessageCircle className="h-12 w-12 mx-auto mb-4 animate-pulse" />
-          <p>Loading admin support...</p>
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-slate-400">Loading messages...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-orange-900 to-slate-900 p-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <button
-            onClick={() => router.push("/artisan/dashboard")}
-            className="flex items-center text-white/70 hover:text-white transition-colors">
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Back to Dashboard
-          </button>
-          <div className="flex items-center text-white">
-            <MessageCircle className="h-6 w-6 mr-2" />
-            <div>
-              <span className="text-xl font-bold">Admin Support</span>
-              <p className="text-sm text-white/70">Get help to grow your business</p>
-            </div>
+    <div className="min-h-screen bg-slate-900">
+      {/* Header */}
+      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-white flex items-center">
+              <MessageCircle className="h-6 w-6 mr-2" />
+              Admin Support
+            </h1>
+            <p className="text-slate-400">Get help to grow your business</p>
           </div>
           <div className="flex items-center space-x-2">
-            <button className="p-2 text-white/70 hover:text-white transition-colors">
+            <button className="p-2 text-slate-400 hover:text-orange-400 transition-colors">
               <Phone className="h-5 w-5" />
             </button>
-            <button className="p-2 text-white/70 hover:text-white transition-colors">
+            <button className="p-2 text-slate-400 hover:text-orange-400 transition-colors">
               <Video className="h-5 w-5" />
             </button>
-            <button className="p-2 text-white/70 hover:text-white transition-colors">
+            <button className="p-2 text-slate-400 hover:text-orange-400 transition-colors">
               <MoreVertical className="h-5 w-5" />
             </button>
           </div>
         </div>
+      </div>
 
+      {/* Content */}
+      <div className="p-6">
         {/* Support Categories */}
         {messages.length === 0 && !isLoading && (
           <div className="mb-8">
@@ -508,12 +505,12 @@ Product Data: ${JSON.stringify(product)}`;
                   <button
                     key={category.id}
                     onClick={() => handleCategorySelect(category)}
-                    className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-4 text-left hover:bg-white/20 transition-all duration-200 group">
+                    className="bg-slate-800 border border-slate-700 rounded-lg p-4 text-left hover:bg-slate-700 hover:border-orange-500/50 transition-all duration-200 group">
                     <div className={`w-10 h-10 bg-gradient-to-r ${category.color} rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
                       <IconComponent className="h-5 w-5 text-white" />
                     </div>
                     <h4 className="font-semibold text-white mb-2">{category.name}</h4>
-                    <p className="text-sm text-white/70">{category.description}</p>
+                    <p className="text-sm text-slate-400">{category.description}</p>
                   </button>
                 );
               })}
@@ -522,14 +519,14 @@ Product Data: ${JSON.stringify(product)}`;
         )}
 
         {/* Messages Container */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 h-[600px] flex flex-col">
+        <div className="bg-slate-800 border border-slate-700 rounded-lg h-[600px] flex flex-col">
           {/* Messages Area */}
           <div className="flex-1 p-6 overflow-y-auto space-y-4">
             {messages.length === 0 ? (
-              <div className="text-center text-white/70 py-12">
-                <HeartHandshake className="h-16 w-16 text-white/30 mx-auto mb-4" />
+              <div className="text-center text-slate-400 py-12">
+                <HeartHandshake className="h-16 w-16 text-slate-600 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-white mb-2">Welcome to Admin Support!</h3>
-                <p className="text-white/70 mb-4">Our team is here to help you succeed. Choose a category above or start typing your question.</p>
+                <p className="text-slate-400 mb-4">Our team is here to help you succeed. Choose a category above or start typing your question.</p>
               </div>
             ) : (
               messages.map((message) => (
@@ -538,28 +535,28 @@ Product Data: ${JSON.stringify(product)}`;
                   className={`flex ${message.isFromAdmin ? "justify-start" : "justify-end"}`}>
                   <div className={`max-w-[70%] ${
                     message.isFromAdmin
-                      ? "bg-white/20 text-white"
-                      : "bg-gradient-to-r from-orange-500 to-pink-500 text-white"
+                      ? "bg-slate-700 border border-slate-600 text-white"
+                      : "bg-orange-500 text-white"
                   } rounded-lg p-4`}>
                     {message.isFromAdmin && (
                       <div className="flex items-center mb-2">
                         <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mr-2">
                           <Shield className="h-3 w-3 text-white" />
                         </div>
-                        <span className="text-xs font-medium text-white/90">Admin Support</span>
+                        <span className="text-xs font-medium text-slate-300">Admin Support</span>
                       </div>
                     )}
                     
                     {/* Simple Product Card for Village Admin - just photo and price */}
                     {message.productData && (
-                      <div className="mb-3 bg-white/10 rounded-lg p-3 border border-white/20">
+                      <div className="mb-3 bg-slate-600 rounded-lg p-3 border border-slate-500">
                         <div className="flex items-center mb-2">
                           <ShoppingBag className="h-4 w-4 mr-2" />
                           <span className="font-medium text-sm">My Product</span>
                         </div>
                         <div className="text-center">
                           {message.productData.imageUrl && (
-                            <div className="w-full max-w-48 mx-auto mb-3 rounded-lg overflow-hidden bg-white/10">
+                            <div className="w-full max-w-48 mx-auto mb-3 rounded-lg overflow-hidden bg-slate-500">
                               <img 
                                 src={message.productData.imageUrl} 
                                 alt={message.productData.name}
@@ -585,7 +582,7 @@ Product Data: ${JSON.stringify(product)}`;
                     {message.attachments && message.attachments.length > 0 && (
                       <div className="mt-3">
                         {message.attachments.map((attachment, index) => (
-                          <div key={index} className="bg-white/10 rounded-lg p-3 border border-white/20">
+                          <div key={index} className="bg-slate-600 rounded-lg p-3 border border-slate-500">
                             {attachment.type === 'file' && attachment.url && (
                               <>
                                 {attachment.url.match(/\.(jpg|jpeg|png|gif)$/i) ? (
@@ -637,13 +634,13 @@ Product Data: ${JSON.stringify(product)}`;
 
           {/* Quick Actions */}
           {showQuickActions && (
-            <div className="border-t border-white/20 p-4">
+            <div className="border-t border-slate-700 p-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {quickActions.map((action, index) => (
                   <button
                     key={index}
                     onClick={() => handleQuickAction(action)}
-                    className="text-left p-2 text-sm text-white/80 hover:text-white hover:bg-white/10 rounded transition-colors">
+                    className="text-left p-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700 rounded transition-colors">
                     {action}
                   </button>
                 ))}
@@ -652,11 +649,11 @@ Product Data: ${JSON.stringify(product)}`;
           )}
 
           {/* Message Input */}
-          <div className="border-t border-white/20 p-4">
+          <div className="border-t border-slate-700 p-4">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => setShowQuickActions(!showQuickActions)}
-                className="p-2 text-white/70 hover:text-white transition-colors">
+                className="p-2 text-slate-400 hover:text-orange-400 transition-colors">
                 <Lightbulb className="h-5 w-5" />
               </button>
               <button 
@@ -664,11 +661,11 @@ Product Data: ${JSON.stringify(product)}`;
                   setShowProductModal(true);
                   loadProducts();
                 }}
-                className="p-2 text-white/70 hover:text-white transition-colors"
+                className="p-2 text-slate-400 hover:text-orange-400 transition-colors"
                 title="Share a product">
                 <ShoppingBag className="h-5 w-5" />
               </button>
-              <label className="p-2 text-white/70 hover:text-white transition-colors cursor-pointer" title="Share a file">
+              <label className="p-2 text-slate-400 hover:text-orange-400 transition-colors cursor-pointer" title="Share a file">
                 <input
                   type="file"
                   onChange={handleFileUpload}
@@ -677,7 +674,7 @@ Product Data: ${JSON.stringify(product)}`;
                   disabled={uploadingFile}
                 />
                 {uploadingFile ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-orange-500"></div>
                 ) : (
                   <Paperclip className="h-5 w-5" />
                 )}
@@ -689,13 +686,13 @@ Product Data: ${JSON.stringify(product)}`;
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                   placeholder="Type your message to admin support..."
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                 />
               </div>
               <button
                 onClick={handleSendMessage}
                 disabled={isSending || !newMessage.trim()}
-                className="p-3 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+                className="p-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
                 {isSending ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                 ) : (
@@ -709,41 +706,41 @@ Product Data: ${JSON.stringify(product)}`;
         {/* Product Sharing Modal */}
         {showProductModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-white">Share Product with Admin</h3>
                 <button
                   onClick={() => setShowProductModal(false)}
-                  className="p-2 text-white/70 hover:text-white transition-colors">
+                  className="p-2 text-slate-400 hover:text-white transition-colors">
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
               {loadingProducts ? (
                 <div className="text-center py-12">
-                  <Package className="h-12 w-12 text-white/30 mx-auto mb-4 animate-pulse" />
-                  <p className="text-white/70">Loading your products...</p>
+                  <Package className="h-12 w-12 text-slate-600 mx-auto mb-4 animate-pulse" />
+                  <p className="text-slate-400">Loading your products...</p>
                 </div>
               ) : products.length === 0 ? (
                 <div className="text-center py-12">
-                  <Package className="h-16 w-16 text-white/30 mx-auto mb-4" />
+                  <Package className="h-16 w-16 text-slate-600 mx-auto mb-4" />
                   <h4 className="text-lg font-medium text-white mb-2">No Products Found</h4>
-                  <p className="text-white/70 mb-4">You don't have any products to share yet.</p>
+                  <p className="text-slate-400 mb-4">You don't have any products to share yet.</p>
                   <button
                     onClick={() => {
                       setShowProductModal(false);
                       router.push('/artisan/products');
                     }}
-                    className="px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg transition-all duration-200">
+                    className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all duration-200">
                     Create Your First Product
                   </button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {products.filter(p => p.isActive).map((product) => (
-                    <div key={product.id} className="bg-white/5 rounded-lg border border-white/20 p-4 hover:bg-white/10 transition-all duration-200 text-center">
+                    <div key={product.id} className="bg-slate-700 border border-slate-600 rounded-lg p-4 hover:bg-slate-600 hover:border-orange-500/50 transition-all duration-200 text-center">
                       {product.imageUrl && (
-                        <div className="w-full h-40 rounded-lg overflow-hidden mb-3 bg-white/10">
+                        <div className="w-full h-40 rounded-lg overflow-hidden mb-3 bg-slate-600">
                           <img 
                             src={product.imageUrl} 
                             alt={product.name}
@@ -759,7 +756,7 @@ Product Data: ${JSON.stringify(product)}`;
                       <button
                         onClick={() => handleShareProduct(product)}
                         disabled={isSending}
-                        className="w-full py-3 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg disabled:opacity-50 transition-all duration-200 flex items-center justify-center text-lg font-medium">
+                        className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg disabled:opacity-50 transition-all duration-200 flex items-center justify-center text-lg font-medium">
                         {isSending ? (
                           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                         ) : (

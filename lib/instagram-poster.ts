@@ -234,14 +234,14 @@ export class InstagramPoster {
 
       // First try with Instagram access token
       console.log("📱 Testing with Instagram access token...");
-      let testUrl = `${this.apiUrl}/${this.businessAccountId}`;
-      let params = {
+      const testUrl = `${this.apiUrl}/${this.businessAccountId}`;
+      const params = {
         fields: "id,username",
         access_token: this.accessToken,
       };
 
       try {
-        let response = await axios.get(testUrl, { params });
+        const response = await axios.get(testUrl, { params });
         if (response.data && response.data.id) {
           console.log("✅ Connection successful with Instagram token!");
           console.log("📋 Account ID:", response.data.id);
@@ -262,7 +262,7 @@ export class InstagramPoster {
         params.access_token = this.userAccessToken;
 
         try {
-          let response = await axios.get(testUrl, { params });
+          const response = await axios.get(testUrl, { params });
           if (response.data && response.data.id) {
             console.log("✅ Connection successful with user access token!");
             console.log("📋 Account ID:", response.data.id);
