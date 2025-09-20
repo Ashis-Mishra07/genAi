@@ -66,8 +66,8 @@ export default function ArtisanAuthPage() {
       }
 
       // Store the tokens and redirect to artisan dashboard
-      localStorage.setItem("accessToken", data.data.accessToken);
-      localStorage.setItem("refreshToken", data.data.refreshToken);
+      localStorage.setItem("auth_token", data.data.accessToken);
+      localStorage.setItem("refresh_token", data.data.refreshToken);
       localStorage.setItem("user_role", "ARTISAN");
       localStorage.setItem("user_id", data.data.user.id);
 

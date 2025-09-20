@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCurrentUser } from '../../../../lib/jwt-utils';
+import { getCurrentUser } from '../../../../lib/utils/jwt';
 import { getUserById } from '../../../../lib/db/auth';
 
 export async function GET(request: NextRequest) {
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get full user details
-    const fullUser = await getUserById(user.userId);
+    const fullUser = await getUserById(user.id);
     
     if (!fullUser || !fullUser.isActive) {
       return NextResponse.json(
@@ -35,14 +35,13 @@ export async function GET(request: NextRequest) {
       bio: fullUser.bio,
       avatar: fullUser.avatar,
       status: fullUser.status,
-      language: fullUser.language,
       lastLoginAt: fullUser.lastLoginAt,
       createdAt: fullUser.createdAt,
     };
 
     return NextResponse.json({
       success: true,
-      data: userData,
+      user: userData,
     });
 
   } catch (error: any) {

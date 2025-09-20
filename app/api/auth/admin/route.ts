@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createTokensResponse } from '../../../../lib/jwt-utils';
+import { createTokensResponse } from '../../../../lib/utils/jwt';
 
 const ADMIN_PASSCODE = '123456';
+// Using a fixed UUID for the admin user to ensure consistency
+const ADMIN_UUID = '00000000-0000-0000-0000-000000000001';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     // Create admin user object for token generation
     const adminUser = {
-      id: 'admin',
+      id: ADMIN_UUID,
       email: 'admin@system.local',
       name: 'System Administrator',
       role: 'ADMIN' as const

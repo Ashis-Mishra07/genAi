@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyJWT } from './lib/jwt-utils';
+import { verifyAccessToken } from './lib/utils/jwt';
 
 // Define protected routes and their required roles
 const protectedRoutes = {
@@ -53,7 +53,7 @@ export async function middleware(request: NextRequest) {
 
   try {
     // Verify JWT token
-    const payload = await verifyJWT(token);
+    const payload = verifyAccessToken(token);
     
     if (!payload || !payload.userId || !payload.role) {
       throw new Error('Invalid token payload');

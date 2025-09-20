@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createUser, getUserByEmail } from '../../../../lib/db/auth';
-import { isValidEmail, isValidPassword, createTokensResponse, hashRefreshToken } from '../../../../lib/jwt-utils';
+import { isValidEmail, isValidPassword, createTokensResponse, hashRefreshToken } from '../../../../lib/utils/jwt';
 import { storeRefreshToken } from '../../../../lib/db/auth';
 
 export async function POST(request: NextRequest) {
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days
 
-    await storeRefreshToken(user.id, refreshTokenHash, expiresAt, request.headers.get('user-agent') || undefined);
+    await storeRefreshToken(user.id, refreshTokenHash, expiresAt);
 
     return NextResponse.json({
       success: true,

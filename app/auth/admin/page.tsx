@@ -38,8 +38,8 @@ export default function AdminAuthPage() {
       }
 
       // Store the tokens and redirect to admin dashboard
-      localStorage.setItem("accessToken", data.accessToken);
-      localStorage.setItem("refreshToken", data.refreshToken);
+      localStorage.setItem("auth_token", data.accessToken);
+      localStorage.setItem("refresh_token", data.refreshToken);
       localStorage.setItem("user_role", "ADMIN");
 
       router.push("/dashboard");

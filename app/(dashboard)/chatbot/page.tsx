@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { Send, Upload, Palette, Camera, Share2, Download, Copy, Info } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Send, Upload, Palette, Camera, Share2, Download, Copy, Info, Package, Plus, User } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import ThemeSelector from '@/components/ui/theme-selector';
 import ProfessionalPoster from '@/components/ui/canvas-poster-professional';
 
@@ -58,8 +59,86 @@ export default function ChatbotPage() {
     imageFile: File;
   } | null>(null);
   
+  // Artisan information for product creation
+  const [artisanInfo, setArtisanInfo] = useState<{
+    id: string;
+    name: string;
+    email: string;
+  } | null>(null);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const searchParams = useSearchParams();
+
+  // Handle poster creation mode from admin chat
+  useEffect(() => {
+    const mode = searchParams.get('mode');
+    if (mode === 'poster-creation') {
+      const imageDataStr = sessionStorage.getItem('posterImageData');
+      if (imageDataStr) {
+        try {
+          const imageData = JSON.parse(imageDataStr);
+          console.log('Poster creation image data:', imageData);
+          
+          // Fetch artisan information
+          if (imageData.artisan_id) {
+            console.log('Fetching info for artisan ID:', imageData.artisan_id);
+            fetchArtisanInfo(imageData.artisan_id);
+          } else {
+            console.log('No artisan_id found in image data');
+            // Set a default artisan info so the button still works
+            setArtisanInfo({
+              id: 'unknown',
+              name: 'Artisan',
+              email: ''
+            });
+          }
+          
+          // Create a welcome message for poster creation
+          const posterWelcomeMessage: Message = {
+            id: Date.now().toString(),
+            type: 'assistant',
+            content: `🎨 **Poster Creation Mode Activated!**
+
+I see you want to create a professional poster for the artisan's product image: **${imageData.filename}**
+
+Let me help you create an amazing marketing poster! Here's what I need from you:
+
+📝 **Product Name** - What should we call this product?
+💰 **Price** - What's the selling price?
+🎨 **Style Preference** - Any specific theme or colors?
+
+The image is ready! Just tell me the product details and I'll create a stunning poster that will help the artisan sell better! ✨
+
+💡 **Pro Tip**: Once the poster is ready, I can also help you create a product listing directly for the artisan!`,
+            timestamp: new Date()
+          };
+
+          // Auto-load the image from URL
+          fetch(imageData.url)
+            .then(response => response.blob())
+            .then(blob => {
+              const file = new File([blob], imageData.filename, { type: 'image/jpeg' });
+              setSelectedFile(file);
+              
+              // Add the poster creation message
+              setMessages(prev => [...prev, posterWelcomeMessage]);
+              
+              // Clear the session storage
+              sessionStorage.removeItem('posterImageData');
+            })
+            .catch(error => {
+              console.error('Failed to load image:', error);
+              // Still show the message even if image loading fails
+              setMessages(prev => [...prev, posterWelcomeMessage]);
+            });
+
+        } catch (error) {
+          console.error('Failed to parse image data:', error);
+        }
+      }
+    }
+  }, [searchParams]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -621,6 +700,159 @@ Ready to **elevate your brand** and **attract discerning customers**? 🚀`,
     document.body.removeChild(link);
   };
 
+  const fetchArtisanInfo = async (artisanId: string) => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      console.log('Fetching artisan info for ID:', artisanId);
+      
+      // Try multiple approaches to get artisan info
+      
+      // Method 1: Direct API call to get artisan conversations
+      const response = await fetch(`/api/admin-chat`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Admin chat response:', data);
+        
+        // Find the specific artisan in conversations
+        if (data.conversations && data.conversations.length > 0) {
+          const artisanConversation = data.conversations.find((conv: any) => 
+            conv.artisan_id === artisanId
+          );
+          
+          if (artisanConversation) {
+            console.log('Found artisan conversation:', artisanConversation);
+            setArtisanInfo({
+              id: artisanId,
+              name: artisanConversation.artisan_name || 'Unknown Artisan',
+              email: artisanConversation.artisan_email || ''
+            });
+            return;
+          }
+        }
+      }
+      
+      // Method 2: Fallback - set basic info with ID
+      console.log('Using fallback artisan info');
+      setArtisanInfo({
+        id: artisanId,
+        name: `Artisan ${artisanId.slice(-4)}`, // Use last 4 chars of ID
+        email: ''
+      });
+      
+    } catch (error) {
+      console.error('Failed to fetch artisan info:', error);
+      // Still set basic info so the button works
+      setArtisanInfo({
+        id: artisanId,
+        name: 'Artisan',
+        email: ''
+      });
+    }
+  };
+
+  const createProductForArtisan = async (posterData: any, price: string) => {
+    if (!artisanInfo) {
+      // Try to get artisan info from sessionStorage as fallback
+      const imageDataStr = sessionStorage.getItem('posterImageData');
+      if (imageDataStr) {
+        try {
+          const imageData = JSON.parse(imageDataStr);
+          if (imageData.artisan_id) {
+            // Set basic artisan info and proceed
+            setArtisanInfo({
+              id: imageData.artisan_id,
+              name: 'Artisan',
+              email: ''
+            });
+          }
+        } catch (e) {
+          console.error('Failed to parse stored image data:', e);
+        }
+      }
+      
+      if (!artisanInfo) {
+        alert('Unable to identify the artisan. Please try going back to the chat and creating the poster again.');
+        return;
+      }
+    }
+
+    try {
+      console.log('Creating product for artisan:', artisanInfo);
+      const token = localStorage.getItem('accessToken');
+      
+      // Create product data
+      const productData = {
+        name: posterData.productName || 'Artisan Product',
+        description: posterData.productStory || `Beautiful ${posterData.productName || 'handcrafted item'} created by ${artisanInfo.name}`,
+        price: parseFloat(price) || 0,
+        category: 'Handmade',
+        imageUrl: posterData.dataUrl, // Use the poster image directly
+        artisanName: artisanInfo.name,
+        artisanId: artisanInfo.id,
+        createdByAdmin: true
+      };
+
+      console.log('Product data to create:', productData);
+
+      const createResponse = await fetch('/api/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(productData)
+      });
+
+      const responseData = await createResponse.json();
+      console.log('Product creation response:', responseData);
+
+      if (createResponse.ok) {
+        alert(`🎉 Product "${productData.name}" created successfully for ${artisanInfo.name}!\n\nPrice: $${price}\nThe product is now live with your beautiful poster!`);
+        
+        // Optionally send success message to artisan
+        try {
+          const successMessage = `🎉 **Product Created Successfully!**
+
+✨ I've created a product listing for you:
+
+📦 **Product Name**: ${productData.name}
+💰 **Price**: $${price}
+🎨 **Marketing Poster**: Professional poster included
+👨‍🎨 **Artisan**: ${artisanInfo.name}
+
+Your product is now live and ready for customers! The beautiful poster we created together will help attract buyers. 🌟`;
+
+          await fetch('/api/admin-chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              message: successMessage,
+              recipient_id: artisanInfo.id
+            })
+          });
+        } catch (msgError) {
+          console.log('Note: Could not send notification to artisan, but product was created successfully');
+        }
+        
+      } else {
+        throw new Error(responseData.error || 'Failed to create product');
+      }
+
+    } catch (error) {
+      console.error('Failed to create product:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Failed to create product: ${errorMessage}. Please try again.`);
+    }
+  };
+
   const copyToClipboard = async (dataUrl: string) => {
     try {
       const response = await fetch(dataUrl);
@@ -655,8 +887,25 @@ Ready to **elevate your brand** and **attract discerning customers**? 🚀`,
             <Palette className="w-6 h-6 text-black font-bold" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-orange-400">AI Poster Creator</h1>
-            <p className="text-sm text-orange-200">Create stunning storytelling posters</p>
+            <h1 className="text-2xl font-bold text-orange-400">
+              {searchParams.get('mode') === 'poster-creation' ? '🎨 Admin Poster Creator' : 'AI Poster Creator'}
+            </h1>
+            <p className="text-sm text-orange-200">
+              {searchParams.get('mode') === 'poster-creation' 
+                ? artisanInfo 
+                  ? `Creating marketing poster for ${artisanInfo.name}` 
+                  : 'Creating marketing poster for artisan'
+                : 'Create stunning storytelling posters'}
+            </p>
+            {/* Artisan Info Badge */}
+            {searchParams.get('mode') === 'poster-creation' && artisanInfo && (
+              <div className="flex items-center gap-2 mt-2 px-3 py-1 bg-green-600/20 border border-green-500/30 rounded-full w-fit">
+                <User className="w-3 h-3 text-green-400" />
+                <span className="text-xs text-green-300 font-medium">
+                  Helping: {artisanInfo.name}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -714,6 +963,26 @@ Ready to **elevate your brand** and **attract discerning customers**? 🚀`,
                       <Copy className="w-4 h-4" />
                       Copy
                     </button>
+                    
+                    {/* Create Product Button - only show in poster creation mode */}
+                    {searchParams.get('mode') === 'poster-creation' && (
+                      <button
+                        onClick={() => {
+                          if (!artisanInfo) {
+                            alert('Artisan information is still loading. Please wait a moment and try again.');
+                            return;
+                          }
+                          const price = prompt('Enter the product price (in $):', '25');
+                          if (price && message.canvasPoster) {
+                            createProductForArtisan(message.canvasPoster, price);
+                          }
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-500 text-white font-medium rounded-lg hover:from-green-500 hover:to-emerald-400 transition-all duration-200 text-sm shadow-lg shadow-green-500/30"
+                      >
+                        <Package className="w-4 h-4" />
+                        {artisanInfo ? `Create Product for ${artisanInfo.name}` : 'Create Product'}
+                      </button>
+                    )}
                   </div>
                 </div>
               )}

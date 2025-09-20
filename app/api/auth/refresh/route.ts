@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyRefreshToken as verifyRefreshTokenJWT, generateAccessToken, hashRefreshToken, generateRefreshToken } from '../../../../lib/jwt-utils';
+import { verifyRefreshToken as verifyRefreshTokenJWT, generateAccessToken, hashRefreshToken, generateRefreshToken } from '../../../../lib/utils/jwt';
 import { verifyRefreshToken, getUserById, storeRefreshToken, revokeRefreshToken } from '../../../../lib/db/auth';
 
 export async function POST(request: NextRequest) {
@@ -56,15 +56,13 @@ export async function POST(request: NextRequest) {
     // Optionally rotate refresh token (revoke old, create new)
     await revokeRefreshToken(tokenHash);
     
-    // Create new refresh token
-    const newRefreshToken = generateRefreshToken({ userId: user.id, email: user.email, role: user.role });
-    const newTokenHash = await hashRefreshToken(newRefreshToken);
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7); // 7 days
+// Create new refresh token
+const newRefreshToken = generateRefreshToken(user.id);
+const newTokenHash = await hashRefreshToken(newRefreshToken);
+const expiresAt = new Date();
+expiresAt.setDate(expiresAt.getDate() + 7); // 7 days
 
-    await storeRefreshToken(user.id, newTokenHash, expiresAt, request.headers.get('user-agent') || undefined);
-
-    return NextResponse.json({
+await storeRefreshToken(user.id, newTokenHash, expiresAt);    return NextResponse.json({
       success: true,
       data: {
         accessToken: newAccessToken,

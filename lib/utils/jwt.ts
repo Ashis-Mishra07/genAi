@@ -40,10 +40,25 @@ export function generateRefreshToken(userId: string): string {
 // Verify access token
 export function verifyAccessToken(token: string): JWTPayload | null {
   try {
+    console.log('JWT: Verifying access token, length:', token.length);
+    console.log('JWT: JWT_SECRET present:', !!JWT_SECRET);
+    
     const payload = jwt.verify(token, JWT_SECRET) as JWTPayload;
+    console.log('JWT: Token verified successfully, payload:', {
+      userId: payload.userId,
+      email: payload.email,
+      role: payload.role,
+      exp: payload.exp ? new Date(payload.exp * 1000).toISOString() : 'No expiry'
+    });
+    
     return payload;
   } catch (error) {
     console.error('JWT verification failed:', error);
+    if (error instanceof jwt.TokenExpiredError) {
+      console.error('JWT: Token has expired');
+    } else if (error instanceof jwt.JsonWebTokenError) {
+      console.error('JWT: Invalid token');
+    }
     return null;
   }
 }
@@ -59,45 +74,74 @@ export function verifyRefreshToken(token: string): { userId: string } | null {
   }
 }
 
-// Extract token from request headers
+// Extract token from request headers or cookies
 export function extractTokenFromRequest(request: NextRequest): string | null {
+  console.log('JWT: Extracting token from request');
+  
+  // First try Authorization header
   const authHeader = request.headers.get('authorization');
-  if (!authHeader) {
-    return null;
+  console.log('JWT: Authorization header:', authHeader ? authHeader.substring(0, 20) + '...' : 'None');
+  
+  if (authHeader) {
+    const [bearer, token] = authHeader.split(' ');
+    if (bearer === 'Bearer' && token) {
+      console.log('JWT: Found Bearer token in header');
+      return token;
+    }
   }
 
-  const [bearer, token] = authHeader.split(' ');
-  if (bearer !== 'Bearer' || !token) {
-    return null;
+  // Fallback to cookies
+  const cookieToken = request.cookies.get('auth_token')?.value;
+  console.log('JWT: Cookie token:', cookieToken ? 'Present' : 'None');
+  
+  if (cookieToken) {
+    console.log('JWT: Found token in cookies');
+    return cookieToken;
   }
 
-  return token;
+  console.log('JWT: No token found in request');
+  return null;
 }
 
 // Get current user from request
 export async function getCurrentUser(request: NextRequest): Promise<AuthUser | null> {
   try {
+    console.log('JWT: Getting current user from request');
+    
     const token = extractTokenFromRequest(request);
+    console.log('JWT: Token extracted:', token ? 'Token present' : 'No token');
+    
     if (!token) {
+      console.log('JWT: No token found in request');
       return null;
     }
 
     const payload = verifyAccessToken(token);
+    console.log('JWT: Token payload:', payload);
+    
     if (!payload) {
+      console.log('JWT: Token verification failed');
       return null;
     }
 
+    console.log('JWT: Getting user by ID:', payload.userId);
     const user = await getUserById(payload.userId);
+    console.log('JWT: User from database:', user ? { id: user.id, email: user.email, role: user.role, isActive: user.isActive } : 'Not found');
+    
     if (!user || !user.isActive) {
+      console.log('JWT: User not found or inactive');
       return null;
     }
 
-    return {
+    const authUser = {
       id: user.id,
       email: user.email,
       name: user.name,
       role: user.role,
     };
+    
+    console.log('JWT: Returning auth user:', authUser);
+    return authUser;
   } catch (error) {
     console.error('Get current user failed:', error);
     return null;

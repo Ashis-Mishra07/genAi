@@ -48,7 +48,7 @@ export default function ArtisanProfilePage() {
 
   const loadProfile = async () => {
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = localStorage.getItem("auth_token");
       if (!token) {
         router.push("/auth/artisan");
         return;
@@ -92,7 +92,7 @@ export default function ArtisanProfilePage() {
     setSuccess("");
 
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = localStorage.getItem("auth_token");
       if (!token) {
         router.push("/auth/artisan");
         return;

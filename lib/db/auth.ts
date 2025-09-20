@@ -15,7 +15,7 @@ export interface User {
   avatar: string | null;
   status: 'ONLINE' | 'OFFLINE' | 'AWAY';
   isActive: boolean;
-  passwordHash: string | null;
+  password: string | null;
   lastLoginAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -46,15 +46,73 @@ export async function verifyPassword(password: string, hashedPassword: string): 
 // Get user by email
 export async function getUserByEmail(email: string): Promise<User | null> {
   const result = await sql`
-    SELECT * FROM users WHERE email = ${email} LIMIT 1;
+    SELECT 
+      id, 
+      email, 
+      password, 
+      name, 
+      phone, 
+      role, 
+      specialty, 
+      location, 
+      bio, 
+      avatar, 
+      status, 
+      is_active as "isActive",
+      last_login_at as "lastLoginAt",
+      created_at as "createdAt",
+      updated_at as "updatedAt"
+    FROM users 
+    WHERE email = ${email} 
+    LIMIT 1;
   `;
   return result.length > 0 ? result[0] as User : null;
 }
 
 // Get user by ID
 export async function getUserById(id: string): Promise<User | null> {
+  // Handle special admin UUID case and legacy "admin" ID
+  const ADMIN_UUID = '00000000-0000-0000-0000-000000000001';
+  if (id === ADMIN_UUID || id === 'admin') {
+    return {
+      id: ADMIN_UUID, // Always return the proper UUID
+      email: 'admin@system.local',
+      password: null, // Not needed for admin
+      name: 'System Administrator',
+      phone: null,
+      role: 'ADMIN',
+      specialty: null,
+      location: null,
+      bio: null,
+      avatar: null,
+      status: 'ONLINE',
+      isActive: true,
+      lastLoginAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as User;
+  }
+
   const result = await sql`
-    SELECT * FROM users WHERE id = ${id} LIMIT 1;
+    SELECT 
+      id, 
+      email, 
+      password, 
+      name, 
+      phone, 
+      role, 
+      specialty, 
+      location, 
+      bio, 
+      avatar, 
+      status, 
+      is_active as "isActive",
+      last_login_at as "lastLoginAt",
+      created_at as "createdAt",
+      updated_at as "updatedAt"
+    FROM users 
+    WHERE id = ${id} 
+    LIMIT 1;
   `;
   return result.length > 0 ? result[0] as User : null;
 }
@@ -71,7 +129,22 @@ export async function createUser(userData: CreateUserData): Promise<User> {
   const result = await sql`
     INSERT INTO users (email, password, name, phone, role, specialty, location, bio, is_active, created_at, updated_at)
     VALUES (${email}, ${hashedPassword}, ${name}, ${phone}, ${role}, ${specialty}, ${location}, ${bio}, true, NOW(), NOW())
-    RETURNING *;
+    RETURNING 
+      id, 
+      email, 
+      password, 
+      name, 
+      phone, 
+      role, 
+      specialty, 
+      location, 
+      bio, 
+      avatar, 
+      status, 
+      is_active as "isActive",
+      last_login_at as "lastLoginAt",
+      created_at as "createdAt",
+      updated_at as "updatedAt";
   `;
   
   return result[0] as User;
@@ -108,7 +181,23 @@ export async function storeRefreshToken(userId: string, token: string, expiresAt
 // Verify refresh token
 export async function verifyRefreshToken(token: string): Promise<User | null> {
   const result = await sql`
-    SELECT u.* FROM users u
+    SELECT 
+      u.id, 
+      u.email, 
+      u.password, 
+      u.name, 
+      u.phone, 
+      u.role, 
+      u.specialty, 
+      u.location, 
+      u.bio, 
+      u.avatar, 
+      u.status, 
+      u.is_active as "isActive",
+      u.last_login_at as "lastLoginAt",
+      u.created_at as "createdAt",
+      u.updated_at as "updatedAt"
+    FROM users u
     JOIN refresh_tokens rt ON u.id = rt.user_id
     WHERE rt.token_hash = ${token} AND rt.expires_at > NOW() AND rt.revoked_at IS NULL
     LIMIT 1;

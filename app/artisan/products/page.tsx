@@ -74,7 +74,7 @@ export default function ArtisanProductsPage() {
 
   const loadProducts = async () => {
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = localStorage.getItem("auth_token");
       if (!token) {
         router.push("/auth/artisan");
         return;
@@ -109,7 +109,7 @@ export default function ArtisanProductsPage() {
     }
 
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = localStorage.getItem("auth_token");
       if (!token) {
         router.push("/auth/artisan");
         return;
@@ -152,7 +152,7 @@ export default function ArtisanProductsPage() {
     currentStatus: boolean
   ) => {
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = localStorage.getItem("auth_token");
       if (!token) {
         router.push("/auth/artisan");
         return;
@@ -186,7 +186,7 @@ export default function ArtisanProductsPage() {
     }
 
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = localStorage.getItem("auth_token");
       if (!token) {
         router.push("/auth/artisan");
         return;

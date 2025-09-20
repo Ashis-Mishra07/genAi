@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyPassword, getUserByEmail, verifyAdminPasscode } from '../../../../lib/db/auth';
-import { isValidEmail, createTokensResponse, hashRefreshToken } from '../../../../lib/jwt-utils';
+import { isValidEmail, createTokensResponse, hashRefreshToken } from '../../../../lib/utils/jwt';
 import { storeRefreshToken } from '../../../../lib/db/auth';
 
 export async function POST(request: NextRequest) {
@@ -33,7 +33,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify password
-    const isValidPassword = await verifyPassword(password, user.passwordHash);
+    if (!user.password) {
+      return NextResponse.json(
+        { error: 'Invalid email or password' },
+        { status: 401 }
+      );
+    }
+
+    const isValidPassword = await verifyPassword(password, user.password);
     if (!isValidPassword) {
       return NextResponse.json(
         { error: 'Invalid email or password' },

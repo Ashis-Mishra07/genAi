@@ -75,7 +75,7 @@ export default function ArtisanDashboard() {
         setUser(userData.user);
       }
 
-      // Fetch products
+      // Fetch products and stats
       const productsResponse = await fetch("/api/products", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
@@ -84,19 +84,34 @@ export default function ArtisanDashboard() {
 
       if (productsResponse.ok) {
         const productsData = await productsResponse.json();
-        setProducts(productsData.products || []);
+        
+        // Set products with proper mapping
+        const mappedProducts = (productsData.products || []).map((product: any) => ({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          imageUrl: product.imageUrl,
+          isActive: product.isActive,
+          createdAt: product.createdAt,
+        }));
+        
+        setProducts(mappedProducts);
 
-        // Calculate stats
-        const totalProducts = productsData.products?.length || 0;
-        const activeProducts =
-          productsData.products?.filter((p: Product) => p.isActive).length || 0;
-
-        setStats({
-          totalProducts,
-          activeProducts,
-          totalViews: Math.floor(Math.random() * 1000), // Mock data for now
-          totalOrders: Math.floor(Math.random() * 50), // Mock data for now
-        });
+        // Set stats from API response
+        if (productsData.stats) {
+          setStats(productsData.stats);
+        } else {
+          // Fallback calculation if stats not provided
+          const totalProducts = mappedProducts.length;
+          const activeProducts = mappedProducts.filter((p: Product) => p.isActive).length;
+          
+          setStats({
+            totalProducts,
+            activeProducts,
+            totalViews: 0, // TODO: Implement proper analytics
+            totalOrders: 0, // TODO: Implement proper order tracking
+          });
+        }
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
@@ -110,6 +125,30 @@ export default function ArtisanDashboard() {
     localStorage.removeItem("user_role");
     localStorage.removeItem("user_id");
     router.push("/");
+  };
+
+  const handleAddProduct = () => {
+    router.push("/artisan/products/new");
+  };
+
+  const handleViewMessages = () => {
+    router.push("/artisan/messages");
+  };
+
+  const handleViewFeedback = () => {
+    router.push("/artisan/feedback");
+  };
+
+  const handleViewAnalytics = () => {
+    router.push("/artisan/analytics");
+  };
+
+  const handleViewProduct = (productId: string) => {
+    router.push(`/products/${productId}`);
+  };
+
+  const handleEditProduct = (productId: string) => {
+    router.push(`/artisan/products/edit/${productId}`);
   };
 
   const handleDeleteProduct = async (productId: string) => {
@@ -154,18 +193,38 @@ export default function ArtisanDashboard() {
                   </h1>
                   <p className="text-sm text-gray-600">
                     Welcome back, {user?.name}
+                    {user?.location && ` from ${user.location}`}
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="flex items-center space-x-4">
-              <button className="p-2 text-gray-400 hover:text-gray-500">
+              <button 
+                onClick={() => router.push("/artisan/messages")}
+                className="p-2 text-gray-400 hover:text-gray-500 relative">
                 <MessageSquare className="h-6 w-6" />
+                {/* Add notification badge if needed */}
               </button>
-              <button className="p-2 text-gray-400 hover:text-gray-500">
+              <button 
+                onClick={() => router.push("/artisan/profile")}
+                className="p-2 text-gray-400 hover:text-gray-500">
                 <Settings className="h-6 w-6" />
               </button>
+              
+              {/* User avatar/info */}
+              <div className="flex items-center space-x-3">
+                <div className="text-right">
+                  <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                  <p className="text-xs text-gray-500">{user?.specialty}</p>
+                </div>
+                <div className="h-8 w-8 bg-orange-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-medium">
+                    {user?.name?.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              </div>
+              
               <button
                 onClick={handleLogout}
                 className="p-2 text-gray-400 hover:text-red-500">
@@ -233,16 +292,28 @@ export default function ArtisanDashboard() {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Quick Actions
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="flex items-center justify-center p-4 border-2 border-dashed border-orange-300 rounded-lg text-orange-600 hover:border-orange-500 hover:text-orange-700 transition-colors">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <button 
+              onClick={handleAddProduct}
+              className="flex items-center justify-center p-4 border-2 border-dashed border-orange-300 rounded-lg text-orange-600 hover:border-orange-500 hover:text-orange-700 transition-colors">
               <Plus className="h-6 w-6 mr-2" />
               Add New Product
             </button>
-            <button className="flex items-center justify-center p-4 border-2 border-dashed border-blue-300 rounded-lg text-blue-600 hover:border-blue-500 hover:text-blue-700 transition-colors">
+            <button 
+              onClick={handleViewMessages}
+              className="flex items-center justify-center p-4 border-2 border-dashed border-blue-300 rounded-lg text-blue-600 hover:border-blue-500 hover:text-blue-700 transition-colors">
               <MessageSquare className="h-6 w-6 mr-2" />
-              View Messages
+              Admin Support
             </button>
-            <button className="flex items-center justify-center p-4 border-2 border-dashed border-green-300 rounded-lg text-green-600 hover:border-green-500 hover:text-green-700 transition-colors">
+            <button 
+              onClick={handleViewFeedback}
+              className="flex items-center justify-center p-4 border-2 border-dashed border-purple-300 rounded-lg text-purple-600 hover:border-purple-500 hover:text-purple-700 transition-colors">
+              <Heart className="h-6 w-6 mr-2" />
+              Customer Feedback
+            </button>
+            <button 
+              onClick={handleViewAnalytics}
+              className="flex items-center justify-center p-4 border-2 border-dashed border-green-300 rounded-lg text-green-600 hover:border-green-500 hover:text-green-700 transition-colors">
               <TrendingUp className="h-6 w-6 mr-2" />
               View Analytics
             </button>
@@ -255,7 +326,9 @@ export default function ArtisanDashboard() {
             <h2 className="text-lg font-semibold text-gray-900">
               Your Products
             </h2>
-            <button className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors flex items-center">
+            <button 
+              onClick={handleAddProduct}
+              className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors flex items-center">
               <Plus className="h-4 w-4 mr-2" />
               Add Product
             </button>
@@ -271,7 +344,9 @@ export default function ArtisanDashboard() {
                 <p className="text-gray-600 mb-4">
                   Start by adding your first handmade product
                 </p>
-                <button className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors">
+                <button 
+                  onClick={handleAddProduct}
+                  className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors">
                   Create Your First Product
                 </button>
               </div>
@@ -314,10 +389,14 @@ export default function ArtisanDashboard() {
                         </span>
 
                         <div className="flex space-x-2">
-                          <button className="p-1 text-gray-400 hover:text-blue-500">
+                          <button 
+                            onClick={() => handleViewProduct(product.id)}
+                            className="p-1 text-gray-400 hover:text-blue-500">
                             <Eye className="h-4 w-4" />
                           </button>
-                          <button className="p-1 text-gray-400 hover:text-green-500">
+                          <button 
+                            onClick={() => handleEditProduct(product.id)}
+                            className="p-1 text-gray-400 hover:text-green-500">
                             <Edit className="h-4 w-4" />
                           </button>
                           <button

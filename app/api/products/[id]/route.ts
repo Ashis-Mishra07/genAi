@@ -1,39 +1,58 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { productOperations, inquiryOperations } from '@/lib/db/products';
+import { getCurrentUser } from '../../../../lib/utils/jwt';
+import { 
+  getProductById, 
+  getProductByIdWithArtisan,
+  updateProduct, 
+  deleteProduct 
+} from '../../../../lib/db/products-neon';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id } = await params;
     
-    if (isNaN(id)) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid product ID' },
-        { status: 400 }
-      );
+    // Try to get current user to determine what data to return
+    let user = null;
+    try {
+      user = await getCurrentUser(request);
+    } catch {
+      // User not authenticated, treat as public access
     }
 
-    const product = await productOperations.getProductById(id);
-
+    let product;
+    
+    // If user is customer or not authenticated, include artisan information
+    if (!user || user.role === 'CUSTOMER') {
+      product = await getProductByIdWithArtisan(id);
+    } else {
+      // For artisans/admins, use regular function
+      product = await getProductById(id);
+    }
+    
     if (!product) {
       return NextResponse.json(
-        { success: false, error: 'Product not found' },
+        { error: 'Product not found' },
         { status: 404 }
       );
     }
 
-    // Get inquiries for this product
-    const inquiries = await inquiryOperations.getInquiriesByProductId(id);
+    // Only show active products to customers/public
+    if ((!user || user.role === 'CUSTOMER') && !product.isActive) {
+      return NextResponse.json(
+        { error: 'Product not found' },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      product: product,
-      inquiries: inquiries
+      product: product
     });
   } catch (error: any) {
-    console.error('Product GET error:', error);
+    console.error('Get product error:', error);
     return NextResponse.json(
       { 
         success: false,
@@ -47,24 +66,27 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
-    const updates = await request.json();
+    const { id } = await params;
     
-    if (isNaN(id)) {
+    // Authentication required for updating products
+    const user = await getCurrentUser(request);
+    if (!user || user.role !== 'ARTISAN') {
       return NextResponse.json(
-        { success: false, error: 'Invalid product ID' },
-        { status: 400 }
+        { error: 'Artisan authentication required' },
+        { status: 401 }
       );
     }
 
-    const product = await productOperations.updateProduct(id, updates);
-
+    const updates = await request.json();
+    
+    const product = await updateProduct(id, user.id, updates);
+    
     if (!product) {
       return NextResponse.json(
-        { success: false, error: 'Product not found' },
+        { error: 'Product not found or you do not have permission to update it' },
         { status: 404 }
       );
     }
@@ -75,7 +97,7 @@ export async function PUT(
       message: 'Product updated successfully'
     });
   } catch (error: any) {
-    console.error('Product UPDATE error:', error);
+    console.error('Update product error:', error);
     return NextResponse.json(
       { 
         success: false,
@@ -89,23 +111,25 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id } = await params;
     
-    if (isNaN(id)) {
+    // Authentication required for deleting products
+    const user = await getCurrentUser(request);
+    if (!user || user.role !== 'ARTISAN') {
       return NextResponse.json(
-        { success: false, error: 'Invalid product ID' },
-        { status: 400 }
+        { error: 'Artisan authentication required' },
+        { status: 401 }
       );
     }
 
-    const deleted = await productOperations.deleteProduct(id);
-
-    if (!deleted) {
+    const success = await deleteProduct(id, user.id);
+    
+    if (!success) {
       return NextResponse.json(
-        { success: false, error: 'Product not found' },
+        { error: 'Product not found or you do not have permission to delete it' },
         { status: 404 }
       );
     }
@@ -115,7 +139,7 @@ export async function DELETE(
       message: 'Product deleted successfully'
     });
   } catch (error: any) {
-    console.error('Product DELETE error:', error);
+    console.error('Delete product error:', error);
     return NextResponse.json(
       { 
         success: false,

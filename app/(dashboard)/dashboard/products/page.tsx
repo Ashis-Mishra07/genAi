@@ -119,27 +119,51 @@ export default function ProductsPage() {
   };
 
   // Add product functions
-  const handleAddProduct = () => {
+  const handleAddProduct = async () => {
     if (newProduct.name && newProduct.description && newProduct.price) {
-      const product: Product = {
-        id: Math.max(...products.map((p) => p.id), 0) + 1,
-        name: newProduct.name,
-        description: newProduct.description,
-        price: parseFloat(newProduct.price),
-        currency: newProduct.currency,
-        image_url: newProduct.image_url || undefined,
-        category: newProduct.category,
-        tags: newProduct.tags
-          ? newProduct.tags.split(",").map((tag) => tag.trim())
-          : [],
-        is_active: newProduct.is_active,
-        created_at: new Date().toISOString(),
-      };
+      try {
+        const token = localStorage.getItem('accessToken');
+        
+        const productData = {
+          name: newProduct.name,
+          description: newProduct.description,
+          price: parseFloat(newProduct.price),
+          currency: newProduct.currency,
+          imageUrl: newProduct.image_url || undefined,
+          category: newProduct.category,
+          tags: newProduct.tags
+            ? newProduct.tags.split(",").map((tag) => tag.trim())
+            : [],
+          isActive: newProduct.is_active,
+        };
 
-      setProducts([product, ...products]);
-      resetAddForm();
-      setShowAddModal(false);
-      // Here you would also make API call to save to database
+        const response = await fetch('/api/products', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(productData)
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            // Reload products to get the latest data
+            await loadProducts();
+            resetAddForm();
+            setShowAddModal(false);
+            alert('Product added successfully!');
+          } else {
+            alert('Failed to add product: ' + data.error);
+          }
+        } else {
+          alert('Failed to add product. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error adding product:', error);
+        alert('Failed to add product. Please try again.');
+      }
     }
   };
 
@@ -169,129 +193,49 @@ export default function ProductsPage() {
   const loadProducts = async () => {
     try {
       setIsLoading(true);
-      // Simulate API call - replace with actual API
-      setTimeout(() => {
-        setProducts([
-          {
-            id: 1,
-            name: "Handwoven Banarasi Silk Saree",
-            description:
-              "Exquisite handwoven silk saree with intricate gold zari work, representing centuries of Banarasi weaving tradition.",
-            story:
-              "This magnificent saree carries the legacy of Banaras weavers who have perfected their craft over 500 years. Each thread tells a story of dedication, passed down through generations of skilled artisans in the holy city of Varanasi.",
-            price: 15000.0,
-            currency: "$",
-            image_url:
-              "https://images.unsplash.com/photo-1737816473298-b76011905c28?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fEhhbmR3b3ZlbiUyMEJhbmFyYXNpJTIwU2lsayUyMFNhcmVlfGVufDB8fDB8fHww",
-            category: "Textiles",
-            tags: [
-              "silk",
-              "saree",
-              "banarasi",
-              "handwoven",
-              "traditional",
-              "gold-zari",
-            ],
-            is_active: true,
-            created_at: "2024-01-15T10:30:00Z",
-          },
-          {
-            id: 2,
-            name: "Blue Pottery Dinner Set",
-            description:
-              "Beautiful hand-painted blue pottery dinner set from Jaipur, featuring traditional Rajasthani motifs and Persian-inspired designs.",
-            story:
-              "Born in the pink city of Jaipur, this blue pottery reflects the Persian influence on Indian craftsmanship. Each piece is meticulously hand-painted by skilled artisans who learned this art form from their ancestors.",
-            price: 3500.0,
-            currency: "INR",
-            image_url:
-              "https://images.unsplash.com/photo-1724709162118-60c05c4c3fcf?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fEJsdWUlMjBQb3R0ZXJ5JTIwRGlubmVyJTIwU2V0fGVufDB8fDB8fHww",
-            category: "Pottery",
-            tags: [
-              "pottery",
-              "ceramic",
-              "blue",
-              "jaipur",
-              "dinnerware",
-              "hand-painted",
-            ],
-            is_active: true,
-            created_at: "2024-01-20T14:15:00Z",
-          },
-          {
-            id: 3,
-            name: "Kundan Meenakari Necklace",
-            description:
-              "Elegant Kundan jewelry with vibrant Meenakari work, showcasing the royal jewelry traditions of Rajasthan.",
-            story:
-              "This stunning necklace represents the grandeur of Rajasthani royal courts. The Kundan setting technique dates back to the Mughal era, while the colorful Meenakari enamel work adds life to each precious stone.",
-            price: 8500.0,
-            currency: "INR",
-            image_url:
-              "https://images.unsplash.com/photo-1554140535-847ce2a7f896?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fEt1bmRhbiUyME1lZW5ha2FyaSUyME5lY2tsYWNlfGVufDB8fDB8fHww",
-            category: "Jewelry",
-            tags: [
-              "kundan",
-              "meenakari",
-              "necklace",
-              "rajasthani",
-              "gold",
-              "traditional",
-            ],
-            is_active: true,
-            created_at: "2024-01-25T16:45:00Z",
-          },
-          {
-            id: 4,
-            name: "Sandalwood Carved Lord Ganesha",
-            description:
-              "Intricate sandalwood carving of Lord Ganesha, showcasing the fine woodworking traditions of Karnataka.",
-            story:
-              "Carved from fragrant sandalwood in the workshops of Mysore, this sculpture embodies centuries of South Indian woodcarving tradition. Each detail reflects the devotion and skill of master craftsmen.",
-            price: 2800.0,
-            currency: "INR",
-            image_url:
-              "https://images.unsplash.com/photo-1701172188718-35894ba655ee?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8U2FuZGFsd29vZCUyMENhcnZlZCUyMExvcmQlMjBHYW5lc2hhfGVufDB8fDB8fHww",
-            category: "Woodwork",
-            tags: [
-              "sandalwood",
-              "carved",
-              "ganesha",
-              "mysore",
-              "spiritual",
-              "handcrafted",
-            ],
-            is_active: false,
-            created_at: "2024-01-30T11:20:00Z",
-          },
-          {
-            id: 5,
-            name: "Brass Tanjore Plate Set",
-            description:
-              "Traditional brass plate set with intricate engravings, perfect for festivals and special occasions.",
-            story:
-              "Crafted in the temple town of Tanjore, these brass plates have adorned South Indian households for generations. The intricate engravings tell stories of gods and goddesses, making every meal a blessed experience.",
-            price: 1200.0,
-            currency: "INR",
-            image_url:
-              "https://images.unsplash.com/photo-1652960018678-1f19799996c5?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fEJyYXNzJTIwVGFuam9yZSUyMFBsYXRlJTIwU2V0fGVufDB8fDB8fHww",
-            category: "Metalwork",
-            tags: [
-              "brass",
-              "tanjore",
-              "engraved",
-              "traditional",
-              "festival",
-              "dining",
-            ],
-            is_active: true,
-            created_at: "2024-02-05T09:15:00Z",
-          },
-        ]);
-        setIsLoading(false);
-      }, 1000);
+      const token = localStorage.getItem('accessToken');
+      
+      const response = await fetch('/api/products', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          // Transform the data to match the expected format
+          const formattedProducts = data.products.map((product: any) => ({
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            story: product.story,
+            price: product.price,
+            currency: product.currency || 'INR',
+            image_url: product.imageUrl || product.image_url,
+            category: product.category,
+            tags: product.tags ? (Array.isArray(product.tags) ? product.tags : product.tags.split(',').map((t: string) => t.trim())) : [],
+            is_active: product.isActive !== false,
+            created_at: product.createdAt || product.created_at || new Date().toISOString(),
+          }));
+          setProducts(formattedProducts);
+        } else {
+          console.error('Failed to load products:', data.error);
+          // Fallback to empty array
+          setProducts([]);
+        }
+      } else {
+        console.error('Failed to fetch products:', response.status);
+        // Fallback to empty array
+        setProducts([]);
+      }
     } catch (error) {
       console.error("Error loading products:", error);
+      // Fallback to empty array
+      setProducts([]);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -359,7 +303,7 @@ export default function ProductsPage() {
   // Helper function to generate contextual stories based on product details
   const generateContextualStory = (product: Product): string => {
     const getRandomLocation = (category: string) => {
-      const locations = {
+      const locations: { [key: string]: string[] } = {
         textiles: [
           "Varanasi",
           "Kanchipuram",

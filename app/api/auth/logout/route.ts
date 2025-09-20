@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCurrentUser, hashRefreshToken } from '../../../../lib/jwt-utils';
+import { getCurrentUser, hashRefreshToken } from '../../../../lib/utils/jwt';
 import { revokeRefreshToken, revokeAllUserTokens, updateUserLoginStatus } from '../../../../lib/db/auth';
 
 export async function POST(request: NextRequest) {
