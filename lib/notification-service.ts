@@ -371,8 +371,8 @@ export async function sendNotification(notificationData: NotificationData) {
   // Send SMS Notification
   if (notificationData.customerPhone) {
     try {
-      // Import Twilio dynamically to avoid build issues
-      const { default: twilio } = require('twilio');
+      // Import Twilio with proper CommonJS syntax
+      const twilio = require('twilio');
       const client = twilio(smsConfig.accountSid, smsConfig.authToken);
       
       const message = getSMSMessage(notificationData.type, notificationData.data);

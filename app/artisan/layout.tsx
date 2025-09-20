@@ -6,7 +6,6 @@ import {
     BarChart3, Bell,
     Headphones,
     Heart,
-    HelpCircle,
     LogOut,
     MessageSquare,
     Package,
@@ -15,7 +14,7 @@ import {
     TrendingUp, User
 } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function ArtisanLayoutContent({
   children,
@@ -23,9 +22,43 @@ function ArtisanLayoutContent({
   children: React.ReactNode;
 }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const router = useRouter();
   const pathname = usePathname();
   const { t } = useLanguage();
+
+  // Fetch unread notification count
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await fetch('/api/notifications?count=true');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setUnreadCount(data.unreadCount);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+    }
+  };
+
+  // Initial fetch and setup polling
+  useEffect(() => {
+    fetchUnreadCount();
+    
+    // Poll for updates every 30 seconds
+    const interval = setInterval(fetchUnreadCount, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  // Listen for navigation to notifications page to refresh count
+  useEffect(() => {
+    if (pathname === '/artisan/notifications') {
+      // Refresh count when navigating to notifications
+      setTimeout(fetchUnreadCount, 1000);
+    }
+  }, [pathname]);
 
   const handleSignOut = async () => {
     if (isLoggingOut) return;
@@ -100,11 +133,6 @@ function ArtisanLayoutContent({
       icon: BarChart3,
     },
     {
-      name: 'Support Dashboard',
-      href: '/artisan/support-dashboard',
-      icon: Headphones,
-    },
-    {
       name: t('feedback'),
       href: '/artisan/feedback',
       icon: Heart,
@@ -158,17 +186,33 @@ function ArtisanLayoutContent({
 
               <div className="pt-4 border-t border-slate-700 mt-4">
                 <button
-                  onClick={() => router.push('/artisan/help')}
-                  className="w-full flex items-center px-3 py-2 text-left text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg transition-colors"
-                >
-                  <HelpCircle className="h-5 w-5 mr-3" />
-                  Help & Support
-                </button>
-                <button
-                  className="w-full flex items-center px-3 py-2 text-left text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg transition-colors"
+                  onClick={() => router.push('/artisan/notifications')}
+                  className={`w-full flex items-center px-3 py-2 text-left rounded-lg transition-colors relative ${
+                    isActive('/artisan/notifications')
+                      ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20'
+                      : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                  }`}
                 >
                   <Bell className="h-5 w-5 mr-3" />
                   Notifications
+                  {/* Dynamic unread count badge */}
+                  {unreadCount > 0 && (
+                    <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] h-5 flex items-center justify-center animate-pulse">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+                
+                <button
+                  onClick={() => router.push('/artisan/support-dashboard')}
+                  className={`w-full flex items-center px-3 py-2 text-left rounded-lg transition-colors mt-2 ${
+                    isActive('/artisan/support-dashboard')
+                      ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20'
+                      : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                  }`}
+                >
+                  <Headphones className="h-5 w-5 mr-3" />
+                  Support Dashboard
                 </button>
               </div>
             </div>
