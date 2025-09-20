@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
 import { Send, Upload, Palette, Camera, Share2, Download, Copy, Info, Package, Plus, User } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import ThemeSelector from '@/components/ui/theme-selector';
@@ -33,7 +33,20 @@ interface Message {
   };
 }
 
-export default function ChatbotPage() {
+// Loading component for Suspense fallback
+function ChatbotLoading() {
+  return (
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+        <p className="text-orange-200">Loading chatbot...</p>
+      </div>
+    </div>
+  );
+}
+
+// Main component that uses useSearchParams
+function ChatbotContent() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -1080,5 +1093,14 @@ Your product is now live and ready for customers! The beautiful poster we create
         )}
       </div>
     </div>
+  );
+}
+
+// Wrapper component with Suspense boundary
+export default function ChatbotPage() {
+  return (
+    <Suspense fallback={<ChatbotLoading />}>
+      <ChatbotContent />
+    </Suspense>
   );
 }

@@ -23,6 +23,9 @@ const nextConfig: NextConfig = {
     },
   },
   
+  // Output configuration for better deployment
+  output: 'standalone',
+  
   // Webpack configuration to handle potential module issues
   webpack: (config, { isServer }) => {
     // Ignore specific warnings/errors

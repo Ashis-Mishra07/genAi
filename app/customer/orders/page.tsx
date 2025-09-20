@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -47,7 +47,20 @@ interface OrderItem {
   artisanName?: string;
 }
 
-export default function CustomerOrdersPage() {
+// Loading component for Suspense fallback
+function OrdersLoading() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading orders...</p>
+      </div>
+    </div>
+  );
+}
+
+// Main component that uses useSearchParams
+function CustomerOrdersContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [orders, setOrders] = useState<Order[]>([]);
@@ -424,5 +437,14 @@ export default function CustomerOrdersPage() {
         </div>
       )}
     </div>
+  );
+}
+
+// Wrapper component with Suspense boundary
+export default function CustomerOrdersPage() {
+  return (
+    <Suspense fallback={<OrdersLoading />}>
+      <CustomerOrdersContent />
+    </Suspense>
   );
 }
