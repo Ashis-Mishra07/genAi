@@ -1,7 +1,8 @@
 'use client';
 
 import LanguageSelector from '@/components/ui/LanguageSelector';
-import { LanguageProvider, useLanguage } from '@/lib/language/LanguageContext';
+import { useTranslation } from '@/lib/i18n/hooks';
+import { LanguageProvider as I18nProvider } from '@/lib/i18n/provider';
 import {
     BarChart3, Bell,
     Headphones,
@@ -25,7 +26,7 @@ function ArtisanLayoutContent({
   const [unreadCount, setUnreadCount] = useState(0);
   const router = useRouter();
   const pathname = usePathname();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   // Fetch unread notification count
   const fetchUnreadCount = async () => {
@@ -118,7 +119,7 @@ function ArtisanLayoutContent({
       icon: Package,
     },
     {
-      name: t('addProduct'),
+      name: t('createProduct'),
       href: '/artisan/products/new',
       icon: Plus,
     },
@@ -128,12 +129,12 @@ function ArtisanLayoutContent({
       icon: MessageSquare,
     },
     {
-      name: t('analytics'),
+      name: t('viewAnalytics'),
       href: '/artisan/analytics',
       icon: BarChart3,
     },
     {
-      name: t('feedback'),
+      name: t('customerFeedback'),
       href: '/artisan/feedback',
       icon: Heart,
     },
@@ -150,20 +151,18 @@ function ArtisanLayoutContent({
     <div className="min-h-screen bg-slate-900 flex">
       {/* Fixed Sidebar */}
       <div className="w-64 bg-slate-800 border-r border-slate-700 flex flex-col fixed h-full">
-        {/* Logo/Brand */}
-        <div className="p-6 border-b border-slate-700">
-          <div className="flex items-center">
-            <div className="bg-orange-500 rounded-lg p-2 mr-3">
-              <Palette className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-white">Artisan Studio</h1>
-                <p className="text-slate-400 text-sm">Creative Portal</p>
+          {/* Logo/Brand */}
+          <div className="p-6 border-b border-slate-700">
+            <div className="flex items-center">
+              <div className="bg-orange-500 rounded-lg p-2 mr-3">
+                <Palette className="h-6 w-6 text-white" />
               </div>
-            </div>
-          </div>
-
-          {/* Navigation */}
+              <div>
+                <h1 className="text-lg font-bold text-white">{t('artisanStudio')}</h1>
+                <p className="text-slate-400 text-sm">{t('creativePortal')}</p>
+                </div>
+              </div>
+            </div>          {/* Navigation */}
           <nav className="flex-1 px-4 py-6">
             <div className="space-y-2">
               {navigationItems.map((item) => {
@@ -194,7 +193,7 @@ function ArtisanLayoutContent({
                   }`}
                 >
                   <Bell className="h-5 w-5 mr-3" />
-                  Notifications
+                  {t('notifications')}
                   {/* Dynamic unread count badge */}
                   {unreadCount > 0 && (
                     <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] h-5 flex items-center justify-center animate-pulse">
@@ -212,7 +211,7 @@ function ArtisanLayoutContent({
                   }`}
                 >
                   <Headphones className="h-5 w-5 mr-3" />
-                  Support Dashboard
+                  {t('supportDashboard')}
                 </button>
               </div>
             </div>
@@ -239,7 +238,7 @@ function ArtisanLayoutContent({
               ) : (
                 <LogOut className="h-5 w-5 mr-3" />
               )}
-              {t('signOut')}
+              {t('logout')}
             </button>
           </div>
         </div>
@@ -258,8 +257,8 @@ export default function ArtisanLayout({
   children: React.ReactNode;
 }) {
   return (
-    <LanguageProvider>
+    <I18nProvider>
       <ArtisanLayoutContent>{children}</ArtisanLayoutContent>
-    </LanguageProvider>
+    </I18nProvider>
   );
 }

@@ -77,7 +77,7 @@ export default function CustomerHelpPage() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       id: '1',
-      text: "Hi there! I'm your AI shopping assistant. How can I help you today?",
+      text: "👋 Welcome to our AI Support Assistant!\n\n**Quick Help:** Click on the common questions above for instant answers.\n\n**Specific Questions:** Type detailed questions below (like 'Where is my order #ORD-123?') for personalized help.\n\nHow can I assist you today?",
       sender: 'ai',
       timestamp: new Date()
     }
@@ -262,6 +262,63 @@ export default function CustomerHelpPage() {
     }
   };
 
+  const handleViewTicketDetails = async (ticketId: string) => {
+    try {
+      // First try to fetch ticket details
+      const response = await fetch(`/api/support/ticket/${ticketId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.ticket) {
+          // Create a detailed popup or modal with ticket information
+          const ticketDetails = `
+Ticket Details:
+
+Ticket ID: #${data.ticket.id}
+Subject: ${data.ticket.subject}
+Category: ${data.ticket.category || 'General'}
+Status: ${data.ticket.status.toUpperCase()}
+Priority: ${data.ticket.priority.toUpperCase()}
+Created: ${new Date(data.ticket.created_at).toLocaleString()}
+Updated: ${new Date(data.ticket.updated_at).toLocaleString()}
+
+Customer Details:
+Name: ${data.ticket.customer_name || 'N/A'}
+Email: ${data.ticket.customer_email || 'N/A'}
+Phone: ${data.ticket.customer_phone || 'N/A'}
+
+Description:
+${data.ticket.description || 'No description available'}
+`;
+          alert(ticketDetails);
+        } else {
+          alert('Ticket details not found.');
+        }
+      } else {
+        throw new Error('Failed to fetch ticket details');
+      }
+    } catch (error) {
+      console.error('Error fetching ticket details:', error);
+      // Fallback to basic ticket info
+      const ticket = recentTickets.find(t => t.id === ticketId);
+      if (ticket) {
+        const basicDetails = `
+Ticket Information:
+
+Ticket ID: #${ticket.id}
+Subject: ${ticket.subject}
+Status: ${ticket.status.toUpperCase()}
+Priority: ${ticket.priority.toUpperCase()}
+Created: ${new Date(ticket.date).toLocaleString()}
+
+For more details or to update this ticket, please contact our support team.
+`;
+        alert(basicDetails);
+      } else {
+        alert('Unable to view ticket details. Please try again or contact support.');
+      }
+    }
+  };
+
   const openRatingModal = (ticketId?: string, refundId?: string) => {
     setRatingData({
       ticketId: ticketId || '',
@@ -271,6 +328,221 @@ export default function CustomerHelpPage() {
       feedback: ''
     });
     setShowRatingModal(true);
+  };
+
+  // Handle quick FAQ questions
+  const handleQuickQuestion = (action: string, question: string, redirect: string | null) => {
+    // Add user question to chat
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      text: question,
+      sender: 'user',
+      timestamp: new Date()
+    };
+    setChatMessages(prev => [...prev, userMessage]);
+
+    setIsAiTyping(true);
+
+    // Generate professional response based on action
+    setTimeout(() => {
+      let response = '';
+      let shouldRedirect = false;
+      let redirectUrl = '';
+
+      switch (action) {
+        case 'track-order':
+          response = `📦 Order Tracking
+
+To track your order:
+
+1. Go to Orders section in your dashboard
+2. Click on the order you want to track
+3. View real-time status updates
+
+You can also use your order number to track via SMS. If you need immediate assistance, I can redirect you to your orders page.`;
+          shouldRedirect = true;
+          redirectUrl = '/customer/orders';
+          break;
+
+        case 'return-policy':
+          response = `↩️ Return Policy
+
+✅ 30-day return window from delivery date
+✅ Items must be in original condition with tags
+✅ Free returns for damaged/incorrect items
+✅ Custom items may have different terms
+
+Return Process:
+1. Go to Orders → Select item → Request Return
+2. Choose reason and upload photos if needed
+3. We'll send a prepaid return label
+4. Refund processed within 5-7 days after we receive the item
+
+Would you like to start a return request?`;
+          break;
+
+        case 'contact-artisan':
+          response = `👨‍🎨 Contacting Artisans
+
+Before Purchase:
+• Visit any product page
+• Click "Message Artisan" button
+• Ask about customization, size, materials, etc.
+
+After Purchase:
+• Go to your Orders section
+• Click on the order
+• Use "Contact Seller" option
+
+Response Time: Most artisans reply within 2-4 hours
+
+I can redirect you to browse products where you can contact artisans directly.`;
+          shouldRedirect = true;
+          redirectUrl = '/customer/products';
+          break;
+
+        case 'payment-methods':
+          response = `💳 Payment Methods
+
+We Accept:
+✅ All major credit cards (Visa, MasterCard, AmEx)
+✅ Debit cards
+✅ UPI (Google Pay, PhonePe, Paytm)
+✅ Net Banking
+✅ Digital wallets
+✅ EMI options available
+
+Security:
+🔒 256-bit SSL encryption
+🔒 PCI DSS compliant
+🔒 No card details stored
+
+Payment Issues? Contact support immediately for assistance.`;
+          break;
+
+        case 'shipping-time':
+          response = `🚚 Shipping Information
+
+Standard Delivery: 5-7 business days (₹49)
+Express Delivery: 2-3 business days (₹99)
+Free Shipping: Orders above ₹999
+
+Custom/Handmade Items:
+• Additional 2-5 days processing time
+• Artisan will specify timeline
+
+Tracking:
+• SMS & email updates at every step
+• Real-time tracking in your dashboard
+
+Note: Rural areas may take 1-2 extra days`;
+          break;
+
+        case 'modify-order':
+          response = `✏️ Order Modification
+
+Within 2 hours of placing order:
+✅ Modify items, quantity, address
+✅ Cancel completely
+✅ Change payment method
+
+After 2 hours:
+❌ Limited modifications possible
+✅ Address changes (before shipping)
+✅ Contact artisan for custom orders
+
+How to Modify:
+1. Go to Orders → Find your order
+2. Click "Modify Order" if available
+3. Or contact support for assistance
+
+Should I redirect you to your orders?`;
+          shouldRedirect = true;
+          redirectUrl = '/customer/orders';
+          break;
+
+        case 'tech-support':
+          response = `🔧 Technical Support
+
+Common Issues & Solutions:
+
+Login Problems:
+• Reset password via "Forgot Password"
+• Clear browser cache
+• Try incognito mode
+
+Payment Failures:
+• Check card details
+• Ensure sufficient balance
+• Try different payment method
+
+Website Issues:
+• Refresh page (Ctrl+F5)
+• Update your browser
+• Disable ad blockers
+
+Still need help?
+Create a support ticket with details about the issue, your browser, and device type.`;
+          break;
+
+        case 'refund-help':
+          response = `💰 Refund Process
+
+Automatic Refunds:
+✅ Order cancelled within 2 hours
+✅ Payment failed but amount deducted
+✅ Seller cancels order
+
+Manual Refund Process:
+1. Go to Orders → Select order
+2. Click "Request Refund"
+3. Choose reason and provide details
+4. Upload photos if item is damaged
+5. Submit request
+
+Timeline:
+• Request reviewed: 1-2 business days
+• Refund processed: 5-7 business days
+• Bank credit: 2-5 days (varies by bank)
+
+Would you like me to redirect you to the refund request form?`;
+          break;
+
+        default:
+          response = `I'm here to help! Please select one of the common questions above, or type a specific question in the message box below. I work best when you ask about specific topics like orders, returns, payments, or technical issues.`;
+      }
+
+      const aiMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        text: response,
+        sender: 'ai',
+        timestamp: new Date()
+      };
+      
+      setChatMessages(prev => [...prev, aiMessage]);
+      setIsAiTyping(false);
+
+      // Add redirect option if applicable
+      if (shouldRedirect && redirectUrl) {
+        setTimeout(() => {
+          const redirectMessage: ChatMessage = {
+            id: (Date.now() + 2).toString(),
+            text: `🔗 Would you like me to redirect you there now?`,
+            sender: 'ai',
+            timestamp: new Date()
+          };
+          setChatMessages(prev => [...prev, redirectMessage]);
+          
+          // Auto-redirect after showing the option (optional)
+          setTimeout(() => {
+            const confirmRedirect = window.confirm(`Redirect to ${redirectUrl.split('/').pop()?.replace('-', ' ')} page?`);
+            if (confirmRedirect) {
+              router.push(redirectUrl);
+            }
+          }, 2000);
+        }, 1000);
+      }
+    }, 1500); // Simulate AI thinking time
   };
 
   const callAIHelpAssistant = async (message: string) => {
@@ -285,13 +557,32 @@ export default function CustomerHelpPage() {
     setCurrentMessage('');
     setIsAiTyping(true);
 
+    // Check if this is a specific query that needs detailed response
+    const isSpecificQuery = checkIfSpecificQuery(message);
+
+    if (!isSpecificQuery) {
+      // For general queries, redirect to FAQ buttons
+      setTimeout(() => {
+        const aiResponse: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          text: `I understand you're looking for help with that topic. For quick answers, please use the helpful buttons above, or be more specific about your question.\n\n**Examples of specific questions:**\n• "Where is my order #ORD-123?"\n• "How do I return item XYZ?"\n• "My payment failed for order ABC"\n• "I can't login to my account"\n\n**For general topics:** Use the quick-answer buttons above! 👆`,
+          sender: 'ai',
+          timestamp: new Date()
+        };
+        setChatMessages(prev => [...prev, aiResponse]);
+        setIsAiTyping(false);
+      }, 1000);
+      return;
+    }
+
     try {
+      // For specific queries, try API first, then fallback to intelligent response
       const response = await fetch('/api/support/ai', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message })
+        body: JSON.stringify({ message, isSpecificQuery: true })
       });
 
       if (response.ok) {
@@ -309,21 +600,23 @@ export default function CustomerHelpPage() {
           setTimeout(() => {
             const suggestionMessage: ChatMessage = {
               id: (Date.now() + 2).toString(),
-              text: "Here are some related topics you might want to explore:\n• " + data.response.suggestions.join('\n• '),
+              text: "**Related topics you might find helpful:**\n• " + data.response.suggestions.join('\n• '),
               sender: 'ai',
               timestamp: new Date()
             };
             setChatMessages(prev => [...prev, suggestionMessage]);
-          }, 1000);
+          }, 1500);
         }
       } else {
-        throw new Error('Failed to get AI response');
+        throw new Error('API not available');
       }
     } catch (error) {
       console.error('AI assistant error:', error);
+      // Fallback to intelligent local response for specific queries
+      const intelligentResponse = getIntelligentResponse(message);
       const errorResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        text: "I'm sorry, I'm having trouble connecting right now. Please try again or contact our human support team for immediate assistance.",
+        text: intelligentResponse,
         sender: 'ai',
         timestamp: new Date()
       };
@@ -333,22 +626,64 @@ export default function CustomerHelpPage() {
     }
   };
 
-  const getAIResponse = (message: string): string => {
+  // Check if the query is specific enough to warrant a detailed response
+  const checkIfSpecificQuery = (message: string): boolean => {
     const lowerMessage = message.toLowerCase();
     
-    if (lowerMessage.includes('order') && lowerMessage.includes('track')) {
-      return "I can help you track your order! Please go to the 'Orders' section in your dashboard, or I can direct you there. Do you have your order number handy?";
-    } else if (lowerMessage.includes('return') || lowerMessage.includes('refund')) {
-      return "Our return policy allows returns within 30 days of delivery. Items must be in original condition. Would you like me to help you start a return process or connect you with our support team?";
-    } else if (lowerMessage.includes('payment') || lowerMessage.includes('charge')) {
-      return "For payment-related issues, I recommend checking your order details first. If there's a discrepancy, I can help you contact our billing support team directly.";
-    } else if (lowerMessage.includes('artisan') || lowerMessage.includes('seller')) {
-      return "You can contact artisans directly through their product pages or order details. Each artisan has their own messaging system for direct communication.";
-    } else if (lowerMessage.includes('shipping') || lowerMessage.includes('delivery')) {
-      return "Standard shipping takes 5-7 business days, express takes 2-3 days. Custom items may take longer. Would you like to check a specific order's shipping status?";
-    } else {
-      return "I understand you need help with that. Let me connect you with the right resources. You can also browse our FAQ section below or contact our human support team for more detailed assistance.";
+    // Look for specific indicators
+    const specificIndicators = [
+      // Order-related specifics
+      /order\s*#?\s*[a-z0-9\-]+/i,
+      /tracking\s*(number|id|code)/i,
+      /\b(ord|ref|txn)\-\d+/i,
+      
+      // Technical issues
+      /can't|cannot|won't|doesn't work|not working|error|failed|problem with/i,
+      /login|password|reset|account|checkout|payment/i,
+      
+      // Specific actions
+      /(how do i|how can i|where do i|where can i)\s+\w+/i,
+      /\b(refund|return|cancel|modify|change|update)\s+.{10,}/i,
+      
+      // Questions with details
+      /\?\s*.{15,}/i, // Question with substantial detail
+      /\b(my|mine|i have|i need|i want)\s+.{10,}/i,
+    ];
+
+    return specificIndicators.some(pattern => pattern.test(message)) || message.length > 20;
+  };
+
+  // Intelligent response for specific queries
+  const getIntelligentResponse = (message: string): string => {
+    const lowerMessage = message.toLowerCase();
+    
+    // Order tracking queries
+    if (/order.*#.*\w+/i.test(message) || /track.*order/i.test(message)) {
+      return `🔍 **Order Tracking Help**\n\nI can see you're asking about a specific order. Here's how to track it:\n\n**Option 1: Dashboard**\n• Go to **Orders** section in your dashboard\n• Search for your order number\n• View real-time tracking\n\n**Option 2: Direct Tracking**\n• Use the tracking number sent via SMS/email\n• Check with the delivery partner directly\n\n**Need immediate help?** If your order is delayed or there's an issue, please contact our support team with your order details.\n\n🔗 Should I redirect you to your Orders page?`;
     }
+    
+    // Login/Account issues
+    if (/login|password|account|sign.*in/i.test(message)) {
+      return `🔐 **Account & Login Help**\n\n**Reset Password:**\n1. Go to login page\n2. Click "Forgot Password?"\n3. Enter your registered email\n4. Check email for reset link\n\n**Still can't login?**\n• Clear browser cache and cookies\n• Try incognito/private mode\n• Check if Caps Lock is on\n• Ensure you're using the correct email\n\n**Account locked?** Contact support immediately - we'll help you regain access within minutes.`;
+    }
+    
+    // Payment issues
+    if (/payment|pay|charged|money|refund|billing/i.test(message)) {
+      return `💳 **Payment Issue Support**\n\nI understand you're having a payment-related concern. Here's what you can do:\n\n**Payment Failed:**\n• Try a different payment method\n• Check card details and expiry\n• Ensure sufficient balance\n\n**Unexpected Charge:**\n• Check your order history\n• Look for confirmation emails\n• Contact support with transaction details\n\n**Refund Status:**\n• Check Orders → Refunds section\n• Refunds take 5-7 business days\n\n**Immediate Help:** For urgent payment issues, please contact our support team directly.`;
+    }
+    
+    // Return/Refund queries
+    if (/return|refund|cancel|send.*back/i.test(message)) {
+      return `↩️ **Return & Refund Assistance**\n\nI can help you with returns! Here's the process:\n\n**Easy Returns:**\n1. Go to **Orders** → Select item\n2. Click **"Return Item"**\n3. Choose reason & upload photos\n4. Get instant prepaid return label\n5. Pack & schedule pickup\n\n**Refund Timeline:**\n• Return approved: 1-2 days after we receive item\n• Money refunded: 5-7 business days\n\n**Custom Items:** Contact the artisan directly first - they may offer exchanges or partial refunds.\n\n🔗 Want me to guide you to start a return?`;
+    }
+    
+    // Technical/Website issues
+    if (/not working|error|bug|problem|issue|can't|cannot|won't|doesn't/i.test(message)) {
+      return `🔧 **Technical Support**\n\nI see you're experiencing a technical issue. Let's try these solutions:\n\n**Quick Fixes:**\n1. **Refresh the page** (Ctrl+F5 or Cmd+R)\n2. **Clear browser cache** and cookies\n3. **Try incognito mode**\n4. **Disable ad blockers** temporarily\n5. **Update your browser** to latest version\n\n**Still not working?**\n• Try a different browser or device\n• Check your internet connection\n• Restart your device\n\n**Need more help?** Please create a support ticket with:\n• Description of the issue\n• Browser & device info\n• Screenshots if possible\n\nOur tech team will resolve it quickly!`;
+    }
+    
+    // Default for other specific queries
+    return `🤖 **Personalized Help**\n\nI can see you have a specific question, and I want to make sure you get the best help possible!\n\n**For immediate assistance:**\n• **Use the quick-answer buttons above** for common topics\n• **Create a support ticket** for detailed help\n• **Call our support line** for urgent issues\n\n**Or try rephrasing your question** to include:\n• Specific order numbers\n• Error messages you're seeing\n• What you were trying to do when the issue occurred\n\nThis helps me provide more targeted assistance! 😊`;
   };
 
   const handleSendMessage = () => {
@@ -471,36 +806,104 @@ export default function CustomerHelpPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2">
-            {/* AI Assistant Section */}
+            {/* AI Assistant Section - Professional FAQ Style */}
             {activeSection === 'ai' && (
-              <div className="bg-slate-800 rounded-lg border border-slate-700 h-[600px] flex flex-col">
-                <div className="p-4 border-b border-slate-700">
+              <div className="bg-slate-800 rounded-lg border border-slate-700">
+                <div className="p-6 border-b border-slate-700">
                   <div className="flex items-center space-x-3">
-                    <div className="h-10 w-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
-                      <Bot className="h-5 w-5 text-white" />
+                    <div className="h-12 w-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
+                      <Bot className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white">AI Shopping Assistant</h3>
-                      <p className="text-slate-400 text-sm">Ask me anything about your orders, products, or policies</p>
+                      <h3 className="text-xl font-bold text-white">AI Shopping Assistant</h3>
+                      <p className="text-slate-400 text-sm">Click on common questions below or ask something specific</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {/* Quick FAQ Buttons */}
+                <div className="p-6 border-b border-slate-700 bg-slate-750">
+                  <h4 className="text-white font-medium mb-4">💡 Common Questions - Click to get instant answers:</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {[
+                      { 
+                        q: "How do I track my order?", 
+                        action: "track-order",
+                        icon: "📦",
+                        redirect: "/customer/orders"
+                      },
+                      { 
+                        q: "What's your return policy?", 
+                        action: "return-policy",
+                        icon: "↩️",
+                        redirect: null
+                      },
+                      { 
+                        q: "How to contact an artisan?", 
+                        action: "contact-artisan",
+                        icon: "👨‍🎨",
+                        redirect: "/customer/products"
+                      },
+                      { 
+                        q: "Payment methods accepted?", 
+                        action: "payment-methods",
+                        icon: "💳",
+                        redirect: null
+                      },
+                      { 
+                        q: "How long does shipping take?", 
+                        action: "shipping-time",
+                        icon: "🚚",
+                        redirect: null
+                      },
+                      { 
+                        q: "Can I modify my order?", 
+                        action: "modify-order",
+                        icon: "✏️",
+                        redirect: "/customer/orders"
+                      },
+                      { 
+                        q: "Need technical support", 
+                        action: "tech-support",
+                        icon: "🔧",
+                        redirect: null
+                      },
+                      { 
+                        q: "Request a refund", 
+                        action: "refund-help",
+                        icon: "💰",
+                        redirect: null
+                      }
+                    ].map((item, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleQuickQuestion(item.action, item.q, item.redirect)}
+                        className="flex items-center space-x-3 p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors text-left group border border-slate-600 hover:border-orange-500/30"
+                      >
+                        <span className="text-lg">{item.icon}</span>
+                        <span className="text-white text-sm group-hover:text-orange-300">{item.q}</span>
+                        <ExternalLink className="h-4 w-4 text-slate-400 group-hover:text-orange-400 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Chat Messages Area */}
+                <div className="h-[400px] overflow-y-auto p-4 space-y-4">
                   {chatMessages.map((message) => (
                     <div
                       key={message.id}
                       className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                        className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
                           message.sender === 'user'
                             ? 'bg-orange-500 text-white'
-                            : 'bg-slate-700 text-slate-100'
+                            : 'bg-slate-700 text-slate-100 border border-slate-600'
                         }`}
                       >
-                        <p className="text-sm">{message.text}</p>
-                        <p className="text-xs opacity-70 mt-1">
+                        <p className="text-sm leading-relaxed">{message.text}</p>
+                        <p className="text-xs opacity-70 mt-2">
                           {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
@@ -509,14 +912,14 @@ export default function CustomerHelpPage() {
                   
                   {isAiTyping && (
                     <div className="flex justify-start">
-                      <div className="bg-slate-700 text-slate-100 max-w-xs lg:max-w-md px-4 py-2 rounded-lg">
-                        <div className="flex items-center space-x-1">
+                      <div className="bg-slate-700 border border-slate-600 text-slate-100 max-w-xs lg:max-w-md px-4 py-3 rounded-lg">
+                        <div className="flex items-center space-x-2">
                           <div className="flex space-x-1">
-                            <div className="h-2 w-2 bg-slate-400 rounded-full animate-bounce"></div>
-                            <div className="h-2 w-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                            <div className="h-2 w-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                            <div className="h-2 w-2 bg-orange-400 rounded-full animate-bounce"></div>
+                            <div className="h-2 w-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                            <div className="h-2 w-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                           </div>
-                          <span className="text-xs text-slate-400 ml-2">AI is typing...</span>
+                          <span className="text-xs text-slate-400 ml-2">AI is thinking...</span>
                         </div>
                       </div>
                     </div>
@@ -524,7 +927,13 @@ export default function CustomerHelpPage() {
                   <div ref={chatEndRef} />
                 </div>
 
-                <div className="p-4 border-t border-slate-700">
+                {/* Input Section */}
+                <div className="p-4 border-t border-slate-700 bg-slate-750">
+                  <div className="mb-3">
+                    <p className="text-xs text-slate-400 text-center">
+                      💬 For specific questions, type your message below. For quick help, use the buttons above.
+                    </p>
+                  </div>
                   <div className="flex items-center space-x-3">
                     <div className="flex-1">
                       <input
@@ -532,14 +941,15 @@ export default function CustomerHelpPage() {
                         value={currentMessage}
                         onChange={(e) => setCurrentMessage(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                        placeholder="Type your question here..."
-                        className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500"
+                        placeholder="Ask a specific question... (e.g., 'Where is my order #ORD-123?')"
+                        className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2.5 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                       />
                     </div>
                     <button
                       onClick={handleSendMessage}
                       disabled={!currentMessage.trim() || isAiTyping}
-                      className="bg-orange-500 hover:bg-orange-600 disabled:bg-slate-600 text-white p-2 rounded-lg transition-colors"
+                      className="bg-orange-500 hover:bg-orange-600 disabled:bg-slate-600 text-white p-2.5 rounded-lg transition-colors min-w-[44px] flex items-center justify-center"
+                      title="Send message"
                     >
                       <Send className="h-5 w-5" />
                     </button>
@@ -989,7 +1399,10 @@ export default function CustomerHelpPage() {
                           </div>
                           <div className="flex items-center justify-between text-sm text-slate-400">
                             <span>Created: {new Date(ticket.date).toLocaleDateString()}</span>
-                            <button className="text-orange-500 hover:text-orange-400 flex items-center">
+                            <button 
+                              onClick={() => handleViewTicketDetails(ticket.id)}
+                              className="text-orange-500 hover:text-orange-400 flex items-center transition-colors"
+                            >
                               View Details
                               <ExternalLink className="h-3 w-3 ml-1" />
                             </button>

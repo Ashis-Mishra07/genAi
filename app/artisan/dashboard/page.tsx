@@ -1,24 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import {
-  Package,
-  Plus,
-  Eye,
-  Edit,
-  Trash2,
-  Heart,
-  DollarSign,
-  Users,
-  TrendingUp,
-  X,
-  Calendar,
-  Tag,
-  MapPin,
-} from "lucide-react";
 import { useTranslation } from "@/lib/i18n/hooks";
-import { useLanguage } from "@/lib/language/LanguageContext";
+import {
+    Calendar,
+    DollarSign,
+    Edit,
+    Eye,
+    Heart,
+    Package,
+    Plus,
+    Tag,
+    Trash2,
+    TrendingUp,
+    Users,
+    X
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface Product {
   id: string;
@@ -40,7 +38,7 @@ interface Stats {
 
 export default function ArtisanDashboard() {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [user, setUser] = useState<any>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -186,7 +184,7 @@ export default function ArtisanDashboard() {
   };
 
   const handleDeleteProduct = async (productId: string) => {
-    if (confirm("Are you sure you want to delete this product?")) {
+    if (confirm(t('confirmDeleteProduct'))) {
       try {
         const response = await fetch(`/api/products/${productId}`, {
           method: "DELETE",
@@ -437,7 +435,7 @@ export default function ArtisanDashboard() {
           <div className="bg-slate-800 border border-slate-700 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-slate-700 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-white">Product Details</h2>
+              <h2 className="text-xl font-bold text-white">{t('productDetails')}</h2>
               <button
                 onClick={() => setShowProductModal(false)}
                 className="p-2 text-slate-400 hover:text-white transition-colors">
@@ -477,7 +475,7 @@ export default function ArtisanDashboard() {
                   <div>
                     <h4 className="text-lg font-semibold text-white mb-2 flex items-center">
                       <Package className="h-5 w-5 mr-2" />
-                      Description
+                      {t('description')}
                     </h4>
                     <p className="text-slate-300 leading-relaxed">
                       {selectedProduct.description}
@@ -490,7 +488,7 @@ export default function ArtisanDashboard() {
                     <div className="bg-slate-700 border border-slate-600 rounded-lg p-4">
                       <div className="flex items-center text-slate-300">
                         <Tag className="h-5 w-5 mr-2 text-blue-400" />
-                        <span className="font-medium">Category</span>
+                        <span className="font-medium">{t('category')}</span>
                       </div>
                       <p className="text-white mt-1">{selectedProduct.category}</p>
                     </div>
@@ -499,7 +497,7 @@ export default function ArtisanDashboard() {
                   <div className="bg-slate-700 border border-slate-600 rounded-lg p-4">
                     <div className="flex items-center text-slate-300">
                       <Calendar className="h-5 w-5 mr-2 text-green-400" />
-                      <span className="font-medium">Created</span>
+                      <span className="font-medium">{t('createdAt')}</span>
                     </div>
                     <p className="text-white mt-1">
                       {new Date(selectedProduct.createdAt).toLocaleDateString()}
@@ -509,7 +507,7 @@ export default function ArtisanDashboard() {
                   <div className="bg-slate-700 border border-slate-600 rounded-lg p-4">
                     <div className="flex items-center text-slate-300">
                       <Heart className="h-5 w-5 mr-2 text-purple-400" />
-                      <span className="font-medium">Status</span>
+                      <span className="font-medium">{t('status')}</span>
                     </div>
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${
@@ -517,7 +515,7 @@ export default function ArtisanDashboard() {
                           ? "bg-green-500/20 text-green-400 border border-green-500/30"
                           : "bg-slate-500/20 text-slate-400 border border-slate-500/30"
                       }`}>
-                      {selectedProduct.isActive ? 'Active' : 'Inactive'}
+                      {selectedProduct.isActive ? t('active') : t('inactive')}
                     </span>
                   </div>
 
@@ -538,7 +536,7 @@ export default function ArtisanDashboard() {
                 <button
                   onClick={() => setShowProductModal(false)}
                   className="px-6 py-2 text-slate-400 border border-slate-600 rounded-lg hover:text-white hover:border-slate-500 transition-colors">
-                  Close
+                  {t('cancel')}
                 </button>
                 
                 <div className="flex space-x-3">
@@ -549,7 +547,7 @@ export default function ArtisanDashboard() {
                     }}
                     className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center">
                     <Eye className="h-4 w-4 mr-2" />
-                    View Live
+                    {t('viewLive')}
                   </button>
                   
                   <button
@@ -559,7 +557,7 @@ export default function ArtisanDashboard() {
                     }}
                     className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors flex items-center">
                     <Edit className="h-4 w-4 mr-2" />
-                    Edit Product
+                    {t('editProduct')}
                   </button>
                 </div>
               </div>

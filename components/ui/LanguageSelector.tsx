@@ -1,14 +1,42 @@
 "use client";
 
+import { Locale } from '@/lib/i18n/config';
+import { useLanguageContext } from '@/lib/i18n/provider';
+import { ChevronDown, Globe } from 'lucide-react';
 import { useState } from 'react';
-import { useLanguage, languages } from '@/lib/language/LanguageContext';
-import { Globe, ChevronDown } from 'lucide-react';
+
+// Define available languages with their native names
+const languages: { code: Locale; name: string; nativeName: string }[] = [
+  { code: 'en', name: 'English', nativeName: 'English' },
+  { code: 'hi', name: 'Hindi', nativeName: 'हिंदी' },
+  { code: 'bn', name: 'Bengali', nativeName: 'বাংলা' },
+  { code: 'te', name: 'Telugu', nativeName: 'తెలుగు' },
+  { code: 'ta', name: 'Tamil', nativeName: 'தமிழ்' },
+  { code: 'ml', name: 'Malayalam', nativeName: 'മലയാളം' },
+  { code: 'kn', name: 'Kannada', nativeName: 'ಕನ್ನಡ' },
+  { code: 'gu', name: 'Gujarati', nativeName: 'ગુજરાતી' },
+  { code: 'mr', name: 'Marathi', nativeName: 'मराठी' },
+  { code: 'or', name: 'Odia', nativeName: 'ଓଡ଼ିଆ' },
+];
 
 export default function LanguageSelector() {
-  const { language, setLanguage, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
-
-  const currentLanguage = languages.find(lang => lang.code === language);
+  
+  // Add error handling for context
+  let contextData;
+  try {
+    contextData = useLanguageContext();
+  } catch (error) {
+    console.warn('LanguageSelector: Language context not available', error);
+    // Fallback to default values when context is not available
+    contextData = {
+      currentLocale: 'en' as const,
+      changeLanguage: () => console.warn('Language change not available - context not loaded')
+    };
+  }
+  
+  const { currentLocale, changeLanguage } = contextData;
+  const currentLanguage = languages.find(lang => lang.code === currentLocale);
 
   return (
     <div className="relative">
@@ -28,11 +56,11 @@ export default function LanguageSelector() {
               <button
                 key={lang.code}
                 onClick={() => {
-                  setLanguage(lang.code);
+                  changeLanguage(lang.code);
                   setIsOpen(false);
                 }}
                 className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-700 transition-colors ${
-                  language === lang.code 
+                  currentLocale === lang.code 
                     ? 'text-orange-400 bg-slate-700' 
                     : 'text-white'
                 }`}

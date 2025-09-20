@@ -2,6 +2,7 @@ export const translations = {
   en: {
     // Header & Navigation
     artisanStudio: 'Artisan Studio',
+    creativePortal: 'Creative Portal',
     welcomeBack: 'Welcome back',
     dashboard: 'Dashboard',
     products: 'Products',
@@ -9,6 +10,8 @@ export const translations = {
     profile: 'Profile',
     settings: 'Settings',
     logout: 'Logout',
+    notifications: 'Notifications',
+    supportDashboard: 'Support Dashboard',
     
     // Stats Cards
     totalProducts: 'Total Products',
@@ -64,14 +67,18 @@ export const translations = {
     cancel: 'Cancel',
     confirm: 'Confirm',
     retry: 'Retry',
+    confirmDeleteProduct: 'Are you sure you want to delete this product?',
     
     // Form Labels
     productName: 'Product Name',
     productDescription: 'Product Description',
+    productDetails: 'Product Details',
+    description: 'Description',
     price: 'Price',
     category: 'Category',
     status: 'Status',
     image: 'Image',
+    viewLive: 'View Live',
     
     // Categories
     handmade: 'Handmade',
@@ -126,6 +133,7 @@ export const translations = {
   hi: {
     // Header & Navigation
     artisanStudio: 'कारीगर स्टूडियो',
+    creativePortal: 'रचनात्मक पोर्टल',
     welcomeBack: 'वापस स्वागत है',
     dashboard: 'डैशबोर्ड',
     products: 'उत्पाद',
@@ -133,6 +141,8 @@ export const translations = {
     profile: 'प्रोफाइल',
     settings: 'सेटिंग्स',
     logout: 'लॉग आउट',
+    notifications: 'सूचनाएं',
+    supportDashboard: 'सहायता डैशबोर्ड',
     
     // Stats Cards
     totalProducts: 'कुल उत्पाद',
@@ -188,14 +198,18 @@ export const translations = {
     cancel: 'रद्द करें',
     confirm: 'पुष्टि करें',
     retry: 'पुनः प्रयास करें',
+    confirmDeleteProduct: 'क्या आप वाकई इस उत्पाद को हटाना चाहते हैं?',
     
     // Form Labels
     productName: 'उत्पाद का नाम',
     productDescription: 'उत्पाद विवरण',
+    productDetails: 'उत्पाद विवरण',
+    description: 'विवरण',
     price: 'कीमत',
     category: 'श्रेणी',
     status: 'स्थिति',
     image: 'छवि',
+    viewLive: 'लाइव देखें',
     
     // Categories
     handmade: 'हस्तनिर्मित',
@@ -250,6 +264,7 @@ export const translations = {
   bn: {
     // Header & Navigation
     artisanStudio: 'কারিগর স্টুডিও',
+    creativePortal: 'সৃজনশীল পোর্টাল',
     welcomeBack: 'ফিরে এসেছেন স্বাগতম',
     dashboard: 'ড্যাশবোর্ড',
     products: 'পণ্য',
@@ -257,6 +272,8 @@ export const translations = {
     profile: 'প্রোফাইল',
     settings: 'সেটিংস',
     logout: 'লগ আউট',
+    notifications: 'বিজ্ঞপ্তি',
+    supportDashboard: 'সহায়তা ড্যাশবোর্ড',
     
     // Stats Cards
     totalProducts: 'মোট পণ্য',
@@ -316,10 +333,13 @@ export const translations = {
     // Form Labels
     productName: 'পণ্যের নাম',
     productDescription: 'পণ্যের বিবরণ',
+    productDetails: 'পণ্যের বিবরণ',
+    description: 'বিবরণ',
     price: 'দাম',
     category: 'শ্রেণী',
     status: 'অবস্থা',
     image: 'ছবি',
+    viewLive: 'লাইভ দেখুন',
     
     // Categories
     handmade: 'হস্তনির্মিত',
