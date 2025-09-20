@@ -6,6 +6,7 @@ import {
   updateProduct, 
   deleteProduct 
 } from '../../../../lib/db/products-neon';
+import { getCache, setCache, deleteCache } from '../../../../lib/redis';
 
 export async function GET(
   request: NextRequest,
@@ -20,6 +21,21 @@ export async function GET(
       user = await getCurrentUser(request);
     } catch {
       // User not authenticated, treat as public access
+    }
+
+    // Create cache key based on user type and product id
+    const userType = user ? user.role : 'PUBLIC';
+    const cacheKey = `product:${id}:${userType}`;
+    
+    // Try to get from cache first
+    try {
+      const cachedResult = await getCache(cacheKey);
+      if (cachedResult) {
+        console.log(`Product Detail: Cache hit for key: ${cacheKey}`);
+        return NextResponse.json(cachedResult);
+      }
+    } catch (cacheError) {
+      console.log('Product Detail: Cache retrieval failed, continuing with database query');
     }
 
     let product;
@@ -47,10 +63,47 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({
+    const responseData = {
       success: true,
       product: product
-    });
+    };
+
+    // Create a lightweight version for caching (exclude heavy fields)
+    const lightProduct = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      category: product.category,
+      isActive: product.isActive,
+      userId: product.userId,
+      createdAt: product.createdAt,
+      updatedAt: product.updatedAt,
+      // Exclude: imageUrl, description, story, artisan info
+    };
+
+    const lightResponseData = {
+      success: true,
+      product: lightProduct,
+      lightweight: true
+    };
+
+    // Cache the lightweight version for 10 minutes
+    try {
+      const dataSize = Buffer.byteLength(JSON.stringify(lightResponseData), 'utf8');
+      console.log(`Product Detail: Light data size: ${dataSize} bytes`);
+      
+      if (dataSize < 100000) { // 100KB limit for individual products
+        await setCache(cacheKey, lightResponseData, 600); // 10 minutes
+        console.log(`Product Detail: Cached lightweight result for key: ${cacheKey}`);
+      } else {
+        console.log(`Product Detail: Even lightweight data too large, skipping cache`);
+      }
+    } catch (cacheError) {
+      console.log('Product Detail: Failed to cache result, continuing without cache');
+    }
+
+    // Return full data for now (frontend can handle progressive loading)
+    return NextResponse.json(responseData);
   } catch (error: any) {
     console.error('Get product error:', error);
     return NextResponse.json(
@@ -89,6 +142,22 @@ export async function PUT(
         { error: 'Product not found or you do not have permission to update it' },
         { status: 404 }
       );
+    }
+
+    // Invalidate cache for this product after update
+    try {
+      const cacheKeys = [
+        `product:${id}:ARTISAN`,
+        `product:${id}:CUSTOMER`, 
+        `product:${id}:PUBLIC`
+      ];
+      
+      for (const key of cacheKeys) {
+        await deleteCache(key);
+      }
+      console.log(`Product Update: Invalidated cache for product ${id}`);
+    } catch (cacheError) {
+      console.log('Product Update: Cache invalidation failed, but update succeeded');
     }
 
     return NextResponse.json({
@@ -132,6 +201,22 @@ export async function DELETE(
         { error: 'Product not found or you do not have permission to delete it' },
         { status: 404 }
       );
+    }
+
+    // Invalidate cache for this product after deletion
+    try {
+      const cacheKeys = [
+        `product:${id}:ARTISAN`,
+        `product:${id}:CUSTOMER`, 
+        `product:${id}:PUBLIC`
+      ];
+      
+      for (const key of cacheKeys) {
+        await deleteCache(key);
+      }
+      console.log(`Product Delete: Invalidated cache for product ${id}`);
+    } catch (cacheError) {
+      console.log('Product Delete: Cache invalidation failed, but deletion succeeded');
     }
 
     return NextResponse.json({

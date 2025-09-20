@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ContentGeneratorTool } from '@/lib/mcp-tools/content-generator';
+import { getCache, setCache } from '@/lib/redis';
 
 const contentGenerator = new ContentGeneratorTool();
 
@@ -33,11 +34,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Create cache key based on content type and input hash
+    const inputString = JSON.stringify({ type: finalType, input: finalInput, context });
+    const inputHash = Buffer.from(inputString).toString('base64').substring(0, 50);
+    const cacheKey = `content:${finalType}:${inputHash}`;
+    
+    // Try to get from cache first (content generation can be expensive)
+    try {
+      const cachedResult = await getCache(cacheKey);
+      if (cachedResult) {
+        console.log(`Content Generation: Cache hit for key: ${cacheKey}`);
+        return NextResponse.json(cachedResult);
+      }
+    } catch (cacheError) {
+      console.log('Content Generation: Cache retrieval failed, continuing with fresh generation');
+    }
+
     const result = await contentGenerator.execute({ 
       type: finalType, 
       input: finalInput, 
       context 
     });
+    
+    // Cache the result for 1 hour (generated content is relatively stable)
+    try {
+      await setCache(cacheKey, result, 3600); // 1 hour
+      console.log(`Content Generation: Cached result for key: ${cacheKey}`);
+    } catch (cacheError) {
+      console.log('Content Generation: Failed to cache result, continuing without cache');
+    }
     
     return NextResponse.json(result);
   } catch (error) {

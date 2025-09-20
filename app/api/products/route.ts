@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '../../../lib/utils/jwt';
 import { 
   getProductsByUserId, 
-  getAllActiveProducts, 
   getAllActiveProductsWithArtisans,
   getFeaturedProducts,
   getAllProducts,
@@ -10,6 +9,7 @@ import {
   getProductStats,
   searchProducts 
 } from '../../../lib/db/products-neon';
+import { cache, setCache, getCache, deleteCache } from '../../../lib/redis';
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,8 +20,43 @@ export async function GET(request: NextRequest) {
     const featured = searchParams.get('featured');
     const category = searchParams.get('category');
     
+    // Create cache key based on parameters
+    const cacheKey = `products:${featured ? 'featured' : 'all'}:${search || 'nosearch'}:${category || 'nocategory'}:${limit}:${offset}`;
+    
+    console.log(`Products: Generated cache key: ${cacheKey}`);
+    
+    // Cache check for non-search requests
+    if (!search) {
+      const fullCacheData = await getCache(cacheKey).catch(() => null);
+      if (fullCacheData && !fullCacheData.isMinimal) {
+        console.log(`Products: Cache hit - serving full data from cache for key: ${cacheKey}`);
+        const response = NextResponse.json(fullCacheData);
+        response.headers.set('X-Cache-Status', 'HIT-FULL');
+        return response;
+      }
+      
+      const minimalCacheData = await getCache(cacheKey + ':minimal').catch(() => null);
+      if (minimalCacheData && minimalCacheData.isMinimal) {
+        console.log(`Products: Serving minimal cached data for key: ${cacheKey}`);
+        const response = NextResponse.json(minimalCacheData);
+        response.headers.set('X-Cache-Status', 'HIT-MINIMAL');
+        return response;
+      }
+      
+      console.log(`Products: Cache miss for key: ${cacheKey}`);
+    } else {
+      console.log(`Products: Skipping cache check - search query present`);
+    }
+
+    console.log(`Products: Fetching from database for key: ${cacheKey}`);
+    
     // Get current user (optional for public endpoints)
-    const user = await getCurrentUser(request);
+    let user = null;
+    try {
+      user = await getCurrentUser(request);
+    } catch {
+      // User not authenticated, continue as public user
+    }
     
     let products;
     let stats = null;
@@ -73,12 +108,61 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({
+    const responseData = {
       success: true,
       products: products,
       stats: stats,
       count: products.length
-    });
+    };
+
+    // Smart caching strategy - try to cache full data if size is reasonable
+    if (!search && products.length <= 50) {
+      try {
+        // First, try to cache the full response
+        const fullDataSize = Buffer.byteLength(JSON.stringify(responseData), 'utf8');
+        console.log(`Products: Full response size: ${fullDataSize} bytes`);
+
+        if (fullDataSize < 800000) { // 800KB limit for full data
+          await setCache(cacheKey, responseData, 300); // 5 minutes
+          console.log(`Products: Cached full data for key: ${cacheKey}, size: ${fullDataSize} bytes`);
+        } else {
+          // If full data is too large, create and cache a minimal version
+          console.log(`Products: Full data too large (${fullDataSize} bytes), creating minimal cache`);
+          
+          const minimalProducts = products.map(product => ({
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            category: product.category,
+            isActive: product.isActive,
+            // Include small image URL if it exists
+            imageUrl: product.imageUrl && product.imageUrl.length < 200 ? product.imageUrl : null,
+          }));
+
+          const minimalResponseData = {
+            success: true,
+            products: minimalProducts,
+            stats: stats,
+            count: products.length,
+            isMinimal: true // Flag to indicate minimal data
+          };
+
+          const minimalDataSize = Buffer.byteLength(JSON.stringify(minimalResponseData), 'utf8');
+          console.log(`Products: Minimal response size: ${minimalDataSize} bytes`);
+
+          if (minimalDataSize < 500000) { // 500KB limit for minimal data
+            await setCache(cacheKey + ':minimal', minimalResponseData, 180); // 3 minutes for minimal
+            console.log(`Products: Cached minimal data for key: ${cacheKey}:minimal`);
+          }
+        }
+      } catch (error) {
+        console.log(`Products: Failed to cache result, continuing without cache:`, error);
+      }
+    } else {
+      console.log(`Products: Skipping cache - search: ${!!search}, count: ${products.length}`);
+    }
+
+    return NextResponse.json(responseData);
   } catch (error: any) {
     console.error('Products API error:', error);
     return NextResponse.json(
@@ -140,6 +224,17 @@ export async function POST(request: NextRequest) {
     productData.userId = targetUserId;
 
     const product = await createProduct(productData);
+
+    // Invalidate all product-related caches after creating a new product
+    try {
+      const productCacheKeys = await cache.getKeys('products:*');
+      for (const key of productCacheKeys) {
+        await deleteCache(key);
+      }
+      console.log('Products: Invalidated all product caches after creating new product');
+    } catch (error) {
+      console.log('Products: Failed to invalidate cache, continuing without cache cleanup:', error);
+    }
 
     return NextResponse.json({
       success: true,

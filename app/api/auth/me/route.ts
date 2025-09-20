@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get full user details
-    const fullUser = await getUserById(user.id);
+    const fullUser = await getUserById(user.userId);
     
     if (!fullUser || !fullUser.isActive) {
       return NextResponse.json(

@@ -8,9 +8,21 @@ const sql = neon(process.env.DATABASE_URL!);
 export async function GET(request: NextRequest) {
   try {
     const token = request.headers.get("authorization")?.replace("Bearer ", "");
+    console.log('GET /api/admin-chat - Raw authorization header:', request.headers.get("authorization"));
+    console.log('GET /api/admin-chat - Extracted token:', token ? `${token.substring(0, 20)}...` : 'null');
+    
     if (!token) {
       console.log('GET /api/admin-chat - No token provided');
       return NextResponse.json({ error: "No token provided" }, { status: 401 });
+    }
+
+    // Check if token looks like a valid JWT (has 3 parts separated by dots)
+    const tokenParts = token.split('.');
+    console.log('GET /api/admin-chat - Token parts count:', tokenParts.length);
+    
+    if (tokenParts.length !== 3) {
+      console.log('GET /api/admin-chat - Malformed token: incorrect parts count');
+      return NextResponse.json({ error: "Malformed token" }, { status: 401 });
     }
 
     const decoded = verifyAccessToken(token);

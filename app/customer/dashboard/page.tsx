@@ -13,6 +13,7 @@ import {
   Bell,
   Grid3X3,
   ChevronRight,
+  LogOut,
 } from "lucide-react";
 
 interface Product {
@@ -52,6 +53,7 @@ export default function CustomerDashboardPage() {
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -147,6 +149,45 @@ export default function CustomerDashboardPage() {
     }
   };
 
+  const handleSignOut = async () => {
+    if (isLoggingOut) return;
+    
+    setIsLoggingOut(true);
+    try {
+      const token = localStorage.getItem('accessToken');
+      const refreshToken = localStorage.getItem('refreshToken');
+      
+      // Call logout API
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          refreshToken,
+          logoutAll: false
+        })
+      });
+
+      // Clear local storage regardless of API response
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      
+      // Redirect to home page
+      router.push('/');
+      
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Still clear local storage and redirect on error
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      router.push('/');
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -212,6 +253,23 @@ export default function CustomerDashboardPage() {
                 className="flex items-center space-x-2 p-2 text-gray-600 hover:text-emerald-600"
               >
                 <User className="h-6 w-6" />
+              </button>
+
+              <button
+                onClick={handleSignOut}
+                disabled={isLoggingOut}
+                className={`p-2 transition-colors ${
+                  isLoggingOut
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-gray-600 hover:text-red-600"
+                }`}
+                title="Sign Out"
+              >
+                {isLoggingOut ? (
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
+                ) : (
+                  <LogOut className="h-6 w-6" />
+                )}
               </button>
             </div>
           </div>

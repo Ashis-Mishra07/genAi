@@ -108,124 +108,106 @@ export default function OrdersPage() {
   };
 
   useEffect(() => {
-    checkAuthAndLoadOrders();
-  }, []);
-
-  const checkAuthAndLoadOrders = async () => {
-    try {
-      const token = localStorage.getItem("accessToken");
+    // Check authentication on mount
+    const checkAuth = () => {
+      const token = localStorage.getItem("accessToken") || 
+                   localStorage.getItem("authToken") || 
+                   localStorage.getItem("auth_token");
       
       if (!token) {
-        console.error("No access token found");
-        window.location.href = "/auth/admin/signin";
-        return;
+        console.warn('No authentication token found on mount');
+        // You can choose to redirect here or let loadOrders handle it
       }
-
-      // First check if user is authenticated
-      const authResponse = await fetch("/api/auth/me", {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      console.log("Auth check response status:", authResponse.status);
-
-      if (authResponse.status === 401) {
-        console.error("Authentication failed - redirecting to login");
-        localStorage.removeItem("accessToken");
-        window.location.href = "/auth/admin/signin";
-        return;
-      }
-
-      if (authResponse.ok) {
-        const authData = await authResponse.json();
-        console.log("Current user:", authData.user);
-        
-        // Only proceed to load orders if auth is successful
-        loadOrders();
-      } else {
-        console.error("Auth check failed");
-        localStorage.removeItem("accessToken");
-        window.location.href = "/auth/admin/signin";
-      }
-    } catch (error) {
-      console.error("Auth check error:", error);
-      localStorage.removeItem("accessToken");
-      window.location.href = "/auth/admin/signin";
-    }
-  };
+    };
+    
+    checkAuth();
+    loadOrders();
+  }, []);
 
   const loadOrders = async () => {
     try {
       setIsLoading(true);
       const token = localStorage.getItem("accessToken");
+      console.log('Admin orders - Token found:', !!token);
+      console.log('Admin orders - All localStorage keys:', Object.keys(localStorage));
       
       if (!token) {
-        console.error("No access token found in loadOrders");
-        return;
+        console.error('No access token found in localStorage');
+        console.log('Checking alternative token keys...');
+        
+        // Check for alternative token keys
+        const altToken = localStorage.getItem("authToken") || localStorage.getItem("auth_token") || localStorage.getItem("token");
+        console.log('Alternative token found:', !!altToken);
+        
+        if (!altToken) {
+          console.error('No authentication token found. Redirecting to login...');
+          // Redirect to login page
+          window.location.href = '/auth/admin';
+          return;
+        } else {
+          console.log('Using alternative token');
+          // Use the alternative token
+          localStorage.setItem("accessToken", altToken);
+        }
       }
-
-      console.log("Fetching orders with token:", token ? "Token present" : "No token");
+      
+      const finalToken = token || localStorage.getItem("accessToken");
+      console.log('Admin orders - Final token preview:', finalToken ? finalToken.substring(0, 20) + '...' : 'No token');
       
       const response = await fetch("/api/orders", {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          "Authorization": `Bearer ${finalToken}`,
           "Content-Type": "application/json",
         },
       });
 
-      console.log("Orders API response status:", response.status);
-
+      console.log('Admin orders - Response status:', response.status);
+      
       if (response.status === 401) {
-        console.error("Orders API authentication failed");
-        // Don't redirect here since checkAuthAndLoadOrders handles it
+        console.error('Authentication failed. Token may be expired. Redirecting to login...');
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("auth_token");
+        window.location.href = '/auth/admin';
         return;
       }
-
+      
       if (response.ok) {
         const data = await response.json();
-        console.log("Orders API response data:", data);
-        
-        if (data.success && data.orders) {
+        console.log('Admin orders - Response data:', data);
+        if (data.success) {
           // Transform the data to match the expected format
           const transformedOrders = data.orders.map((order: any) => ({
             id: order.id,
-            order_number: order.orderNumber || order.order_number,
-            status: (order.status || "PENDING").toUpperCase(),
-            total_amount: order.total || order.total_amount || 0,
-            currency: order.currency || "INR",
-            customer_name: order.customerName || order.customer_name || order.shippingAddress?.fullName || "Customer",
-            customer_email: order.customerEmail || order.customer_email || order.shippingAddress?.email || "",
+            order_number: order.orderNumber,
+            status: order.status.toUpperCase(),
+            total_amount: order.total,
+            currency: order.currency,
+            customer_name: order.shippingAddress?.fullName || "Customer",
+            customer_email: order.shippingAddress?.email || "",
             customer_phone: order.shippingAddress?.phone || "",
-            shipping_address: typeof order.shippingAddress === 'string' 
-              ? order.shippingAddress 
-              : `${order.shippingAddress?.address || ""}, ${order.shippingAddress?.city || ""}, ${order.shippingAddress?.state || ""} ${order.shippingAddress?.pincode || ""}`,
-            delivery_date: order.estimatedDelivery || order.delivery_date,
-            tracking_number: order.trackingNumber || order.tracking_number,
+            shipping_address: `${order.shippingAddress?.address || ""}, ${order.shippingAddress?.city || ""}, ${order.shippingAddress?.state || ""} ${order.shippingAddress?.pincode || ""}`,
+            delivery_date: order.estimatedDelivery,
+            tracking_number: order.trackingNumber,
             items: order.items?.map((item: any, index: number) => ({
-              id: item.id || index + 1,
-              product_name: item.name || item.product_name,
-              product_image: item.imageUrl || item.product_image,
-              quantity: item.quantity || 1,
-              price: item.price || 0,
-              total: (item.price || 0) * (item.quantity || 1),
+              id: index + 1,
+              product_name: item.name,
+              product_image: item.imageUrl,
+              quantity: item.quantity,
+              price: item.price,
+              total: item.price * item.quantity,
             })) || [],
-            created_at: order.createdAt || order.created_at || new Date().toISOString(),
-            updated_at: order.updatedAt || order.updated_at || order.createdAt || order.created_at || new Date().toISOString(),
+            created_at: order.createdAt,
+            updated_at: order.updatedAt || order.createdAt,
           }));
           
-          console.log("Transformed orders:", transformedOrders);
           setOrders(transformedOrders);
-        } else {
-          console.log("No orders found or success=false, setting empty array");
-          setOrders([]);
         }
       } else {
+        console.error("Failed to fetch orders - Status:", response.status);
         const errorData = await response.text();
-        console.error("Failed to fetch orders:", response.status, errorData);
+        console.error("Error response:", errorData);
         setOrders([]);
       }
     } catch (error) {

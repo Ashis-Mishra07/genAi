@@ -10,38 +10,37 @@ import {
 } from '../../../lib/db/orders';
 import { createNotification } from '../../../lib/db/notifications';
 import { getProductById } from '../../../lib/db/products-neon';
+import { cache, setCache, getCache, deleteCache } from '../../../lib/redis';
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('Orders API: Starting request processing');
-    
-    // Log headers for debugging
-    const authHeader = request.headers.get('authorization');
-    console.log('Orders API: Auth header present:', !!authHeader);
-    console.log('Orders API: Auth header value:', authHeader ? authHeader.substring(0, 20) + '...' : 'None');
-    
     const user = await getCurrentUser(request);
-    console.log('Orders API: User from token:', user);
-    
     if (!user) {
-      console.log('Orders API: No user found, returning 401');
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
       );
     }
 
-    console.log('Orders API: User authenticated successfully:', user.email, user.role);
-
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
+    // Create cache key based on user role and parameters
+    const cacheKey = `orders:${user.role}:${user.id}:${status || 'all'}:${limit}:${offset}`;
+    
+    // Try to get from cache first
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+      console.log(`Orders: Serving from cache for user ${user.email}`);
+      return NextResponse.json(cachedData);
+    }
+
+    console.log(`Orders: Cache miss, fetching from database for user ${user.email}`);
     let orders: DBOrder[] = [];
 
     // Get orders based on user role
-    console.log('Orders API: Fetching orders for role:', user.role);
     if (user.role === 'ADMIN') {
       orders = await getAllOrders();
     } else if (user.role === 'ARTISAN') {
@@ -49,8 +48,6 @@ export async function GET(request: NextRequest) {
     } else if (user.role === 'CUSTOMER') {
       orders = await getOrdersByCustomerId(user.id);
     }
-
-    console.log('Orders API: Found orders count:', orders.length);
 
     // Filter by status if provided
     if (status && status !== 'all') {
@@ -68,15 +65,23 @@ export async function GET(request: NextRequest) {
       deliveredOrders: orders.filter(order => order.status === 'delivered').length,
     };
 
-    console.log('Orders API: Returning success response with', paginatedOrders.length, 'orders');
-
-    return NextResponse.json({
+    const responseData = {
       success: true,
       orders: paginatedOrders,
       stats: stats,
       count: orders.length,
       totalCount: orders.length
-    });
+    };
+
+    // Cache the result for 5 minutes (300 seconds)
+    try {
+      await setCache(cacheKey, responseData, 300);
+      console.log(`Orders: Cached result for user ${user.email}`);
+    } catch (error) {
+      console.log(`Orders: Failed to cache result, continuing without cache:`, error);
+    }
+
+    return NextResponse.json(responseData);
   } catch (error: any) {
     console.error('Get orders error:', error);
     return NextResponse.json(
@@ -92,32 +97,18 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('Orders API POST: Starting order creation process');
-    
     const user = await getCurrentUser(request);
-    console.log('Orders API POST: User from token:', user);
-    
     if (!user || user.role !== 'CUSTOMER') {
-      console.log('Orders API POST: Authentication failed or not a customer', { user });
       return NextResponse.json(
         { error: 'Customer authentication required' },
         { status: 401 }
       );
     }
 
-    console.log('Orders API POST: Customer authenticated successfully:', user.email);
-
     const orderData = await request.json();
-    console.log('Orders API POST: Order data received:', {
-      itemsCount: orderData.items?.length,
-      total: orderData.total,
-      shippingAddress: orderData.shippingAddress ? 'Present' : 'Missing',
-      paymentMethod: orderData.paymentMethod
-    });
 
     // Validate required fields
     if (!orderData.items || !Array.isArray(orderData.items) || orderData.items.length === 0) {
-      console.log('Orders API POST: Validation failed - no items');
       return NextResponse.json(
         { error: 'Order items are required' },
         { status: 400 }
@@ -125,14 +116,11 @@ export async function POST(request: NextRequest) {
     }
 
     if (!orderData.shippingAddress || !orderData.total) {
-      console.log('Orders API POST: Validation failed - missing shipping address or total');
       return NextResponse.json(
         { error: 'Shipping address and total are required' },
         { status: 400 }
       );
     }
-
-    console.log('Orders API POST: Validation passed, creating order...');
 
     // Create the order
     const order = await createOrder({
@@ -145,21 +133,36 @@ export async function POST(request: NextRequest) {
       status: orderData.status || 'pending'
     });
 
-    console.log('Orders API POST: Order creation result:', order ? 'Success' : 'Failed');
-
     if (!order) {
-      console.log('Orders API POST: Order creation returned null');
       return NextResponse.json(
         { error: 'Failed to create order' },
         { status: 500 }
       );
     }
 
-    console.log('Orders API POST: Order created successfully:', order.orderNumber);
+    // Invalidate relevant caches after creating order
+    try {
+      const cacheKeysToInvalidate = [
+        `orders:CUSTOMER:${user.id}:*`,
+        `orders:ADMIN:*:*`,
+        `orders:ARTISAN:*:*`,
+        'products:*'
+      ];
+
+      // Clear cache for this customer and admin views
+      for (const pattern of cacheKeysToInvalidate) {
+        const keys = await cache.getKeys(pattern);
+        for (const key of keys) {
+          await deleteCache(key);
+        }
+      }
+      console.log('Orders: Invalidated cache after creating new order');
+    } catch (error) {
+      console.log('Orders: Failed to invalidate cache, continuing without cache cleanup:', error);
+    }
 
     // Send notifications to artisans (skip if notifications table doesn't exist yet)
     try {
-      console.log('Orders API POST: Starting notification process...');
       // Collect unique artisan IDs from the order items
       const artisanIds = new Set<string>();
       
@@ -171,8 +174,6 @@ export async function POST(request: NextRequest) {
           }
         }
       }
-
-      console.log('Orders API POST: Found artisan IDs:', Array.from(artisanIds));
 
       // Notify each artisan about their products being ordered
       for (const artisanId of artisanIds) {
@@ -191,14 +192,10 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      console.log('Orders API POST: Notifications sent successfully');
-
     } catch (notificationError) {
       console.error('Error sending notifications (notifications table may not exist):', notificationError);
       // Don't fail the order creation if notifications fail
     }
-
-    console.log('Orders API POST: Returning success response');
 
     return NextResponse.json({
       success: true,

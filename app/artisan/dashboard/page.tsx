@@ -38,6 +38,7 @@ export default function ArtisanDashboard() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [products, setProducts] = useState<Product[]>([]);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [stats, setStats] = useState<Stats>({
     totalProducts: 0,
     activeProducts: 0,
@@ -120,11 +121,49 @@ export default function ArtisanDashboard() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("user_role");
-    localStorage.removeItem("user_id");
-    router.push("/");
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    
+    setIsLoggingOut(true);
+    try {
+      const token = localStorage.getItem('accessToken');
+      const refreshToken = localStorage.getItem('refreshToken');
+      
+      // Call logout API
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          refreshToken,
+          logoutAll: false
+        })
+      });
+
+      // Clear local storage regardless of API response
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("user_role");
+      localStorage.removeItem("user_id");
+      
+      // Redirect to home page
+      router.push('/');
+      
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Still clear local storage and redirect on error
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("user_role");
+      localStorage.removeItem("user_id");
+      router.push('/');
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   const handleAddProduct = () => {
@@ -227,8 +266,19 @@ export default function ArtisanDashboard() {
               
               <button
                 onClick={handleLogout}
-                className="p-2 text-gray-400 hover:text-red-500">
-                <LogOut className="h-6 w-6" />
+                disabled={isLoggingOut}
+                className={`p-2 transition-colors ${
+                  isLoggingOut
+                    ? "text-gray-500 cursor-not-allowed"
+                    : "text-gray-400 hover:text-red-500"
+                }`}
+                title="Sign Out"
+              >
+                {isLoggingOut ? (
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
+                ) : (
+                  <LogOut className="h-6 w-6" />
+                )}
               </button>
             </div>
           </div>

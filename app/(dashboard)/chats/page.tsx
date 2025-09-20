@@ -79,7 +79,7 @@ export default function ChatsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [chatMode, setChatMode] = useState<'regular' | 'support'>('regular');
+  const [chatMode, setChatMode] = useState<'support'>('support');
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -131,10 +131,24 @@ export default function ChatsPage() {
     setIsAdmin(userRole === 'ADMIN');
   };
 
+  // Helper function to get the access token from localStorage
+  const getAccessToken = () => {
+    // Try different token keys that might be used
+    return localStorage.getItem('accessToken') || 
+           localStorage.getItem('auth_token') || 
+           null;
+  };
+
   const fetchArtisanConversations = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
+      const token = getAccessToken();
       console.log('Fetching artisan conversations...');
+      console.log('Token found:', token ? 'Yes' : 'No');
+      
+      if (!token) {
+        console.log('No access token found');
+        return;
+      }
       
       const response = await fetch('/api/admin-chat', {
         headers: {
@@ -162,7 +176,13 @@ export default function ChatsPage() {
 
   const fetchAdminMessages = async (artisanId: string) => {
     try {
-      const token = localStorage.getItem('accessToken');
+      const token = getAccessToken();
+      
+      if (!token) {
+        console.log('No access token found for admin messages');
+        return;
+      }
+      
       const response = await fetch(`/api/admin-chat?artisanId=${artisanId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -763,49 +783,14 @@ I'll be back with your poster soon! 📸➡️🎨`;
           <div className="flex items-center space-x-3 mb-2">
             <MessageSquare className="h-8 w-8 text-orange-400" />
             <h1 className="text-3xl font-bold text-white bg-gradient-to-r from-orange-500 to-orange-400 bg-clip-text text-transparent">
-              {chatMode === 'regular' ? 'Artisan Chats' : 'Support Center'}
+              Support Center
             </h1>
           </div>
           <div className="h-1 bg-gradient-to-r from-orange-500 to-orange-400 rounded-full w-32"></div>
           <p className="text-gray-400 mt-2">
-            {chatMode === 'regular' 
-              ? 'Chat with artisans and manage their artwork enhancement requests'
-              : 'Manage artisan support conversations and provide business assistance'
-            }
+            Manage artisan support conversations and provide business assistance
           </p>
         </div>
-
-        {/* Chat Mode Toggle (Only for Admins) */}
-        {isAdmin && (
-          <div className="mb-6">
-            <div className="flex space-x-1 bg-gray-800/50 p-1 rounded-lg border border-gray-700 w-fit">
-              <button
-                onClick={() => setChatMode('regular')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                  chatMode === 'regular'
-                    ? 'bg-orange-500 text-white shadow-lg'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
-                }`}>
-                Regular Chats
-              </button>
-              <button
-                onClick={() => setChatMode('support')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                  chatMode === 'support'
-                    ? 'bg-orange-500 text-white shadow-lg'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
-                }`}>
-                Support Center
-              </button>
-              <button
-                onClick={() => console.log('Debug - Artisan conversations:', artisanConversations, 'Selected:', selectedArtisan)}
-                className="px-3 py-1 bg-blue-500 text-white rounded text-sm ml-4"
-              >
-                Debug
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Search Bar */}
         <div className="mb-6">
@@ -823,143 +808,43 @@ I'll be back with your poster soon! 📸➡️🎨`;
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          {chatMode === 'regular' ? (
-            <>
-              <div className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-4 border border-green-500/20">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                  <span className="text-green-400 font-medium">
-                    Online: {users.filter((u) => u.status === "ONLINE").length}
-                  </span>
-                </div>
-              </div>
-              <div className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-4 border border-yellow-500/20">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                  <span className="text-yellow-400 font-medium">
-                    Away: {users.filter((u) => u.status === "AWAY").length}
-                  </span>
-                </div>
-              </div>
-              <div className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-4 border border-orange-500/20">
-                <div className="flex items-center space-x-2">
-                  <MessageSquare className="h-4 w-4 text-orange-400" />
-                  <span className="text-orange-400 font-medium">
-                    Total Unread: {users.reduce((sum, u) => sum + u.unreadCount, 0)}
-                  </span>
-                </div>
-              </div>
-              <div className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-4 border border-purple-500/20">
-                <div className="flex items-center space-x-2">
-                  <Sparkles className="h-4 w-4 text-purple-400" />
-                  <span className="text-purple-400 font-medium">
-                    Total Artisans: {users.length}
-                  </span>
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-4 border border-blue-500/20">
-                <div className="flex items-center space-x-2">
-                  <MessageSquare className="h-4 w-4 text-blue-400" />
-                  <span className="text-blue-400 font-medium">
-                    Active Conversations: {artisanConversations.length}
-                  </span>
-                </div>
-              </div>
-              <div className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-4 border border-red-500/20">
-                <div className="flex items-center space-x-2">
-                  <AlertCircle className="h-4 w-4 text-red-400" />
-                  <span className="text-red-400 font-medium">
-                    Pending Support: {artisanConversations.reduce((sum, c) => sum + c.unread_count, 0)}
-                  </span>
-                </div>
-              </div>
-              <div className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-4 border border-green-500/20">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-4 w-4 text-green-400" />
-                  <span className="text-green-400 font-medium">
-                    Responded Today: {artisanConversations.filter(c => c.last_sender === 'admin').length}
-                  </span>
-                </div>
-              </div>
-              <div className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-4 border border-purple-500/20">
-                <div className="flex items-center space-x-2">
-                  <Sparkles className="h-4 w-4 text-purple-400" />
-                  <span className="text-purple-400 font-medium">
-                    Admin Support Active
-                  </span>
-                </div>
-              </div>
-            </>
-          )}
+          <div className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-4 border border-blue-500/20">
+            <div className="flex items-center space-x-2">
+              <MessageSquare className="h-4 w-4 text-blue-400" />
+              <span className="text-blue-400 font-medium">
+                Active Conversations: {artisanConversations.length}
+              </span>
+            </div>
+          </div>
+          <div className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-4 border border-red-500/20">
+            <div className="flex items-center space-x-2">
+              <AlertCircle className="h-4 w-4 text-red-400" />
+              <span className="text-red-400 font-medium">
+                Pending Support: {artisanConversations.reduce((sum, c) => sum + c.unread_count, 0)}
+              </span>
+            </div>
+          </div>
+          <div className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-4 border border-green-500/20">
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-4 w-4 text-green-400" />
+              <span className="text-green-400 font-medium">
+                Responded Today: {artisanConversations.filter(c => c.last_sender === 'admin').length}
+              </span>
+            </div>
+          </div>
+          <div className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-4 border border-purple-500/20">
+            <div className="flex items-center space-x-2">
+              <Sparkles className="h-4 w-4 text-purple-400" />
+              <span className="text-purple-400 font-medium">
+                Admin Support Active
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* Users Grid */}
+        {/* Artisan Support Conversations Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {chatMode === 'regular' ? (
-            // Regular Users Grid
-            filteredUsers.map((user) => (
-              <div
-                key={user.id}
-                onClick={() => setSelectedUser(user.id)}
-                className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-xl p-6 border border-orange-500/20 hover:border-orange-500/40 transition-all duration-300 cursor-pointer group hover:scale-105">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="relative">
-                      <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center group-hover:from-orange-400 group-hover:to-orange-500 transition-all duration-300">
-                        <span className="text-white font-semibold">
-                          {user.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </span>
-                      </div>
-                      <div
-                        className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-gray-800 ${getStatusColor(
-                          user.status
-                        )}`}></div>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-white text-lg group-hover:text-orange-300 transition-colors">
-                        {user.name}
-                      </h3>
-                      <p className="text-orange-400 text-sm">{user.specialty}</p>
-                      <p className="text-gray-400 text-xs">{user.location}</p>
-                    </div>
-                  </div>
-                  {user.unreadCount > 0 && (
-                    <span className="bg-orange-500 text-white text-xs rounded-full px-2 py-1 min-w-[24px] text-center font-medium">
-                      {user.unreadCount}
-                    </span>
-                  )}
-                </div>
-
-                <div className="mb-3">
-                  <p className="text-gray-300 text-sm line-clamp-2">
-                    {user.lastMessage}
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span>{formatLastSeen(user.lastSeen)}</span>
-                  <span
-                    className={`px-2 py-1 rounded-full ${
-                      user.status === "ONLINE"
-                        ? "bg-green-500/20 text-green-400"
-                        : user.status === "AWAY"
-                        ? "bg-yellow-500/20 text-yellow-400"
-                        : "bg-gray-500/20 text-gray-400"
-                    }`}>
-                    {user.status.toLowerCase()}
-                  </span>
-                </div>
-              </div>
-            ))
-          ) : (
-            // Artisan Support Conversations Grid
-            filteredArtisanConversations.map((conversation) => (
+          {filteredArtisanConversations.map((conversation) => (
               <div
                 key={conversation.artisan_id}
                 onClick={() => setSelectedArtisan(conversation.artisan_id)}
@@ -975,22 +860,20 @@ I'll be back with your poster soon! 📸➡️🎨`;
                             .join("")}
                         </span>
                       </div>
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-orange-500 rounded-full border-2 border-gray-800 flex items-center justify-center">
-                        <MessageSquare className="h-2 w-2 text-white" />
-                      </div>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-white text-lg group-hover:text-purple-300 transition-colors">
+                      <h3 className="font-semibold text-white group-hover:text-purple-300 transition-colors">
                         {conversation.artisan_name}
                       </h3>
-                      <p className="text-purple-400 text-sm">Support Request</p>
-                      <p className="text-gray-400 text-xs">{conversation.artisan_email}</p>
+                      <p className="text-sm text-gray-400">{conversation.artisan_email}</p>
                     </div>
                   </div>
                   {conversation.unread_count > 0 && (
-                    <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[24px] text-center font-medium">
-                      {conversation.unread_count}
-                    </span>
+                    <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">
+                        {conversation.unread_count}
+                      </span>
+                    </div>
                   )}
                 </div>
 
@@ -1012,9 +895,9 @@ I'll be back with your poster soon! 📸➡️🎨`;
                   </span>
                 </div>
               </div>
-            ))
-          )}
+            ))}
         </div>
+
       </div>
     </div>
   );

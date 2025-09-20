@@ -44,21 +44,10 @@ export async function createOrder(orderData: {
   status?: string;
 }): Promise<Order | null> {
   try {
-    console.log('DB Orders: Creating order for customer:', orderData.customerId);
-    console.log('DB Orders: Order data:', {
-      itemsCount: orderData.items.length,
-      total: orderData.total,
-      currency: orderData.currency,
-      paymentMethod: orderData.paymentMethod,
-      status: orderData.status
-    });
-
     // Generate order number
     const orderNumber = `ORD-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
-    console.log('DB Orders: Generated order number:', orderNumber);
     
     // Insert order into database
-    console.log('DB Orders: Inserting order into database...');
     const [orderResult] = await sql`
       INSERT INTO orders (
         order_number, customer_id, status, total, currency, 
@@ -72,37 +61,24 @@ export async function createOrder(orderData: {
                shipping_address, payment_method, created_at
     `;
 
-    console.log('DB Orders: Order inserted, result:', orderResult);
-
     if (!orderResult) {
-      console.error('DB Orders: No result from order insertion');
       throw new Error('Failed to create order');
     }
 
     // Insert order items
-    console.log('DB Orders: Inserting order items...');
     for (const item of orderData.items) {
-      console.log('DB Orders: Inserting item:', {
-        productId: item.productId,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity
-      });
-      
       await sql`
         INSERT INTO order_items (
           order_id, product_id, name, price, quantity, artisan_name
         ) VALUES (
           ${orderResult.id}, ${item.productId}, ${item.name}, 
-          ${item.price}, ${item.quantity}, ${item.artisanName || null}
+          ${item.price}, ${item.quantity}, ${item.artisanName}
         )
       `;
     }
 
-    console.log('DB Orders: All order items inserted successfully');
-
     // Return the complete order
-    const finalOrder = {
+    return {
       id: orderResult.id,
       orderNumber: orderResult.order_number,
       customerId: orderResult.customer_id,
@@ -114,9 +90,6 @@ export async function createOrder(orderData: {
       shippingAddress: orderData.shippingAddress,
       paymentMethod: orderResult.payment_method,
     };
-
-    console.log('DB Orders: Order created successfully:', finalOrder.orderNumber);
-    return finalOrder;
   } catch (error) {
     console.error('Error creating order:', error);
     return null;

@@ -175,6 +175,15 @@ export async function updateUserStatus(userId: string, status: string) {
     SET status = $1, last_seen = NOW()
     WHERE id = $2
   `, [status, userId]);
+  
+  // Return the updated user data
+  const result = await query(`
+    SELECT id, status, last_seen
+    FROM users
+    WHERE id = $1
+  `, [userId]);
+  
+  return result.rows[0];
 }
 
 // Helper function to get last message for room
