@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     if (logoutAll) {
       // Revoke all tokens for the user
-      await revokeAllUserTokens(user.userId);
+      await revokeAllUserTokens(user.id);
     } else if (refreshToken) {
       // Revoke specific refresh token
       const tokenHash = await hashRefreshToken(refreshToken);
@@ -26,12 +26,33 @@ export async function POST(request: NextRequest) {
     }
 
     // Update user status to offline
-    await updateUserLoginStatus(user.userId, 'OFFLINE');
+    await updateUserLoginStatus(user.id, 'OFFLINE');
 
-    return NextResponse.json({
+    // Create response and clear cookies
+    const response = NextResponse.json({
       success: true,
       message: logoutAll ? 'Logged out from all devices' : 'Logout successful',
     });
+
+    // Clear authentication cookies
+    response.cookies.set('auth_token', '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 0,
+      path: '/'
+    });
+
+    response.cookies.set('refresh_token', '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 0,
+      path: '/'
+    });
+
+    console.log('Logout: Cleared auth cookies for user:', user.email);
+    return response;
 
   } catch (error: any) {
     console.error('Logout error:', error);
@@ -47,13 +68,34 @@ export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser(request);
     if (user) {
-      await updateUserLoginStatus(user.userId, 'OFFLINE');
+      await updateUserLoginStatus(user.id, 'OFFLINE');
     }
 
-    return NextResponse.json({
+    // Create response and clear cookies
+    const response = NextResponse.json({
       success: true,
       message: 'Logout successful',
     });
+
+    // Clear authentication cookies
+    response.cookies.set('auth_token', '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 0,
+      path: '/'
+    });
+
+    response.cookies.set('refresh_token', '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 0,
+      path: '/'
+    });
+
+    console.log('Logout: Cleared auth cookies');
+    return response;
 
   } catch (error: any) {
     console.error('Logout error:', error);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Package, Heart, ShoppingCart, User, TrendingUp, Star, 
@@ -40,107 +40,40 @@ interface DashboardStats {
 
 export default function CustomerDashboardPage() {
   const router = useRouter();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [stats, setStats] = useState<DashboardStats>({
-    totalOrders: 0,
-    totalSpent: 0,
-    wishlistItems: 2,
-    cartItems: 2
+
+  const [stats] = useState<DashboardStats>({
+    totalOrders: 12,
+    totalSpent: 45600,
+    wishlistItems: 8,
+    cartItems: 3
   });
-  const [loading, setLoading] = useState(true);
 
-  // Fetch actual orders from database
-  useEffect(() => {
-    const checkAuthAndFetchOrders = async () => {
-      try {
-        // First check if user is authenticated
-        console.log('Checking authentication...');
-        const authResponse = await fetch('/api/auth/me', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        });
-
-        if (!authResponse.ok) {
-          console.log('User not authenticated, redirecting to login...');
-          router.push('/auth/customer');
-          return;
-        }
-
-        const authData = await authResponse.json();
-        console.log('User authenticated:', authData.user.email);
-
-        // Now fetch orders
-        console.log('Fetching orders from API...');
-        const response = await fetch('/api/orders?limit=10', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        });
-
-        console.log('Response status:', response.status);
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('API Response:', data);
-          if (data.success && data.orders) {
-            const formattedOrders = data.orders.map((order: any) => ({
-              id: order.id,
-              orderNumber: order.orderNumber,
-              status: order.status,
-              total: order.total,
-              date: order.createdAt,
-              itemCount: order.items?.length || 1
-            }));
-
-            setOrders(formattedOrders);
-            console.log('Formatted orders:', formattedOrders);
-            
-            // Use stats from API if available, otherwise calculate
-            if (data.stats) {
-              setStats({
-                totalOrders: data.stats.totalOrders,
-                totalSpent: data.stats.totalSpent,
-                wishlistItems: 2, // You can fetch this from wishlist API
-                cartItems: 2 // You can fetch this from cart API
-              });
-            } else {
-              // Calculate stats from orders
-              const calculatedStats = {
-                totalOrders: formattedOrders.length,
-                totalSpent: formattedOrders.reduce((sum: number, order: Order) => sum + order.total, 0),
-                wishlistItems: 2,
-                cartItems: 2
-              };
-              setStats(calculatedStats);
-            }
-          } else {
-            console.error('API response error:', data.error || 'No orders data');
-            console.log('Full response data:', data);
-            setOrders([]);
-          }
-        } else {
-          const errorText = await response.text();
-          console.error('Failed to fetch orders:', response.status, errorText);
-          setOrders([]);
-        }
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-        setOrders([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkAuthAndFetchOrders();
-  }, [router]);
-
-  // Get recent orders (latest 3)
-  const recentOrders = orders.slice(0, 3);
+  const [recentOrders] = useState<Order[]>([
+    {
+      id: '1',
+      orderNumber: 'ORD-2024-001',
+      status: 'delivered',
+      total: 12800,
+      date: '2024-01-20',
+      itemCount: 2
+    },
+    {
+      id: '2',
+      orderNumber: 'ORD-2024-002',
+      status: 'shipped',
+      total: 8500,
+      date: '2024-01-15',
+      itemCount: 1
+    },
+    {
+      id: '3',
+      orderNumber: 'ORD-2024-003',
+      status: 'confirmed',
+      total: 5600,
+      date: '2024-01-10',
+      itemCount: 2
+    }
+  ]);
 
   const [recommendedProducts] = useState<Product[]>([
     {
@@ -285,61 +218,29 @@ export default function CustomerDashboardPage() {
             </div>
 
             <div className="p-6">
-              {loading ? (
-                <div className="space-y-4">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex items-center justify-between p-4 bg-slate-700 rounded-lg animate-pulse">
-                      <div className="flex items-center space-x-4">
-                        <div className="h-10 w-10 bg-slate-600 rounded-full"></div>
-                        <div>
-                          <div className="h-4 bg-slate-600 rounded w-24 mb-2"></div>
-                          <div className="h-3 bg-slate-600 rounded w-32"></div>
-                        </div>
+              <div className="space-y-4">
+                {recentOrders.map((order) => (
+                  <div key={order.id} className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
+                    <div className="flex items-center space-x-4">
+                      <div className="h-10 w-10 bg-orange-500 rounded-full flex items-center justify-center">
+                        <Package className="h-5 w-5 text-white" />
                       </div>
-                      <div className="text-right">
-                        <div className="h-4 bg-slate-600 rounded w-16 mb-2"></div>
-                        <div className="h-3 bg-slate-600 rounded w-12"></div>
+                      <div>
+                        <p className="font-medium text-white">{order.orderNumber}</p>
+                        <p className="text-slate-400 text-sm">
+                          {new Date(order.date).toLocaleDateString()} • {order.itemCount} items
+                        </p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              ) : recentOrders.length === 0 ? (
-                <div className="text-center py-8">
-                  <Package className="h-16 w-16 text-slate-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-white mb-2">No orders yet</h3>
-                  <p className="text-slate-400 mb-4">Start shopping to see your orders here</p>
-                  <button
-                    onClick={() => router.push('/customer/products')}
-                    className="bg-orange-500 text-white px-6 py-2 rounded-lg font-medium hover:bg-orange-600 transition-colors"
-                  >
-                    Browse Products
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {recentOrders.map((order) => (
-                    <div key={order.id} className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
-                      <div className="flex items-center space-x-4">
-                        <div className="h-10 w-10 bg-orange-500 rounded-full flex items-center justify-center">
-                          <Package className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-white">{order.orderNumber}</p>
-                          <p className="text-slate-400 text-sm">
-                            {new Date(order.date).toLocaleDateString()} • {order.itemCount} items
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-white">₹{order.total.toLocaleString()}</p>
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(order.status)}`}>
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                        </span>
-                      </div>
+                    <div className="text-right">
+                      <p className="font-bold text-white">₹{order.total.toLocaleString()}</p>
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(order.status)}`}>
+                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      </span>
                     </div>
-                  ))}
-                </div>
-              )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 

@@ -1,232 +1,119 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
-  ArrowLeft,
-  Plus,
-  Minus,
-  Trash2,
-  Heart,
-  ShoppingBag,
-  User,
-  Package,
-} from "lucide-react";
+  ShoppingCart, Plus, Minus, Trash2, Heart, ArrowRight, Package
+} from 'lucide-react';
 
 interface CartItem {
-  id: string;
-  productId: string;
+  id: number;
+  productId: number;
   name: string;
   price: number;
-  currency: string;
+  originalPrice: number;
+  image: string;
+  artisan: string;
+  location: string;
   quantity: number;
-  imageUrl?: string;
-  artisan?: {
-    id: string;
-    name: string;
-    email: string;
-  };
+  inStock: boolean;
+  category: string;
 }
 
 export default function CustomerCartPage() {
   const router = useRouter();
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  
+  const [cartItems, setCartItems] = useState<CartItem[]>([
+    {
+      id: 1,
+      productId: 1,
+      name: "Handwoven Silk Saree",
+      price: 8500,
+      originalPrice: 12000,
+      image: "/api/placeholder/300/300",
+      artisan: "Priya Sharma",
+      location: "Varanasi, UP",
+      quantity: 1,
+      inStock: true,
+      category: "Textiles"
+    },
+    {
+      id: 2,
+      productId: 3,
+      name: "Wooden Jewelry Box",
+      price: 1800,
+      originalPrice: 2500,
+      image: "/api/placeholder/300/300",
+      artisan: "Meera Devi",
+      location: "Kashmir",
+      quantity: 2,
+      inStock: true,
+      category: "Woodwork"
+    }
+  ]);
 
-  useEffect(() => {
-    loadCartItems();
-  }, []);
-
-  const loadCartItems = async () => {
-    try {
-      setIsLoading(true);
-      
-      // Get cart items from localStorage
-      const savedCart = localStorage.getItem("customer_cart");
-      if (!savedCart) {
-        setCartItems([]);
-        setIsLoading(false);
-        return;
-      }
-
-      const cartProductIds = JSON.parse(savedCart);
-      if (!Array.isArray(cartProductIds) || cartProductIds.length === 0) {
-        setCartItems([]);
-        setIsLoading(false);
-        return;
-      }
-
-      // Fetch product details from API
-      const token = localStorage.getItem("accessToken");
-      const items: CartItem[] = [];
-
-      for (const productId of cartProductIds) {
-        try {
-          const response = await fetch(`/api/products/${productId}`, {
-            headers: {
-              "Authorization": `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            if (data.success && data.product) {
-              items.push({
-                id: data.product.id,
-                productId: data.product.id,
-                name: data.product.name,
-                price: data.product.price,
-                currency: data.product.currency,
-                quantity: 1, // Default quantity, can be updated
-                imageUrl: data.product.imageUrl,
-                artisan: data.product.artisan,
-              });
-            }
-          }
-        } catch (error) {
-          console.error(`Error fetching product ${productId}:`, error);
+  const updateQuantity = (id: number, change: number) => {
+    setCartItems(items => 
+      items.map(item => {
+        if (item.id === id) {
+          const newQuantity = Math.max(0, item.quantity + change);
+          return { ...item, quantity: newQuantity };
         }
-      }
-
-      setCartItems(items);
-    } catch (error) {
-      console.error("Error loading cart items:", error);
-      setCartItems([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const updateQuantity = (productId: string, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      removeFromCart(productId);
-      return;
-    }
-
-    setCartItems(items =>
-      items.map(item =>
-        item.productId === productId ? { ...item, quantity: newQuantity } : item
-      )
+        return item;
+      }).filter(item => item.quantity > 0)
     );
   };
 
-  const removeFromCart = (productId: string) => {
-    // Update state
-    setCartItems(items => items.filter(item => item.productId !== productId));
-    
-    // Update localStorage
-    const savedCart = localStorage.getItem("customer_cart");
-    if (savedCart) {
-      const cartProductIds = JSON.parse(savedCart);
-      const updatedCart = cartProductIds.filter((id: string) => id !== productId);
-      localStorage.setItem("customer_cart", JSON.stringify(updatedCart));
-    }
+  const removeItem = (id: number) => {
+    setCartItems(items => items.filter(item => item.id !== id));
   };
 
-  const clearCart = () => {
-    setCartItems([]);
-    localStorage.removeItem("customer_cart");
+  const moveToWishlist = (id: number) => {
+    // In a real app, this would move the item to wishlist
+    removeItem(id);
   };
 
-  const moveToWishlist = (productId: string) => {
-    // Remove from cart
-    removeFromCart(productId);
-    
-    // Add to wishlist
-    const savedWishlist = localStorage.getItem("customer_wishlist");
-    const wishlist = savedWishlist ? JSON.parse(savedWishlist) : [];
-    if (!wishlist.includes(productId)) {
-      wishlist.push(productId);
-      localStorage.setItem("customer_wishlist", JSON.stringify(wishlist));
-    }
-  };
-
-  const getSubtotal = () => {
-    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-  };
-
-  const proceedToCheckout = () => {
-    if (cartItems.length === 0) return;
-    
-    // Save only essential checkout data (without large images)
-    const checkoutData = cartItems.map(item => ({
-      id: item.id,
-      productId: item.productId,
-      name: item.name,
-      price: item.price,
-      currency: item.currency,
-      quantity: item.quantity,
-      artisan: item.artisan ? {
-        id: item.artisan.id,
-        name: item.artisan.name
-      } : undefined
-    }));
-    
-    try {
-      localStorage.setItem("checkout_items", JSON.stringify(checkoutData));
-      router.push("/customer/checkout");
-    } catch (error) {
-      console.error("Failed to save checkout data:", error);
-      // Fallback: proceed to checkout without saving to localStorage
-      // The checkout page can fetch fresh data from the cart items in localStorage
-      router.push("/customer/checkout");
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Package className="h-8 w-8 animate-spin mx-auto text-emerald-500" />
-          <p className="mt-2 text-gray-600">Loading cart...</p>
-        </div>
-      </div>
-    );
-  }
+  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const shipping = subtotal > 5000 ? 0 : 299;
+  const tax = Math.round(subtotal * 0.18); // 18% GST
+  const total = subtotal + shipping + tax;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-900">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => router.back()}
-                className="p-2 hover:bg-gray-100 rounded-lg"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </button>
-              <h1 className="text-xl font-semibold text-gray-900">Shopping Cart</h1>
-              <span className="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full text-sm">
-                {cartItems.length} {cartItems.length === 1 ? "item" : "items"}
-              </span>
+      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Shopping Cart</h1>
+            <p className="text-slate-400">{cartItems.length} items in your cart</p>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3 bg-slate-700 rounded-lg px-3 py-2">
+              <div className="h-8 w-8 bg-orange-500 rounded-full flex items-center justify-center">
+                <ShoppingCart className="h-4 w-4 text-white" />
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-medium text-white">Total: ₹{total.toLocaleString()}</p>
+                <p className="text-xs text-slate-400">{cartItems.length} items</p>
+              </div>
             </div>
-            
-            {cartItems.length > 0 && (
-              <button
-                onClick={clearCart}
-                className="text-red-600 hover:text-red-700 text-sm font-medium"
-              >
-                Clear Cart
-              </button>
-            )}
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="p-6">
         {cartItems.length === 0 ? (
+          // Empty Cart
           <div className="text-center py-16">
-            <ShoppingBag className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-xl font-medium text-gray-900 mb-2">Your cart is empty</h2>
-            <p className="text-gray-600 mb-8">Start shopping to add items to your cart</p>
+            <ShoppingCart className="h-24 w-24 text-slate-400 mx-auto mb-6" />
+            <h2 className="text-2xl font-bold text-white mb-4">Your cart is empty</h2>
+            <p className="text-slate-400 mb-8">Add some amazing handcrafted products to your cart</p>
             <button
-              onClick={() => router.push("/customer/products")}
-              className="bg-emerald-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-emerald-600"
+              onClick={() => router.push('/customer/products')}
+              className="bg-orange-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors"
             >
-              Browse Products
+              Continue Shopping
             </button>
           </div>
         ) : (
@@ -234,123 +121,157 @@ export default function CustomerCartPage() {
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-4">
               {cartItems.map((item) => (
-                <div key={item.productId} className="bg-white rounded-lg shadow-sm border p-6">
-                  <div className="flex items-start space-x-4">
+                <div key={item.id} className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                  <div className="flex items-center space-x-4">
                     {/* Product Image */}
-                    <div className="w-20 h-20 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden">
-                      {item.imageUrl ? (
-                        <img
-                          src={item.imageUrl}
-                          alt={item.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Package className="h-8 w-8 text-gray-400" />
-                        </div>
-                      )}
+                    <div className="w-24 h-24 bg-slate-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Package className="h-8 w-8 text-slate-400" />
                     </div>
 
                     {/* Product Details */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-medium text-gray-900 mb-1">
-                        {item.name}
-                      </h3>
-                      
-                      {item.artisan && (
-                        <div className="flex items-center text-sm text-gray-600 mb-2">
-                          <User className="h-4 w-4 mr-1" />
-                          {item.artisan.name}
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="font-semibold text-white text-lg">{item.name}</h3>
+                          <p className="text-slate-400 text-sm">by {item.artisan}</p>
+                          <p className="text-slate-400 text-xs">{item.location}</p>
+                          <span className="inline-block bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs mt-2">
+                            {item.category}
+                          </span>
                         </div>
-                      )}
 
-                      <div className="flex items-center justify-between">
-                        <span className="text-lg font-bold text-emerald-600">
-                          {item.currency === "INR" ? "₹" : "$"}{item.price.toLocaleString()}
-                        </span>
-
-                        {/* Quantity Controls */}
-                        <div className="flex items-center space-x-3">
+                        <div className="text-right">
                           <div className="flex items-center space-x-2">
+                            <span className="text-lg font-bold text-white">₹{item.price.toLocaleString()}</span>
+                            {item.originalPrice > item.price && (
+                              <span className="text-slate-400 text-sm line-through">₹{item.originalPrice.toLocaleString()}</span>
+                            )}
+                          </div>
+                          {!item.inStock && (
+                            <span className="text-red-400 text-sm font-medium">Out of Stock</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Quantity and Actions */}
+                      <div className="flex items-center justify-between mt-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex items-center bg-slate-700 rounded-lg">
                             <button
-                              onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                              className="p-1 hover:bg-gray-100 rounded"
+                              onClick={() => updateQuantity(item.id, -1)}
+                              className="p-2 hover:bg-slate-600 rounded-l-lg transition-colors"
+                              disabled={!item.inStock}
                             >
-                              <Minus className="h-4 w-4" />
+                              <Minus className="h-4 w-4 text-slate-400" />
                             </button>
-                            <span className="w-8 text-center font-medium">{item.quantity}</span>
+                            <span className="px-4 py-2 text-white font-medium">{item.quantity}</span>
                             <button
-                              onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                              className="p-1 hover:bg-gray-100 rounded"
+                              onClick={() => updateQuantity(item.id, 1)}
+                              className="p-2 hover:bg-slate-600 rounded-r-lg transition-colors"
+                              disabled={!item.inStock}
                             >
-                              <Plus className="h-4 w-4" />
+                              <Plus className="h-4 w-4 text-slate-400" />
                             </button>
                           </div>
 
-                          {/* Actions */}
-                          <div className="flex items-center space-x-2 ml-4">
-                            <button
-                              onClick={() => moveToWishlist(item.productId)}
-                              className="p-2 text-gray-400 hover:text-red-500 rounded"
-                              title="Move to Wishlist"
-                            >
-                              <Heart className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => removeFromCart(item.productId)}
-                              className="p-2 text-gray-400 hover:text-red-500 rounded"
-                              title="Remove from Cart"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
+                          <span className="text-slate-400">×</span>
+                          <span className="text-white font-semibold">₹{(item.price * item.quantity).toLocaleString()}</span>
+                        </div>
+
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => moveToWishlist(item.id)}
+                            className="p-2 text-slate-400 hover:text-red-400 transition-colors"
+                            title="Move to Wishlist"
+                          >
+                            <Heart className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => removeItem(item.id)}
+                            className="p-2 text-slate-400 hover:text-red-400 transition-colors"
+                            title="Remove Item"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               ))}
+
+              {/* Continue Shopping */}
+              <button
+                onClick={() => router.push('/customer/products')}
+                className="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 text-slate-400 hover:text-white hover:border-orange-500 transition-colors"
+              >
+                + Add more items
+              </button>
             </div>
 
             {/* Order Summary */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-sm border p-6 sticky top-4">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h2>
+            <div className="space-y-6">
+              <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                <h3 className="text-lg font-semibold text-white mb-4">Order Summary</h3>
                 
-                <div className="space-y-3 border-b pb-4 mb-4">
-                  <div className="flex justify-between text-gray-600">
+                <div className="space-y-3">
+                  <div className="flex justify-between text-slate-400">
                     <span>Subtotal ({cartItems.length} items)</span>
-                    <span>₹{getSubtotal().toLocaleString()}</span>
+                    <span>₹{subtotal.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between text-gray-600">
+                  
+                  <div className="flex justify-between text-slate-400">
                     <span>Shipping</span>
-                    <span className="text-green-600">Free</span>
+                    <span>{shipping === 0 ? 'Free' : `₹${shipping}`}</span>
                   </div>
-                  <div className="flex justify-between text-gray-600">
-                    <span>Tax</span>
-                    <span>₹{Math.round(getSubtotal() * 0.18).toLocaleString()}</span>
+                  
+                  <div className="flex justify-between text-slate-400">
+                    <span>Tax (GST 18%)</span>
+                    <span>₹{tax.toLocaleString()}</span>
+                  </div>
+                  
+                  {shipping === 0 && (
+                    <div className="text-green-400 text-sm">
+                      🎉 Free shipping on orders above ₹5,000
+                    </div>
+                  )}
+                  
+                  <div className="border-t border-slate-700 pt-3">
+                    <div className="flex justify-between text-white font-semibold text-lg">
+                      <span>Total</span>
+                      <span>₹{total.toLocaleString()}</span>
+                    </div>
                   </div>
                 </div>
-                
-                <div className="flex justify-between text-lg font-semibold text-gray-900 mb-6">
-                  <span>Total</span>
-                  <span>₹{Math.round(getSubtotal() * 1.18).toLocaleString()}</span>
-                </div>
-                
-                <button
-                  onClick={proceedToCheckout}
-                  disabled={cartItems.length === 0}
-                  className="w-full bg-emerald-500 text-white py-3 rounded-lg font-medium hover:bg-emerald-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                >
-                  Proceed to Checkout
+
+                <button className="w-full bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors mt-6 flex items-center justify-center space-x-2">
+                  <span>Proceed to Checkout</span>
+                  <ArrowRight className="h-4 w-4" />
                 </button>
-                
-                <div className="mt-4 text-center">
-                  <button
-                    onClick={() => router.push("/customer/products")}
-                    className="text-emerald-600 hover:text-emerald-700 text-sm font-medium"
-                  >
-                    Continue Shopping
+              </div>
+
+              {/* Delivery Info */}
+              <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                <h4 className="font-semibold text-white mb-3">Delivery Information</h4>
+                <div className="space-y-2 text-sm text-slate-400">
+                  <p>📦 Standard Delivery: 5-7 business days</p>
+                  <p>🚚 Express Delivery: 2-3 business days (+₹199)</p>
+                  <p>🏪 Store Pickup: Available at 15+ locations</p>
+                  <p>↩️ Easy Returns: 30-day return policy</p>
+                </div>
+              </div>
+
+              {/* Promo Code */}
+              <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                <h4 className="font-semibold text-white mb-3">Promo Code</h4>
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    placeholder="Enter promo code"
+                    className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white placeholder-slate-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  />
+                  <button className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors">
+                    Apply
                   </button>
                 </div>
               </div>

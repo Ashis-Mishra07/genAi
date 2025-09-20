@@ -65,11 +65,32 @@ export async function POST(request: NextRequest) {
 
     await storeRefreshToken(user.id, refreshTokenHash, expiresAt);
 
-    return NextResponse.json({
+    // Create response with tokens
+    const response = NextResponse.json({
       success: true,
       message: 'Login successful',
       data: tokens,
     });
+
+    // Set authentication cookies
+    response.cookies.set('auth_token', tokens.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60, // 24 hours
+      path: '/'
+    });
+
+    response.cookies.set('refresh_token', tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+      path: '/'
+    });
+
+    console.log('Signin: Set auth cookies for user:', user.email);
+    return response;
 
   } catch (error: any) {
     console.error('Sign in error:', error);

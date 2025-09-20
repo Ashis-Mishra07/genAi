@@ -17,6 +17,8 @@ import {
   DollarSign,
   Users,
 } from "lucide-react";
+import { useTranslation } from "@/lib/i18n/hooks";
+import LanguageSelector from "@/components/ui/language-selector";
 
 interface Product {
   id: string;
@@ -36,6 +38,7 @@ interface Stats {
 
 export default function ArtisanDashboard() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [user, setUser] = useState<any>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -48,43 +51,83 @@ export default function ArtisanDashboard() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    checkAuth();
-    fetchDashboardData();
+    console.log('Component mounted, checking authentication...');
+    if (checkAuth()) {
+      fetchDashboardData();
+    }
   }, []);
 
   const checkAuth = () => {
-    const token = localStorage.getItem("auth_token");
+    const token = localStorage.getItem("auth_token") || localStorage.getItem("accessToken");
     const role = localStorage.getItem("user_role");
 
+    console.log('Auth check:', { hasToken: !!token, role });
+
     if (!token || role !== "ARTISAN") {
+      console.log('Authentication failed, redirecting to login');
       router.push("/auth/artisan");
-      return;
+      return false;
     }
+    return true;
   };
 
   const fetchDashboardData = async () => {
     try {
+      setIsLoading(true);
+      
+      // Get token from localStorage
+      const token = localStorage.getItem("auth_token") || localStorage.getItem("accessToken");
+      
+      if (!token) {
+        console.error('No authentication token found');
+        router.push("/auth/artisan");
+        return;
+      }
+
+      console.log('Fetching user data with token:', token.substring(0, 20) + '...');
+
       // Fetch user info
       const userResponse = await fetch("/api/auth/me", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       });
 
+      console.log('User API response:', userResponse.status);
+
       if (userResponse.ok) {
         const userData = await userResponse.json();
+        console.log('User data received:', userData);
         setUser(userData.user);
+      } else {
+        console.error('Failed to fetch user data:', userResponse.status);
+        const errorData = await userResponse.text();
+        console.error('Error details:', errorData);
+        
+        if (userResponse.status === 401) {
+          // Token might be expired, redirect to login
+          localStorage.removeItem("auth_token");
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("user_role");
+          router.push("/auth/artisan");
+          return;
+        }
       }
 
       // Fetch products and stats
       const productsResponse = await fetch("/api/products", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       });
 
+      console.log('Products API response:', productsResponse.status);
+
       if (productsResponse.ok) {
         const productsData = await productsResponse.json();
+        console.log('Products data received:', productsData);
         
         // Set products with proper mapping
         const mappedProducts = (productsData.products || []).map((product: any) => ({
@@ -213,6 +256,7 @@ export default function ArtisanDashboard() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div>
+        <p className="mt-4 text-gray-600">{t('loadingDashboard')}</p>
       </div>
     );
   }
@@ -228,17 +272,26 @@ export default function ArtisanDashboard() {
                 <Palette className="h-8 w-8 text-orange-500 mr-3" />
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">
-                    Artisan Studio
+                    {t('artisanStudio')}
                   </h1>
                   <p className="text-sm text-gray-600">
-                    Welcome back, {user?.name}
+                    {t('welcomeBack')}, {user?.name || user?.email || 'Artisan'}
                     {user?.location && ` from ${user.location}`}
                   </p>
+                  {/* Debug info - remove in production */}
+                  {process.env.NODE_ENV === 'development' && (
+                    <div className="text-xs text-gray-400 mt-1">
+                      Debug: User loaded: {user ? 'Yes' : 'No'} | 
+                      Name: {user?.name || 'None'} | 
+                      Email: {user?.email || 'None'}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
             <div className="flex items-center space-x-4">
+              <LanguageSelector />
               <button 
                 onClick={() => router.push("/artisan/messages")}
                 className="p-2 text-gray-400 hover:text-gray-500 relative">
@@ -295,7 +348,7 @@ export default function ArtisanDashboard() {
                 <p className="text-2xl font-semibold text-gray-900">
                   {stats.totalProducts}
                 </p>
-                <p className="text-gray-600">Total Products</p>
+                <p className="text-gray-600">{t('totalProducts')}</p>
               </div>
             </div>
           </div>
@@ -307,7 +360,7 @@ export default function ArtisanDashboard() {
                 <p className="text-2xl font-semibold text-gray-900">
                   {stats.activeProducts}
                 </p>
-                <p className="text-gray-600">Active Products</p>
+                <p className="text-gray-600">{t('activeProducts')}</p>
               </div>
             </div>
           </div>
@@ -319,7 +372,7 @@ export default function ArtisanDashboard() {
                 <p className="text-2xl font-semibold text-gray-900">
                   {stats.totalViews}
                 </p>
-                <p className="text-gray-600">Total Views</p>
+                <p className="text-gray-600">{t('totalViews')}</p>
               </div>
             </div>
           </div>
@@ -331,7 +384,7 @@ export default function ArtisanDashboard() {
                 <p className="text-2xl font-semibold text-gray-900">
                   {stats.totalOrders}
                 </p>
-                <p className="text-gray-600">Total Orders</p>
+                <p className="text-gray-600">{t('totalOrders')}</p>
               </div>
             </div>
           </div>
@@ -340,32 +393,32 @@ export default function ArtisanDashboard() {
         {/* Quick Actions */}
         <div className="bg-white rounded-lg shadow mb-8 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Quick Actions
+            {t('quickActions')}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <button 
               onClick={handleAddProduct}
               className="flex items-center justify-center p-4 border-2 border-dashed border-orange-300 rounded-lg text-orange-600 hover:border-orange-500 hover:text-orange-700 transition-colors">
               <Plus className="h-6 w-6 mr-2" />
-              Add New Product
+              {t('createProduct')}
             </button>
             <button 
               onClick={handleViewMessages}
               className="flex items-center justify-center p-4 border-2 border-dashed border-blue-300 rounded-lg text-blue-600 hover:border-blue-500 hover:text-blue-700 transition-colors">
               <MessageSquare className="h-6 w-6 mr-2" />
-              Admin Support
+              {t('chatWithCustomers')}
             </button>
             <button 
               onClick={handleViewFeedback}
               className="flex items-center justify-center p-4 border-2 border-dashed border-purple-300 rounded-lg text-purple-600 hover:border-purple-500 hover:text-purple-700 transition-colors">
               <Heart className="h-6 w-6 mr-2" />
-              Customer Feedback
+              {t('customerFeedback')}
             </button>
             <button 
               onClick={handleViewAnalytics}
               className="flex items-center justify-center p-4 border-2 border-dashed border-green-300 rounded-lg text-green-600 hover:border-green-500 hover:text-green-700 transition-colors">
               <TrendingUp className="h-6 w-6 mr-2" />
-              View Analytics
+              {t('viewAnalytics')}
             </button>
           </div>
         </div>
@@ -374,13 +427,13 @@ export default function ArtisanDashboard() {
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h2 className="text-lg font-semibold text-gray-900">
-              Your Products
+              {t('recentProducts')}
             </h2>
             <button 
               onClick={handleAddProduct}
               className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors flex items-center">
               <Plus className="h-4 w-4 mr-2" />
-              Add Product
+              {t('createProduct')}
             </button>
           </div>
 
@@ -389,15 +442,15 @@ export default function ArtisanDashboard() {
               <div className="text-center py-12">
                 <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No products yet
+                  {t('noProducts')}
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  Start by adding your first handmade product
+                  {t('startCreating')}
                 </p>
                 <button 
                   onClick={handleAddProduct}
                   className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors">
-                  Create Your First Product
+                  {t('createProduct')}
                 </button>
               </div>
             ) : (
@@ -435,23 +488,26 @@ export default function ArtisanDashboard() {
                               ? "bg-green-100 text-green-800"
                               : "bg-gray-100 text-gray-800"
                           }`}>
-                          {product.isActive ? "Active" : "Inactive"}
+                          {product.isActive ? t('active') : t('inactive')}
                         </span>
 
                         <div className="flex space-x-2">
                           <button 
                             onClick={() => handleViewProduct(product.id)}
-                            className="p-1 text-gray-400 hover:text-blue-500">
+                            className="p-1 text-gray-400 hover:text-blue-500"
+                            title={t('viewProduct')}>
                             <Eye className="h-4 w-4" />
                           </button>
                           <button 
                             onClick={() => handleEditProduct(product.id)}
-                            className="p-1 text-gray-400 hover:text-green-500">
+                            className="p-1 text-gray-400 hover:text-green-500"
+                            title={t('editProduct')}>
                             <Edit className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleDeleteProduct(product.id)}
-                            className="p-1 text-gray-400 hover:text-red-500">
+                            className="p-1 text-gray-400 hover:text-red-500"
+                            title={t('deleteProduct')}>
                             <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
