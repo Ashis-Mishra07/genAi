@@ -178,17 +178,53 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('Product creation API called');
+    console.log('Environment check:', {
+      nodeEnv: process.env.NODE_ENV,
+      jwtSecret: !!process.env.JWT_SECRET,
+      databaseUrl: !!process.env.DATABASE_URL,
+      databaseUrlLength: process.env.DATABASE_URL?.length || 0
+    });
+    
+    // Check if critical environment variables are missing
+    if (!process.env.DATABASE_URL) {
+      console.error('Critical error: DATABASE_URL is missing');
+      return NextResponse.json(
+        { error: 'Server configuration error: Database not configured' },
+        { status: 500 }
+      );
+    }
+    
+    if (!process.env.JWT_SECRET) {
+      console.error('Critical error: JWT_SECRET is missing');
+      return NextResponse.json(
+        { error: 'Server configuration error: Authentication not configured' },
+        { status: 500 }
+      );
+    }
+    
     // Authentication required for creating products
+    console.log('Attempting to get current user...');
     const user = await getCurrentUser(request);
+    console.log('Current user result:', user ? { id: user.id, role: user.role } : 'No user');
+    
     if (!user) {
+      console.log('Authentication failed - no user found');
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
       );
     }
 
+    console.log('Parsing request body...');
     const productData = await request.json();
-    console.log('Product creation request:', { user, productData });
+    console.log('Product creation request:', { 
+      userId: user.id, 
+      userRole: user.role, 
+      productName: productData.name,
+      hasImageUrl: !!productData.imageUrl,
+      hasDescription: !!productData.description
+    });
     
     // Validate required fields
     if (!productData.name || !productData.price) {
@@ -223,15 +259,33 @@ export async function POST(request: NextRequest) {
     // Add user ID to product data
     productData.userId = targetUserId;
 
-    const product = await createProduct(productData);
+    console.log('Creating product with data:', {
+      name: productData.name,
+      userId: targetUserId,
+      price: productData.price,
+      hasImageUrl: !!productData.imageUrl
+    });
 
-    // Invalidate all product-related caches after creating a new product
+    const product = await createProduct(productData);
+    console.log('Product created successfully:', { id: product.id, name: product.name });
+
+    // Invalidate specific product-related caches after creating a new product
     try {
-      const productCacheKeys = await cache.getKeys('products:*');
-      for (const key of productCacheKeys) {
+      // Instead of using pattern matching (which might fail on Upstash), 
+      // invalidate specific cache keys that we know exist
+      const cacheKeysToInvalidate = [
+        'products:all:nosearch:nocategory:50:0',
+        'products:all:nosearch:nocategory:20:0',
+        'products:featured:nosearch:nocategory:4:0',
+        'products:featured:nosearch:nocategory:8:0',
+        'products:all:nosearch:nocategory:10:0'
+      ];
+      
+      for (const key of cacheKeysToInvalidate) {
         await deleteCache(key);
+        await deleteCache(key + ':minimal'); // Also delete minimal versions
       }
-      console.log('Products: Invalidated all product caches after creating new product');
+      console.log('Products: Invalidated common product cache keys after creating new product');
     } catch (error) {
       console.log('Products: Failed to invalidate cache, continuing without cache cleanup:', error);
     }
@@ -243,11 +297,23 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
   } catch (error: any) {
     console.error('Product creation error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    
+    // Return a more detailed error response for debugging
     return NextResponse.json(
       { 
         success: false,
         error: 'Failed to create product',
-        details: error.message
+        details: error.message,
+        // Include more context in development/staging
+        ...(process.env.NODE_ENV !== 'production' && { 
+          stack: error.stack,
+          fullError: error.toString()
+        })
       },
       { status: 500 }
     );
