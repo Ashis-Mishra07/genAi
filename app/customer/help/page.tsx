@@ -15,6 +15,7 @@ import {
     Phone,
     RefreshCw,
     Send,
+    Star,
     User
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -114,6 +115,14 @@ export default function CustomerHelpPage() {
   const [isSubmittingRefund, setIsSubmittingRefund] = useState(false);
   const [recentTickets, setRecentTickets] = useState<SupportTicket[]>([]);
   const [loadingTickets, setLoadingTickets] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [ratingData, setRatingData] = useState({
+    ticketId: '',
+    refundId: '',
+    customerEmail: '',
+    rating: 0,
+    feedback: ''
+  });
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -229,6 +238,39 @@ export default function CustomerHelpPage() {
     } finally {
       setIsSubmittingRefund(false);
     }
+  };
+
+  const submitRating = async () => {
+    try {
+      const response = await fetch('/api/support/rating', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ratingData)
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        alert('Thank you for your feedback!');
+        setShowRatingModal(false);
+        setRatingData({ ticketId: '', refundId: '', customerEmail: '', rating: 0, feedback: '' });
+      } else {
+        throw new Error('Failed to submit rating');
+      }
+    } catch (error) {
+      console.error('Rating submission error:', error);
+      alert('Failed to submit rating. Please try again.');
+    }
+  };
+
+  const openRatingModal = (ticketId?: string, refundId?: string) => {
+    setRatingData({
+      ticketId: ticketId || '',
+      refundId: refundId || '',
+      customerEmail: supportForm.email || ticketForm.customerEmail || refundForm.customerEmail || '',
+      rating: 0,
+      feedback: ''
+    });
+    setShowRatingModal(true);
   };
 
   const callAIHelpAssistant = async (message: string) => {
@@ -971,14 +1013,14 @@ export default function CustomerHelpPage() {
                   <Mail className="h-5 w-5 text-orange-500" />
                   <div>
                     <p className="text-white font-medium">Email Support</p>
-                    <p className="text-slate-400 text-sm">support@artisans.ai</p>
+                    <p className="text-slate-400 text-sm">mishralucky074@gmail.com</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <Phone className="h-5 w-5 text-orange-500" />
                   <div>
                     <p className="text-white font-medium">Phone Support</p>
-                    <p className="text-slate-400 text-sm">+91 1800-123-4567</p>
+                    <p className="text-slate-400 text-sm">+16693123723</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
@@ -993,7 +1035,16 @@ export default function CustomerHelpPage() {
 
             {/* Recent Support Queries */}
             <div className="bg-slate-800 rounded-lg border border-slate-700 p-6">
-              <h3 className="text-lg font-bold text-white mb-4">Recent Queries</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-white">Recent Queries</h3>
+                <button
+                  onClick={() => openRatingModal()}
+                  className="text-orange-500 hover:text-orange-400 text-sm flex items-center"
+                >
+                  <Star className="h-4 w-4 mr-1" />
+                  Rate Experience
+                </button>
+              </div>
               <div className="space-y-3">
                 <div className="flex items-start space-x-3">
                   <CheckCircle className="h-5 w-5 text-green-400 mt-0.5" />
@@ -1037,6 +1088,84 @@ export default function CustomerHelpPage() {
           </div>
         </div>
       </div>
+
+      {/* Rating Modal */}
+      {showRatingModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 rounded-lg border border-slate-700 w-full max-w-md">
+            <div className="p-6 border-b border-slate-700">
+              <h3 className="text-xl font-bold text-white">Rate Your Experience</h3>
+              <p className="text-slate-400 mt-2">How satisfied are you with our support?</p>
+            </div>
+
+            <div className="p-6">
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-white mb-3">Rating</label>
+                <div className="flex items-center space-x-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => setRatingData({...ratingData, rating: star})}
+                      className={`h-8 w-8 transition-colors ${
+                        star <= ratingData.rating 
+                          ? 'text-yellow-400 fill-current' 
+                          : 'text-slate-600 hover:text-slate-400'
+                      }`}
+                    >
+                      <Star className="h-full w-full" />
+                    </button>
+                  ))}
+                  <span className="ml-3 text-white font-medium">
+                    {ratingData.rating > 0 ? `${ratingData.rating}/5` : 'Select rating'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-white mb-2">Email (Optional)</label>
+                <input
+                  type="email"
+                  value={ratingData.customerEmail}
+                  onChange={(e) => setRatingData({...ratingData, customerEmail: e.target.value})}
+                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500"
+                  placeholder="your@email.com"
+                />
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-white mb-2">Feedback (Optional)</label>
+                <textarea
+                  value={ratingData.feedback}
+                  onChange={(e) => setRatingData({...ratingData, feedback: e.target.value})}
+                  rows={3}
+                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 resize-none"
+                  placeholder="Tell us about your experience..."
+                />
+              </div>
+
+              <div className="flex items-center justify-end space-x-3">
+                <button
+                  onClick={() => {
+                    setShowRatingModal(false);
+                    setRatingData({ ticketId: '', refundId: '', customerEmail: '', rating: 0, feedback: '' });
+                  }}
+                  className="px-4 py-2 text-slate-400 hover:text-white transition-colors"
+                >
+                  Skip
+                </button>
+                <button
+                  onClick={submitRating}
+                  disabled={ratingData.rating === 0}
+                  className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 disabled:bg-slate-600 transition-colors flex items-center"
+                >
+                  <Star className="h-4 w-4 mr-2" />
+                  Submit Rating
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
