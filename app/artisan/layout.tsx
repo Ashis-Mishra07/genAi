@@ -1,13 +1,21 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import {
-  Palette, Package, MessageSquare, TrendingUp, User, LogOut, Heart, 
-  Plus, BarChart3, Bell, HelpCircle
-} from 'lucide-react';
-import { LanguageProvider, useLanguage } from '@/lib/language/LanguageContext';
 import LanguageSelector from '@/components/ui/LanguageSelector';
+import { LanguageProvider, useLanguage } from '@/lib/language/LanguageContext';
+import {
+    BarChart3, Bell,
+    Headphones,
+    Heart,
+    HelpCircle,
+    LogOut,
+    MessageSquare,
+    Package,
+    Palette,
+    Plus,
+    TrendingUp, User
+} from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 function ArtisanLayoutContent({
   children,
@@ -90,6 +98,11 @@ function ArtisanLayoutContent({
       name: t('analytics'),
       href: '/artisan/analytics',
       icon: BarChart3,
+    },
+    {
+      name: 'Support Dashboard',
+      href: '/artisan/support-dashboard',
+      icon: Headphones,
     },
     {
       name: t('feedback'),

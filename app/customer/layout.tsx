@@ -1,10 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
 import {
-  Package, TrendingUp, User, ShoppingCart, Heart, Bell, LogOut, Star
+    Bell,
+    Heart,
+    LogOut,
+    Package,
+    ShoppingCart,
+    Star,
+    TrendingUp, User
 } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export default function CustomerLayout({
   children,
@@ -129,7 +135,12 @@ export default function CustomerLayout({
 
             <div className="pt-4 border-t border-slate-700 mt-4">
               <button
-                className="w-full flex items-center px-3 py-2 text-left text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg transition-colors"
+                onClick={() => router.push('/customer/help')}
+                className={`w-full flex items-center px-3 py-2 text-left rounded-lg transition-colors ${
+                  isActive('/customer/help')
+                    ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20'
+                    : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                }`}
               >
                 <Bell className="h-5 w-5 mr-3" />
                 Need Help?
