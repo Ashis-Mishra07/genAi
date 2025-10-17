@@ -1,0 +1,385 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  ARTISAN
+  CUSTOMER
+}
+
+enum UserStatus {
+  ONLINE
+  OFFLINE
+  AWAY
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum NotificationType {
+  ORDER_PLACED
+  ORDER_UPDATED
+  PRODUCT_SOLD
+  GENERAL
+}
+
+enum InquirySource {
+  WEBSITE
+  INSTAGRAM
+  WHATSAPP
+  EMAIL
+  PHONE
+}
+
+enum InquiryStatus {
+  NEW
+  CONTACTED
+  NEGOTIATING
+  CONVERTED
+  LOST
+}
+
+enum ChatRoomType {
+  DIRECT
+  GROUP
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  SYSTEM
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+  PROCESSING
+  ENHANCED
+  POSTED
+}
+
+enum ProcessingStatus {
+  PENDING
+  PROCESSING
+  ENHANCED
+  POSTED
+  FAILED
+}
+
+enum SenderType {
+  ADMIN
+  ARTISAN
+}
+
+model User {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email        String     @unique @db.VarChar(255)
+  passwordHash String?    @map("password_hash") @db.VarChar(255)
+  name         String?    @db.VarChar(255)
+  phone        String?    @db.VarChar(50)
+  role         UserRole   @default(CUSTOMER)
+  specialty    String?    @db.VarChar(255) // For artisans
+  location     String?    @db.VarChar(255) // For artisans
+  bio          String?    @db.Text
+  avatar       String?    @db.Text
+  status       UserStatus @default(OFFLINE)
+  isActive     Boolean    @default(true) @map("is_active")
+  lastLoginAt  DateTime?  @map("last_login_at") @db.Timestamptz(6)
+  lastSeen     DateTime   @default(now()) @map("last_seen") @db.Timestamptz(6)
+  language     String     @default("en") @db.VarChar(10)
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  refreshTokens         RefreshToken[]
+  products              Product[]
+  customerOrders        Order[]               @relation("CustomerOrders")
+  notifications         Notification[]
+  productInquiries      ProductInquiry[]
+  chatRoomParticipants  ChatRoomParticipant[]
+  sentMessages          ChatMessage[]         @relation("SentMessages")
+  messageReadStatus     MessageReadStatus[]
+  adminMessagesSent     AdminMessage[]        @relation("AdminMessagesSent")
+  adminMessagesReceived AdminMessage[]        @relation("AdminMessagesReceived")
+
+  @@map("users")
+}
+
+model AdminPasscode {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  passcode  String    @db.VarChar(6)
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  expiresAt DateTime? @map("expires_at") @db.Timestamptz(6)
+  usedCount Int       @default(0) @map("used_count")
+  maxUses   Int       @default(100) @map("max_uses")
+
+  @@map("admin_passcodes")
+}
+
+model RefreshToken {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  tokenHash  String    @map("token_hash") @db.VarChar(255)
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  revokedAt  DateTime? @map("revoked_at") @db.Timestamptz(6)
+  deviceInfo String?   @map("device_info") @db.Text
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model Product {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  artisanId        String   @map("artisan_id") @db.Uuid
+  name             String   @db.VarChar(255)
+  description      String?  @db.Text
+  story            String?  @db.Text
+  price            Decimal  @db.Decimal(10, 2)
+  currency         String   @default("INR") @db.VarChar(10)
+  imageUrl         String?  @map("image_url") @db.Text
+  posterUrl        String?  @map("poster_url") @db.Text
+  category         String?  @db.VarChar(100)
+  tags             String[] @db.Text
+  materials        String?  @db.VarChar(255)
+  artistName       String?  @map("artist_name") @db.VarChar(255)
+  culturalOrigin   String?  @map("cultural_origin") @db.VarChar(255)
+  dimensions       String?  @db.VarChar(100)
+  weight           String?  @db.VarChar(50)
+  instagramPostId  String?  @map("instagram_post_id") @db.VarChar(100)
+  instagramMediaId String?  @map("instagram_media_id") @db.VarChar(100)
+  instagramUrl     String?  @map("instagram_url") @db.Text
+  isActive         Boolean  @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  artisan    User             @relation(fields: [artisanId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+  inquiries  ProductInquiry[]
+
+  @@index([artisanId])
+  @@index([isActive])
+  @@index([category])
+  @@map("products")
+}
+
+model Order {
+  id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderNumber       String      @unique @map("order_number") @db.VarChar(50)
+  customerId        String      @map("customer_id") @db.Uuid
+  status            OrderStatus @default(PENDING)
+  total             Decimal     @db.Decimal(10, 2)
+  currency          String      @default("INR") @db.VarChar(3)
+  shippingAddress   Json        @map("shipping_address") @db.JsonB
+  billingAddress    String?     @map("billing_address") @db.Text
+  paymentMethod     String      @map("payment_method") @db.VarChar(20)
+  trackingNumber    String?     @map("tracking_number") @db.VarChar(100)
+  estimatedDelivery DateTime?   @map("estimated_delivery") @db.Date
+  createdAt         DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  customer   User        @relation("CustomerOrders", fields: [customerId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+
+  @@index([customerId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderId     String   @map("order_id") @db.Uuid
+  productId   String   @map("product_id") @db.Uuid
+  name        String   @db.VarChar(255)
+  price       Decimal  @db.Decimal(10, 2)
+  quantity    Int      @default(1)
+  artisanName String?  @map("artisan_name") @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+model Notification {
+  id        String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  type      NotificationType
+  title     String           @db.VarChar(255)
+  message   String           @db.Text
+  data      Json             @default("{}") @db.JsonB
+  isRead    Boolean          @default(false) @map("is_read")
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model ProductInquiry {
+  id         String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  productId  String        @map("product_id") @db.Uuid
+  customerId String?       @map("customer_id") @db.Uuid
+  buyerName  String?       @map("buyer_name") @db.VarChar(255)
+  buyerEmail String?       @map("buyer_email") @db.VarChar(255)
+  buyerPhone String?       @map("buyer_phone") @db.VarChar(50)
+  message    String        @db.Text
+  source     InquirySource @default(WEBSITE)
+  status     InquiryStatus @default(NEW)
+  createdAt  DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  product  Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  customer User?   @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@index([productId])
+  @@index([customerId])
+  @@index([status])
+  @@map("product_inquiries")
+}
+
+model ChatRoom {
+  id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String?      @db.VarChar(255)
+  type      ChatRoomType @default(DIRECT)
+  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  participants ChatRoomParticipant[]
+  messages     ChatMessage[]
+
+  @@map("chat_rooms")
+}
+
+model ChatRoomParticipant {
+  id       String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  roomId   String   @map("room_id") @db.Uuid
+  userId   String   @map("user_id") @db.Uuid
+  role     String   @default("MEMBER") @db.VarChar(20) // ADMIN, MEMBER
+  joinedAt DateTime @default(now()) @map("joined_at") @db.Timestamptz(6)
+
+  // Relations
+  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@map("chat_room_participants")
+}
+
+model ChatMessage {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  roomId      String        @map("room_id") @db.Uuid
+  senderId    String        @map("sender_id") @db.Uuid
+  messageType MessageType   @default(TEXT) @map("message_type")
+  content     String?       @db.Text
+  imageUrl    String?       @map("image_url") @db.Text
+  status      MessageStatus @default(SENT)
+  metadata    Json?         @db.JsonB // Additional data for system messages, image processing status
+  replyToId   String?       @map("reply_to_id") @db.Uuid
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  room                 ChatRoom               @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sender               User                   @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  replyTo              ChatMessage?           @relation("MessageReplies", fields: [replyToId], references: [id])
+  replies              ChatMessage[]          @relation("MessageReplies")
+  readStatus           MessageReadStatus[]
+  imageProcessingQueue ImageProcessingQueue[]
+
+  @@index([roomId])
+  @@index([senderId])
+  @@index([createdAt])
+  @@map("chat_messages")
+}
+
+model MessageReadStatus {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  messageId String   @map("message_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  readAt    DateTime @default(now()) @map("read_at") @db.Timestamptz(6)
+
+  // Relations
+  message ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+  @@index([userId])
+  @@map("message_read_status")
+}
+
+model ImageProcessingQueue {
+  id                    String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  messageId             String           @map("message_id") @db.Uuid
+  originalImageUrl      String           @map("original_image_url") @db.Text
+  enhancedImageUrl      String?          @map("enhanced_image_url") @db.Text
+  posterUrl             String?          @map("poster_url") @db.Text
+  instagramPostId       String?          @map("instagram_post_id") @db.Text
+  status                ProcessingStatus @default(PENDING)
+  processingStartedAt   DateTime?        @map("processing_started_at") @db.Timestamptz(6)
+  processingCompletedAt DateTime?        @map("processing_completed_at") @db.Timestamptz(6)
+  errorMessage          String?          @map("error_message") @db.Text
+  createdAt             DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  message ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@map("image_processing_queue")
+}
+
+model AdminMessage {
+  id             Int        @id @default(autoincrement())
+  senderId       String     @map("sender_id") @db.Uuid
+  senderType     SenderType @map("sender_type")
+  recipientId    String     @map("recipient_id") @db.Uuid
+  recipientType  SenderType @map("recipient_type")
+  message        String     @db.Text
+  attachmentUrl  String?    @map("attachment_url") @db.Text
+  attachmentName String?    @map("attachment_name") @db.VarChar(255)
+  createdAt      DateTime   @default(now()) @map("created_at") @db.Timestamp(6)
+  isRead         Boolean    @default(false) @map("is_read")
+  updatedAt      DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  // Relations
+  sender    User @relation("AdminMessagesSent", fields: [senderId], references: [id])
+  recipient User @relation("AdminMessagesReceived", fields: [recipientId], references: [id])
+
+  @@index([senderId, senderType])
+  @@index([recipientId, recipientType])
+  @@index([createdAt])
+  @@index([isRead])
+  @@map("admin_messages")
+}
