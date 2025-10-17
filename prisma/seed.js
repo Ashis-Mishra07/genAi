@@ -133,6 +133,7 @@ async function main() {
         culturalOrigin: 'Gujarat, India',
         dimensions: '6.5 meters length',
         weight: '500 grams',
+        imageUrl: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400&h=400&fit=crop',
         isActive: true,
       },
       {
@@ -146,6 +147,7 @@ async function main() {
         culturalOrigin: 'Rajasthan, India',
         dimensions: '2.5 meters length',
         weight: '150 grams',
+        imageUrl: 'https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=400&h=400&fit=crop',
         isActive: true,
       },
     ];

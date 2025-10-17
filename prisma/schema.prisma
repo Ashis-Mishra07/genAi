@@ -116,6 +116,7 @@ model User {
   messageReadStatus     MessageReadStatus[]
   adminMessagesSent     AdminMessage[]        @relation("AdminMessagesSent")
   adminMessagesReceived AdminMessage[]        @relation("AdminMessagesReceived")
+  cartItems             CartItem[]            @relation("UserCartItems")
 
   @@map("users")
 }
@@ -176,6 +177,7 @@ model Product {
   artisan    User             @relation(fields: [artisanId], references: [id], onDelete: Cascade)
   orderItems OrderItem[]
   inquiries  ProductInquiry[]
+  cartItems  CartItem[]       @relation("ProductCartItems")
 
   @@index([artisanId])
   @@index([isActive])
@@ -267,6 +269,24 @@ model ProductInquiry {
   @@index([customerId])
   @@index([status])
   @@map("product_inquiries")
+}
+
+model CartItem {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  user    User    @relation("UserCartItems", fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation("ProductCartItems", fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId]) // Prevent duplicate items in cart
+  @@index([userId])
+  @@index([productId])
+  @@map("cart_items")
 }
 
 model ChatRoom {

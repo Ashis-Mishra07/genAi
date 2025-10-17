@@ -1,14 +1,24 @@
 import { Redis } from '@upstash/redis';
 
-// Create Redis instance with proper Upstash configuration
-export const redisClient = new Redis({
+// Check if Redis configuration is available
+const REDIS_ENABLED = process.env.REDIS_URL && process.env.REDIS_TOKEN;
+
+// Create Redis instance with proper Upstash configuration (only if credentials are available)
+export const redisClient = REDIS_ENABLED ? new Redis({
   url: process.env.REDIS_URL!,
   token: process.env.REDIS_TOKEN!,
-});
+}) : null;
 
 // Test the connection on initialization
-console.log('Redis: Initializing with URL:', process.env.REDIS_URL ? 'Set' : 'Missing');
-console.log('Redis: Initializing with Token:', process.env.REDIS_TOKEN ? 'Set' : 'Missing');
+console.log('Redis: Configuration check:', {
+  url: process.env.REDIS_URL ? 'Set' : 'Missing',
+  token: process.env.REDIS_TOKEN ? 'Set' : 'Missing',
+  enabled: REDIS_ENABLED
+});
+
+if (!REDIS_ENABLED) {
+  console.log('Redis: Disabled - Missing configuration. Application will continue without caching.');
+}
 
 // Constants for handling large data
 const MAX_VALUE_SIZE = 900000; // ~900KB limit for Redis values (conservative)
@@ -17,10 +27,12 @@ const CHUNK_SIZE = 800000; // ~800KB per chunk
 // Cache utility functions
 export class CacheService {
   private static instance: CacheService;
-  private redis: Redis;
+  private redis: Redis | null;
+  private enabled: boolean;
 
   constructor() {
     this.redis = redisClient;
+    this.enabled = Boolean(REDIS_ENABLED && redisClient !== null);
   }
 
   static getInstance(): CacheService {
@@ -32,6 +44,11 @@ export class CacheService {
 
   // Set data with expiration (in seconds) - simplified approach
   async set(key: string, value: any, expiration: number = 3600): Promise<void> {
+    if (!this.enabled || !this.redis) {
+      console.log(`Redis: Disabled - skipping set for key "${key}"`);
+      return;
+    }
+
     try {
       const serializedValue = JSON.stringify(value);
       const valueSize = Buffer.byteLength(serializedValue, 'utf8');
@@ -50,7 +67,8 @@ export class CacheService {
     } catch (error) {
       console.error(`Redis SET error for key "${key}":`, error);
       console.log('Redis: Continuing without cache...');
-      // Don't throw error, just log and continue
+      // Disable Redis for this instance if connection fails
+      this.enabled = false;
     }
   }
 

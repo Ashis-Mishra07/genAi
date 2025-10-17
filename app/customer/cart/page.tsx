@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ShoppingCart, Plus, Minus, Trash2, Heart, ArrowRight, Package
@@ -8,75 +8,144 @@ import {
 
 interface CartItem {
   id: number;
-  productId: number;
+  productId: string;
   name: string;
+  description?: string;
   price: number;
-  originalPrice: number;
-  image: string;
-  artisan: string;
-  location: string;
+  currency: string;
+  imageUrl?: string;
+  artisanName: string;
+  artisanLocation: string;
   quantity: number;
   inStock: boolean;
-  category: string;
+  category?: string;
+  addedAt: string;
+}
+
+interface CartTotals {
+  subtotal: number;
+  shipping: number;
+  tax: number;
+  total: number;
 }
 
 export default function CustomerCartPage() {
   const router = useRouter();
   
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: 1,
-      productId: 1,
-      name: "Handwoven Silk Saree",
-      price: 8500,
-      originalPrice: 12000,
-      image: "/api/placeholder/300/300",
-      artisan: "Priya Sharma",
-      location: "Varanasi, UP",
-      quantity: 1,
-      inStock: true,
-      category: "Textiles"
-    },
-    {
-      id: 2,
-      productId: 3,
-      name: "Wooden Jewelry Box",
-      price: 1800,
-      originalPrice: 2500,
-      image: "/api/placeholder/300/300",
-      artisan: "Meera Devi",
-      location: "Kashmir",
-      quantity: 2,
-      inStock: true,
-      category: "Woodwork"
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [totals, setTotals] = useState<CartTotals>({
+    subtotal: 0,
+    shipping: 0,
+    tax: 0,
+    total: 0
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchCartItems();
+  }, []);
+
+  const checkAuth = () => {
+    const token = localStorage.getItem("auth_token") || localStorage.getItem("accessToken");
+    const role = localStorage.getItem("user_role");
+
+    if (!token) {
+      router.push("/auth/customer");
+      return false;
     }
-  ]);
-
-  const updateQuantity = (id: number, change: number) => {
-    setCartItems(items => 
-      items.map(item => {
-        if (item.id === id) {
-          const newQuantity = Math.max(0, item.quantity + change);
-          return { ...item, quantity: newQuantity };
-        }
-        return item;
-      }).filter(item => item.quantity > 0)
-    );
+    return true;
   };
 
-  const removeItem = (id: number) => {
-    setCartItems(items => items.filter(item => item.id !== id));
+  const fetchCartItems = async () => {
+    if (!checkAuth()) return;
+
+    try {
+      setIsLoading(true);
+      const token = localStorage.getItem("auth_token") || localStorage.getItem("accessToken");
+
+      const response = await fetch("/api/cart/details", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCartItems(data.cartItems || []);
+        setTotals(data.totals || { subtotal: 0, shipping: 0, tax: 0, total: 0 });
+      } else if (response.status === 401) {
+        router.push("/auth/customer");
+      } else {
+        setError('Failed to load cart items');
+      }
+    } catch (error) {
+      console.error("Error fetching cart:", error);
+      setError('Failed to load cart items');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const moveToWishlist = (id: number) => {
+  const updateQuantity = async (id: number, change: number) => {
+    const item = cartItems.find(item => item.id === id);
+    if (!item) return;
+
+    const newQuantity = Math.max(0, item.quantity + change);
+    
+    try {
+      const token = localStorage.getItem("auth_token") || localStorage.getItem("accessToken");
+      
+      const response = await fetch("/api/cart", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          itemId: id,
+          quantity: newQuantity
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh cart items to get updated totals
+        fetchCartItems();
+      }
+    } catch (error) {
+      console.error("Error updating cart:", error);
+    }
+  };
+
+  const removeItem = async (id: number) => {
+    try {
+      const token = localStorage.getItem("auth_token") || localStorage.getItem("accessToken");
+      
+      const response = await fetch(`/api/cart?itemId=${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        // Refresh cart items
+        fetchCartItems();
+      }
+    } catch (error) {
+      console.error("Error removing item:", error);
+    }
+  };
+
+  const moveToWishlist = async (id: number) => {
     // In a real app, this would move the item to wishlist
-    removeItem(id);
+    // For now, just remove the item
+    await removeItem(id);
   };
-
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = subtotal > 5000 ? 0 : 299;
-  const tax = Math.round(subtotal * 0.18); // 18% GST
-  const total = subtotal + shipping + tax;
 
   return (
     <div className="min-h-screen bg-slate-900">
@@ -94,7 +163,7 @@ export default function CustomerCartPage() {
                 <ShoppingCart className="h-4 w-4 text-white" />
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium text-white">Total: ₹{total.toLocaleString()}</p>
+                <p className="text-sm font-medium text-white">Total: ₹{totals.total.toLocaleString()}</p>
                 <p className="text-xs text-slate-400">{cartItems.length} items</p>
               </div>
             </div>
@@ -103,7 +172,25 @@ export default function CustomerCartPage() {
       </div>
 
       <div className="p-6">
-        {cartItems.length === 0 ? (
+        {/* Loading State */}
+        {isLoading ? (
+          <div className="text-center py-16">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
+            <p className="text-slate-400">Loading your cart...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-16">
+            <ShoppingCart className="h-24 w-24 text-slate-400 mx-auto mb-6" />
+            <h2 className="text-2xl font-bold text-white mb-4">Error loading cart</h2>
+            <p className="text-slate-400 mb-8">{error}</p>
+            <button
+              onClick={fetchCartItems}
+              className="bg-orange-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : cartItems.length === 0 ? (
           // Empty Cart
           <div className="text-center py-16">
             <ShoppingCart className="h-24 w-24 text-slate-400 mx-auto mb-6" />
@@ -124,8 +211,16 @@ export default function CustomerCartPage() {
                 <div key={item.id} className="bg-slate-800 rounded-lg p-6 border border-slate-700">
                   <div className="flex items-center space-x-4">
                     {/* Product Image */}
-                    <div className="w-24 h-24 bg-slate-700 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Package className="h-8 w-8 text-slate-400" />
+                    <div className="w-24 h-24 bg-slate-700 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      {item.imageUrl ? (
+                        <img
+                          src={item.imageUrl}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <Package className="h-8 w-8 text-slate-400" />
+                      )}
                     </div>
 
                     {/* Product Details */}
@@ -133,19 +228,18 @@ export default function CustomerCartPage() {
                       <div className="flex items-start justify-between">
                         <div>
                           <h3 className="font-semibold text-white text-lg">{item.name}</h3>
-                          <p className="text-slate-400 text-sm">by {item.artisan}</p>
-                          <p className="text-slate-400 text-xs">{item.location}</p>
-                          <span className="inline-block bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs mt-2">
-                            {item.category}
-                          </span>
+                          <p className="text-slate-400 text-sm">by {item.artisanName}</p>
+                          <p className="text-slate-400 text-xs">{item.artisanLocation}</p>
+                          {item.category && (
+                            <span className="inline-block bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs mt-2">
+                              {item.category}
+                            </span>
+                          )}
                         </div>
 
                         <div className="text-right">
                           <div className="flex items-center space-x-2">
                             <span className="text-lg font-bold text-white">₹{item.price.toLocaleString()}</span>
-                            {item.originalPrice > item.price && (
-                              <span className="text-slate-400 text-sm line-through">₹{item.originalPrice.toLocaleString()}</span>
-                            )}
                           </div>
                           {!item.inStock && (
                             <span className="text-red-400 text-sm font-medium">Out of Stock</span>
@@ -217,20 +311,20 @@ export default function CustomerCartPage() {
                 <div className="space-y-3">
                   <div className="flex justify-between text-slate-400">
                     <span>Subtotal ({cartItems.length} items)</span>
-                    <span>₹{subtotal.toLocaleString()}</span>
+                    <span>₹{totals.subtotal.toLocaleString()}</span>
                   </div>
                   
                   <div className="flex justify-between text-slate-400">
                     <span>Shipping</span>
-                    <span>{shipping === 0 ? 'Free' : `₹${shipping}`}</span>
+                    <span>{totals.shipping === 0 ? 'Free' : `₹${totals.shipping}`}</span>
                   </div>
                   
                   <div className="flex justify-between text-slate-400">
                     <span>Tax (GST 18%)</span>
-                    <span>₹{tax.toLocaleString()}</span>
+                    <span>₹{totals.tax.toLocaleString()}</span>
                   </div>
                   
-                  {shipping === 0 && (
+                  {totals.shipping === 0 && (
                     <div className="text-green-400 text-sm">
                       🎉 Free shipping on orders above ₹5,000
                     </div>
@@ -239,7 +333,7 @@ export default function CustomerCartPage() {
                   <div className="border-t border-slate-700 pt-3">
                     <div className="flex justify-between text-white font-semibold text-lg">
                       <span>Total</span>
-                      <span>₹{total.toLocaleString()}</span>
+                      <span>₹{totals.total.toLocaleString()}</span>
                     </div>
                   </div>
                 </div>
