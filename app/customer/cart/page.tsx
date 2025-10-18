@@ -338,10 +338,19 @@ export default function CustomerCartPage() {
                   </div>
                 </div>
 
-                <button className="w-full bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors mt-6 flex items-center justify-center space-x-2">
+                <button 
+                  onClick={() => router.push('/customer/checkout')}
+                  disabled={cartItems.length === 0 || cartItems.some(item => !item.inStock)}
+                  className="w-full bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors mt-6 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   <span>Proceed to Checkout</span>
                   <ArrowRight className="h-4 w-4" />
                 </button>
+                {cartItems.some(item => !item.inStock) && (
+                  <p className="text-sm text-red-400 mt-2 text-center">
+                    Please remove out of stock items to proceed
+                  </p>
+                )}
               </div>
 
               {/* Delivery Info */}
