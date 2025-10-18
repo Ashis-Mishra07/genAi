@@ -1,6 +1,7 @@
 'use client';
 
 import LanguageSelector from '@/components/ui/LanguageSelector';
+import FloatingChatbot from '@/components/artisan/FloatingChatbot';
 import { useTranslation } from '@/lib/i18n/hooks';
 import { LanguageProvider as I18nProvider } from '@/lib/i18n/provider';
 import {
@@ -247,6 +248,9 @@ function ArtisanLayoutContent({
         <div className="flex-1 ml-64">
           {children}
         </div>
+        
+        {/* Floating Chatbot - Available on all artisan pages */}
+        <FloatingChatbot />
       </div>
   );
 }

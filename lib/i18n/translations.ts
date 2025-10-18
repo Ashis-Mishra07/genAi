@@ -128,6 +128,17 @@ export const translations = {
     // Language
     changeLanguage: 'Change Language',
     selectLanguage: 'Select Language',
+    
+    // Chatbot
+    chatbotTitle: 'AI Assistant',
+    chatbotSubtitle: 'Always here to help',
+    chatbotPlaceholder: 'Type your message...',
+    chatbotVoiceStart: 'Start voice recording',
+    chatbotVoiceStop: 'Stop recording',
+    chatbotSend: 'Send message',
+    chatbotProcessing: 'Processing your voice message...',
+    chatbotError: 'Sorry, I encountered an error. Please try again.',
+    chatbotVoiceError: 'Sorry, I could not process your voice message. Please try typing instead.',
   },
   
   hi: {
@@ -259,6 +270,17 @@ export const translations = {
     // Language
     changeLanguage: 'भाषा बदलें',
     selectLanguage: 'भाषा चुनें',
+    
+    // Chatbot
+    chatbotTitle: 'AI सहायक',
+    chatbotSubtitle: 'मदद के लिए हमेशा यहाँ',
+    chatbotPlaceholder: 'अपना संदेश लिखें...',
+    chatbotVoiceStart: 'वॉइस रिकॉर्डिंग शुरू करें',
+    chatbotVoiceStop: 'रिकॉर्डिंग बंद करें',
+    chatbotSend: 'संदेश भेजें',
+    chatbotProcessing: 'आपका वॉइस संदेश प्रोसेस हो रहा है...',
+    chatbotError: 'क्षमा करें, एक त्रुटि हुई। कृपया पुनः प्रयास करें।',
+    chatbotVoiceError: 'क्षमा करें, मैं आपका वॉइस संदेश प्रोसेस नहीं कर सका। कृपया टाइप करने का प्रयास करें।',
   },
   
   bn: {
