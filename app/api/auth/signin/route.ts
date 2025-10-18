@@ -72,6 +72,10 @@ export async function POST(request: NextRequest) {
       data: tokens,
     });
 
+    // Clear any existing auth cookies first
+    response.cookies.delete('auth_token');
+    response.cookies.delete('refresh_token');
+
     // Set authentication cookies
     response.cookies.set('auth_token', tokens.accessToken, {
       httpOnly: true,
@@ -89,7 +93,8 @@ export async function POST(request: NextRequest) {
       path: '/'
     });
 
-    console.log('Signin: Set auth cookies for user:', user.email);
+    console.log('Signin: Set auth cookies for user:', user.email, 'ID:', user.id);
+    console.log('Signin: Generated JWT payload userId:', authUser.id, 'role:', authUser.role);
     return response;
 
   } catch (error: any) {

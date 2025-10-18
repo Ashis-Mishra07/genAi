@@ -26,6 +26,13 @@ export default function CustomerAuthPage() {
     setError("");
 
     try {
+      // Clear any existing tokens before login/signup
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user_role");
+      localStorage.removeItem("user_id");
+      localStorage.removeItem("auth_token");
+
       const endpoint =
         mode === "signin" ? "/api/auth/signin" : "/api/auth/signup";
       const payload =
@@ -42,6 +49,7 @@ export default function CustomerAuthPage() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: 'include', // Important: Include cookies
         body: JSON.stringify(payload),
       });
 
@@ -53,11 +61,15 @@ export default function CustomerAuthPage() {
         );
       }
 
-      // Store the tokens and redirect to customer dashboard
-      localStorage.setItem("accessToken", data.data.accessToken);
-      localStorage.setItem("refreshToken", data.data.refreshToken);
-      localStorage.setItem("user_role", "CUSTOMER");
-      localStorage.setItem("user_id", data.data.user.id);
+      // Store the tokens in localStorage (backup to cookies)
+      if (data.data && data.data.accessToken) {
+        localStorage.setItem("accessToken", data.data.accessToken);
+        localStorage.setItem("refreshToken", data.data.refreshToken);
+        localStorage.setItem("user_role", "CUSTOMER");
+        localStorage.setItem("user_id", data.data.user.id);
+        
+        console.log("Auth success - User ID:", data.data.user.id, "Role:", data.data.user.role);
+      }
 
       router.push("/customer/dashboard");
     } catch (error) {

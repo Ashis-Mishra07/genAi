@@ -83,7 +83,11 @@ export async function POST(request: NextRequest) {
       data: tokens,
     }, { status: 201 });
 
-    // Set authentication cookies
+    // Clear any existing auth cookies first
+    response.cookies.delete('auth_token');
+    response.cookies.delete('refresh_token');
+
+    // Set new authentication cookies
     response.cookies.set('auth_token', tokens.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -100,7 +104,8 @@ export async function POST(request: NextRequest) {
       path: '/'
     });
 
-    console.log('Signup: Set auth cookies for new user:', user.email);
+    console.log('Signup: Set auth cookies for new user:', user.email, 'ID:', user.id);
+    console.log('Signup: Generated JWT payload userId:', authUser.id, 'role:', authUser.role);
     return response;
 
   } catch (error: any) {
