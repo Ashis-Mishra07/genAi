@@ -17,6 +17,9 @@ export interface Product {
   userId: string;
   createdAt: Date;
   updatedAt: Date;
+  videoUrl?: string;
+  videoStatus?: string;
+  videoGenerationId?: string;
 }
 
 // Create product interface
@@ -49,7 +52,10 @@ export async function getProductsByUserId(userId: string): Promise<Product[]> {
       is_active as "isActive", 
       user_id as "userId",
       created_at as "createdAt",
-      updated_at as "updatedAt"
+      updated_at as "updatedAt",
+      video_url as "videoUrl",
+      video_status as "videoStatus",
+      video_generation_id as "videoGenerationId"
     FROM products 
     WHERE user_id = ${userId} 
     ORDER BY created_at DESC
@@ -74,6 +80,9 @@ export async function getAllActiveProductsWithArtisans(limit: number = 50, offse
       p.user_id as "userId",
       p.created_at as "createdAt",
       p.updated_at as "updatedAt",
+      p.video_url as "videoUrl",
+      p.video_status as "videoStatus",
+      p.video_generation_id as "videoGenerationId",
       COALESCE(u.name, 'Unknown Artisan') as "artisanName",
       COALESCE(u.location, 'Unknown Location') as "artisanLocation"
     FROM products p
@@ -102,6 +111,9 @@ export async function getFeaturedProducts(limit: number = 8): Promise<(Product &
       p.user_id as "userId",
       p.created_at as "createdAt",
       p.updated_at as "updatedAt",
+      p.video_url as "videoUrl",
+      p.video_status as "videoStatus",
+      p.video_generation_id as "videoGenerationId",
       COALESCE(u.name, 'Unknown Artisan') as "artisanName",
       COALESCE(u.location, 'Unknown Location') as "artisanLocation",
       CASE WHEN p.created_at > NOW() - INTERVAL '30 days' THEN true ELSE false END as "isNew",
@@ -138,6 +150,9 @@ export async function getProductByIdWithArtisan(id: string): Promise<(Product & 
       p.user_id as "userId",
       p.created_at as "createdAt",
       p.updated_at as "updatedAt",
+      p.video_url as "videoUrl",
+      p.video_status as "videoStatus",
+      p.video_generation_id as "videoGenerationId",
       COALESCE(u.name, 'Unknown Artisan') as "artisanName",
       COALESCE(u.location, 'Unknown Location') as "artisanLocation",
       COALESCE(u.bio, '') as "artisanBio",
@@ -166,7 +181,10 @@ export async function getAllProducts(limit: number = 50, offset: number = 0): Pr
       is_active as "isActive", 
       user_id as "userId",
       created_at as "createdAt",
-      updated_at as "updatedAt"
+      updated_at as "updatedAt",
+      video_url as "videoUrl",
+      video_status as "videoStatus",
+      video_generation_id as "videoGenerationId"
     FROM products 
     ORDER BY created_at DESC 
     LIMIT ${limit} OFFSET ${offset}
@@ -190,7 +208,10 @@ export async function getProductById(id: string): Promise<Product | null> {
       is_active as "isActive", 
       user_id as "userId",
       created_at as "createdAt",
-      updated_at as "updatedAt"
+      updated_at as "updatedAt",
+      video_url as "videoUrl",
+      video_status as "videoStatus",
+      video_generation_id as "videoGenerationId"
     FROM products 
     WHERE id = ${id} 
     LIMIT 1
@@ -235,7 +256,10 @@ export async function createProduct(productData: CreateProductData): Promise<Pro
       is_active as "isActive", 
       user_id as "userId",
       created_at as "createdAt",
-      updated_at as "updatedAt"
+      updated_at as "updatedAt",
+      video_url as "videoUrl",
+      video_status as "videoStatus",
+      video_generation_id as "videoGenerationId"
   `;
   
   return result[0] as Product;
@@ -303,7 +327,10 @@ export async function updateProduct(id: string, userId: string, updates: Partial
         is_active as "isActive", 
         user_id as "userId",
         created_at as "createdAt",
-        updated_at as "updatedAt"
+        updated_at as "updatedAt",
+        video_url as "videoUrl",
+        video_status as "videoStatus",
+        video_generation_id as "videoGenerationId"
     `;
     
     return result.length > 0 ? result[0] as Product : null;
@@ -368,7 +395,10 @@ export async function searchProducts(
         is_active as "isActive", 
         user_id as "userId",
         created_at as "createdAt",
-        updated_at as "updatedAt"
+        updated_at as "updatedAt",
+        video_url as "videoUrl",
+        video_status as "videoStatus",
+        video_generation_id as "videoGenerationId"
       FROM products 
       WHERE user_id = ${userId}
       AND (
@@ -396,7 +426,10 @@ export async function searchProducts(
         is_active as "isActive", 
         user_id as "userId",
         created_at as "createdAt",
-        updated_at as "updatedAt"
+        updated_at as "updatedAt",
+        video_url as "videoUrl",
+        video_status as "videoStatus",
+        video_generation_id as "videoGenerationId"
       FROM products 
       WHERE (
         name ILIKE ${'%' + searchTerm + '%'} OR

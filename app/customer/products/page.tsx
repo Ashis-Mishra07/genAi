@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Package, Eye, Star, Heart, ShoppingCart, Search, Filter, Grid3X3, List
+  Package, Eye, Star, Heart, ShoppingCart, Search, Filter, Grid3X3, List, X
 } from 'lucide-react';
 
 interface Product {
@@ -15,6 +15,8 @@ interface Product {
   currency: string;
   imageUrl?: string;
   posterUrl?: string;
+  videoUrl?: string;
+  videoStatus?: string;
   category?: string;
   isActive: boolean;
   userId: string;
@@ -38,6 +40,7 @@ export default function CustomerProductsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
+  const [videoModalProduct, setVideoModalProduct] = useState<Product | null>(null);
 
   // Fetch products from API
   useEffect(() => {
@@ -327,12 +330,50 @@ export default function CustomerProductsPage() {
                       viewMode === 'list' ? 'flex items-center' : ''
                     }`}
                   >
-                    <div className={`relative ${viewMode === 'list' ? 'w-32 h-32 flex-shrink-0' : 'w-full h-48'}`}>
-                      {product.imageUrl ? (
+                    <div 
+                      className={`relative ${viewMode === 'list' ? 'w-32 h-32 flex-shrink-0' : 'w-full h-48'} cursor-pointer`}
+                      onClick={() => {
+                        if (product.videoUrl && product.videoStatus === 'COMPLETED') {
+                          setVideoModalProduct(product);
+                        } else {
+                          router.push(`/customer/products/${product.id}`);
+                        }
+                      }}
+                    >
+                      {product.videoUrl && product.videoStatus === 'COMPLETED' ? (
+                        <div className="relative w-full h-full group">
+                          <video
+                            src={product.videoUrl}
+                            poster={product.imageUrl || undefined}
+                            className="w-full h-full object-cover"
+                            muted
+                            loop
+                            playsInline
+                            onMouseEnter={(e) => e.currentTarget.play()}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.pause();
+                              e.currentTarget.currentTime = 0;
+                            }}
+                          />
+                          {/* Video overlay badge - now clickable */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent group-hover:from-black/70 transition-all flex items-center justify-center">
+                            <div className="bg-emerald-500 group-hover:bg-emerald-600 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center shadow-2xl transform group-hover:scale-110 transition-all">
+                              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M8 5v10l7-5-7-5z"/>
+                              </svg>
+                              WATCH VIDEO
+                            </div>
+                          </div>
+                          {/* Video duration badge */}
+                          <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 rounded text-xs font-medium">
+                            7s
+                          </div>
+                        </div>
+                      ) : product.imageUrl ? (
                         <img 
                           src={product.imageUrl} 
                           alt={product.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                         />
                       ) : (
                         <div className="w-full h-full bg-slate-700 flex items-center justify-center">
@@ -340,15 +381,21 @@ export default function CustomerProductsPage() {
                         </div>
                       )}
                       {product.isNew && (
-                        <div className="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded text-xs font-medium">
+                        <div className="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded text-xs font-medium z-10">
                           NEW
                         </div>
                       )}
-                      <button className="absolute top-2 left-2 p-2 bg-slate-800/80 rounded-full hover:bg-slate-700">
+                      <button 
+                        className="absolute top-2 left-2 p-2 bg-slate-800/80 rounded-full hover:bg-slate-700 z-10"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Add to wishlist logic here
+                        }}
+                      >
                         <Heart className="h-4 w-4 text-slate-400 hover:text-red-400" />
                       </button>
                       {!product.isActive && (
-                        <div className="absolute inset-0 bg-slate-900/80 flex items-center justify-center">
+                        <div className="absolute inset-0 bg-slate-900/80 flex items-center justify-center z-20">
                           <span className="text-red-400 font-medium text-sm">Unavailable</span>
                         </div>
                       )}
@@ -431,6 +478,97 @@ export default function CustomerProductsPage() {
           </>
         )}
       </div>
+
+      {/* Video Modal */}
+      {videoModalProduct && (
+        <div 
+          className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setVideoModalProduct(null)}
+        >
+          <div 
+            className="relative max-w-4xl w-full bg-slate-800 rounded-2xl overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setVideoModalProduct(null)}
+              className="absolute top-4 right-4 z-10 p-2 bg-slate-900/80 hover:bg-slate-900 rounded-full transition-colors"
+            >
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Video Player */}
+            <div className="aspect-video bg-black">
+              <video
+                src={videoModalProduct.videoUrl}
+                controls
+                autoPlay
+                className="w-full h-full"
+                poster={videoModalProduct.imageUrl || undefined}
+              >
+                Your browser does not support video playback.
+              </video>
+            </div>
+
+            {/* Product Info */}
+            <div className="p-6 bg-slate-800">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h2 className="text-2xl font-bold text-white mb-2">{videoModalProduct.name}</h2>
+                  {videoModalProduct.artisanName && (
+                    <p className="text-slate-400 text-sm mb-3">by {videoModalProduct.artisanName}</p>
+                  )}
+                  {videoModalProduct.description && (
+                    <p className="text-slate-300 text-sm mb-4">{videoModalProduct.description}</p>
+                  )}
+                  <div className="flex items-center space-x-4">
+                    <span className="text-2xl font-bold text-emerald-400">
+                      {videoModalProduct.currency === 'INR' ? '₹' : '$'}
+                      {videoModalProduct.price.toLocaleString()}
+                    </span>
+                    {videoModalProduct.category && (
+                      <span className="text-xs bg-slate-700 text-slate-300 px-3 py-1 rounded-full">
+                        {videoModalProduct.category}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="mt-6 flex space-x-3">
+                <button
+                  onClick={() => {
+                    setVideoModalProduct(null);
+                    router.push(`/customer/products/${videoModalProduct.id}`);
+                  }}
+                  className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3 px-6 rounded-lg font-medium transition-colors"
+                >
+                  View Full Details
+                </button>
+                <button
+                  onClick={() => {
+                    if (videoModalProduct.isActive) {
+                      addToCart(videoModalProduct.id);
+                      setVideoModalProduct(null);
+                    }
+                  }}
+                  className={`flex-1 py-3 px-6 rounded-lg font-medium transition-colors ${
+                    videoModalProduct.isActive
+                      ? 'bg-orange-500 hover:bg-orange-600 text-white'
+                      : 'bg-slate-600 text-slate-400 cursor-not-allowed'
+                  }`}
+                  disabled={!videoModalProduct.isActive}
+                >
+                  {videoModalProduct.isActive ? 'Add to Cart' : 'Unavailable'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

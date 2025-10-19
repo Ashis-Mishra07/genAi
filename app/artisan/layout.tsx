@@ -13,7 +13,7 @@ import {
     Package,
     Palette,
     Plus,
-    TrendingUp, User
+    TrendingUp, User, Video
 } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';

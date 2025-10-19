@@ -1,0 +1,107 @@
+{
+  "name": "Product Video Generation - Simple",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "video",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook_node",
+      "name": "1. Receive Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [220, 300],
+      "webhookId": "video-webhook"
+    },
+    {
+      "parameters": {
+        "url": "https://{{ $env.GCP_REGION }}-aiplatform.googleapis.com/v1/projects/{{ $env.GCP_PROJECT_ID }}/locations/{{ $env.GCP_REGION }}/publishers/google/models/veo-001:generateVideo",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "instances",
+              "value": "={{ [{\"prompt\": $json.body.prompt}] }}"
+            },
+            {
+              "name": "parameters",
+              "value": "={{ {\"sampleCount\": 1, \"aspectRatio\": \"9:16\"} }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "vertex_api_node",
+      "name": "2. Call Vertex AI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [440, 300],
+      "credentials": {
+        "googleApi": {
+          "id": "google_creds",
+          "name": "Google Service Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.body.callbackUrl }}",
+        "method": "POST",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ {\"productId\": $json.body.productId, \"videoUrl\": $json.predictions[0].videoUrl, \"status\": \"COMPLETED\"} }}",
+        "options": {}
+      },
+      "id": "callback_node",
+      "name": "3. Send Result",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [660, 300]
+    }
+  ],
+  "connections": {
+    "1. Receive Request": {
+      "main": [
+        [
+          {
+            "node": "2. Call Vertex AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. Call Vertex AI": {
+      "main": [
+        [
+          {
+            "node": "3. Send Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-10-18T00:00:00.000Z",
+  "versionId": "1"
+}

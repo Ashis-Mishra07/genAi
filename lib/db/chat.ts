@@ -20,7 +20,7 @@ export async function getUsers() {
   const result = await query(`
     SELECT id, email, name, specialty, location, status, last_seen, avatar, created_at
     FROM users 
-    WHERE email != 'admin@artisan-marketplace.com'
+    WHERE role != 'ADMIN'
     ORDER BY last_seen DESC
   `);
   return result.rows;
@@ -31,7 +31,8 @@ export async function getAdminUser() {
   const result = await query(`
     SELECT id, email, name, specialty, location, status, last_seen, avatar
     FROM users 
-    WHERE email = 'admin@artisan-marketplace.com'
+    WHERE role = 'ADMIN'
+    ORDER BY created_at ASC
     LIMIT 1
   `);
   return result.rows[0];

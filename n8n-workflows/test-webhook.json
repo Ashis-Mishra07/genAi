@@ -1,0 +1,77 @@
+{
+  "name": "Test Webhook - Simple Echo",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-product-video",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-node",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "response",
+              "name": "message",
+              "type": "string",
+              "value": "Webhook received successfully"
+            },
+            {
+              "id": "product-id",
+              "name": "productId",
+              "type": "string",
+              "value": "={{ $json.body.productId }}"
+            },
+            {
+              "id": "prompt",
+              "name": "prompt",
+              "type": "string",
+              "value": "={{ $json.body.prompt }}"
+            },
+            {
+              "id": "status",
+              "name": "status",
+              "type": "string",
+              "value": "PROCESSING"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "response-node",
+      "name": "Build Response",
+      "type": "n8n-nodes-base.set",
+      "position": [460, 300],
+      "typeVersion": 3.4
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Build Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-10-18T00:00:00.000Z",
+  "versionId": "1"
+}

@@ -22,6 +22,8 @@ interface Product {
   instagram_media_id: string;
   instagram_post_url: string;
   image_url: string;
+  videoUrl?: string;
+  videoStatus?: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -152,17 +154,41 @@ export default function ProductPage() {
       <div className="max-w-6xl mx-auto px-4">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Product Image */}
-            <div className="p-6">
-              {product.image_url ? (
-                <img
-                  src={product.image_url}
-                  alt={product.name}
-                  className="w-full h-96 object-cover rounded-lg shadow-md"
-                />
-              ) : (
-                <div className="w-full h-96 bg-gray-200 rounded-lg flex items-center justify-center">
-                  <span className="text-gray-500">No image available</span>
+            {/* Product Image & Video */}
+            <div className="p-6 space-y-4">
+              {/* Product Image */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 mb-2">Product Image</h3>
+                {product.image_url ? (
+                  <img
+                    src={product.image_url}
+                    alt={product.name}
+                    className="w-full h-96 object-cover rounded-lg shadow-md"
+                  />
+                ) : (
+                  <div className="w-full h-96 bg-gray-200 rounded-lg flex items-center justify-center">
+                    <span className="text-gray-500">No image available</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Product Video */}
+              {product.videoUrl && product.videoStatus === 'COMPLETED' && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">Product Video</h3>
+                  <div className="relative rounded-lg overflow-hidden shadow-md bg-black">
+                    <video
+                      src={product.videoUrl}
+                      controls
+                      className="w-full h-96 object-contain"
+                      poster={product.image_url}
+                    >
+                      Your browser does not support video playback.
+                    </video>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2 text-center">
+                    ✨ AI-generated product demonstration video
+                  </p>
                 </div>
               )}
               

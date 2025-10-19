@@ -30,6 +30,8 @@ interface Product {
   currency: string;
   imageUrl?: string;
   posterUrl?: string;
+  videoUrl?: string;
+  videoStatus?: string;
   category?: string;
   isActive: boolean;
   userId: string;
@@ -54,6 +56,7 @@ export default function ProductDetailPage() {
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [cart, setCart] = useState<{ [key: string]: number }>({});
   const [showImageModal, setShowImageModal] = useState(false);
+  const [showVideo, setShowVideo] = useState(true); // Show video by default if available
 
   useEffect(() => {
     if (id) {
@@ -191,6 +194,7 @@ export default function ProductDetailPage() {
   }
 
   const images = [product.imageUrl, product.posterUrl].filter(Boolean) as string[];
+  const hasVideo = product.videoUrl && product.videoStatus === 'COMPLETED';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -214,10 +218,59 @@ export default function ProductDetailPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Product Images */}
+          {/* Product Images & Video */}
           <div className="space-y-4">
+            {/* View Selector - Show when both video and image exist */}
+            {hasVideo && product.imageUrl && (
+              <div className="flex gap-2 bg-gray-100 p-1 rounded-lg">
+                <button
+                  onClick={() => setShowVideo(true)}
+                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                    showVideo
+                      ? 'bg-white text-emerald-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <span className="inline-flex items-center">
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M8 5v10l7-5-7-5z"/>
+                    </svg>
+                    Video Demo
+                  </span>
+                </button>
+                <button
+                  onClick={() => setShowVideo(false)}
+                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                    !showVideo
+                      ? 'bg-white text-emerald-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <span className="inline-flex items-center">
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    Product Image
+                  </span>
+                </button>
+              </div>
+            )}
+            
+            {/* Main Display Area */}
             <div className="aspect-square bg-white rounded-lg shadow-sm overflow-hidden">
-              {images.length > 0 ? (
+              {hasVideo && showVideo ? (
+                <video
+                  key={product.videoUrl} 
+                  src={product.videoUrl}
+                  controls
+                  controlsList="nodownload"
+                  playsInline
+                  className="w-full h-full object-contain bg-black"
+                  poster={product.imageUrl || undefined}
+                >
+                  Your browser does not support the video tag.
+                </video>
+              ) : images.length > 0 ? (
                 <img
                   src={images[selectedImage]}
                   alt={product.name}
@@ -230,6 +283,23 @@ export default function ProductDetailPage() {
                 </div>
               )}
             </div>
+
+            {/* Video Info Badge */}
+            {hasVideo && showVideo && (
+              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mr-3">
+                    <svg className="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-emerald-900">AI-Generated Product Video</p>
+                    <p className="text-xs text-emerald-700">Click ▶️ play button to watch the demo</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Image Thumbnails */}
             {images.length > 1 && (

@@ -68,41 +68,23 @@ export async function GET(
       product: product
     };
 
-    // Create a lightweight version for caching (exclude heavy fields)
-    const lightProduct = {
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      category: product.category,
-      isActive: product.isActive,
-      userId: product.userId,
-      createdAt: product.createdAt,
-      updatedAt: product.updatedAt,
-      // Exclude: imageUrl, description, story, artisan info
-    };
-
-    const lightResponseData = {
-      success: true,
-      product: lightProduct,
-      lightweight: true
-    };
-
-    // Cache the lightweight version for 10 minutes
+    // Don't cache individual products or cache full data
+    // Individual product pages need all fields including video
     try {
-      const dataSize = Buffer.byteLength(JSON.stringify(lightResponseData), 'utf8');
-      console.log(`Product Detail: Light data size: ${dataSize} bytes`);
+      const dataSize = Buffer.byteLength(JSON.stringify(responseData), 'utf8');
+      console.log(`Product Detail: Full data size: ${dataSize} bytes`);
       
-      if (dataSize < 100000) { // 100KB limit for individual products
-        await setCache(cacheKey, lightResponseData, 600); // 10 minutes
-        console.log(`Product Detail: Cached lightweight result for key: ${cacheKey}`);
+      if (dataSize < 200000) { // 200KB limit for individual products with video
+        await setCache(cacheKey, responseData, 300); // 5 minutes instead of 10
+        console.log(`Product Detail: Cached full result for key: ${cacheKey}`);
       } else {
-        console.log(`Product Detail: Even lightweight data too large, skipping cache`);
+        console.log(`Product Detail: Data too large, skipping cache`);
       }
     } catch (cacheError) {
       console.log('Product Detail: Failed to cache result, continuing without cache');
     }
 
-    // Return full data for now (frontend can handle progressive loading)
+    // Return full data
     return NextResponse.json(responseData);
   } catch (error: any) {
     console.error('Get product error:', error);

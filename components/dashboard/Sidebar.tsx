@@ -15,6 +15,7 @@ import {
   Sparkles,
   Users,
   LogOut,
+  Video,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +24,7 @@ const navigation = [
   { name: "AI Assistant", href: "/chatbot", icon: Sparkles },
   { name: "Chats", href: "/chats", icon: MessageSquare },
   { name: "Products", href: "/dashboard/products", icon: Package },
+  { name: "Video Generation", href: "/video-generation", icon: Video },
   { name: "Orders", href: "/dashboard/orders", icon: ShoppingCart },
   { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
