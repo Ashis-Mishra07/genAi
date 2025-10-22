@@ -52,7 +52,12 @@ export default function CustomerProductsPage() {
       setIsLoading(true);
       setError('');
       
-      const response = await fetch('/api/products?featured=false&limit=50');
+      const response = await fetch('/api/products?featured=false&limit=50', {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
       
       if (response.ok) {
         const data = await response.json();
@@ -64,7 +69,7 @@ export default function CustomerProductsPage() {
       } else {
         setError('Failed to fetch products from server');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching products:', error);
       setError('Network error - please check your connection');
     } finally {

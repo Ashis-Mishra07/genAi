@@ -23,7 +23,10 @@ const publicRoutes = [
   '/api/auth/admin',
   '/api/auth/refresh',
   '/api/db/init',
-  '/api/db/check-structure'
+  '/api/db/check-structure',
+  '/api/products',  // Public products endpoint
+  '/api/cart',      // Cart endpoints
+  '/api/orders'     // Orders endpoints (auth handled in route)
 ];
 
 export async function middleware(request: NextRequest) {
@@ -103,12 +106,12 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
+     * Match all request paths except:
+     * - api routes (handled internally)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 }

@@ -65,72 +65,99 @@ export async function getProductsByUserId(userId: string): Promise<Product[]> {
 
 // Get all active products with artisan information (for public listing)
 export async function getAllActiveProductsWithArtisans(limit: number = 50, offset: number = 0): Promise<(Product & { artisanName: string; artisanLocation: string })[]> {
-  const result = await sql`
+  // Query 1: Get products only (FAST)
+  const products = await sql`
     SELECT 
-      p.id, 
-      p.name, 
-      p.description, 
-      p.story, 
-      p.price, 
-      p.currency, 
-      p.image_url as "imageUrl", 
-      p.poster_url as "posterUrl", 
-      p.category, 
-      p.is_active as "isActive", 
-      p.user_id as "userId",
-      p.created_at as "createdAt",
-      p.updated_at as "updatedAt",
-      p.video_url as "videoUrl",
-      p.video_status as "videoStatus",
-      p.video_generation_id as "videoGenerationId",
-      COALESCE(u.name, 'Unknown Artisan') as "artisanName",
-      COALESCE(u.location, 'Unknown Location') as "artisanLocation"
-    FROM products p
-    LEFT JOIN users u ON p.user_id = u.id
-    WHERE p.is_active = true 
-    ORDER BY p.created_at DESC 
-    LIMIT ${limit} OFFSET ${offset}
-  `;
-  return result as (Product & { artisanName: string; artisanLocation: string })[];
-}
-
-// Get featured products (most recent active products)
-export async function getFeaturedProducts(limit: number = 8): Promise<(Product & { artisanName: string; artisanLocation: string; isNew: boolean; reviewCount: number; rating: number })[]> {
-  const result = await sql`
-    SELECT 
-      p.id, 
-      p.name, 
-      p.description, 
-      p.story, 
-      p.price, 
-      p.currency, 
-      p.image_url as "imageUrl", 
-      p.poster_url as "posterUrl", 
-      p.category, 
-      p.is_active as "isActive", 
-      p.user_id as "userId",
-      p.created_at as "createdAt",
-      p.updated_at as "updatedAt",
-      p.video_url as "videoUrl",
-      p.video_status as "videoStatus",
-      p.video_generation_id as "videoGenerationId",
-      COALESCE(u.name, 'Unknown Artisan') as "artisanName",
-      COALESCE(u.location, 'Unknown Location') as "artisanLocation",
-      CASE WHEN p.created_at > NOW() - INTERVAL '30 days' THEN true ELSE false END as "isNew",
-      0 as "reviewCount",
-      CASE 
-        WHEN RANDOM() < 0.3 THEN 4.9
-        WHEN RANDOM() < 0.6 THEN 4.8
-        WHEN RANDOM() < 0.8 THEN 4.7
-        ELSE 4.6
-      END as "rating"
-    FROM products p
-    LEFT JOIN users u ON p.user_id = u.id
-    WHERE p.is_active = true 
-    ORDER BY p.created_at DESC 
+      id, 
+      name, 
+      price, 
+      currency, 
+      image_url,
+      category,
+      video_url,
+      video_status,
+      user_id
+    FROM products
+    WHERE is_active = true 
     LIMIT ${limit}
   `;
-  return result as (Product & { artisanName: string; artisanLocation: string; isNew: boolean; reviewCount: number; rating: number })[];
+  
+  if (products.length === 0) {
+    return [];
+  }
+  
+  // Query 2: Get all users (FAST) 
+  const users = await sql`SELECT id, name, location FROM users`;
+  const userMap = new Map(users.map((u: any) => [u.id, u]));
+  
+  // Join in JavaScript
+  return products.map((row: any) => {
+    const user = userMap.get(row.user_id);
+    return {
+      id: row.id,
+      name: row.name,
+      description: '',
+      price: Number(row.price),
+      currency: row.currency,
+      imageUrl: row.image_url,
+      category: row.category,
+      isActive: true,
+      userId: row.user_id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      videoUrl: row.video_url,
+      videoStatus: row.video_status,
+      artisanName: user?.name || 'Unknown Artisan',
+      artisanLocation: user?.location || 'Unknown Location',
+    };
+  }) as (Product & { artisanName: string; artisanLocation: string })[];
+}
+
+// Get featured products (most recent active products) - OPTIMIZED FOR SPEED
+export async function getFeaturedProducts(limit: number = 8): Promise<(Product & { artisanName: string; artisanLocation: string; isNew: boolean; reviewCount: number; rating: number })[]> {
+  // Query 1: Get products only (FAST)
+  const products = await sql`
+    SELECT 
+      id, 
+      name, 
+      price, 
+      currency, 
+      image_url,
+      category,
+      user_id
+    FROM products
+    WHERE is_active = true 
+    LIMIT ${limit}
+  `;
+  
+  if (products.length === 0) {
+    return [];
+  }
+  
+  // Query 2: Get all users (FAST)
+  const users = await sql`SELECT id, name, location FROM users`;
+  const userMap = new Map(users.map((u: any) => [u.id, u]));
+  
+  // Join in JavaScript
+  return products.map((row: any) => {
+    const user = userMap.get(row.user_id);
+    return {
+      id: row.id,
+      name: row.name,
+      price: Number(row.price),
+      currency: row.currency,
+      imageUrl: row.image_url,
+      category: row.category,
+      isActive: true,
+      userId: row.user_id,
+      createdAt: new Date(),
+      artisanName: user?.name || 'Unknown Artisan',
+      artisanLocation: user?.location || 'Unknown Location',
+      isNew: true,
+      reviewCount: 0,
+      rating: 4.7
+    };
+  }) as (Product & { artisanName: string; artisanLocation: string; isNew: boolean; reviewCount: number; rating: number })[];
 }
 
 // Get product by ID with artisan information

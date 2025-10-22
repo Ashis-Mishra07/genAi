@@ -63,9 +63,9 @@ export default function CustomerDashboardPage() {
       setIsLoading(true);
       const token = localStorage.getItem("accessToken");
       
-      // Load featured products from real API
+      // Load featured products from real API (limit to 6 for faster load)
       try {
-        const productsResponse = await fetch("/api/products?featured=true", {
+        const productsResponse = await fetch("/api/products?featured=true&limit=6", {
           headers: {
             "Authorization": `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -90,7 +90,7 @@ export default function CustomerDashboardPage() {
               isTrending: Math.random() > 0.8,
               discount: Math.floor(Math.random() * 20),
             }));
-            setFeaturedProducts(transformedProducts.slice(0, 8)); // Limit to 8
+            setFeaturedProducts(transformedProducts.slice(0, 6)); // Limit to 6 for faster load
           }
         }
       } catch (error) {
@@ -98,9 +98,9 @@ export default function CustomerDashboardPage() {
         setFeaturedProducts([]);
       }
 
-      // Load recent orders from real API
+      // Load recent orders from real API (limit to 3 for faster load)
       try {
-        const ordersResponse = await fetch("/api/orders", {
+        const ordersResponse = await fetch("/api/orders?limit=3", {
           headers: {
             "Authorization": `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -111,7 +111,7 @@ export default function CustomerDashboardPage() {
           const ordersData = await ordersResponse.json();
           if (ordersData.success) {
             // Transform database orders to match interface
-            const transformedOrders: Order[] = ordersData.orders.slice(0, 5).map((o: any) => ({
+            const transformedOrders: Order[] = ordersData.orders.slice(0, 3).map((o: any) => ({
               id: o.id,
               orderNumber: o.orderNumber || `ORD-${o.id.slice(0, 8)}`,
               date: o.createdAt || o.date,

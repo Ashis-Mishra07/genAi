@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '../../../lib/utils/jwt';
 import { getCartItemsWithProducts, addToCart, updateCartItemQuantity, removeFromCart, clearCart } from '../../../lib/db/cart';
+import { sendCartAdditionEmail } from '../../../lib/email-service';
+import { getProductById } from '../../../lib/db/products-neon';
 
 export async function GET(request: NextRequest) {
   try {
@@ -59,6 +61,43 @@ export async function POST(request: NextRequest) {
 
     // Get updated cart items
     const cartItems = await getCartItemsWithProducts(user.id);
+
+    // Send cart addition email notification (don't fail cart addition if email fails)
+    try {
+      // Get product details
+      const product = await getProductById(productId);
+      
+      if (product && user.email) {
+        // Calculate cart totals
+        const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+        const totalAmount = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+
+        const cartEmailData = {
+          customerName: user.name || 'Customer',
+          customerEmail: user.email,
+          product: {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            imageUrl: product.imageUrl,
+            artisanName: (product as any).artisanName || 'Artisan'
+          },
+          quantity: quantity,
+          cartStats: {
+            totalItems: totalItems,
+            totalAmount: totalAmount
+          },
+          cartUrl: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/customer/cart`,
+          continueShoppingUrl: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/products`
+        };
+
+        await sendCartAdditionEmail(cartEmailData);
+        console.log('Cart addition email sent successfully');
+      }
+    } catch (emailError) {
+      console.error('Error sending cart addition email (continuing without failing cart operation):', emailError);
+      // Don't fail the cart addition if email fails
+    }
 
     return NextResponse.json({
       success: true,

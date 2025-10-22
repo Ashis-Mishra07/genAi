@@ -1,6 +1,12 @@
 import { neon } from '@neondatabase/serverless';
 
-const sql = neon(process.env.DATABASE_URL!);
+// Create a function to get a fresh SQL connection
+function getSql() {
+  if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL not configured');
+  }
+  return neon(process.env.DATABASE_URL);
+}
 
 export interface CartItem {
   id: string;
@@ -28,55 +34,79 @@ export interface CartItemWithProduct extends CartItem {
 
 // Get all cart items for a user with product details
 export async function getCartItemsWithProducts(userId: string): Promise<CartItemWithProduct[]> {
-  const result = await sql`
+  const sql = getSql();
+  
+  // Query 1: Get cart items
+  const cartItems = await sql`
     SELECT 
-      ci.id,
-      ci.user_id as "userId",
-      ci.product_id as "productId",
-      ci.quantity,
-      ci.created_at as "createdAt",
-      ci.updated_at as "updatedAt",
-      p.id as "product_id",
-      p.name as "product_name",
-      p.description as "product_description",
-      p.price as "product_price",
-      p.currency as "product_currency",
-      p.image_url as "product_imageUrl",
-      p.category as "product_category",
-      p.is_active as "product_isActive",
-      COALESCE(u.name, 'Unknown Artisan') as "artisan_name",
-      COALESCE(u.location, 'Unknown Location') as "artisan_location"
-    FROM cart_items ci
-    JOIN products p ON ci.product_id = p.id
-    LEFT JOIN users u ON p.user_id = u.id
-    WHERE ci.user_id = ${userId}
-    ORDER BY ci.created_at DESC
+      id,
+      user_id,
+      product_id,
+      quantity,
+      created_at,
+      updated_at
+    FROM cart_items
+    WHERE user_id = ${userId}
+    ORDER BY created_at DESC
   `;
 
-  return result.map((row: any) => ({
-    id: row.id,
-    userId: row.userId,
-    productId: row.productId,
-    quantity: row.quantity,
-    createdAt: row.createdAt,
-    updatedAt: row.updatedAt,
-    product: {
-      id: row.product_id,
-      name: row.product_name,
-      description: row.product_description,
-      price: Number(row.product_price),
-      currency: row.product_currency,
-      imageUrl: row.product_imageUrl,
-      category: row.product_category,
-      isActive: row.product_isActive,
-      artisanName: row.artisan_name,
-      artisanLocation: row.artisan_location,
-    }
-  })) as CartItemWithProduct[];
+  if (cartItems.length === 0) {
+    return [];
+  }
+
+  // Get product IDs
+  const productIds = cartItems.map((item: any) => item.product_id);
+
+  // Query 2: Get products
+  const products = await sql`
+    SELECT id, name, price, currency, image_url, category, is_active, user_id
+    FROM products
+    WHERE id = ANY(${productIds})
+  `;
+
+  // Query 3: Get unique user IDs from products
+  const userIds = [...new Set(products.map((p: any) => p.user_id))];
+  const users = await sql`
+    SELECT id, name, location
+    FROM users
+    WHERE id = ANY(${userIds})
+  `;
+
+  // Create maps
+  const productMap = new Map(products.map((p: any) => [p.id, p]));
+  const userMap = new Map(users.map((u: any) => [u.id, u]));
+
+  // Combine in JavaScript
+  return cartItems.map((row: any) => {
+    const product: any = productMap.get(row.product_id);
+    const user: any = product ? userMap.get(product.user_id) : null;
+    
+    return {
+      id: row.id,
+      userId: row.user_id,
+      productId: row.product_id,
+      quantity: row.quantity,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      product: {
+        id: product?.id || '',
+        name: product?.name || 'Unknown Product',
+        price: Number(product?.price || 0),
+        currency: product?.currency || 'INR',
+        imageUrl: product?.image_url,
+        category: product?.category,
+        isActive: product?.is_active || false,
+        artisanName: user?.name || 'Unknown Artisan',
+        artisanLocation: user?.location || 'Unknown Location',
+      }
+    };
+  }) as CartItemWithProduct[];
 }
 
 // Add item to cart (or update quantity if exists)
 export async function addToCart(userId: string, productId: string, quantity: number = 1): Promise<CartItem> {
+  const sql = getSql();
+  
   // Check if item already exists in cart
   const existingItem = await sql`
     SELECT id, quantity FROM cart_items 
@@ -118,6 +148,8 @@ export async function addToCart(userId: string, productId: string, quantity: num
 
 // Update cart item quantity
 export async function updateCartItemQuantity(userId: string, cartItemId: string, quantity: number): Promise<CartItem | null> {
+  const sql = getSql();
+  
   if (quantity <= 0) {
     // Remove item if quantity is 0 or less
     await sql`
@@ -145,6 +177,7 @@ export async function updateCartItemQuantity(userId: string, cartItemId: string,
 
 // Remove item from cart
 export async function removeFromCart(userId: string, cartItemId: string): Promise<boolean> {
+  const sql = getSql();
   const result = await sql`
     DELETE FROM cart_items 
     WHERE id = ${cartItemId} AND user_id = ${userId}
@@ -154,6 +187,7 @@ export async function removeFromCart(userId: string, cartItemId: string): Promis
 
 // Clear entire cart for user
 export async function clearCart(userId: string): Promise<boolean> {
+  const sql = getSql();
   const result = await sql`
     DELETE FROM cart_items 
     WHERE user_id = ${userId}
@@ -163,6 +197,7 @@ export async function clearCart(userId: string): Promise<boolean> {
 
 // Get cart item count for user
 export async function getCartItemCount(userId: string): Promise<number> {
+  const sql = getSql();
   const result = await sql`
     SELECT COALESCE(SUM(quantity), 0) as count
     FROM cart_items 

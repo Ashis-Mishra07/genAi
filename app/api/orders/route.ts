@@ -11,6 +11,14 @@ import {
 import { createNotification } from '../../../lib/db/notifications';
 import { getProductById } from '../../../lib/db/products-neon';
 import { cache, setCache, getCache, deleteCache } from '../../../lib/redis';
+import { 
+  sendOrderConfirmationEmail, 
+  sendArtisanNotificationsForOrder,
+  calculateShipping
+} from '../../../lib/email-service';
+import { neon } from '@neondatabase/serverless';
+
+const sql = neon(process.env.DATABASE_URL!);
 
 export async function GET(request: NextRequest) {
   try {
@@ -27,17 +35,8 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    // Create cache key based on user role and parameters
-    const cacheKey = `orders:${user.role}:${user.id}:${status || 'all'}:${limit}:${offset}`;
-    
-    // Try to get from cache first
-    const cachedData = await getCache(cacheKey);
-    if (cachedData) {
-      console.log(`Orders: Serving from cache for user ${user.email}`);
-      return NextResponse.json(cachedData);
-    }
-
-    console.log(`Orders: Cache miss, fetching from database for user ${user.email}`);
+    // REDIS DISABLED FOR PERFORMANCE - Direct database queries
+    console.log(`Orders: Fetching directly from database for user ${user.email} (Redis disabled)`);
     let orders: DBOrder[] = [];
 
     // Get orders based on user role
@@ -73,14 +72,7 @@ export async function GET(request: NextRequest) {
       totalCount: orders.length
     };
 
-    // Cache the result for 5 minutes (300 seconds)
-    try {
-      await setCache(cacheKey, responseData, 300);
-      console.log(`Orders: Cached result for user ${user.email}`);
-    } catch (error) {
-      console.log(`Orders: Failed to cache result, continuing without cache:`, error);
-    }
-
+    // REDIS CACHING DISABLED - Returns data immediately
     return NextResponse.json(responseData);
   } catch (error: any) {
     console.error('Get orders error:', error);
@@ -140,26 +132,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Invalidate relevant caches after creating order
-    try {
-      const cacheKeysToInvalidate = [
-        `orders:CUSTOMER:${user.id}:*`,
-        `orders:ADMIN:*:*`,
-        `orders:ARTISAN:*:*`,
-        'products:*'
-      ];
-
-      // Clear cache for this customer and admin views
-      for (const pattern of cacheKeysToInvalidate) {
-        const keys = await cache.getKeys(pattern);
-        for (const key of keys) {
-          await deleteCache(key);
-        }
-      }
-      console.log('Orders: Invalidated cache after creating new order');
-    } catch (error) {
-      console.log('Orders: Failed to invalidate cache, continuing without cache cleanup:', error);
-    }
+    // REDIS CACHING DISABLED - No cache invalidation needed
+    console.log('Orders: Cache invalidation skipped (Redis disabled)');
 
     // Send notifications to artisans (skip if notifications table doesn't exist yet)
     try {
@@ -195,6 +169,101 @@ export async function POST(request: NextRequest) {
     } catch (notificationError) {
       console.error('Error sending notifications (notifications table may not exist):', notificationError);
       // Don't fail the order creation if notifications fail
+    }
+
+    // Send email notifications (don't fail order creation if emails fail)
+    try {
+      // Calculate shipping
+      const subtotal = orderData.items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
+      const shipping = calculateShipping(subtotal);
+
+      // Prepare customer order confirmation email
+      const customerEmailData = {
+        orderNumber: order.orderNumber,
+        customerName: orderData.shippingAddress.fullName,
+        customerEmail: user.email,
+        items: orderData.items.map((item: any) => ({
+          id: item.productId,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          imageUrl: item.imageUrl,
+          artisanName: item.artisanName
+        })),
+        subtotal: subtotal,
+        shipping: shipping,
+        total: order.total,
+        shippingAddress: {
+          fullName: orderData.shippingAddress.fullName,
+          addressLine1: orderData.shippingAddress.addressLine1 || orderData.shippingAddress.address,
+          addressLine2: orderData.shippingAddress.addressLine2,
+          city: orderData.shippingAddress.city,
+          state: orderData.shippingAddress.state,
+          postalCode: orderData.shippingAddress.pincode || orderData.shippingAddress.postalCode,
+          country: orderData.shippingAddress.country || 'India',
+          phone: orderData.shippingAddress.phone
+        },
+        paymentMethod: orderData.paymentMethod,
+        createdAt: order.createdAt,
+        trackOrderUrl: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/customer/orders`
+      };
+
+      // Send customer confirmation email
+      await sendOrderConfirmationEmail(customerEmailData);
+
+      // Prepare artisan notifications
+      const artisanProductsMap = new Map<string, {
+        artisanEmail: string;
+        artisanName: string;
+        products: Array<{
+          id: string;
+          name: string;
+          quantity: number;
+          price: number;
+          imageUrl?: string;
+        }>;
+      }>();
+
+      // Group products by artisan
+      for (const item of orderData.items) {
+        if (item.productId) {
+          const product = await getProductById(item.productId);
+          if (product && product.userId) {
+            // Get artisan user details from database
+            const artisanResult = await sql`
+              SELECT id, email, name FROM users WHERE id = ${product.userId}
+            `;
+            
+            if (artisanResult.length > 0) {
+              const artisan = artisanResult[0];
+              
+              if (!artisanProductsMap.has(artisan.id)) {
+                artisanProductsMap.set(artisan.id, {
+                  artisanEmail: artisan.email,
+                  artisanName: artisan.name || 'Artisan',
+                  products: []
+                });
+              }
+
+              artisanProductsMap.get(artisan.id)?.products.push({
+                id: item.productId,
+                name: item.name,
+                quantity: item.quantity,
+                price: item.price,
+                imageUrl: item.imageUrl
+              });
+            }
+          }
+        }
+      }
+
+      // Send artisan notification emails
+      await sendArtisanNotificationsForOrder(customerEmailData, artisanProductsMap);
+
+      console.log('Order emails sent successfully for order:', order.orderNumber);
+    } catch (emailError) {
+      console.error('Error sending order emails (continuing without failing order):', emailError);
+      // Don't fail the order creation if emails fail
     }
 
     return NextResponse.json({

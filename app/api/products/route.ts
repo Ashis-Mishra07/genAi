@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { neon } from '@neondatabase/serverless';
 import { getCurrentUser } from '../../../lib/utils/jwt';
 import { 
   getProductsByUserId, 
@@ -12,157 +13,66 @@ import {
 import { cache, setCache, getCache, deleteCache } from '../../../lib/redis';
 
 export async function GET(request: NextRequest) {
+  console.log('====== PRODUCTS API CALLED ======');
+  const requestStart = Date.now();
+  
   try {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '50');
-    const offset = parseInt(searchParams.get('offset') || '0');
-    const search = searchParams.get('search');
-    const featured = searchParams.get('featured');
-    const category = searchParams.get('category');
     
-    // Create cache key based on parameters
-    const cacheKey = `products:${featured ? 'featured' : 'all'}:${search || 'nosearch'}:${category || 'nocategory'}:${limit}:${offset}`;
+    console.log(`Products: Fetching products, limit=${limit}`);
     
-    console.log(`Products: Generated cache key: ${cacheKey}`);
-    
-    // Cache check for non-search requests
-    if (!search) {
-      const fullCacheData = await getCache(cacheKey).catch(() => null);
-      if (fullCacheData && !fullCacheData.isMinimal) {
-        console.log(`Products: Cache hit - serving full data from cache for key: ${cacheKey}`);
-        const response = NextResponse.json(fullCacheData);
-        response.headers.set('X-Cache-Status', 'HIT-FULL');
-        return response;
-      }
-      
-      const minimalCacheData = await getCache(cacheKey + ':minimal').catch(() => null);
-      if (minimalCacheData && minimalCacheData.isMinimal) {
-        console.log(`Products: Serving minimal cached data for key: ${cacheKey}`);
-        const response = NextResponse.json(minimalCacheData);
-        response.headers.set('X-Cache-Status', 'HIT-MINIMAL');
-        return response;
-      }
-      
-      console.log(`Products: Cache miss for key: ${cacheKey}`);
-    } else {
-      console.log(`Products: Skipping cache check - search query present`);
-    }
-
-    console.log(`Products: Fetching from database for key: ${cacheKey}`);
-    
-    // Get current user (optional for public endpoints)
-    let user = null;
-    try {
-      user = await getCurrentUser(request);
-    } catch {
-      // User not authenticated, continue as public user
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL not configured');
     }
     
-    let products;
-    let stats = null;
+    // Use the EXACT working code from test-db
+    const sql = neon(process.env.DATABASE_URL);
     
-    // Handle featured products request
-    if (featured === 'true') {
-      products = await getFeaturedProducts(limit);
-      return NextResponse.json({
-        success: true,
-        products: products,
-        count: products.length
-      });
-    }
+    // Get products
+    const products = await sql`
+      SELECT id, name, price, currency, image_url, category, video_url, video_status, user_id
+      FROM products
+      WHERE is_active = true 
+      LIMIT ${limit}
+    `;
     
-    if (user) {
-      if (user.role === 'ADMIN') {
-        // Admin sees ALL products in the system (active and inactive)
-        if (search) {
-          products = await searchProducts(search); // Search all products, not user-specific
-        } else {
-          products = await getAllProducts(limit, offset); // Show all products including inactive
-        }
-        // Admin stats could show overall system stats or their created products
-        stats = await getProductStats(user.id);
-      } else {
-        // Artisan/Customer sees only their own products or active products
-        if (user.role === 'ARTISAN') {
-          if (search) {
-            products = await searchProducts(search, user.id);
-          } else {
-            products = await getProductsByUserId(user.id);
-          }
-          stats = await getProductStats(user.id);
-        } else {
-          // Customer sees all active products with artisan info
-          if (search) {
-            products = await searchProducts(search);
-          } else {
-            products = await getAllActiveProductsWithArtisans(limit, offset);
-          }
-        }
-      }
-    } else {
-      // If not authenticated, return public products with artisan info
-      if (search) {
-        products = await searchProducts(search);
-      } else {
-        products = await getAllActiveProductsWithArtisans(limit, offset);
-      }
-    }
-
-    const responseData = {
+    console.log(`Products: Got ${products.length} products`);
+    
+    // Get users
+    const users = await sql`SELECT id, name, location FROM users`;
+    console.log(`Products: Got ${users.length} users`);
+    
+    // Combine in JavaScript
+    const userMap = new Map(users.map((u: any) => [u.id, u]));
+    const productsWithArtisans = products.map((p: any) => {
+      const user: any = userMap.get(p.user_id);
+      return {
+        id: p.id,
+        name: p.name,
+        description: '',
+        price: Number(p.price),
+        currency: p.currency,
+        imageUrl: p.image_url,
+        category: p.category,
+        isActive: true,
+        userId: p.user_id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        videoUrl: p.video_url,
+        videoStatus: p.video_status,
+        artisanName: user?.name || 'Unknown Artisan',
+        artisanLocation: user?.location || 'Unknown Location'
+      };
+    });
+    
+    console.log(`Products: Returning ${productsWithArtisans.length} products (${Date.now() - requestStart}ms)`);
+    
+    return NextResponse.json({
       success: true,
-      products: products,
-      stats: stats,
-      count: products.length
-    };
-
-    // Smart caching strategy - try to cache full data if size is reasonable
-    if (!search && products.length <= 50) {
-      try {
-        // First, try to cache the full response
-        const fullDataSize = Buffer.byteLength(JSON.stringify(responseData), 'utf8');
-        console.log(`Products: Full response size: ${fullDataSize} bytes`);
-
-        if (fullDataSize < 800000) { // 800KB limit for full data
-          await setCache(cacheKey, responseData, 300); // 5 minutes
-          console.log(`Products: Cached full data for key: ${cacheKey}, size: ${fullDataSize} bytes`);
-        } else {
-          // If full data is too large, create and cache a minimal version
-          console.log(`Products: Full data too large (${fullDataSize} bytes), creating minimal cache`);
-          
-          const minimalProducts = products.map(product => ({
-            id: product.id,
-            name: product.name,
-            price: product.price,
-            category: product.category,
-            isActive: product.isActive,
-            // Include small image URL if it exists
-            imageUrl: product.imageUrl && product.imageUrl.length < 200 ? product.imageUrl : null,
-          }));
-
-          const minimalResponseData = {
-            success: true,
-            products: minimalProducts,
-            stats: stats,
-            count: products.length,
-            isMinimal: true // Flag to indicate minimal data
-          };
-
-          const minimalDataSize = Buffer.byteLength(JSON.stringify(minimalResponseData), 'utf8');
-          console.log(`Products: Minimal response size: ${minimalDataSize} bytes`);
-
-          if (minimalDataSize < 500000) { // 500KB limit for minimal data
-            await setCache(cacheKey + ':minimal', minimalResponseData, 180); // 3 minutes for minimal
-            console.log(`Products: Cached minimal data for key: ${cacheKey}:minimal`);
-          }
-        }
-      } catch (error) {
-        console.log(`Products: Failed to cache result, continuing without cache:`, error);
-      }
-    } else {
-      console.log(`Products: Skipping cache - search: ${!!search}, count: ${products.length}`);
-    }
-
-    return NextResponse.json(responseData);
+      products: productsWithArtisans,
+      count: productsWithArtisans.length
+    });
   } catch (error: any) {
     console.error('Products API error:', error);
     return NextResponse.json(
@@ -269,26 +179,8 @@ export async function POST(request: NextRequest) {
     const product = await createProduct(productData);
     console.log('Product created successfully:', { id: product.id, name: product.name });
 
-    // Invalidate specific product-related caches after creating a new product
-    try {
-      // Instead of using pattern matching (which might fail on Upstash), 
-      // invalidate specific cache keys that we know exist
-      const cacheKeysToInvalidate = [
-        'products:all:nosearch:nocategory:50:0',
-        'products:all:nosearch:nocategory:20:0',
-        'products:featured:nosearch:nocategory:4:0',
-        'products:featured:nosearch:nocategory:8:0',
-        'products:all:nosearch:nocategory:10:0'
-      ];
-      
-      for (const key of cacheKeysToInvalidate) {
-        await deleteCache(key);
-        await deleteCache(key + ':minimal'); // Also delete minimal versions
-      }
-      console.log('Products: Invalidated common product cache keys after creating new product');
-    } catch (error) {
-      console.log('Products: Failed to invalidate cache, continuing without cache cleanup:', error);
-    }
+    // REDIS CACHING DISABLED - No cache invalidation needed
+    console.log('Products: Cache invalidation skipped (Redis disabled)');
 
     return NextResponse.json({
       success: true,
