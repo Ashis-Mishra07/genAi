@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "@/lib/i18n/hooks";
+import { useTranslateContent } from "@/lib/hooks/useTranslateContent";
 import {
   User,
   Mail,
@@ -26,6 +28,8 @@ interface ArtisanProfile {
 
 export default function ArtisanProfilePage() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { translateText, isHindi } = useTranslateContent();
   const [profile, setProfile] = useState<ArtisanProfile>({
     id: "",
     name: "",
@@ -110,9 +114,15 @@ export default function ArtisanProfilePage() {
         throw new Error("Failed to update profile");
       }
 
-      setSuccess("Profile updated successfully!");
+      setSuccess(
+        isHindi
+          ? "प्रोफाइल सफलतापूर्वक अपडेट हो गया!"
+          : "Profile updated successfully!"
+      );
     } catch (error) {
-      setError("Failed to update profile");
+      setError(
+        isHindi ? "प्रोफाइल अपडेट करने में विफल" : "Failed to update profile"
+      );
       console.error("Profile update error:", error);
     } finally {
       setIsSaving(false);
@@ -124,7 +134,9 @@ export default function ArtisanProfilePage() {
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">Loading profile...</p>
+          <p className="text-slate-400">
+            {isHindi ? "प्रोफाइल लोड हो रहा है..." : "Loading profile..."}
+          </p>
         </div>
       </div>
     );
@@ -135,10 +147,14 @@ export default function ArtisanProfilePage() {
       {/* Header */}
       <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-white">Profile Settings</h1>
+          <h1 className="text-2xl font-bold text-white">
+            {isHindi ? "प्रोफाइल सेटिंग्स" : "Profile Settings"}
+          </h1>
           <div className="flex items-center text-slate-400">
             <User className="h-5 w-5 mr-2" />
-            <span>Manage your account</span>
+            <span>
+              {isHindi ? "अपना खाता प्रबंधित करें" : "Manage your account"}
+            </span>
           </div>
         </div>
       </div>
@@ -176,7 +192,7 @@ export default function ArtisanProfilePage() {
                 <div>
                   <label className="block text-slate-300 text-sm font-medium mb-2">
                     <User className="h-4 w-4 inline mr-1" />
-                    Full Name *
+                    {isHindi ? "पूरा नाम *" : "Full Name *"}
                   </label>
                   <input
                     type="text"
@@ -184,7 +200,11 @@ export default function ArtisanProfilePage() {
                     value={profile.name}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                    placeholder="Enter your full name"
+                    placeholder={
+                      isHindi
+                        ? "अपना पूरा नाम दर्ज करें"
+                        : "Enter your full name"
+                    }
                     required
                   />
                 </div>
@@ -192,7 +212,7 @@ export default function ArtisanProfilePage() {
                 <div>
                   <label className="block text-slate-300 text-sm font-medium mb-2">
                     <Mail className="h-4 w-4 inline mr-1" />
-                    Email Address *
+                    {isHindi ? "ईमेल पता *" : "Email Address *"}
                   </label>
                   <input
                     type="email"
@@ -200,7 +220,9 @@ export default function ArtisanProfilePage() {
                     value={profile.email}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                    placeholder="Enter your email"
+                    placeholder={
+                      isHindi ? "अपना ईमेल दर्ज करें" : "Enter your email"
+                    }
                     required
                   />
                 </div>
@@ -208,7 +230,7 @@ export default function ArtisanProfilePage() {
                 <div>
                   <label className="block text-slate-300 text-sm font-medium mb-2">
                     <Phone className="h-4 w-4 inline mr-1" />
-                    Phone Number
+                    {isHindi ? "फोन नंबर" : "Phone Number"}
                   </label>
                   <input
                     type="tel"
@@ -216,14 +238,18 @@ export default function ArtisanProfilePage() {
                     value={profile.phone || ""}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                    placeholder="Enter your phone number"
+                    placeholder={
+                      isHindi
+                        ? "अपना फोन नंबर दर्ज करें"
+                        : "Enter your phone number"
+                    }
                   />
                 </div>
 
                 <div>
                   <label className="block text-slate-300 text-sm font-medium mb-2">
                     <Palette className="h-4 w-4 inline mr-1" />
-                    Specialty
+                    {isHindi ? "विशेषता" : "Specialty"}
                   </label>
                   <input
                     type="text"
@@ -231,7 +257,11 @@ export default function ArtisanProfilePage() {
                     value={profile.specialty || ""}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                    placeholder="e.g., Pottery, Jewelry, Woodworking"
+                    placeholder={
+                      isHindi
+                        ? "जैसे: मिट्टी के बर्तन, आभूषण, लकड़ी का काम"
+                        : "e.g., Pottery, Jewelry, Woodworking"
+                    }
                   />
                 </div>
               </div>
@@ -239,7 +269,7 @@ export default function ArtisanProfilePage() {
               <div>
                 <label className="block text-slate-300 text-sm font-medium mb-2">
                   <MapPin className="h-4 w-4 inline mr-1" />
-                  Location
+                  {isHindi ? "स्थान" : "Location"}
                 </label>
                 <input
                   type="text"
@@ -247,14 +277,18 @@ export default function ArtisanProfilePage() {
                   value={profile.location || ""}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder="Enter your city or region"
+                  placeholder={
+                    isHindi
+                      ? "अपना शहर या क्षेत्र दर्ज करें"
+                      : "Enter your city or region"
+                  }
                 />
               </div>
 
               <div>
                 <label className="block text-slate-300 text-sm font-medium mb-2">
                   <FileText className="h-4 w-4 inline mr-1" />
-                  Bio
+                  {isHindi ? "बायो" : "Bio"}
                 </label>
                 <textarea
                   name="bio"
@@ -262,7 +296,11 @@ export default function ArtisanProfilePage() {
                   onChange={handleInputChange}
                   rows={4}
                   className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 resize-none"
-                  placeholder="Tell customers about your craft and experience..."
+                  placeholder={
+                    isHindi
+                      ? "ग्राहकों को अपनी कलाकारी और अनुभव के बारे में बताएं..."
+                      : "Tell customers about your craft and experience..."
+                  }
                 />
               </div>
 
@@ -287,12 +325,12 @@ export default function ArtisanProfilePage() {
                 {isSaving ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Saving...
+                    {isHindi ? "सेव हो रहा है..." : "Saving..."}
                   </>
                 ) : (
                   <>
                     <Save className="h-5 w-5 mr-2" />
-                    Update Profile
+                    {isHindi ? "प्रोफाइल अपडेट करें" : "Update Profile"}
                   </>
                 )}
               </button>

@@ -19,6 +19,7 @@
     "db:format": "prisma format"
   },
   "dependencies": {
+    "@google-cloud/translate": "^9.2.1",
     "@google/generative-ai": "^0.24.1",
     "@modelcontextprotocol/sdk": "^1.18.1",
     "@neondatabase/serverless": "^1.0.1",

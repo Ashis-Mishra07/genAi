@@ -1,24 +1,26 @@
-'use client';
+"use client";
 
 import {
-    Bell,
-    CheckCircle2,
-    Eye,
-    EyeOff,
-    Gift,
-    Package,
-    RefreshCw,
-    Settings,
-    ShoppingBag,
-    Trash2,
-    Zap
-} from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+  Bell,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  Gift,
+  Package,
+  RefreshCw,
+  Settings,
+  ShoppingBag,
+  Trash2,
+  Zap,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useTranslation } from "@/lib/i18n/hooks";
+import { useTranslateContent } from "@/lib/hooks/useTranslateContent";
 
 interface Notification {
   id: number;
-  type: 'purchase' | 'ticket' | 'review' | 'system';
+  type: "purchase" | "ticket" | "review" | "system";
   title: string;
   message: string;
   createdAt: string;
@@ -35,45 +37,46 @@ interface NotificationResponse {
 
 const getNotificationIcon = (type: string) => {
   switch (type) {
-    case 'order_placed':
-    case 'purchase':
+    case "order_placed":
+    case "purchase":
       return ShoppingBag;
-    case 'order_updated':
+    case "order_updated":
       return Package;
-    case 'product_sold':
-const getNotificationColor = (type: string) => {
-  switch (type) {
-    case 'order_placed':
-    case 'purchase':
-      return 'text-green-400';
-    case 'order_updated':
-      return 'text-blue-400';
-    case 'product_sold':
-      return 'text-emerald-400';
-    case 'ticket':
-      return 'text-cyan-400';
-    case 'review':
-      return 'text-yellow-400';
-    case 'system':
-    case 'general':
-      return 'text-purple-400';
-    case 'payment':
-      return 'text-indigo-400';
-    case 'message':
-      return 'text-rose-400';
-    case 'promotion':
-      return 'text-pink-400';
-    case 'settings':
-      return 'text-slate-400';
-    case 'urgent':
-      return 'text-red-400';
-    default:
-      return 'text-gray-400';
-  }
-};    return Gift;
-    case 'settings':
+    case "product_sold":
+      const getNotificationColor = (type: string) => {
+        switch (type) {
+          case "order_placed":
+          case "purchase":
+            return "text-green-400";
+          case "order_updated":
+            return "text-blue-400";
+          case "product_sold":
+            return "text-emerald-400";
+          case "ticket":
+            return "text-cyan-400";
+          case "review":
+            return "text-yellow-400";
+          case "system":
+          case "general":
+            return "text-purple-400";
+          case "payment":
+            return "text-indigo-400";
+          case "message":
+            return "text-rose-400";
+          case "promotion":
+            return "text-pink-400";
+          case "settings":
+            return "text-slate-400";
+          case "urgent":
+            return "text-red-400";
+          default:
+            return "text-gray-400";
+        }
+      };
+      return Gift;
+    case "settings":
       return Settings;
-    case 'urgent':
+    case "urgent":
       return Zap;
     default:
       return Bell;
@@ -82,89 +85,103 @@ const getNotificationColor = (type: string) => {
 
 const getNotificationColor = (type: string) => {
   switch (type) {
-    case 'purchase':
-      return 'text-green-400';
-    case 'ticket':
-      return 'text-blue-400';
-    case 'review':
-      return 'text-yellow-400';
-    case 'system':
-      return 'text-purple-400';
+    case "purchase":
+      return "text-green-400";
+    case "ticket":
+      return "text-blue-400";
+    case "review":
+      return "text-yellow-400";
+    case "system":
+      return "text-purple-400";
     default:
-      return 'text-gray-400';
+      return "text-gray-400";
   }
 };
 
 const getNotificationBgColor = (type: string) => {
   switch (type) {
-    case 'order_placed':
-    case 'purchase':
-      return 'bg-green-500/10';
-    case 'order_updated':
-      return 'bg-blue-500/10';
-    case 'product_sold':
-      return 'bg-emerald-500/10';
-    case 'ticket':
-      return 'bg-cyan-500/10';
-    case 'review':
-      return 'bg-yellow-500/10';
-    case 'system':
-    case 'general':
-      return 'bg-purple-500/10';
-    case 'payment':
-      return 'bg-indigo-500/10';
-    case 'message':
-      return 'bg-rose-500/10';
-    case 'promotion':
-      return 'bg-pink-500/10';
-    case 'settings':
-      return 'bg-slate-500/10';
-    case 'urgent':
-      return 'bg-red-500/10';
+    case "order_placed":
+    case "purchase":
+      return "bg-green-500/10";
+    case "order_updated":
+      return "bg-blue-500/10";
+    case "product_sold":
+      return "bg-emerald-500/10";
+    case "ticket":
+      return "bg-cyan-500/10";
+    case "review":
+      return "bg-yellow-500/10";
+    case "system":
+    case "general":
+      return "bg-purple-500/10";
+    case "payment":
+      return "bg-indigo-500/10";
+    case "message":
+      return "bg-rose-500/10";
+    case "promotion":
+      return "bg-pink-500/10";
+    case "settings":
+      return "bg-slate-500/10";
+    case "urgent":
+      return "bg-red-500/10";
     default:
-      return 'bg-gray-500/10';
+      return "bg-gray-500/10";
   }
 };
 
-const getRelativeTime = (dateString: string) => {
+const getRelativeTime = (dateString: string, isHindi: boolean = false) => {
   const now = new Date();
   const date = new Date(dateString);
   const diff = now.getTime() - date.getTime();
-  
+
   const seconds = Math.floor(diff / 1000);
   const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
   const weeks = Math.floor(days / 7);
   const months = Math.floor(days / 30);
-  
-  if (months > 0) return `${months} month${months > 1 ? 's' : ''} ago`;
-  if (weeks > 0) return `${weeks} week${weeks > 1 ? 's' : ''} ago`;
-  if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
-  if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-  if (minutes > 0) return `${minutes} min${minutes > 1 ? 's' : ''} ago`;
+
+  if (isHindi) {
+    if (months > 0) return `${months} महीने पहले`;
+    if (weeks > 0) return `${weeks} सप्ताह पहले`;
+    if (days > 0) return `${days} दिन पहले`;
+    if (hours > 0) return `${hours} घंटे पहले`;
+    if (minutes > 0) return `${minutes} मिनट पहले`;
+    if (seconds > 30) return `${seconds} सेकंड पहले`;
+    return "अभी";
+  }
+
+  if (months > 0) return `${months} month${months > 1 ? "s" : ""} ago`;
+  if (weeks > 0) return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
+  if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
+  if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+  if (minutes > 0) return `${minutes} min${minutes > 1 ? "s" : ""} ago`;
   if (seconds > 30) return `${seconds} seconds ago`;
-  return 'Just now';
+  return "Just now";
 };
 
 export default function NotificationsPage() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { translateText, isHindi } = useTranslateContent();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [actionLoading, setActionLoading] = useState<number | string | null>(null);
+  const [actionLoading, setActionLoading] = useState<number | string | null>(
+    null
+  );
 
   // Fetch notifications function
   const fetchNotifications = async (silent = false) => {
     if (!silent) {
       setRefreshing(true);
     }
-    
+
     try {
-      const response = await fetch('/api/notifications');
+      const response = await fetch("/api/notifications");
       if (response.ok) {
         const data: NotificationResponse = await response.json();
         if (data.success) {
@@ -174,7 +191,7 @@ export default function NotificationsPage() {
         }
       }
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      console.error("Error fetching notifications:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -198,27 +215,29 @@ export default function NotificationsPage() {
   // Mark notification as read
   const markAsRead = async (notificationId: number) => {
     setActionLoading(notificationId);
-    
+
     try {
-      const response = await fetch('/api/notifications', {
-        method: 'PUT',
+      const response = await fetch("/api/notifications", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          action: 'markAsRead',
-          notificationId
+          action: "markAsRead",
+          notificationId,
         }),
       });
 
       if (response.ok) {
-        setNotifications(prev => prev.map(n => 
-          n.id === notificationId ? { ...n, isRead: true } : n
-        ));
-        setUnreadCount(prev => Math.max(0, prev - 1));
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n.id === notificationId ? { ...n, isRead: true } : n
+          )
+        );
+        setUnreadCount((prev) => Math.max(0, prev - 1));
       }
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      console.error("Error marking notification as read:", error);
     } finally {
       setActionLoading(null);
     }
@@ -226,25 +245,25 @@ export default function NotificationsPage() {
 
   // Mark all notifications as read
   const markAllAsRead = async () => {
-    setActionLoading('all');
-    
+    setActionLoading("all");
+
     try {
-      const response = await fetch('/api/notifications', {
-        method: 'PUT',
+      const response = await fetch("/api/notifications", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          action: 'markAllRead'
+          action: "markAllRead",
         }),
       });
 
       if (response.ok) {
-        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+        setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
         setUnreadCount(0);
       }
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
+      console.error("Error marking all notifications as read:", error);
     } finally {
       setActionLoading(null);
     }
@@ -252,16 +271,16 @@ export default function NotificationsPage() {
 
   // Clear all notifications
   const clearAllNotifications = async () => {
-    setActionLoading('clear');
-    
+    setActionLoading("clear");
+
     try {
-      const response = await fetch('/api/notifications', {
-        method: 'PUT',
+      const response = await fetch("/api/notifications", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          action: 'clearAll'
+          action: "clearAll",
         }),
       });
 
@@ -271,24 +290,27 @@ export default function NotificationsPage() {
         setTotalCount(0);
       }
     } catch (error) {
-      console.error('Error clearing notifications:', error);
+      console.error("Error clearing notifications:", error);
     } finally {
       setActionLoading(null);
     }
   };
 
   // Filter and sort notifications based on show unread only and timestamp
-  const filteredNotifications = (showUnreadOnly 
-    ? notifications.filter(n => !n.isRead)
-    : notifications)
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const filteredNotifications = (
+    showUnreadOnly ? notifications.filter((n) => !n.isRead) : notifications
+  ).sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
 
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-900 p-6 flex items-center justify-center">
         <div className="flex items-center space-x-3 text-slate-400">
           <RefreshCw className="h-6 w-6 animate-spin" />
-          <span>Loading notifications...</span>
+          <span>
+            {isHindi ? "सूचनाएं लोड हो रही हैं..." : "Loading notifications..."}
+          </span>
         </div>
       </div>
     );
@@ -305,39 +327,42 @@ export default function NotificationsPage() {
                 <Bell className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">Notifications</h1>
+                <h1 className="text-2xl font-bold text-white">
+                  {isHindi ? "सूचनाएं" : "Notifications"}
+                </h1>
                 <p className="text-slate-400">
-                  {totalCount} total • {unreadCount} unread
+                  {totalCount} {isHindi ? "कुल" : "total"} • {unreadCount}{" "}
+                  {isHindi ? "अपठित" : "unread"}
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-3">
               <button
                 onClick={() => fetchNotifications()}
                 disabled={refreshing}
-                className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-              >
-                <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+                className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
+                <RefreshCw
+                  className={`h-5 w-5 ${refreshing ? "animate-spin" : ""}`}
+                />
               </button>
-              
+
               <button
                 onClick={() => setShowUnreadOnly(!showUnreadOnly)}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   showUnreadOnly
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                }`}
-              >
+                    ? "bg-orange-500 text-white"
+                    : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                }`}>
                 {showUnreadOnly ? (
                   <div className="flex items-center space-x-2">
                     <EyeOff className="h-4 w-4" />
-                    <span>Show All</span>
+                    <span>{isHindi ? "सभी दिखाएं" : "Show All"}</span>
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2">
                     <Eye className="h-4 w-4" />
-                    <span>Unread Only</span>
+                    <span>{isHindi ? "केवल अपठित" : "Unread Only"}</span>
                   </div>
                 )}
               </button>
@@ -348,28 +373,28 @@ export default function NotificationsPage() {
           <div className="flex items-center space-x-3">
             <button
               onClick={markAllAsRead}
-              disabled={unreadCount === 0 || actionLoading === 'all'}
-              className="px-4 py-2 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-            >
-              {actionLoading === 'all' ? (
+              disabled={unreadCount === 0 || actionLoading === "all"}
+              className="px-4 py-2 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2">
+              {actionLoading === "all" ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />
               ) : (
                 <CheckCircle2 className="h-4 w-4" />
               )}
-              <span>Mark All Read</span>
+              <span>
+                {isHindi ? "सभी को पढ़ा गया चिह्नित करें" : "Mark All Read"}
+              </span>
             </button>
-            
+
             <button
               onClick={clearAllNotifications}
-              disabled={totalCount === 0 || actionLoading === 'clear'}
-              className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-            >
-              {actionLoading === 'clear' ? (
+              disabled={totalCount === 0 || actionLoading === "clear"}
+              className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2">
+              {actionLoading === "clear" ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />
               ) : (
                 <Trash2 className="h-4 w-4" />
               )}
-              <span>Clear All</span>
+              <span>{isHindi ? "सभी साफ करें" : "Clear All"}</span>
             </button>
           </div>
         </div>
@@ -380,13 +405,22 @@ export default function NotificationsPage() {
             <div className="text-center py-12">
               <Bell className="h-12 w-12 text-slate-600 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-slate-400 mb-2">
-                {showUnreadOnly ? 'No unread notifications' : 'No notifications'}
+                {showUnreadOnly
+                  ? isHindi
+                    ? "कोई अपठित सूचना नहीं"
+                    : "No unread notifications"
+                  : isHindi
+                  ? "कोई सूचना नहीं"
+                  : "No notifications"}
               </h3>
               <p className="text-slate-500">
-                {showUnreadOnly 
-                  ? 'All caught up! You have no unread notifications.'
-                  : 'When you receive notifications, they will appear here.'
-                }
+                {showUnreadOnly
+                  ? isHindi
+                    ? "सभी पूर्ण! आपके पास कोई अपठित सूचना नहीं है।"
+                    : "All caught up! You have no unread notifications."
+                  : isHindi
+                  ? "जब आपको सूचनाएं प्राप्त होंगी, तो वे यहाँ दिखाई देंगी।"
+                  : "When you receive notifications, they will appear here."}
               </p>
             </div>
           ) : (
@@ -394,17 +428,18 @@ export default function NotificationsPage() {
               const Icon = getNotificationIcon(notification.type);
               const iconColor = getNotificationColor(notification.type);
               const bgColor = getNotificationBgColor(notification.type);
-              
+
               return (
                 <div
                   key={notification.id}
                   className={`relative bg-slate-800 rounded-lg p-4 border transition-all duration-200 hover:bg-slate-750 cursor-pointer group ${
-                    notification.isRead 
-                      ? 'border-slate-700' 
-                      : 'border-orange-500/30 bg-slate-800/80'
+                    notification.isRead
+                      ? "border-slate-700"
+                      : "border-orange-500/30 bg-slate-800/80"
                   }`}
-                  onClick={() => !notification.isRead && markAsRead(notification.id)}
-                >
+                  onClick={() =>
+                    !notification.isRead && markAsRead(notification.id)
+                  }>
                   <div className="flex items-start space-x-4">
                     {/* Icon */}
                     <div className={`flex-shrink-0 p-2 rounded-lg ${bgColor}`}>
@@ -414,32 +449,38 @@ export default function NotificationsPage() {
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <h3 className={`text-sm font-medium ${
-                          notification.isRead ? 'text-slate-300' : 'text-white'
-                        }`}>
+                        <h3
+                          className={`text-sm font-medium ${
+                            notification.isRead
+                              ? "text-slate-300"
+                              : "text-white"
+                          }`}>
                           {notification.title}
                         </h3>
                         <div className="flex items-center space-x-2">
                           <span className="text-xs text-slate-500">
-                            {getRelativeTime(notification.createdAt)}
+                            {getRelativeTime(notification.createdAt, isHindi)}
                           </span>
                           {!notification.isRead && (
                             <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                           )}
                         </div>
                       </div>
-                      
-                      <p className={`text-sm mt-1 ${
-                        notification.isRead ? 'text-slate-400' : 'text-slate-300'
-                      }`}>
+
+                      <p
+                        className={`text-sm mt-1 ${
+                          notification.isRead
+                            ? "text-slate-400"
+                            : "text-slate-300"
+                        }`}>
                         {notification.message}
                       </p>
-                      
+
                       <div className="flex items-center justify-between mt-2">
                         <span className="text-xs text-slate-500 capitalize">
                           {notification.type}
                         </span>
-                        
+
                         {!notification.isRead && (
                           <button
                             onClick={(e) => {
@@ -447,14 +488,17 @@ export default function NotificationsPage() {
                               markAsRead(notification.id);
                             }}
                             disabled={actionLoading === notification.id}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-orange-400 hover:text-orange-300 flex items-center space-x-1"
-                          >
+                            className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-orange-400 hover:text-orange-300 flex items-center space-x-1">
                             {actionLoading === notification.id ? (
                               <RefreshCw className="h-3 w-3 animate-spin" />
                             ) : (
                               <Eye className="h-3 w-3" />
                             )}
-                            <span>Mark as read</span>
+                            <span>
+                              {isHindi
+                                ? "पढ़ा गया चिह्नित करें"
+                                : "Mark as read"}
+                            </span>
                           </button>
                         )}
                       </div>

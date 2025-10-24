@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { useTranslation } from "@/lib/i18n/hooks";
+import { useTranslateContent } from "@/lib/hooks/useTranslateContent";
 import {
   ArrowLeft,
   Upload,
@@ -19,7 +21,6 @@ import {
   Camera,
   X,
 } from "lucide-react";
-import { useLanguage } from "@/lib/language/LanguageContext";
 
 interface ProductFormData {
   name: string;
@@ -45,12 +46,22 @@ export default function EditProductPage() {
   const router = useRouter();
   const params = useParams();
   const productId = params.id as string;
-  const { t } = useLanguage();
-  
+  const { t } = useTranslation();
+  const { translateText, isHindi } = useTranslateContent();
+
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingProduct, setIsLoadingProduct] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [translatedDisplayData, setTranslatedDisplayData] = useState<{
+    name: string;
+    description: string;
+    story: string;
+  }>({
+    name: "",
+    description: "",
+    story: "",
+  });
 
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
@@ -121,8 +132,32 @@ export default function EditProductPage() {
           isFeatured: product.isFeatured ?? false,
           stockQuantity: product.stockQuantity || 1,
         });
+
+        // Translate the display data if in Hindi mode
+        if (isHindi) {
+          const [translatedName, translatedDescription, translatedStory] =
+            await Promise.all([
+              translateText(product.name || ""),
+              translateText(product.description || ""),
+              translateText(product.story || ""),
+            ]);
+
+          setTranslatedDisplayData({
+            name: translatedName,
+            description: translatedDescription,
+            story: translatedStory,
+          });
+        } else {
+          setTranslatedDisplayData({
+            name: product.name || "",
+            description: product.description || "",
+            story: product.story || "",
+          });
+        }
       } catch (error) {
-        setError(error instanceof Error ? error.message : "Failed to load product");
+        setError(
+          error instanceof Error ? error.message : "Failed to load product"
+        );
       } finally {
         setIsLoadingProduct(false);
       }
@@ -134,19 +169,22 @@ export default function EditProductPage() {
   }, [productId]);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value, type } = e.target;
-    
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" 
-        ? (e.target as HTMLInputElement).checked
-        : type === "number" 
+      [name]:
+        type === "checkbox"
+          ? (e.target as HTMLInputElement).checked
+          : type === "number"
           ? parseFloat(value) || 0
           : value,
     }));
-    
+
     // Clear messages when user starts typing
     if (error) setError("");
     if (success) setSuccess("");
@@ -183,12 +221,11 @@ export default function EditProductPage() {
       }
 
       setSuccess("Product updated successfully!");
-      
+
       // Redirect to dashboard after a short delay
       setTimeout(() => {
         router.push("/artisan/dashboard");
       }, 1500);
-
     } catch (error) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
@@ -222,12 +259,15 @@ export default function EditProductPage() {
               onClick={() => router.back()}
               className="flex items-center text-slate-400 hover:text-white transition-colors mr-4">
               <ArrowLeft className="h-5 w-5 mr-2" />
-              {t('back')}
+              {t("back")}
             </button>
             <div className="flex items-center">
               <Package className="h-8 w-8 text-orange-500 mr-3" />
               <h1 className="text-2xl font-bold text-white">
-                {t('editProduct')}
+                Edit Product:{" "}
+                {isHindi && translatedDisplayData.name
+                  ? translatedDisplayData.name
+                  : formData.name}
               </h1>
             </div>
           </div>
@@ -242,334 +282,344 @@ export default function EditProductPage() {
               {error}
             </div>
           )}
-          
+
           {success && (
             <div className="mb-6 bg-green-500/20 border border-green-500/50 text-green-400 px-4 py-3 rounded-lg">
               {success}
             </div>
           )}
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Basic Information */}
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
-              <Type className="h-5 w-5 mr-2 text-orange-500" />
-              {t('basicInformation')}
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {t('productName')} *
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder="Enter product name"
-                  required
-                />
-              </div>
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Basic Information */}
+            <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+              <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
+                <Type className="h-5 w-5 mr-2 text-orange-500" />
+                {t("basicInformation")}
+              </h2>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {t('category')}
-                </label>
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
-                  <option value="">{t('selectCategory')}</option>
-                  {categories.map((category) => (
-                    <option key={category.key} value={category.key}>
-                      {category.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    {t("productName")} *
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={isHindi ? translatedDisplayData.name : formData.name}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    placeholder="Enter product name"
+                    required
+                    disabled={isHindi}
+                    title={
+                      isHindi
+                        ? "Hindi translation display only. Edit in English."
+                        : ""
+                    }
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {t('price')} *
-                </label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    {t("category")}
+                  </label>
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
+                    <option value="">Select Category</option>
+                    {categories.map((category) => (
+                      <option key={category.key} value={category.key}>
+                        {category.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    {t("price")} *
+                  </label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                    <input
+                      type="number"
+                      name="price"
+                      value={formData.price}
+                      onChange={handleInputChange}
+                      className="w-full pl-10 pr-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                      placeholder="0.00"
+                      min="0"
+                      step="0.01"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    {t("currency")}
+                  </label>
+                  <select
+                    name="currency"
+                    value={formData.currency}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
+                    <option value="INR">INR (₹)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    {t("stockQuantity")}
+                  </label>
                   <input
                     type="number"
-                    name="price"
-                    value={formData.price}
+                    name="stockQuantity"
+                    value={formData.stockQuantity}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                    placeholder="0.00"
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                     min="0"
-                    step="0.01"
-                    required
+                  />
+                </div>
+
+                <div className="flex items-center space-x-6">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      name="isActive"
+                      checked={formData.isActive}
+                      onChange={handleInputChange}
+                      className="rounded border-slate-600 text-orange-500 focus:ring-orange-500 bg-slate-700"
+                    />
+                    <span className="ml-2 text-sm text-slate-300">
+                      {t("active")}
+                    </span>
+                  </label>
+
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      name="isFeatured"
+                      checked={formData.isFeatured}
+                      onChange={handleInputChange}
+                      className="rounded border-slate-600 text-orange-500 focus:ring-orange-500 bg-slate-700"
+                    />
+                    <span className="ml-2 text-sm text-slate-300">
+                      {t("featured")}
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {/* Description & Story */}
+            <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+              <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
+                <FileText className="h-5 w-5 mr-2 text-orange-500" />
+                {t("descriptionStory")}
+              </h2>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    {t("productDescription")}
+                  </label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    rows={4}
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    placeholder="Describe your product..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    {t("culturalStory")}
+                  </label>
+                  <textarea
+                    name="story"
+                    value={formData.story}
+                    onChange={handleInputChange}
+                    rows={4}
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    placeholder="Tell the cultural story behind your product..."
                   />
                 </div>
               </div>
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {t('currency')}
-                </label>
-                <select
-                  name="currency"
-                  value={formData.currency}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
-                  <option value="INR">INR (₹)</option>
-                  <option value="USD">USD ($)</option>
-                  <option value="EUR">EUR (€)</option>
-                </select>
-              </div>
+            {/* Product Details */}
+            <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+              <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
+                <Tag className="h-5 w-5 mr-2 text-orange-500" />
+                {t("productDetails")}
+              </h2>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {t('stockQuantity')}
-                </label>
-                <input
-                  type="number"
-                  name="stockQuantity"
-                  value={formData.stockQuantity}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  min="0"
-                />
-              </div>
-
-              <div className="flex items-center space-x-6">
-                <label className="flex items-center">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    {t("materials")}
+                  </label>
                   <input
-                    type="checkbox"
-                    name="isActive"
-                    checked={formData.isActive}
+                    type="text"
+                    name="materials"
+                    value={formData.materials}
                     onChange={handleInputChange}
-                    className="rounded border-slate-600 text-orange-500 focus:ring-orange-500 bg-slate-700"
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    placeholder="e.g., Cotton, Silk, Wood"
                   />
-                  <span className="ml-2 text-sm text-slate-300">{t('active')}</span>
-                </label>
-                
-                <label className="flex items-center">
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    {t("culturalOrigin")}
+                  </label>
                   <input
-                    type="checkbox"
-                    name="isFeatured"
-                    checked={formData.isFeatured}
+                    type="text"
+                    name="culture"
+                    value={formData.culture}
                     onChange={handleInputChange}
-                    className="rounded border-slate-600 text-orange-500 focus:ring-orange-500 bg-slate-700"
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    placeholder="e.g., Rajasthani, Bengali"
                   />
-                  <span className="ml-2 text-sm text-slate-300">{t('featured')}</span>
-                </label>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    {t("artistName")}
+                  </label>
+                  <input
+                    type="text"
+                    name="artistName"
+                    value={formData.artistName}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    placeholder="Creator's name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    {t("dimensions")}
+                  </label>
+                  <input
+                    type="text"
+                    name="dimensions"
+                    value={formData.dimensions}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    placeholder="e.g., 30cm x 20cm x 5cm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    {t("weight")}
+                  </label>
+                  <input
+                    type="text"
+                    name="weight"
+                    value={formData.weight}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    placeholder="e.g., 500g"
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Description & Story */}
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
-              <FileText className="h-5 w-5 mr-2 text-orange-500" />
-              {t('descriptionStory')}
-            </h2>
-            
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {t('productDescription')}
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  rows={4}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder="Describe your product..."
-                />
-              </div>
+            {/* Images & Links */}
+            <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+              <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
+                <Upload className="h-5 w-5 mr-2 text-orange-500" />
+                {t("imagesLinks")}
+              </h2>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {t('culturalStory')}
-                </label>
-                <textarea
-                  name="story"
-                  value={formData.story}
-                  onChange={handleInputChange}
-                  rows={4}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder="Tell the cultural story behind your product..."
-                />
-              </div>
-            </div>
-          </div>
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    {t("productImageUrl")}
+                  </label>
+                  <input
+                    type="url"
+                    name="imageUrl"
+                    value={formData.imageUrl}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                </div>
 
-          {/* Product Details */}
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
-              <Tag className="h-5 w-5 mr-2 text-orange-500" />
-              {t('productDetails')}
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {t('materials')}
-                </label>
-                <input
-                  type="text"
-                  name="materials"
-                  value={formData.materials}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder="e.g., Cotton, Silk, Wood"
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    {t("marketingPosterUrl")}
+                  </label>
+                  <input
+                    type="url"
+                    name="posterUrl"
+                    value={formData.posterUrl}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    placeholder="https://example.com/poster.jpg"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {t('culturalOrigin')}
-                </label>
-                <input
-                  type="text"
-                  name="culture"
-                  value={formData.culture}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder="e.g., Rajasthani, Bengali"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {t('artistName')}
-                </label>
-                <input
-                  type="text"
-                  name="artistName"
-                  value={formData.artistName}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder="Creator's name"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {t('dimensions')}
-                </label>
-                <input
-                  type="text"
-                  name="dimensions"
-                  value={formData.dimensions}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder="e.g., 30cm x 20cm x 5cm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {t('weight')}
-                </label>
-                <input
-                  type="text"
-                  name="weight"
-                  value={formData.weight}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder="e.g., 500g"
-                />
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    {t("instagramPostUrl")}
+                  </label>
+                  <input
+                    type="url"
+                    name="instagramUrl"
+                    value={formData.instagramUrl}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    placeholder="https://instagram.com/p/..."
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Images & Links */}
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
-              <Upload className="h-5 w-5 mr-2 text-orange-500" />
-              {t('imagesLinks')}
-            </h2>
-            
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {t('productImageUrl')}
-                </label>
-                <input
-                  type="url"
-                  name="imageUrl"
-                  value={formData.imageUrl}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder="https://example.com/image.jpg"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {t('marketingPosterUrl')}
-                </label>
-                <input
-                  type="url"
-                  name="posterUrl"
-                  value={formData.posterUrl}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder="https://example.com/poster.jpg"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {t('instagramPostUrl')}
-                </label>
-                <input
-                  type="url"
-                  name="instagramUrl"
-                  value={formData.instagramUrl}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder="https://instagram.com/p/..."
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex justify-between">
-            <button
-              type="button"
-              onClick={handlePreview}
-              className="flex items-center px-6 py-3 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">
-              <Eye className="h-4 w-4 mr-2" />
-              {t('preview')}
-            </button>
-
-            <div className="flex space-x-4">
+            {/* Action Buttons */}
+            <div className="flex justify-between">
               <button
                 type="button"
-                onClick={() => router.back()}
-                className="px-6 py-3 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">
-                {t('cancel')}
+                onClick={handlePreview}
+                className="flex items-center px-6 py-3 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">
+                <Eye className="h-4 w-4 mr-2" />
+                {t("preview")}
               </button>
-              
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="flex items-center px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                {isLoading ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                ) : (
-                  <Save className="h-4 w-4 mr-2" />
-                )}
-                {isLoading ? t('updating') : t('updateProduct')}
-              </button>
+
+              <div className="flex space-x-4">
+                <button
+                  type="button"
+                  onClick={() => router.back()}
+                  className="px-6 py-3 border border-slate-600 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">
+                  {t("cancel")}
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex items-center px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                  {isLoading ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  ) : (
+                    <Save className="h-4 w-4 mr-2" />
+                  )}
+                  {isLoading ? t("updating") : t("updateProduct")}
+                </button>
+              </div>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
-  </div>
   );
 }

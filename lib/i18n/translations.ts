@@ -88,6 +88,19 @@ export const translations = {
     woodwork: 'Woodwork',
     metalwork: 'Metalwork',
     food: 'Food & Beverages',
+    paintings: 'Paintings & Art',
+    homeDecor: 'Home Decor',
+    traditionalWear: 'Traditional Wear',
+    sculptures: 'Sculptures',
+    other: 'Other',
+    
+    // Form Labels
+    basicInformation: 'Basic Information',
+    backToDashboard: 'Back to Dashboard',
+    createNewProduct: 'Create New Product',
+    enterProductName: 'Enter product name',
+    enterPrice: 'Enter price',
+    currency: 'Currency',
     
     // Time & Dates
     createdAt: 'Created',
@@ -230,6 +243,19 @@ export const translations = {
     woodwork: 'लकड़ी का काम',
     metalwork: 'धातु का काम',
     food: 'खाद्य और पेय',
+    paintings: 'चित्रकारी और कला',
+    homeDecor: 'घर की सजावट',
+    traditionalWear: 'पारंपरिक पोशाक',
+    sculptures: 'मूर्तियां',
+    other: 'अन्य',
+    
+    // Form Labels
+    basicInformation: 'मूलभूत जानकारी',
+    backToDashboard: 'डैशबोर्ड पर वापस जाएं',
+    createNewProduct: 'नया उत्पाद बनाएं',
+    enterProductName: 'उत्पाद का नाम दर्ज करें',
+    enterPrice: 'कीमत दर्ज करें',
+    currency: 'मुद्रा',
     
     // Time & Dates
     createdAt: 'बनाया गया',
