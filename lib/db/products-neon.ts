@@ -1,6 +1,11 @@
 import { neon } from '@neondatabase/serverless';
 
-const sql = neon(process.env.DATABASE_URL!);
+// Configure Neon with better timeout and retry settings
+const sql = neon(process.env.DATABASE_URL!, {
+  fetchOptions: {
+    timeout: 30000, // 30 seconds timeout
+  },
+});
 
 // Product interface matching actual database schema
 export interface Product {
@@ -246,7 +251,7 @@ export async function getProductById(id: string): Promise<Product | null> {
   return result.length > 0 ? result[0] as Product : null;
 }
 
-// Create product
+// Create product with retry logic
 export async function createProduct(productData: CreateProductData): Promise<Product> {
   const {
     name,
@@ -261,35 +266,65 @@ export async function createProduct(productData: CreateProductData): Promise<Pro
     userId,
   } = productData;
 
-  const result = await sql`
-    INSERT INTO products (
-      name, description, story, price, currency, image_url, poster_url, 
-      category, is_active, user_id, 
-      created_at, updated_at
-    ) VALUES (
-      ${name}, ${description}, ${story}, ${price}, ${currency}, ${imageUrl}, 
-      ${posterUrl}, ${category}, ${isActive}, ${userId}, NOW(), NOW()
-    )
-    RETURNING 
-      id, 
-      name, 
-      description, 
-      story, 
-      price, 
-      currency, 
-      image_url as "imageUrl", 
-      poster_url as "posterUrl", 
-      category, 
-      is_active as "isActive", 
-      user_id as "userId",
-      created_at as "createdAt",
-      updated_at as "updatedAt",
-      video_url as "videoUrl",
-      video_status as "videoStatus",
-      video_generation_id as "videoGenerationId"
-  `;
+  // Retry logic for handling connection issues
+  let lastError;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      console.log(`Creating product attempt ${attempt}/3`);
+      
+      const result = await sql`
+        INSERT INTO products (
+          name, description, story, price, currency, image_url, poster_url, 
+          category, is_active, user_id, 
+          created_at, updated_at
+        ) VALUES (
+          ${name}, ${description}, ${story}, ${price}, ${currency}, ${imageUrl}, 
+          ${posterUrl}, ${category}, ${isActive}, ${userId}, NOW(), NOW()
+        )
+        RETURNING 
+          id, 
+          name, 
+          description, 
+          story, 
+          price, 
+          currency, 
+          image_url as "imageUrl", 
+          poster_url as "posterUrl", 
+          category, 
+          is_active as "isActive", 
+          user_id as "userId",
+          created_at as "createdAt",
+          updated_at as "updatedAt",
+          video_url as "videoUrl",
+          video_status as "videoStatus",
+          video_generation_id as "videoGenerationId"
+      `;
+      
+      console.log(`Product created successfully on attempt ${attempt}`);
+      return result[0] as Product;
+    } catch (error: any) {
+      lastError = error;
+      console.error(`Product creation attempt ${attempt} failed:`, error.message);
+      
+      // If this is a timeout or connection error and we have retries left, wait and retry
+      if (attempt < 3 && (
+        error.message?.includes('timeout') || 
+        error.message?.includes('fetch failed') ||
+        error.message?.includes('ECONNREFUSED')
+      )) {
+        const waitTime = attempt * 2000; // 2s, 4s
+        console.log(`Waiting ${waitTime}ms before retry...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        continue;
+      }
+      
+      // If it's not a retryable error or we're out of retries, throw
+      throw error;
+    }
+  }
   
-  return result[0] as Product;
+  // This should never be reached due to the throw above, but TypeScript needs it
+  throw lastError;
 }
 
 // Update product
