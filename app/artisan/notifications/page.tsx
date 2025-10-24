@@ -160,6 +160,35 @@ const getRelativeTime = (dateString: string, isHindi: boolean = false) => {
   return "Just now";
 };
 
+const getNotificationTypeText = (type: string, isHindi: boolean = false) => {
+  if (!isHindi) return type.charAt(0).toUpperCase() + type.slice(1);
+
+  switch (type) {
+    case "purchase":
+      return "खरीदारी";
+    case "ticket":
+      return "टिकट";
+    case "review":
+      return "समीक्षा";
+    case "system":
+      return "सिस्टम";
+    case "order":
+      return "ऑर्डर";
+    case "payment":
+      return "भुगतान";
+    case "message":
+      return "संदेश";
+    case "promotion":
+      return "प्रचार";
+    case "settings":
+      return "सेटिंग्स";
+    case "urgent":
+      return "तत्काल";
+    default:
+      return type;
+  }
+};
+
 export default function NotificationsPage() {
   const router = useRouter();
   const { t } = useTranslation();
@@ -173,6 +202,45 @@ export default function NotificationsPage() {
   const [actionLoading, setActionLoading] = useState<number | string | null>(
     null
   );
+
+  // Translation cache for notification content
+  const [translatedTitles, setTranslatedTitles] = useState<{
+    [key: string]: string;
+  }>({});
+  const [translatedMessages, setTranslatedMessages] = useState<{
+    [key: string]: string;
+  }>({});
+
+  // Function to translate notification content
+  const translateNotificationContent = async (
+    notificationId: number,
+    title: string,
+    message: string
+  ) => {
+    if (!isHindi) return;
+
+    try {
+      // Translate title if not already translated
+      if (title && !translatedTitles[notificationId]) {
+        const translatedTitle = await translateText(title);
+        setTranslatedTitles((prev) => ({
+          ...prev,
+          [notificationId]: translatedTitle,
+        }));
+      }
+
+      // Translate message if not already translated
+      if (message && !translatedMessages[notificationId]) {
+        const translatedMessage = await translateText(message);
+        setTranslatedMessages((prev) => ({
+          ...prev,
+          [notificationId]: translatedMessage,
+        }));
+      }
+    } catch (error) {
+      console.error("Translation failed:", error);
+    }
+  };
 
   // Fetch notifications function
   const fetchNotifications = async (silent = false) => {
@@ -202,6 +270,19 @@ export default function NotificationsPage() {
   useEffect(() => {
     fetchNotifications();
   }, []);
+
+  // Effect to translate notification content when language changes to Hindi
+  useEffect(() => {
+    if (isHindi && notifications.length > 0) {
+      notifications.forEach((notification) => {
+        translateNotificationContent(
+          notification.id,
+          notification.title,
+          notification.message
+        );
+      });
+    }
+  }, [isHindi, notifications.length]);
 
   // Auto-refresh every 30 seconds
   useEffect(() => {
@@ -455,7 +536,9 @@ export default function NotificationsPage() {
                               ? "text-slate-300"
                               : "text-white"
                           }`}>
-                          {notification.title}
+                          {isHindi && translatedTitles[notification.id]
+                            ? translatedTitles[notification.id]
+                            : notification.title}
                         </h3>
                         <div className="flex items-center space-x-2">
                           <span className="text-xs text-slate-500">
@@ -473,12 +556,14 @@ export default function NotificationsPage() {
                             ? "text-slate-400"
                             : "text-slate-300"
                         }`}>
-                        {notification.message}
+                        {isHindi && translatedMessages[notification.id]
+                          ? translatedMessages[notification.id]
+                          : notification.message}
                       </p>
 
                       <div className="flex items-center justify-between mt-2">
-                        <span className="text-xs text-slate-500 capitalize">
-                          {notification.type}
+                        <span className="text-xs text-slate-500">
+                          {getNotificationTypeText(notification.type, isHindi)}
                         </span>
 
                         {!notification.isRead && (
