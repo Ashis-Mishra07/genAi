@@ -269,6 +269,7 @@ export default function ChatsPage() {
         timestamp: new Date().toISOString()
       };
       
+      
       sessionStorage.setItem('posterImageData', JSON.stringify(imageData));
       
       // Send a message to the artisan about poster creation

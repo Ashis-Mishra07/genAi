@@ -13,6 +13,7 @@ import {
   Tag,
   Search,
   IndianRupee,
+  Instagram,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -49,6 +50,11 @@ export default function ProductsPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  // Instagram posting state
+  const [postingToInstagram, setPostingToInstagram] = useState<number | null>(
+    null
+  );
 
   // Add product form state
   const [newProduct, setNewProduct] = useState({
@@ -93,6 +99,15 @@ export default function ProductsPage() {
     setShowViewModal(true);
   };
 
+  const handleProductClick = async (product: Product) => {
+    // Generate story if product doesn't have one
+    if (!product.story) {
+      await generateStory(product.id);
+    }
+    // Then open the view modal
+    handleViewProduct(product);
+  };
+
   const handleEditProduct = (product: Product) => {
     setSelectedProduct(product);
     setShowEditModal(true);
@@ -101,6 +116,39 @@ export default function ProductsPage() {
   const handleDeleteProduct = (product: Product) => {
     setSelectedProduct(product);
     setShowDeleteModal(true);
+  };
+
+  // Instagram post handler
+  const handlePostToInstagram = async (product: Product) => {
+    try {
+      setPostingToInstagram(product.id);
+
+      const response = await fetch("/api/instagram/post-product", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ productId: product.id }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          alert("Product posted to Instagram successfully!");
+        } else {
+          alert("Failed to post to Instagram: " + result.error);
+        }
+      } else {
+        alert("Failed to post to Instagram. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error posting to Instagram:", error);
+      alert(
+        "Failed to post to Instagram. Please check your connection and try again."
+      );
+    } finally {
+      setPostingToInstagram(null);
+    }
   };
 
   const closeModals = () => {
@@ -122,8 +170,8 @@ export default function ProductsPage() {
   const handleAddProduct = async () => {
     if (newProduct.name && newProduct.description && newProduct.price) {
       try {
-        const token = localStorage.getItem('accessToken');
-        
+        const token = localStorage.getItem("accessToken");
+
         const productData = {
           name: newProduct.name,
           description: newProduct.description,
@@ -137,13 +185,13 @@ export default function ProductsPage() {
           isActive: newProduct.is_active,
         };
 
-        const response = await fetch('/api/products', {
-          method: 'POST',
+        const response = await fetch("/api/products", {
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(productData)
+          body: JSON.stringify(productData),
         });
 
         if (response.ok) {
@@ -153,16 +201,16 @@ export default function ProductsPage() {
             await loadProducts();
             resetAddForm();
             setShowAddModal(false);
-            alert('Product added successfully!');
+            alert("Product added successfully!");
           } else {
-            alert('Failed to add product: ' + data.error);
+            alert("Failed to add product: " + data.error);
           }
         } else {
-          alert('Failed to add product. Please try again.');
+          alert("Failed to add product. Please try again.");
         }
       } catch (error) {
-        console.error('Error adding product:', error);
-        alert('Failed to add product. Please try again.');
+        console.error("Error adding product:", error);
+        alert("Failed to add product. Please try again.");
       }
     }
   };
@@ -193,14 +241,14 @@ export default function ProductsPage() {
   const loadProducts = async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('accessToken');
-      
-      const response = await fetch('/api/products', {
-        method: 'GET',
+      const token = localStorage.getItem("accessToken");
+
+      const response = await fetch("/api/products", {
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
 
       if (response.ok) {
@@ -213,21 +261,28 @@ export default function ProductsPage() {
             description: product.description,
             story: product.story,
             price: product.price,
-            currency: product.currency || 'INR',
+            currency: product.currency || "INR",
             image_url: product.imageUrl || product.image_url,
             category: product.category,
-            tags: product.tags ? (Array.isArray(product.tags) ? product.tags : product.tags.split(',').map((t: string) => t.trim())) : [],
+            tags: product.tags
+              ? Array.isArray(product.tags)
+                ? product.tags
+                : product.tags.split(",").map((t: string) => t.trim())
+              : [],
             is_active: product.isActive !== false,
-            created_at: product.createdAt || product.created_at || new Date().toISOString(),
+            created_at:
+              product.createdAt ||
+              product.created_at ||
+              new Date().toISOString(),
           }));
           setProducts(formattedProducts);
         } else {
-          console.error('Failed to load products:', data.error);
+          console.error("Failed to load products:", data.error);
           // Fallback to empty array
           setProducts([]);
         }
       } else {
-        console.error('Failed to fetch products:', response.status);
+        console.error("Failed to fetch products:", response.status);
         // Fallback to empty array
         setProducts([]);
       }
@@ -476,7 +531,7 @@ export default function ProductsPage() {
           {filteredProducts.map((product) => (
             <div
               key={product.id}
-              onClick={() => handleViewProduct(product)}
+              onClick={() => handleProductClick(product)}
               className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden hover:shadow-lg hover:border-orange-500 transition-all cursor-pointer">
               {/* Product Image */}
               <div className="h-48 bg-gray-800 flex items-center justify-center">
@@ -576,19 +631,20 @@ export default function ProductsPage() {
                     </button>
                   </div>
 
-                  {!product.story && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        generateStory(product.id);
-                      }}
-                      className="border-orange-500 text-orange-400 hover:bg-orange-500/20">
-                      <Sparkles className="h-3 w-3 mr-1" />
-                      Generate Story
-                    </Button>
-                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePostToInstagram(product);
+                    }}
+                    disabled={postingToInstagram === product.id}
+                    className="border-pink-500 text-pink-400 hover:bg-pink-500/20 disabled:opacity-50">
+                    <Instagram className="h-3 w-3 mr-1" />
+                    {postingToInstagram === product.id
+                      ? "Posting..."
+                      : "Add to Instagram"}
+                  </Button>
                 </div>
               </div>
             </div>
