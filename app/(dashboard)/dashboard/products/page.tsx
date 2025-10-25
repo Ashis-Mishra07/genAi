@@ -118,33 +118,78 @@ export default function ProductsPage() {
     setShowDeleteModal(true);
   };
 
-  // Instagram post handler
+  // Instagram post handler - Updated to use n8n workflow
   const handlePostToInstagram = async (product: Product) => {
     try {
       setPostingToInstagram(product.id);
 
-      const response = await fetch("/api/instagram/post-product", {
+      console.log("📱 Starting Instagram post for product:", product.name);
+      console.log("🖼️ Product image URL:", product.image_url);
+      console.log("💰 Product price:", product.price);
+
+      // Generate Instagram caption for the product
+      const caption = `✨ ${product.name} ✨
+
+${
+  product.description ||
+  `Beautiful handcrafted ${product.name} created with love and tradition.`
+}
+
+💰 Price: ${product.currency === "INR" ? "₹" : "$"}${
+        product.price?.toLocaleString() || "N/A"
+      }
+🎨 Category: ${product.category || "Handmade"}
+${product.story ? `📖 ${product.story.substring(0, 100)}...` : ""}
+
+Discover authentic artisan crafts that tell a story! 🎭
+
+#handmade #artisan #traditional #authentic #craft #handcrafted #artisanal #culture #heritage #madewithlove #ArtisanAI #SupportArtisans`;
+
+      console.log("📝 Generated caption:", caption.substring(0, 100) + "...");
+
+      // Call the new n8n API endpoint
+      const response = await fetch("/api/instagram/post-via-n8n", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ productId: product.id }),
+        body: JSON.stringify({
+          productId: product.id,
+          cloudinaryUrl: product.image_url, // ← This should be your Cloudinary poster URL
+          caption: caption,
+        }),
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success) {
-          alert("Product posted to Instagram successfully!");
-        } else {
-          alert("Failed to post to Instagram: " + result.error);
-        }
-      } else {
-        alert("Failed to post to Instagram. Please try again.");
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to post to Instagram via n8n");
       }
+
+      console.log("🎉 Successfully posted to Instagram via n8n!");
+      console.log("📊 Result:", result);
+
+      // Show success message with details
+      const successMessage = `Successfully posted "${
+        product.name
+      }" to Instagram! 🎉
+
+📸 Image: ${
+        product.image_url?.includes("cloudinary.com")
+          ? "Cloudinary Poster"
+          : "Product Image"
+      }
+📱 Account: ${result.data?.instagramAccountId || "Unknown"}
+🆔 Creation ID: ${result.data?.n8nResult?.id || "Unknown"}
+⏰ Posted at: ${new Date().toLocaleTimeString()}`;
+
+      alert(successMessage);
     } catch (error) {
-      console.error("Error posting to Instagram:", error);
+      console.error("❌ Error posting to Instagram:", error);
       alert(
-        "Failed to post to Instagram. Please check your connection and try again."
+        `Failed to post to Instagram: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
       );
     } finally {
       setPostingToInstagram(null);
