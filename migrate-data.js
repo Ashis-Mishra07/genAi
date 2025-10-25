@@ -2,10 +2,10 @@ const { neon } = require('@neondatabase/serverless');
 require('dotenv').config();
 
 // Old database connection
-const OLD_DB_URL = 'postgresql://neondb_owner:npg_WqiyEbN08opI@ep-morning-bird-adgu6q6z-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
+const OLD_DB_URL = 'postgresql://neondb_owner:npg_1ciSWIPJFz4x@ep-hidden-silence-adt1vpgf-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
 
 // New database connection (from .env)
-const NEW_DB_URL = process.env.DATABASE_URL;
+const NEW_DB_URL = "postgresql://neondb_owner:npg_5hADVX3ZEziP@ep-small-firefly-ahuvp52g-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
 
 const oldDb = neon(OLD_DB_URL);
 const newDb = neon(NEW_DB_URL);

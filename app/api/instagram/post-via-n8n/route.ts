@@ -1,5 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Function to transform Cloudinary URLs for social media platforms
+function transformCloudinaryForSocialMedia(originalUrl: string, platform: 'facebook' | 'instagram' = 'facebook'): string {
+  if (!originalUrl || !originalUrl.includes('cloudinary.com')) {
+    return originalUrl;
+  }
+
+  // Platform-specific transformations
+  const transformations = {
+    facebook: 'w_1200,h_628,c_fill,q_auto,f_auto', // 1.91:1 aspect ratio for Facebook
+    instagram: 'w_1080,h_1080,c_fill,q_auto,f_auto' // 1:1 aspect ratio for Instagram
+  };
+
+  const transformation = transformations[platform];
+  
+  // Insert transformation parameters into Cloudinary URL
+  return originalUrl.replace('/image/upload/', `/image/upload/${transformation}/`);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { productId, cloudinaryUrl, caption } = await request.json();
@@ -7,7 +25,7 @@ export async function POST(request: NextRequest) {
     console.log('🚀 ===============================================');
     console.log('🚀 STARTING INSTAGRAM POST VIA N8N WORKFLOW');
     console.log('📦 Product ID:', productId);
-    console.log('📸 Cloudinary Poster URL:', cloudinaryUrl);
+    console.log('📸 Original Cloudinary URL:', cloudinaryUrl);
     console.log('📝 Caption Length:', caption?.length || 0);
     console.log('===============================================');
 
@@ -19,12 +37,19 @@ export async function POST(request: NextRequest) {
       throw new Error('Caption is required');
     }
 
+    // Transform Cloudinary URL for Facebook (since Instagram uses Facebook's API)
+    const transformedImageUrl = transformCloudinaryForSocialMedia(cloudinaryUrl, 'facebook');
+    
+    console.log('🔄 Image URL Transformation:');
+    console.log('📸 Original URL:', cloudinaryUrl);
+    console.log('✨ Transformed URL:', transformedImageUrl);
+
     // Your n8n webhook URL - update this with your actual n8n URL
     const n8nWebhookUrl = process.env.N8N_INSTAGRAM_WEBHOOK_URL || 'http://localhost:5678/webhook/instagram-post';
 
     // Prepare data for n8n workflow (matching your n8n structure)
     const n8nPayload = {
-      imageURL: cloudinaryUrl,  // ← Changed to imageURL (capital URL) to match n8n
+      imageURL: transformedImageUrl,  // Use transformed URL with correct aspect ratio
       captionText: caption,
       Node: "17841477359386904", // Your Instagram business account ID
       productId: productId,
@@ -64,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     console.log('🎉 ===============================================');
     console.log('🎉 INSTAGRAM POST COMPLETED SUCCESSFULLY!');
-    console.log('📸 Posted Image URL:', cloudinaryUrl);
+    console.log('📸 Posted Image URL:', transformedImageUrl);
     console.log('📱 Instagram Business Account:', n8nPayload.Node);
     console.log('🆔 Creation ID:', n8nResult?.id || 'Unknown');
     console.log('===============================================');
@@ -74,7 +99,8 @@ export async function POST(request: NextRequest) {
       message: 'Posted to Instagram via n8n successfully',
       data: {
         n8nResult: n8nResult,
-        cloudinaryUrl: cloudinaryUrl,
+        originalCloudinaryUrl: cloudinaryUrl,
+        transformedImageUrl: transformedImageUrl,
         productId: productId,
         instagramAccountId: n8nPayload.Node,
         postedAt: new Date().toISOString()
