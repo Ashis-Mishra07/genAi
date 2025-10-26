@@ -26,7 +26,7 @@ async function fetchArtisanData(artisanId: string, query: string) {
           created_at: true,
         },
         orderBy: {
-          createdAt: 'desc',
+          created_at: 'desc',
         },
         take: 10,
       });

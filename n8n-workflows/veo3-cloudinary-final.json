@@ -1,4 +1,5 @@
 {
+  "name": "Product Video Generation - Veo 3 with Cloudinary (Final)",
   "nodes": [
     {
       "parameters": {
@@ -7,15 +8,11 @@
         "responseMode": "lastNode",
         "options": {}
       },
-      "id": "9a53a0ba-4814-4136-a1fc-ca9ab7d4d981",
+      "id": "webhook-node",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
-      "position": [
-        224,
-        -64
-      ],
-      "webhookId": "860ce817-4920-402f-a0a6-69416c5477b5"
+      "position": [240, 300]
     },
     {
       "parameters": {
@@ -25,7 +22,7 @@
               "id": "project-id",
               "name": "PROJECT_ID",
               "type": "string",
-              "value": "=genai-456413"
+              "value": "={{ $env.GCP_PROJECT_ID }}"
             },
             {
               "id": "model-version",
@@ -64,66 +61,31 @@
               "value": "={{ $json.body.productId }}"
             },
             {
-              "id": "cloudinary-name",
-              "name": "CLOUDINARY_CLOUD_NAME",
+              "id": "db-url",
+              "name": "DATABASE_URL",
               "type": "string",
-              "value": "=swasthik"
+              "value": "={{ $env.DATABASE_URL }}"
             },
             {
-              "id": "cloudinary-key",
-              "name": "CLOUDINARY_API_KEY",
+              "id": "product-image",
+              "name": "PRODUCT_IMAGE_URL",
               "type": "string",
-              "value": "=855762179536577"
-            },
-            {
-              "id": "cloudinary-secret",
-              "name": "CLOUDINARY_API_SECRET",
-              "type": "string",
-              "value": "=XEhMTHhYpRFXUGKbgtF21jyXATU"
-            },
-            {
-              "id": "timestamp",
-              "name": "TIMESTAMP",
-              "type": "number",
-              "value": "={{ Math.floor(Date.now() / 1000) }}"
-            },
-            {
-              "id": "c772c7e5-ac3a-482b-b94e-6fe01afa94ef",
-              "name": "service_key",
-              "value": "-----BEGIN PRIVATE KEY-----\\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDKbdJHoLdDvzrq\\nCYpHeLO7rbKARYhntgUEz4O3yz34QvbsVUFSfsTvUqTbjys35TM4c5WPVcUN/yxj\\nC+FKCukSqmjMZafMZR36TesWkEd+IORJRbbqj0dd1hXklqNjvPkIHTIMn7OK8qhv\\nZGBs/54gUp2FLmIq8JIGg1RvIh8XMzra9EfA0a0k0WRNyJ1uC+1ZGpHs8wLDDLh6\\nPEge3IqlU1wrBZyEtiHvfPpBM2oL3/5YNjEhJdxy+NyUJf2eA6efK7OiiA/0Gpqa\\nDt2l/YsJ2k6r7Lv3Rbhqgd8nL61HonxDsVUZuWCOzI+vCe58homMJeGQq1fEOtZP\\n8w7s3VQzAgMBAAECggEAIcPSvN7aYsL9fTctKQHBnQ76hLnUaFQsnyJL+ra8dfIZ\\nhM8tr6h0ieTTmcnWMCMbeZGSA1APp+eFzFmZcQPD37ir9VgJdqbxKqSfj2puemPb\\nIDuwKIzQnx7MFQ5pX4QQV+GizQdAZ+9U2Au6p8O1aPfOzX2woy/wc4Spa0YaQICf\\nm3lnmMVsgchikJBKHErmIyaXF+U0ogJSdFIYAtHcMqJ+4BmC6jEcIR8O3SaZfZgs\\nX8zLwJdWBX79ZLEfDTOQGG3xZfN8yf8nHiYSxlxCkl0lpDfuaAZrLIfZecE9oAL3\\nT6vmKrfjvJdG2vn0c0YX3OnXgK6RoEGngzNxQyUriQKBgQDpfhQUyVlRSPF/sOwX\\nNUt+P/15jxd4QDJA3BQGG1BAiXPse3j4u1j5rNhDD0XYub4yHnVuPEKF4WG2WPkQ\\nihf3+M6qrZqIZ7Sj2uFdt328nUuqLyMnZNrW1iAWhLy43iCqjrNqu0emmGcss/c1\\nSLuFXn3BZRJdAmuPTTcl+9dFWQKBgQDd8S9sI5Qaci1segqbotNqlr+4O9jJ6XB/\\nxpyX8EcNVnwkLpwDhFNNX5KaCLZR6RiPU4Vn3mkmMJ0oppWZ8jH7UL6Hzk02TFCU\\nfLYdG1tPYx1I7I0BXSf1PZ2bNjoP6UzQvl22gXoifd9CEl4KDK7aME9ZDa2+nE9b\\n4UgbIxsYawKBgFbOfc7AkMlMkiRD9XInaTq1tZn03efiDgzZBUTD8NEdiRCZUv8+\\nP7ULUpeT3QbW/2QIuOXT13OIuFgfufExNfoF8We5BSPDUoA8ht7dsgxmelP6FFq3\\n/zgyAVn93V/pjUF7ri53FAtWy7zt53FS6gyKdbxpxCr6FF0BewhPGdh5AoGBANmn\\noPktPx5cYN2kJekR2sIKSsSTtHv3OgOlNIbw9c1HxoD5ULlGOSeFFdGHv70+mn5c\\ny1Tc0kPIoydtjwMleQzc1615jVE1sESetT6ASKDnM54DlhkDUZ95KKpBmNln05RX\\nTLIh8jQHOz6hoqW6YHPLstVDy+NFibIykbNDT1w3AoGBAIkjSqWDAh9Mu5r2QuJ3\\n6C5nS2ly1E9204KX6zPNVjevyv1oAlPh8DzgfBMjaOZ4b1ZOMBxblMHGsUyzVkgo\\ng3PWehzRsdgWcz7fmrLQVaa04/6VQGKOz64jANGwBmQ/6VjkgHRsQPjsjXvwNnAx\\nYjdOm2GvMtDN05vvA3reBf2o\\n-----END PRIVATE KEY-----\\n",
-              "type": "string"
-            },
-            {
-              "id": "e16058dd-f74d-4499-b2a9-e7865d78c850",
-              "name": "email",
-              "value": "n8n-veo-sa@genai-456413.iam.gserviceaccount.com",
-              "type": "string"
-            },
-            {
-              "id": "c4ce6b5e-67a5-4215-9e04-5fadd191db4e",
-              "name": "imageUrl",
-              "value": "={{ $json.body.productImage }}",
-              "type": "string"
+              "value": "={{ $json.body.productImage }}"
             }
           ]
         },
         "options": {}
       },
-      "id": "2a7cbf24-d60e-4296-9a73-3089fb412217",
+      "id": "setting-node",
       "name": "Setting",
       "type": "n8n-nodes-base.set",
-      "position": [
-        448,
-        -64
-      ],
+      "position": [460, 300],
       "typeVersion": 3.4
     },
     {
       "parameters": {
         "method": "POST",
         "url": "=https://{{ $json.API_ENDPOINT }}/v1/projects/{{ $json.PROJECT_ID }}/locations/{{ $json.LOCATION }}/publishers/google/models/{{ $json.MODEL_VERSION }}:predictLongRunning",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "googleApi",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -139,36 +101,24 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"instances\": [\n    {\n      \"prompt\": {{ JSON.stringify($json.TEXT_PROMPT) }}\n    }\n  ],\n  \"parameters\": {\n    \"aspectRatio\": \"9:16\",\n    \"sampleCount\": 1,\n    \"durationSeconds\": \"7\",\n    \"personGeneration\": \"allow_all\",\n    \"addWatermark\": false,\n    \"includeRaiReason\": true,\n    \"generateAudio\": false\n  }\n}",
+        "jsonBody": "={\n  \"instances\": [\n    {\n      \"prompt\": {{ JSON.stringify($json.TEXT_PROMPT) }},\n      \"image\": {\n        \"bytesBase64Encoded\": {{ JSON.stringify($json.PRODUCT_IMAGE_BASE64 || '') }},\n        \"gcsUri\": {{ JSON.stringify($json.PRODUCT_IMAGE_URL || '') }}\n      }\n    }\n  ],\n  \"parameters\": {\n    \"aspectRatio\": \"9:16\",\n    \"sampleCount\": 1,\n    \"durationSeconds\": \"7\",\n    \"personGeneration\": \"allow_all\",\n    \"addWatermark\": false,\n    \"includeRaiReason\": true,\n    \"generateAudio\": false\n  }\n}",
         "options": {}
       },
-      "id": "7018133a-7eec-40ac-a6f3-02ffe0ceb47b",
+      "id": "veo-generate",
       "name": "Vertex AI Veo 3 - Generate",
       "type": "n8n-nodes-base.httpRequest",
-      "position": [
-        672,
-        -64
-      ],
-      "typeVersion": 4.2,
-      "credentials": {
-        "googleApi": {
-          "id": "TXpkmuobnviW73sU",
-          "name": "Google Service Account account"
-        }
-      }
+      "position": [680, 300],
+      "typeVersion": 4.2
     },
     {
       "parameters": {
         "amount": 2,
         "unit": "minutes"
       },
-      "id": "6ee76f50-b8e8-45ba-be25-dc04c49bf24f",
+      "id": "wait-node",
       "name": "Wait",
       "type": "n8n-nodes-base.wait",
-      "position": [
-        896,
-        -64
-      ],
+      "position": [900, 300],
       "typeVersion": 1.1,
       "webhookId": "video-wait-webhook"
     },
@@ -176,8 +126,6 @@
       "parameters": {
         "method": "POST",
         "url": "=https://{{ $('Setting').item.json.API_ENDPOINT }}/v1/projects/{{ $('Setting').item.json.PROJECT_ID }}/locations/{{ $('Setting').item.json.LOCATION }}/publishers/google/models/{{ $('Setting').item.json.MODEL_VERSION }}:fetchPredictOperation",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "googleApi",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -196,20 +144,11 @@
         "jsonBody": "={\n  \"operationName\": \"{{ $json.name }}\"\n}",
         "options": {}
       },
-      "id": "a881544a-8e89-4af1-ae35-752ce178ef8a",
+      "id": "veo-fetch",
       "name": "Vertex AI Veo 3 - Fetch",
       "type": "n8n-nodes-base.httpRequest",
-      "position": [
-        1104,
-        -64
-      ],
-      "typeVersion": 4.2,
-      "credentials": {
-        "googleApi": {
-          "id": "TXpkmuobnviW73sU",
-          "name": "Google Service Account account"
-        }
-      }
+      "position": [1120, 300],
+      "typeVersion": 4.2
     },
     {
       "parameters": {
@@ -220,14 +159,32 @@
           "mimeType": "video/mp4"
         }
       },
-      "id": "534c0a91-4bfe-4d15-a579-aad754087ee7",
+      "id": "convert-file",
       "name": "Convert to File",
       "type": "n8n-nodes-base.convertToFile",
-      "position": [
-        1328,
-        -64
-      ],
+      "position": [1340, 300],
       "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "binaryPropertyName": "data",
+        "publicId": "={{ 'product-videos/video_' + $('Setting').item.json.PRODUCT_ID }}",
+        "options": {
+          "resourceType": "video"
+        }
+      },
+      "id": "upload-cloudinary",
+      "name": "Upload to Cloudinary",
+      "type": "n8n-nodes-base.cloudinary",
+      "position": [1560, 300],
+      "typeVersion": 1,
+      "credentials": {
+        "cloudinaryApi": {
+          "id": "cloudinary-creds",
+          "name": "Cloudinary API"
+        }
+      }
     },
     {
       "parameters": {
@@ -235,39 +192,15 @@
         "query": "=UPDATE products SET video_url = '{{ $json.secure_url }}', video_status = 'COMPLETED', updated_at = NOW() WHERE id = '{{ $('Setting').item.json.PRODUCT_ID }}'",
         "options": {}
       },
-      "id": "fb6e8c7a-a172-41b9-827c-91f321724cbc",
+      "id": "update-db",
       "name": "Update Database",
       "type": "n8n-nodes-base.postgres",
-      "position": [
-        1776,
-        -64
-      ],
+      "position": [1780, 300],
       "typeVersion": 2.4,
       "credentials": {
         "postgres": {
-          "id": "RjyzKYaEgAFYXtkw",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "uploadFile",
-        "resource_type_file": "video",
-        "additionalFieldsFile": {}
-      },
-      "type": "n8n-nodes-cloudinary.cloudinary",
-      "typeVersion": 1,
-      "position": [
-        1552,
-        64
-      ],
-      "id": "1701a36d-4a2a-427f-aa0d-9a87d6e5049a",
-      "name": "Upload an asset from file data",
-      "credentials": {
-        "cloudinaryApi": {
-          "id": "VBE5VQQklKnne6h9",
-          "name": "Cloudinary account"
+          "id": "postgres-creds",
+          "name": "PostgreSQL account"
         }
       }
     }
@@ -332,14 +265,14 @@
       "main": [
         [
           {
-            "node": "Upload an asset from file data",
+            "node": "Upload to Cloudinary",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Upload an asset from file data": {
+    "Upload to Cloudinary": {
       "main": [
         [
           {
@@ -351,9 +284,12 @@
       ]
     }
   },
-  "pinData": {},
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "f65c35e81d7c8ed56ed8ab438a58198c3d157f187e1055a579226e47ac9a59c8"
-  }
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-10-19T00:00:00.000Z",
+  "versionId": "1"
 }
