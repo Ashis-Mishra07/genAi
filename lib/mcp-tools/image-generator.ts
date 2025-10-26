@@ -36,13 +36,13 @@ export class ImageGeneratorTool {
         }
       }
 
-      // Option 3: Generate a CSS-based photoshoot mockup (always works)
+      // Option 3: Generate a CSS-based visual poster (always works)
       return this.generateCSSPoster(prompt, productInfo, style, dimensions);
 
     } catch (error: any) {
       console.error('All image generation methods failed:', error);
       
-      // Ultimate fallback to text-based photoshoot concept description
+      // Ultimate fallback to text-based poster description
       return this.generateFallbackPoster(prompt, productInfo, style, dimensions);
     }
   }
@@ -125,14 +125,14 @@ export class ImageGeneratorTool {
   }
 
   private generateCSSPoster(prompt: string, productInfo: any, style: string, dimensions: string) {
-    // Generate a beautiful CSS-based photoshoot mockup that looks like a real image
-    const photoshootData = this.generateAdvancedHtmlPoster(prompt, productInfo, style, dimensions);
+    // Generate a beautiful CSS-based poster that looks like a real image
+    const posterData = this.generateAdvancedHtmlPoster(prompt, productInfo, style, dimensions);
     
     return {
       success: true,
       result: {
-        type: 'css_photoshoot',
-        htmlContent: photoshootData,
+        type: 'css_poster',
+        htmlContent: posterData,
         prompt: prompt,
         style: style,
         dimensions: dimensions,
@@ -144,57 +144,271 @@ export class ImageGeneratorTool {
   }
 
   private enhancePromptForPoster(prompt: string, productInfo: any, style: string): string {
-    let enhancedPrompt = '';
+    // Detect product type from prompt and productInfo
+    const productType = this.detectProductType(prompt, productInfo);
+    const photoshootConcept = this.getPhotoshootConcept(productType, style);
     
-    // Base prompt for professional product photoshoot
-    enhancedPrompt += 'Create a professional product photoshoot for artisan products, ';
-    enhancedPrompt += 'high-end photography aesthetic, editorial style product photography, ';
+    let enhancedPrompt = photoshootConcept.basePrompt;
     
-    // Add style modifiers with photoshoot focus
-    switch (style) {
-      case 'lifestyle':
-        enhancedPrompt += 'lifestyle photography aesthetic, natural settings, authentic moments, everyday luxury, ';
-        break;
-      case 'studio':
-        enhancedPrompt += 'professional studio photography, controlled lighting, clean backgrounds, product focus, ';
-        break;
-      case 'editorial':
-        enhancedPrompt += 'editorial fashion photography style, artistic composition, magazine quality, storytelling imagery, ';
-        break;
-      case 'commercial':
-        enhancedPrompt += 'commercial product photography, brand storytelling, professional styling, market-ready imagery, ';
-        break;
-      case 'artistic':
-        enhancedPrompt += 'artistic photography approach, creative composition, artistic lighting, unique perspectives, ';
-        break;
-      default:
-        enhancedPrompt += 'lifestyle product photography, authentic brand storytelling, photoshoot aesthetic, ';
-    }
-
-    // Add product-specific details if available
+    // Add product-specific details
     if (productInfo) {
-      if (productInfo.type) enhancedPrompt += `showcasing beautiful ${productInfo.type}, `;
-      if (productInfo.materials) enhancedPrompt += `highlighting ${productInfo.materials} craftsmanship, `;
-      if (productInfo.culture) enhancedPrompt += `celebrating ${productInfo.culture} heritage, `;
-      if (productInfo.title) enhancedPrompt += `product name "${productInfo.title}", `;
+      if (productInfo.type) enhancedPrompt += `featuring ${productInfo.type}, `;
+      if (productInfo.materials) enhancedPrompt += `made from ${productInfo.materials}, `;
+      if (productInfo.colors && productInfo.colors.length > 0) {
+        enhancedPrompt += `in ${productInfo.colors.join(' and ')} colors, `;
+      }
+      if (productInfo.culture) enhancedPrompt += `with ${productInfo.culture} cultural elements, `;
     }
 
-    // Add the main prompt
-    enhancedPrompt += prompt;
+    // Add the main prompt context
+    enhancedPrompt += prompt + ', ';
     
-    // Add professional photoshoot requirements - NO text overlays, focus on photography
-    enhancedPrompt += ', professional product photoshoot with no text overlays, ';
-    enhancedPrompt += 'pure photography focus, editorial quality imagery, ';
-    enhancedPrompt += 'NO price tags, NO pricing information, NO text overlays, ';
-    enhancedPrompt += 'NO watermarks, NO logos, NO promotional text, ';
-    enhancedPrompt += 'focus on beautiful product photography and styling, ';
-    enhancedPrompt += 'professional lighting setup, expert composition, ';
-    enhancedPrompt += 'brand storytelling through visual narrative only, ';
-    enhancedPrompt += 'Instagram-worthy photoshoot aesthetic, ';
-    enhancedPrompt += 'perfect lighting, 4k resolution, photoshoot quality, ';
-    enhancedPrompt += 'elegant photographic composition, let the artisan product and styling speak';
+    // Add specific photoshoot scenario
+    enhancedPrompt += photoshootConcept.scenario + ', ';
+    
+    // Add style-specific modifiers
+    enhancedPrompt += photoshootConcept.styleModifiers + ', ';
+    
+    // Add technical requirements
+    enhancedPrompt += photoshootConcept.technicalSpecs + ', ';
+    
+    // Add final quality specifications
+    enhancedPrompt += 'professional photography, high resolution, no text overlays, no watermarks, no logos, cinematic lighting, magazine quality, Instagram-worthy aesthetic';
 
     return enhancedPrompt;
+  }
+
+  private detectProductType(prompt: string, productInfo: any): string {
+    const text = (prompt + ' ' + JSON.stringify(productInfo || {})).toLowerCase();
+    
+    // Clothing detection with better patterns
+    if (text.match(/\b(hoodie|hoody|sweatshirt|pullover|jumper)\b/)) return 'hoodie';
+    if (text.match(/\b(t-?shirt|tee|top|tank)\b/)) return 'tshirt';
+    if (text.match(/\b(shirt|blouse|button.?up|dress.?shirt)\b/)) return 'shirt';
+    if (text.match(/\b(dress|gown|frock|sundress|maxi.?dress)\b/)) return 'dress';
+    if (text.match(/\b(jeans|pants|trousers|bottoms|slacks|chinos)\b/)) return 'pants';
+    if (text.match(/\b(jacket|blazer|coat|cardigan|sweater)\b/)) return 'jacket';
+    if (text.match(/\b(shoes|sneakers|boots|footwear|sandals|heels)\b/)) return 'shoes';
+    
+    // Accessories detection
+    if (text.match(/\b(necklace|chain|pendant|choker)\b/)) return 'necklace';
+    if (text.match(/\b(ring|band|signet)\b/)) return 'ring';
+    if (text.match(/\b(earrings|studs|hoops|dangles)\b/)) return 'earrings';
+    if (text.match(/\b(bracelet|bangle|wristband|charm.?bracelet)\b/)) return 'bracelet';
+    if (text.match(/\b(watch|timepiece|wristwatch)\b/)) return 'watch';
+    if (text.match(/\b(bag|purse|handbag|backpack|tote|clutch|satchel)\b/)) return 'bag';
+    if (text.match(/\b(hat|cap|beanie|fedora|baseball.?cap)\b/)) return 'hat';
+    if (text.match(/\b(sunglasses|glasses|eyewear|shades)\b/)) return 'sunglasses';
+    if (text.match(/\b(scarf|shawl|wrap|pashmina)\b/)) return 'scarf';
+    
+    // Home & Decor
+    if (text.match(/\b(vase|pot|vessel|urn|planter)\b/)) return 'vase';
+    if (text.match(/\b(candle|lamp|light|lantern|sconce)\b/)) return 'candle';
+    if (text.match(/\b(pillow|cushion|throw|pillow.?case)\b/)) return 'pillow';
+    if (text.match(/\b(artwork|painting|print|canvas|poster)\b/)) return 'artwork';
+    if (text.match(/\b(sculpture|figurine|statue|carving)\b/)) return 'sculpture';
+    if (text.match(/\b(bowl|dish|plate|ceramic|pottery)\b/)) return 'bowl';
+    if (text.match(/\b(mirror|frame|wall.?decor)\b/)) return 'mirror';
+    
+    // Beauty & Personal Care
+    if (text.match(/\b(soap|skincare|lotion|cream|balm)\b/)) return 'skincare';
+    if (text.match(/\b(perfume|fragrance|cologne|scent)\b/)) return 'perfume';
+    
+    // Default fallback
+    return 'general';
+  }
+
+  private getPhotoshootConcept(productType: string, style: string) {
+    const concepts: { [key: string]: any } = {
+      hoodie: {
+        basePrompt: 'Professional fashion photoshoot featuring a model wearing a stylish hoodie, ',
+        scenario: style === 'lifestyle' ? 
+          'urban street setting, model walking casually, natural candid poses, city backdrop' :
+          style === 'studio' ?
+          'clean white studio backdrop, model in confident standing poses, professional lighting setup' :
+          style === 'editorial' ?
+          'artistic urban environment, dramatic model poses, magazine-style composition, moody lighting' :
+          style === 'commercial' ?
+          'commercial product showcase, model displaying hoodie features, brand-focused professional shoot' :
+          'artistic creative shoot, model in expressive poses, unique lighting, creative composition',
+        styleModifiers: style === 'lifestyle' ? 
+          'natural street lighting, authentic urban aesthetic, casual styling, real-world context' :
+          style === 'studio' ?
+          'professional studio lighting, clean background, fashion model poses, commercial quality' :
+          'high-fashion editorial lighting, dramatic shadows, magazine photography, artistic direction',
+        technicalSpecs: 'full body and detail shots, fabric texture clearly visible, fit and styling emphasized, model showcasing hoodie naturally'
+      },
+      
+      tshirt: {
+        basePrompt: 'Professional fashion photoshoot with a model wearing a stylish t-shirt, ',
+        scenario: style === 'lifestyle' ? 
+          'casual outdoor setting, model in relaxed natural poses, everyday fashion context, natural environment' :
+          style === 'studio' ?
+          'minimalist studio setup, model showcasing t-shirt fit and style, clean professional backdrop' :
+          style === 'editorial' ?
+          'creative fashion editorial setting, artistic model poses, magazine-quality composition' :
+          style === 'commercial' ?
+          'commercial product photography, model highlighting t-shirt features and design details' :
+          'artistic fashion shoot, creative poses, unique styling, expressive modeling',
+        styleModifiers: style === 'lifestyle' ? 
+          'natural daylight, casual authentic styling, lifestyle moments, relaxed atmosphere' :
+          style === 'studio' ?
+          'controlled studio lighting, professional model poses, commercial fashion styling' :
+          'editorial fashion lighting, dramatic composition, high-fashion styling, artistic direction',
+        technicalSpecs: 'upper body focus shots, fabric detail and color accuracy, t-shirt fit clearly shown, natural model poses'
+      },
+      
+      shirt: {
+        basePrompt: 'Professional fashion photoshoot with a model wearing an elegant dress shirt, ',
+        scenario: style === 'lifestyle' ? 
+          'sophisticated office or cafe environment, model in professional casual poses, business casual context' :
+          style === 'studio' ?
+          'clean professional studio setup, model in business formal poses, elegant styling' :
+          style === 'editorial' ?
+          'high-fashion editorial shoot, dramatic lighting, sophisticated magazine composition' :
+          style === 'commercial' ?
+          'commercial fashion photography, model showcasing shirt versatility and professional quality' :
+          'artistic professional shoot, creative styling, sophisticated poses, elegant presentation',
+        styleModifiers: style === 'lifestyle' ? 
+          'natural professional lighting, business casual aesthetic, sophisticated real-world styling' :
+          style === 'studio' ?
+          'professional studio lighting, formal model poses, business fashion presentation' :
+          'editorial fashion lighting, dramatic professional styling, magazine-quality composition',
+        technicalSpecs: 'upper body and detail shots, fabric quality and craftsmanship visible, professional styling emphasized'
+      },
+      
+      dress: {
+        basePrompt: 'Elegant fashion photoshoot featuring a model wearing the beautiful dress, ',
+        scenario: style === 'lifestyle' ? 
+          'beautiful outdoor location, model in graceful natural poses, romantic golden hour lighting' :
+          style === 'studio' ?
+          'professional fashion studio, model in elegant flowing poses, dramatic studio lighting' :
+          style === 'editorial' ?
+          'high-fashion editorial shoot, artistic dramatic poses, magazine-style glamour photography' :
+          style === 'commercial' ?
+          'commercial fashion photography, model showcasing dress silhouette, movement, and details' :
+          'artistic fashion shoot, creative poses, dramatic lighting, expressive modeling',
+        styleModifiers: style === 'lifestyle' ? 
+          'golden hour natural lighting, romantic atmosphere, elegant natural poses, outdoor beauty' :
+          style === 'studio' ?
+          'professional fashion lighting, elegant model poses, glamorous styling, studio perfection' :
+          'high-fashion editorial lighting, dramatic composition, luxury styling, artistic direction',
+        technicalSpecs: 'full body shots emphasizing dress silhouette, fabric flow and movement captured, elegant model presentation'
+      },
+      
+      necklace: {
+        basePrompt: 'Professional jewelry photoshoot featuring a model wearing the elegant necklace, ',
+        scenario: style === 'lifestyle' ? 
+          'elegant portrait setting, model in natural graceful poses, necklace as the focal point' :
+          style === 'studio' ?
+          'clean jewelry photography setup, close-up and portrait shots, professional jewelry lighting' :
+          style === 'editorial' ?
+          'high-fashion jewelry editorial, artistic composition, luxury jewelry aesthetic' :
+          style === 'commercial' ?
+          'commercial jewelry photography, model showcasing necklace design and craftsmanship details' :
+          'artistic jewelry shoot, creative lighting, dramatic poses, luxury presentation',
+        styleModifiers: style === 'lifestyle' ? 
+          'soft natural portrait lighting, elegant simplicity, refined natural styling' :
+          style === 'studio' ?
+          'controlled jewelry lighting, macro detail capability, luxury commercial presentation' :
+          'editorial jewelry lighting, dramatic shadows, high-fashion luxury styling',
+        technicalSpecs: 'close-up detail shots of jewelry craftsmanship, portrait shots emphasizing necklace, model poses highlighting piece'
+      },
+      
+      bag: {
+        basePrompt: 'Professional accessory photoshoot featuring a model with the stylish bag, ',
+        scenario: style === 'lifestyle' ? 
+          'urban street style setting, model carrying bag naturally, everyday fashion lifestyle context' :
+          style === 'studio' ?
+          'clean studio setup, model posing with bag, accessory-focused professional photography' :
+          style === 'editorial' ?
+          'fashion editorial shoot, artistic styling, luxury accessory presentation' :
+          style === 'commercial' ?
+          'commercial product photography, model demonstrating bag functionality, style, and features' :
+          'artistic accessory shoot, creative poses, unique styling, expressive modeling',
+        styleModifiers: style === 'lifestyle' ? 
+          'street style aesthetic, natural carrying poses, fashion-forward everyday styling' :
+          style === 'studio' ?
+          'professional accessory lighting, model poses showcasing bag design and functionality' :
+          'editorial fashion lighting, luxury accessory styling, high-fashion presentation',
+        technicalSpecs: 'bag detail shots, model carrying and styling poses, craftsmanship and functionality clearly visible'
+      },
+      
+      shoes: {
+        basePrompt: 'Professional footwear photoshoot featuring a model wearing the stylish shoes, ',
+        scenario: style === 'lifestyle' ? 
+          'urban or natural outdoor setting, model walking or standing naturally, shoes in real-world context' :
+          style === 'studio' ?
+          'clean studio floor setup, model poses emphasizing footwear, professional shoe photography' :
+          style === 'editorial' ?
+          'fashion editorial shoot, artistic footwear photography, magazine-style composition' :
+          style === 'commercial' ?
+          'commercial shoe photography, model demonstrating shoe style, fit, and design details' :
+          'artistic footwear shoot, creative poses, dramatic lighting, expressive modeling',
+        styleModifiers: style === 'lifestyle' ? 
+          'natural lighting, movement and walking shots, real-world footwear context' :
+          style === 'studio' ?
+          'professional footwear lighting, posed shots emphasizing design, product-focused presentation' :
+          'editorial fashion lighting, dramatic footwear styling, high-fashion shoe presentation',
+        technicalSpecs: 'full body and close-up shoe shots, footwear detail and craftsmanship visible, fit and style emphasized'
+      },
+      
+      // Additional product types for comprehensive coverage
+      pants: {
+        basePrompt: 'Professional fashion photoshoot with a model wearing the stylish pants, ',
+        scenario: style === 'lifestyle' ? 
+          'casual urban setting, model in natural walking poses, everyday fashion context' :
+          'professional studio setup, model showcasing pants fit and style, clean backdrop',
+        styleModifiers: 'natural fashion lighting, model poses emphasizing fit and movement',
+        technicalSpecs: 'full body shots, pants fit and fabric detail visible, styling emphasized'
+      },
+      
+      jacket: {
+        basePrompt: 'Professional outerwear photoshoot featuring a model wearing the jacket, ',
+        scenario: style === 'lifestyle' ? 
+          'outdoor urban setting, model in natural poses, layered styling context' :
+          'studio setup, model showcasing jacket design and fit, professional presentation',
+        styleModifiers: 'fashion lighting emphasizing texture and fit',
+        technicalSpecs: 'upper body and detail shots, jacket construction and styling visible'
+      },
+      
+      scarf: {
+        basePrompt: 'Professional accessory photoshoot with a model wearing the elegant scarf, ',
+        scenario: 'portrait and styling shots, model showcasing scarf versatility and draping',
+        styleModifiers: 'soft lighting emphasizing fabric texture and styling options',
+        technicalSpecs: 'detail shots of fabric and styling versatility, elegant model poses'
+      },
+      
+      vase: {
+        basePrompt: 'Professional home decor lifestyle photoshoot featuring the beautiful vase, ',
+        scenario: style === 'lifestyle' ? 
+          'elegant home interior setting, vase styled with fresh flowers, natural home environment' :
+          style === 'studio' ?
+          'clean product photography setup, vase as centerpiece, professional lighting' :
+          'artistic interior design shoot, sophisticated home styling, magazine-quality presentation',
+        styleModifiers: style === 'lifestyle' ? 
+          'natural home lighting, lived-in aesthetic, cozy styling, authentic home environment' :
+          'professional product lighting, styled interior presentation, commercial quality',
+        technicalSpecs: 'detailed craftsmanship shots, styled interior context, artistic home composition'
+      },
+      
+      general: {
+        basePrompt: 'Professional product photoshoot showcasing the beautiful artisan item, ',
+        scenario: style === 'lifestyle' ? 
+          'natural authentic setting, product in real-world context, lifestyle integration' :
+          style === 'studio' ?
+          'clean professional setup, product as hero focus, controlled lighting' :
+          style === 'editorial' ?
+          'artistic editorial presentation, creative composition, magazine-style quality' :
+          'commercial product photography, professional presentation, brand-focused shoot',
+        styleModifiers: style === 'lifestyle' ? 
+          'natural lighting, authentic context, real-world styling' :
+          'professional studio lighting, product hero shots, commercial presentation',
+        technicalSpecs: 'detailed craftsmanship visible, multiple angles, professional quality photography'
+      }
+    };
+    
+    return concepts[productType] || concepts.general;
   }
 
   private generateAdvancedHtmlPoster(prompt: string, productInfo: any, style: string, dimensions: string): string {
@@ -209,9 +423,9 @@ export class ImageGeneratorTool {
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Artisan Product Photoshoot</title>
+    <title>Artisan Product Poster</title>
     <style>
-        .photoshoot {
+        .poster {
             width: ${dims.width}px;
             height: ${dims.height}px;
             background: linear-gradient(135deg, ${colorScheme.background});
@@ -219,15 +433,14 @@ export class ImageGeneratorTool {
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 60px;
+            padding: 40px;
             box-sizing: border-box;
-            font-family: 'Inter', 'Helvetica Neue', sans-serif;
+            font-family: 'Georgia', serif;
             position: relative;
             overflow: hidden;
-            backdrop-filter: blur(5px);
         }
         
-        .photoshoot::before {
+        .poster::before {
             content: '';
             position: absolute;
             top: 0;
@@ -235,81 +448,75 @@ export class ImageGeneratorTool {
             right: 0;
             bottom: 0;
             background: ${colorScheme.overlay};
-            opacity: 0.05;
-            filter: blur(1px);
+            opacity: 0.1;
         }
         
         .content {
             text-align: center;
             z-index: 2;
-            max-width: 85%;
+            max-width: 90%;
         }
         
-        .brand-story {
-            font-size: ${dimensions === 'story' ? '28px' : '24px'};
+        .description {
+            font-size: ${dimensions === 'story' ? '32px' : '28px'};
             color: ${colorScheme.text};
-            margin-bottom: 40px;
-            line-height: 1.6;
-            font-weight: 200;
-            text-align: center;
-            letter-spacing: 0.5px;
-        }
-        
-        .photoshoot-cta {
-            background: transparent;
-            color: ${colorScheme.text};
-            border: 2px solid ${colorScheme.cta};
-            padding: 15px 35px;
-            border-radius: 25px;
-            font-size: ${dimensions === 'story' ? '20px' : '18px'};
+            margin-bottom: 50px;
+            line-height: 1.4;
             font-weight: 300;
+            text-align: center;
+        }
+        
+        .cta {
+            background: ${colorScheme.cta};
+            color: white;
+            padding: 18px 40px;
+            border-radius: 30px;
+            font-size: ${dimensions === 'story' ? '24px' : '22px'};
+            font-weight: bold;
             text-decoration: none;
             display: inline-block;
-            margin-top: 30px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            margin-top: 20px;
             transition: all 0.3s ease;
+        }
+        
+        .cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+        
+        .handcrafted-badge {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            background: rgba(255,255,255,0.9);
+            color: ${colorScheme.cta};
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
             letter-spacing: 1px;
         }
         
-        .photoshoot-cta:hover {
-            background: ${colorScheme.cta};
-            color: white;
-            transform: translateY(-1px);
-        }
-        
-        .artisan-badge {
+        .cultural-element {
             position: absolute;
-            top: 30px;
-            left: 30px;
-            background: rgba(255,255,255,0.15);
-            color: ${colorScheme.text};
-            padding: 10px 20px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: 200;
-            text-transform: lowercase;
-            letter-spacing: 2px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .brand-accent {
-            position: absolute;
-            ${dimensions === 'story' ? 'bottom: 40px; right: 40px;' : 'bottom: 30px; right: 30px;'}
-            width: 60px;
-            height: 60px;
+            ${dimensions === 'story' ? 'bottom: 30px; right: 30px;' : 'bottom: 25px; right: 25px;'}
+            width: 80px;
+            height: 80px;
             background: ${colorScheme.accent};
-            border-radius: 30px;
-            opacity: 0.1;
-            transform: rotate(45deg);
+            border-radius: 50%;
+            opacity: 0.2;
         }
     </style>
 </head>
 <body>
-    <div class="photoshoot">
-        <div class="artisan-badge">artisan made</div>
-        <div class="brand-accent"></div>
+    <div class="poster">
+        <div class="handcrafted-badge">Handcrafted</div>
+        <div class="cultural-element"></div>
         <div class="content">
-            <p class="brand-story">${description}</p>
-            <div class="photoshoot-cta">explore collection</div>
+            <p class="description">${description}</p>
+            <div class="cta">DM to Buy</div>
         </div>
     </div>
 </body>
@@ -319,20 +526,16 @@ export class ImageGeneratorTool {
   private extractDescription(prompt: string, productInfo: any): string {
     if (productInfo?.description) return productInfo.description;
     
-    // Create brand storytelling focused description for photoshoots
+    // Create a clean, descriptive text without pricing
     const words = prompt.toLowerCase().split(' ');
-    const storyWords = ['authentic', 'handcrafted', 'artisan', 'creative', 'passionate', 'unique', 'timeless'];
-    const found = words.find(word => storyWords.includes(word)) || 'authentic';
+    const craftWords = ['handcrafted', 'artisan', 'traditional', 'beautiful', 'unique', 'elegant'];
+    const found = words.find(word => craftWords.includes(word)) || 'beautiful';
     
     if (productInfo?.materials) {
-      return `Where ${found} craftsmanship meets ${productInfo.materials} artistry`;
+      return `${found.charAt(0).toUpperCase() + found.slice(1)} ${productInfo.materials} creation`;
     }
     
-    if (productInfo?.culture) {
-      return `${found.charAt(0).toUpperCase() + found.slice(1)} heritage, modern expression`;
-    }
-    
-    return `${found.charAt(0).toUpperCase() + found.slice(1)} artisan stories, beautifully crafted`;
+    return `${found.charAt(0).toUpperCase() + found.slice(1)} handcrafted piece`;
   }
 
   private getDimensions(dimensions: string) {
@@ -349,58 +552,49 @@ export class ImageGeneratorTool {
 
   private getColorScheme(style: string) {
     switch (style) {
-      case 'lifestyle':
+      case 'elegant':
         return {
-          background: '#fafafa, #f0f0f0',
-          overlay: 'radial-gradient(circle at 60% 40%, #e8e8e8, transparent)',
-          title: '#333333',
-          text: '#555555',
-          cta: '#8d6e63',
-          accent: '#a1887f'
+          background: '#f8f6f3, #e8e5e1',
+          overlay: 'radial-gradient(circle at 50% 50%, #d4af37, transparent)',
+          title: '#2c1810',
+          text: '#5a4a3a',
+          cta: '#d4af37',
+          accent: '#d4af37'
         };
-      case 'studio':
+      case 'vintage':
         return {
-          background: '#ffffff, #f8f8f8',
-          overlay: 'linear-gradient(135deg, rgba(0,0,0,0.02), transparent)',
-          title: '#212121',
-          text: '#424242',
-          cta: '#37474f',
-          accent: '#546e7a'
-        };
-      case 'editorial':
-        return {
-          background: '#fcfcfc, #f5f5f5',
-          overlay: 'radial-gradient(circle at 70% 30%, rgba(0,0,0,0.05), transparent)',
-          title: '#1a1a1a',
-          text: '#2e2e2e',
-          cta: '#6d4c41',
-          accent: '#8d6e63'
-        };
-      case 'commercial':
-        return {
-          background: '#f9f9f9, #eeeeee',
-          overlay: 'linear-gradient(45deg, rgba(66,66,66,0.03), transparent)',
-          title: '#263238',
-          text: '#37474f',
-          cta: '#455a64',
-          accent: '#607d8b'
-        };
-      case 'artistic':
-        return {
-          background: '#fefefe, #f7f7f7',
-          overlay: 'radial-gradient(circle at 40% 60%, rgba(121,85,72,0.08), transparent)',
+          background: '#f4f1e8, #e6dcc8',
+          overlay: 'radial-gradient(circle at 30% 70%, #8b4513, transparent)',
           title: '#3e2723',
           text: '#5d4037',
-          cta: '#795548',
-          accent: '#8d6e63'
+          cta: '#8b4513',
+          accent: '#cd853f'
         };
-      default: // lifestyle
+      case 'modern':
+        return {
+          background: '#ffffff, #f5f5f5',
+          overlay: 'linear-gradient(45deg, #333333, transparent)',
+          title: '#212121',
+          text: '#424242',
+          cta: '#2196f3',
+          accent: '#03a9f4'
+        };
+      case 'cultural':
+        return {
+          background: '#fff8e1, #f3e5ab',
+          overlay: 'radial-gradient(circle at 70% 30%, #ff6f00, transparent)',
+          title: '#e65100',
+          text: '#bf360c',
+          cta: '#ff6f00',
+          accent: '#ffa726'
+        };
+      default:
         return {
           background: '#fafafa, #f0f0f0',
-          overlay: 'radial-gradient(circle at 60% 40%, #e8e8e8, transparent)',
-          title: '#333333',
-          text: '#555555',
-          cta: '#8d6e63',
+          overlay: 'linear-gradient(135deg, #6a1b9a, transparent)',
+          title: '#4a148c',
+          text: '#6a1b9a',
+          cta: '#8e24aa',
           accent: '#ab47bc'
         };
     }
@@ -410,12 +604,12 @@ export class ImageGeneratorTool {
     return {
       success: true,
       result: {
-        type: 'text_photoshoot',
-        content: `📸 **Professional Product Photoshoot Concept**\n\n${prompt}\n\n✨ **Photography Style**: ${style}\n📐 **Format**: ${dimensions}\n🎨 **Brand Story**: Authentic artisan craftsmanship\n\n� **Explore Collection**\n\n*This would be displayed as a beautiful photoshoot-style visual with elegant typography and minimal design.*`,
+        type: 'text_poster',
+        content: `📸 **Professional Product Poster**\n\n${prompt}\n\n✨ **Style**: ${style}\n📐 **Format**: ${dimensions}\n\n💫 **DM to Buy**\n\n*This would be displayed as a beautiful visual poster with minimal text and clean design.*`,
         style: style,
         dimensions: dimensions,
         tool: 'text-fallback',
-        note: 'Visual photoshoot generation temporarily unavailable. This represents the photoshoot concept that would be captured.'
+        note: 'Visual poster generation temporarily unavailable. This represents the poster content that would be displayed.'
       },
       timestamp: new Date().toISOString()
     };

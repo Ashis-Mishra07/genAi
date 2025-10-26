@@ -71,18 +71,20 @@ export class ContentGeneratorTool {
       Additional Context: ${context ? JSON.stringify(context, null, 2) : 'None'}
       
       Requirements:
-      - Write as a brand narrative that tells the product's creative journey
-      - Focus on the artisan's passion, dedication, and artistic process
-      - Describe the photoshoot-worthy qualities and visual appeal
-      - Highlight how each piece tells its own unique story
-      - Include sensory details (texture, visual beauty, craftsmanship feel)
-      - Mention the photogenic qualities and styling potential
-      - Connect the product to lifestyle and personal expression
+      FOR REALISTIC PHOTOSHOOT CONTEXT:
+      - Create content that envisions this product being worn/used by real models
+      - Describe specific photoshoot scenarios (e.g., "model wearing this hoodie in urban setting")
+      - Focus on how the product would look in professional photography
+      - Include model styling suggestions and pose concepts
+      - Describe lighting and setting that would complement the product
+      - Write for brands planning actual photoshoots with models
+      - Mention specific photoshoot styles (lifestyle, studio, editorial, commercial)
+      - Include realistic model scenarios and styling contexts
+      - Connect to authentic fashion/lifestyle photography
       - Keep between 180-280 words
-      - Write for photography enthusiasts and visual content creators
-      - Include elements that would inspire photoshoot concepts
+      - Format as professional photoshoot brief and creative direction
       
-      Format as a brand story that would inspire a photoshoot concept and resonate with creative professionals.
+      Write as if directing a professional photographer and stylist for a real photoshoot with models.
     `;
   }
 
@@ -110,52 +112,52 @@ export class ContentGeneratorTool {
 
   private createMarketingCopyPrompt(input: any, context?: any): string {
     return `
-      Create persuasive marketing copy for this artisan product:
+      Create photoshoot-inspired brand content for this artisan product:
       
       Product Information: ${JSON.stringify(input, null, 2)}
-      Marketing Context: ${context ? JSON.stringify(context, null, 2) : 'General e-commerce marketing'}
+      Photography Context: ${context ? JSON.stringify(context, null, 2) : 'Professional photoshoot campaign'}
       
-      Create:
-      1. Attention-grabbing headline (10-15 words)
-      2. Compelling subheadline (15-25 words)
-      3. Key selling points (5-7 bullet points)
-      4. Emotional appeal paragraph (50-75 words)
-      5. Strong call-to-action (5-10 words)
-      6. Urgency/scarcity statement (if applicable)
+      Create photoshoot-focused brand content:
+      1. Photoshoot headline (describing the visual story, 10-15 words)
+      2. Model/styling subheadline (describing how it looks on models, 15-25 words)  
+      3. Visual selling points (5-7 bullet points about photoshoot appeal)
+      4. Photoshoot concept paragraph (describing the visual story, 50-75 words)
+      5. Creative call-to-action (photoshoot/visual focused, 5-10 words)
+      6. Styling statement (how models/stylists would use this piece)
       
       Focus on:
-      - Unique handmade quality
-      - Cultural authenticity
-      - Supporting artisan communities
-      - Limited availability
-      - Investment in heritage
-      - Gift-worthy appeal
+      - How the product photographs on models
+      - Professional photoshoot quality
+      - Visual storytelling potential
+      - Model styling opportunities
+      - Photography and creative appeal
+      - Instagram-worthy aesthetic
       
-      Format as structured marketing copy ready for use on websites, ads, or promotional materials.
+      Format as creative brief for professional photoshoot campaign with models.
     `;
   }
 
   private createSocialCaptionPrompt(input: any, context?: any): string {
     return `
-      Create engaging social media captions for this artisan product:
+      Create photoshoot-style social media captions for this artisan product:
       
       Product Information: ${JSON.stringify(input, null, 2)}
-      Platform Context: ${context ? JSON.stringify(context, null, 2) : 'Multi-platform use'}
+      Photoshoot Context: ${context ? JSON.stringify(context, null, 2) : 'Model photoshoot campaign'}
       
-      Create captions for:
-      1. Instagram (with hashtags)
-      2. Facebook (community-focused)
-      3. Twitter/X (concise version)
+      Create model/photoshoot captions for:
+      1. Instagram (with model/fashion hashtags)
+      2. Facebook (behind-the-scenes photoshoot story)  
+      3. Twitter/X (photoshoot moment version)
       
       Each caption should:
-      - Tell a micro-story about the product
-      - Highlight cultural heritage
-      - Include relevant hashtags
-      - Have engaging hooks
-      - Encourage interaction
-      - Support artisan communities theme
+      - Reference the photoshoot/model context
+      - Describe how the product looks in photos
+      - Include photoshoot behind-the-scenes elements
+      - Use fashion/photography hashtags
+      - Appeal to visual content creators
+      - Focus on styling and aesthetic appeal
       
-      Make them authentic, educational, and shareable.
+      Write as if posting from a professional photoshoot with models wearing/using the product.
     `;
   }
 

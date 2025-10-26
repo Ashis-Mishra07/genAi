@@ -41,22 +41,28 @@ export class ImageAnalyzer {
 
   async extractProductInfo(imageData: string) {
     const prompt = `
-      Analyze this product image from a professional photography and brand storytelling perspective. Extract information in JSON format:
+      Analyze this product image for REALISTIC PHOTOSHOOT PLANNING with models. Extract information in JSON format:
       {
         "productName": "estimated product name",
         "category": "product category",
+        "specificProductType": "exact product type (hoodie, tshirt, necklace, bag, shoes, dress, etc.)",
         "materials": ["list of materials"],
         "colors": ["dominant colors"],
-        "photographyStyle": "current photography style (studio, lifestyle, editorial, etc.)",
+        "photographyStyle": "current photography style (studio, lifestyle, editorial, commercial, artistic)",
         "lightingQuality": "assessment of lighting and shadows",
         "compositionNotes": "photography composition analysis",
+        "idealModel": "recommended model type for this product (casual streetwear model, elegant jewelry model, professional fashion model, etc.)",
+        "photoshootScenario": "specific photoshoot scenario (urban street, professional studio, elegant portrait, lifestyle setting, etc.)",
+        "stylingElements": ["specific styling suggestions for model photoshoot"],
+        "modelPoses": ["recommended model poses for this product type"],
+        "settingRecommendations": ["ideal photoshoot settings and backgrounds"],
         "brandStoryElements": ["visual elements that tell the brand story"],
         "culturalElements": ["cultural or traditional elements visible"],
-        "photoshootPotential": "assessment of how photogenic this product is",
-        "stylingOpportunities": ["potential styling and photography concepts"],
+        "photoshootPotential": "assessment of how this product would look in professional model photoshoot",
         "visualAppeal": "overall aesthetic and visual impact assessment",
         "backgroundSuitability": "current background and setting analysis",
-        "improvementSuggestions": ["photography and presentation improvement ideas"]
+        "improvementSuggestions": ["photography and model presentation improvement ideas"],
+        "instagramReady": "assessment of Instagram-worthiness and social media appeal"
       }
       Only return the JSON, no additional text.
     `;
