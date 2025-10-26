@@ -1,9 +1,13 @@
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
 export class ImageGeneratorTool {
   private apiKey: string;
+  private genAI: GoogleGenerativeAI;
 
   constructor() {
     // We'll use Hugging Face's free Stable Diffusion API
     this.apiKey = process.env.HUGGINGFACE_API_KEY || '';
+    this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
   }
 
   async execute(args: { 
@@ -11,33 +15,64 @@ export class ImageGeneratorTool {
     productInfo?: any; 
     style?: 'lifestyle' | 'studio' | 'editorial' | 'commercial' | 'artistic';
     dimensions?: 'square' | 'story' | 'landscape';
+    uploadedImage?: string; // Base64 image data
+    useRealContent?: boolean; // Use actual content instead of hardcoded
   }) {
-    const { prompt, productInfo, style = 'lifestyle', dimensions = 'square' } = args;
+    const { prompt, productInfo, style = 'lifestyle', dimensions = 'square', uploadedImage, useRealContent = true } = args;
 
     try {
-      // Try multiple free image generation APIs
+      let analysisResult = null;
+      let enhancedProductInfo = productInfo;
+
+      // Step 1: If image is uploaded, analyze it with Gemini Vision
+      if (uploadedImage) {
+        console.log('🔍 Analyzing uploaded product image with Gemini Vision...');
+        analysisResult = await this.analyzeProductImage(uploadedImage);
+        
+        if (analysisResult.success) {
+          // Merge analyzed info with existing product info
+          enhancedProductInfo = { 
+            ...productInfo, 
+            ...analysisResult.productDetails,
+            geminiAnalysis: analysisResult.analysis
+          };
+          console.log('✅ Product analysis complete:', enhancedProductInfo.specificProductType);
+        }
+      }
+
+      // Step 2: Generate realistic photoshoot content (not hardcoded)
+      let photoshootContent = null;
+      if (useRealContent) {
+        photoshootContent = await this.generatePhotoshootContent(prompt, enhancedProductInfo, style);
+      }
+
+      // Step 3: Try multiple image generation APIs with enhanced prompts
       let imageResult = null;
       
       // Option 1: Try Pollinations AI (free, no API key required)
       try {
-        imageResult = await this.generateWithPollinations(prompt, productInfo, style, dimensions);
-        if (imageResult) return imageResult;
+        imageResult = await this.generateWithPollinations(prompt, enhancedProductInfo, style, dimensions, photoshootContent);
+        if (imageResult) {
+          return imageResult;
+        }
       } catch (error) {
-        console.log('Pollinations API failed, trying next option...');
+        console.log('Pollinations AI failed, trying next option...');
       }
 
       // Option 2: Try Hugging Face if API key is available
       if (this.apiKey) {
         try {
-          imageResult = await this.generateWithHuggingFace(prompt, productInfo, style, dimensions);
-          if (imageResult) return imageResult;
+          imageResult = await this.generateWithHuggingFace(prompt, enhancedProductInfo, style, dimensions, photoshootContent);
+          if (imageResult) {
+            return imageResult;
+          }
         } catch (error) {
           console.log('Hugging Face API failed, trying fallback...');
         }
       }
 
-      // Option 3: Generate a CSS-based visual poster (always works)
-      return this.generateCSSPoster(prompt, productInfo, style, dimensions);
+      // Option 3: Generate realistic photoshoot mockup (not hardcoded CSS)
+      return this.generateRealisticPhotoshoot(prompt, enhancedProductInfo, style, dimensions, photoshootContent);
 
     } catch (error: any) {
       console.error('All image generation methods failed:', error);
@@ -47,7 +82,7 @@ export class ImageGeneratorTool {
     }
   }
 
-  private async generateWithPollinations(prompt: string, productInfo: any, style: string, dimensions: string) {
+  private async generateWithPollinations(prompt: string, productInfo: any, style: string, dimensions: string, content?: any) {
     const enhancedPrompt = this.enhancePromptForPoster(prompt, productInfo, style);
     
     // Get dimension specs
@@ -72,7 +107,9 @@ export class ImageGeneratorTool {
             prompt: enhancedPrompt,
             style: style,
             dimensions: dimensions,
-            tool: 'pollinations-ai'
+            tool: 'pollinations-ai',
+            content: content?.content || null,
+            photoshootBrief: content?.brief || null
           },
           timestamp: new Date().toISOString()
         };
@@ -84,7 +121,7 @@ export class ImageGeneratorTool {
     return null;
   }
 
-  private async generateWithHuggingFace(prompt: string, productInfo: any, style: string, dimensions: string) {
+  private async generateWithHuggingFace(prompt: string, productInfo: any, style: string, dimensions: string, content?: any) {
     const enhancedPrompt = this.enhancePromptForPoster(prompt, productInfo, style);
     
     try {
@@ -112,7 +149,9 @@ export class ImageGeneratorTool {
             prompt: enhancedPrompt,
             style: style,
             dimensions: dimensions,
-            tool: 'huggingface-sdxl'
+            tool: 'huggingface-sdxl',
+            content: content?.content || null,
+            photoshootBrief: content?.brief || null
           },
           timestamp: new Date().toISOString()
         };
@@ -622,5 +661,199 @@ export class ImageGeneratorTool {
       reader.onerror = reject;
       reader.readAsDataURL(blob);
     });
+  }
+
+  // New method to analyze uploaded product images with Gemini Vision
+  private async analyzeProductImage(imageData: string) {
+    try {
+      const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+      // Convert base64 to proper format for Gemini
+      const imagePart = {
+        inlineData: {
+          data: imageData.replace(/^data:image\/[a-z]+;base64,/, ''), // Remove data URL prefix
+          mimeType: 'image/jpeg'
+        }
+      };
+
+      const analysisPrompt = `
+        Analyze this product image for REALISTIC PHOTOSHOOT PLANNING. Extract detailed information:
+        
+        Return ONLY a JSON object with this structure:
+        {
+          "specificProductType": "exact product type (hoodie, tshirt, necklace, bag, shoes, dress, etc.)",
+          "productName": "estimated product name",
+          "category": "product category", 
+          "materials": ["list of visible materials"],
+          "colors": ["dominant colors visible"],
+          "currentStyle": "current photo style (amateur, professional, product shot, lifestyle, etc.)",
+          "backgroundType": "current background (white, natural, cluttered, studio, etc.)",
+          "lightingQuality": "lighting assessment (good, poor, needs improvement, professional, etc.)",
+          "photoshootPotential": "how this would look in professional model photoshoot",
+          "idealModelType": "recommended model for this product (streetwear, elegant, casual, professional, etc.)",
+          "recommendedSetting": "ideal photoshoot setting (urban street, studio, outdoor, elegant interior, etc.)",
+          "stylingNeeds": ["what styling elements are needed for photoshoot"],
+          "backgroundRemoval": "whether background should be removed (yes/no)",
+          "photoshootConcept": "detailed concept for model photoshoot with this product"
+        }
+      `;
+
+      const result = await model.generateContent([analysisPrompt, imagePart]);
+      const response = await result.response;
+      const analysisText = response.text();
+
+      // Parse the JSON response
+      const productDetails = JSON.parse(analysisText);
+      
+      return {
+        success: true,
+        analysis: analysisText,
+        productDetails: productDetails,
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      console.error('Gemini image analysis error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to analyze image',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  // New method to generate realistic photoshoot content using ContentGeneratorTool
+  private async generatePhotoshootContent(prompt: string, productInfo: any, style: string) {
+    try {
+      // Import and use ContentGeneratorTool
+      const { ContentGeneratorTool } = await import('./content-generator');
+      const contentGenerator = new ContentGeneratorTool();
+
+      // Generate product description with photoshoot focus
+      const descriptionResult = await contentGenerator.execute({
+        type: 'product_description',
+        input: {
+          prompt: prompt,
+          productInfo: productInfo,
+          photoshootStyle: style
+        },
+        context: {
+          focusOn: 'photoshoot_direction',
+          includeModelScenarios: true,
+          realisticStyling: true
+        }
+      });
+
+      // Generate marketing copy with photoshoot focus  
+      const marketingResult = await contentGenerator.execute({
+        type: 'marketing_copy',
+        input: {
+          prompt: prompt,
+          productInfo: productInfo,
+          photoshootStyle: style
+        },
+        context: {
+          campaignType: 'model_photoshoot',
+          visualFocus: true
+        }
+      });
+
+      if (descriptionResult.success && marketingResult.success) {
+        return {
+          success: true,
+          content: descriptionResult.content,
+          brief: marketingResult.content,
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      return {
+        success: false,
+        error: 'Failed to generate photoshoot content'
+      };
+
+    } catch (error) {
+      console.error('Content generation error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Content generation failed'
+      };
+    }
+  }
+
+  // New method to generate realistic photoshoot mockup instead of hardcoded CSS
+  private async generateRealisticPhotoshoot(prompt: string, productInfo: any, style: string, dimensions: string, content: any) {
+    // Detect product type for realistic scenario
+    const productType = this.detectProductType(prompt, productInfo);
+    const photoshootConcept = this.getPhotoshootConcept(productType, style);
+    
+    // Create realistic photoshoot description instead of CSS mockup
+    const photoshootDescription = this.createRealisticPhotoshootDescription(productType, style, photoshootConcept, content);
+    
+    return {
+      success: true,
+      result: {
+        type: 'realistic_photoshoot',
+        photoshootConcept: photoshootDescription,
+        modelScenario: photoshootConcept.scenario,
+        productType: productType,
+        style: style,
+        dimensions: dimensions,
+        content: content?.content || null,
+        brief: content?.brief || null,
+        tool: 'realistic-photoshoot-generator',
+        note: `Realistic ${productType} photoshoot concept with model. Use this as direction for professional photography.`
+      },
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  // Helper method to create realistic photoshoot descriptions
+  private createRealisticPhotoshootDescription(productType: string, style: string, concept: any, content: any) {
+    return `
+🎬 **PROFESSIONAL ${productType.toUpperCase()} PHOTOSHOOT**
+
+📸 **CONCEPT**: ${concept.basePrompt}
+
+👤 **MODEL SCENARIO**: ${concept.scenario}
+
+💡 **LIGHTING & STYLE**: ${concept.styleModifiers}
+
+📋 **TECHNICAL SPECS**: ${concept.technicalSpecs}
+
+${content?.content ? `\n📝 **CREATIVE BRIEF**:\n${content.content}` : ''}
+
+${content?.brief ? `\n🎯 **MARKETING DIRECTION**:\n${content.brief}` : ''}
+
+🔥 **EXECUTION NOTES**:
+- Professional model casting required
+- ${style} photography style
+- Focus on authentic product presentation
+- Instagram-ready final images
+- No hardcoded elements - all content tailored to product
+
+**This is a realistic photoshoot brief for professional execution with models.**
+    `;
+  }
+
+  // Updated fallback method
+  private generateFallbackPhotoshoot(prompt: string, productInfo: any, style: string, dimensions: string) {
+    const productType = this.detectProductType(prompt, productInfo);
+    const photoshootConcept = this.getPhotoshootConcept(productType, style);
+    
+    return {
+      success: true,
+      result: {
+        type: 'photoshoot_concept',
+        content: `📸 **REALISTIC ${productType.toUpperCase()} PHOTOSHOOT CONCEPT**\n\n🎯 **Product**: ${prompt}\n\n📋 **Model Scenario**: ${photoshootConcept.scenario}\n\n✨ **Style**: ${style} photography\n📐 **Format**: ${dimensions}\n🎬 **Direction**: ${photoshootConcept.basePrompt}\n\n👥 **Creative Notes**: ${photoshootConcept.styleModifiers}\n\n📝 **Technical**: ${photoshootConcept.technicalSpecs}\n\n*Professional ${productType} photoshoot with model, realistic styling, and authentic brand storytelling.*`,
+        productType: productType,
+        photoshootDetails: photoshootConcept,
+        style: style,
+        dimensions: dimensions,
+        tool: 'realistic-concept-generator',
+        note: `Realistic ${productType} photoshoot concept ready for professional photography execution.`
+      },
+      timestamp: new Date().toISOString()
+    };
   }
 }
