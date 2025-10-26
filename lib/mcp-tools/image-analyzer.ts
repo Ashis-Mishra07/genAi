@@ -106,74 +106,77 @@ export class ImageAnalyzerTool {
     switch (action) {
       case 'analyze':
         enhancedPrompt = `
-          ${prompt || 'Analyze this artisan product image comprehensively'}
+          ${prompt || 'Analyze this artisan product image from a photography and brand storytelling perspective'}
           
           Please analyze this artisan product image and provide detailed information about:
           
           1. **Product Details**: What type of artisan product is this? What materials, colors, and techniques are visible?
-          2. **Cultural Context**: What cultural tradition or heritage does this represent?
-          3. **Craftsmanship**: What level of skill and time investment is evident?
-          4. **Market Value**: What makes this unique and valuable to collectors or customers?
-          5. **Story Potential**: What cultural stories or traditions could be associated with this piece?
+          2. **Photography Quality**: Assess the current lighting, composition, styling, and photoshoot potential
+          3. **Brand Story Elements**: What authentic narrative and creative journey does this piece represent?
+          4. **Visual Appeal**: How photogenic is this product? What makes it compelling for visual content?
+          5. **Styling Opportunities**: What photoshoot concepts and styling approaches would enhance this product?
+          6. **Cultural Heritage**: What cultural tradition does this represent for authentic brand storytelling?
+          7. **Creative Process**: What artisan techniques and creative passion are evident in the craftsmanship?
           
-          Provide a comprehensive analysis that would help an artisan marketplace seller create compelling product listings.
+          Provide a comprehensive analysis that would help create compelling brand stories and photoshoot concepts.
         `;
         break;
 
       case 'refine':
         enhancedPrompt = `
-          Analyze this artisan product image and provide detailed photography refinement suggestions:
+          Analyze this artisan product image and provide professional photoshoot refinement suggestions:
           
-          **IMAGE QUALITY ASSESSMENT:**
-          1. **Lighting Analysis**: Evaluate current lighting - is it natural, artificial, harsh, soft? What improvements are needed?
-          2. **Composition Review**: Assess framing, angles, background, and overall composition quality
-          3. **Color Accuracy**: Are the colors true to life? Any color correction needed?
-          4. **Clarity & Focus**: Is the image sharp? Any blur or focus issues?
+          **PHOTOSHOOT QUALITY ASSESSMENT:**
+          1. **Lighting Analysis**: Evaluate current lighting setup - assess mood, shadows, highlights, and overall aesthetic quality
+          2. **Composition & Styling**: Review framing, angles, styling elements, and brand story visual narrative
+          3. **Color Palette**: Assess color harmony, brand consistency, and visual appeal for content creation
+          4. **Brand Story Elements**: How well does this image tell the artisan's creative journey and brand narrative?
           
-          **REFINEMENT RECOMMENDATIONS:**
-          1. **Lighting Improvements**: Specific suggestions for better lighting setup
-          2. **Background Suggestions**: Ideal background colors/textures to enhance the product
-          3. **Angle & Positioning**: Best angles to showcase the craftsmanship
-          4. **Props & Styling**: Cultural or complementary props that would enhance the presentation
-          5. **Technical Settings**: Camera/phone settings recommendations
+          **PROFESSIONAL PHOTOSHOOT RECOMMENDATIONS:**
+          1. **Photography Style Direction**: Suggest best photoshoot style (lifestyle, studio, editorial, commercial, artistic)
+          2. **Lighting & Mood Setup**: Professional lighting recommendations for brand storytelling
+          3. **Styling & Props**: Creative styling suggestions that enhance the brand narrative
+          4. **Background & Setting**: Ideal environments that complement the artisan's story
+          5. **Composition Concepts**: Multiple shot ideas for a complete photoshoot series
           
-          **SOCIAL MEDIA OPTIMIZATION:**
-          - Square crop suggestions for Instagram
-          - Vertical orientation tips for Stories
-          - Close-up detail shots for showcasing craftsmanship
+          **CONTENT CREATION OPTIMIZATION:**
+          - Instagram photoshoot series suggestions
+          - Behind-the-scenes content opportunities
+          - Brand story visual narrative ideas
+          - Creative styling and photography direction
           
-          Provide actionable, specific advice that an artisan can implement with basic photography equipment.
+          Provide professional photoshoot direction that elevates the artisan's brand story and visual content.
         `;
         break;
 
       case 'poster':
         enhancedPrompt = `
-          Analyze this artisan product image and extract key information for creating a SALES POSTER:
+          Analyze this artisan product image and extract key information for creating a BRAND STORYTELLING PHOTOSHOOT:
           
-          **PRODUCT ANALYSIS FOR SALES:**
+          **PRODUCT ANALYSIS FOR PHOTOSHOOT CONCEPTS:**
           1. **Product Type**: What specific type of artisan product is this?
-          2. **Materials**: What premium materials are visible?
-          3. **Cultural Heritage**: What cultural tradition/origin does this represent?
-          4. **Unique Selling Points**: What makes this product special and valuable?
-          5. **Craftsmanship Quality**: What level of skill and artistry is evident?
-          6. **Target Market**: Who would buy this product?
+          2. **Visual Appeal**: What makes this product photogenic and compelling for photography?
+          3. **Brand Story Elements**: What authentic narrative and creative journey does this represent?
+          4. **Styling Potential**: What photography styles and concepts would best showcase this product?
+          5. **Artisan Heritage**: What cultural tradition and creative process are evident?
+          6. **Target Audience**: Who would connect with this brand story and aesthetic?
           
-          **SALES-FOCUSED INFORMATION FORMAT:**
+          **PHOTOSHOOT-FOCUSED INFORMATION FORMAT:**
           Please format your response as JSON with these fields:
           {
-            "productType": "specific product type for marketing",
-            "materials": "premium materials highlighted for sales",
-            "culture": "cultural origin/heritage for authenticity",
-            "keyFeatures": ["unique selling point 1", "premium feature 2", "quality aspect 3"],
-            "title": "catchy product name for sales (5-8 words)",
-            "description": "compelling sales description emphasizing quality and heritage (2-3 sentences)",
-            "targetMarket": "ideal customer description",
-            "priceRange": "estimated price range based on materials and craftsmanship (e.g., $150-$300)",
-            "artist": "artist name if visible/determinable, otherwise 'Artisan Creator'",
-            "posterPrompt": "detailed prompt for generating a professional Instagram sales poster with pricing, artist name, and 'DM to Buy' call-to-action"
+            "productType": "specific product type for photography",
+            "materials": "beautiful materials to highlight in photoshoot",
+            "culture": "cultural heritage for authentic brand storytelling",
+            "brandStoryElements": ["authentic narrative 1", "creative process 2", "heritage aspect 3"],
+            "title": "evocative brand story title (5-8 words)",
+            "description": "compelling brand narrative emphasizing creativity and authentic craftsmanship (2-3 sentences)",
+            "targetAudience": "creative community and photography enthusiasts who appreciate authentic artisan stories",
+            "photographyStyle": "recommended photoshoot style (lifestyle, studio, editorial, commercial, artistic)",
+            "artist": "artisan name if visible/determinable, otherwise 'Creative Artisan'",
+            "photoshootPrompt": "detailed prompt for generating professional brand storytelling photoshoot imagery with focus on authentic artisan narrative and creative process"
           }
           
-          Focus on extracting information that emphasizes VALUE, QUALITY, and CULTURAL AUTHENTICITY for sales purposes.
+          Focus on extracting information that emphasizes CREATIVITY, AUTHENTICITY, and BRAND STORYTELLING for photoshoot concepts.
         `;
         break;
     }
@@ -221,11 +224,12 @@ export class ImageAnalyzerTool {
           };
         }
 
-        // Generate the actual poster image
+        // Generate the actual photoshoot concept image
+        const photoshootStyle = productInfo.photographyStyle || 'lifestyle';
         const posterResult = await this.imageGenerator.execute({
-          prompt: `Professional artisan product poster showcasing ${productInfo.title || 'handcrafted item'}`,
+          prompt: `Professional artisan product photoshoot showcasing ${productInfo.title || 'handcrafted item'}`,
           productInfo: productInfo,
-          style: 'elegant', // Use elegant style for sales posters
+          style: photoshootStyle as 'lifestyle' | 'studio' | 'editorial' | 'commercial' | 'artistic', // Use recommended photoshoot style
           dimensions: 'square'   // Instagram square format
         });
 
@@ -235,17 +239,17 @@ export class ImageAnalyzerTool {
             analysis: text,
             action: action,
             productInfo: productInfo,
-            poster: posterResult.success ? posterResult.result : null,
+            photoshoot: posterResult.success ? posterResult.result : null,
             confidence: 'high',
             tool: `gemini-vision-${modelName}`,
             model: modelName,
-            salesFocused: true
+            brandStoryFocused: true
           },
           timestamp: new Date().toISOString()
         };
-      } catch (posterError) {
-        console.error('Poster generation failed:', posterError);
-        // Return analysis without poster if generation fails
+      } catch (photoshootError) {
+        console.error('Photoshoot concept generation failed:', photoshootError);
+        // Return analysis without photoshoot concept if generation fails
       }
     }
 
@@ -285,19 +289,19 @@ export class ImageAnalyzerTool {
   async extractProductInfo(imageData: string) {
     return this.execute({
       imageData,
-      prompt: 'Extract comprehensive product information from this artisan craft image',
+      prompt: 'Extract comprehensive product information from this artisan craft image for brand storytelling',
       action: 'analyze'
     });
   }
 
-  async getImageRefinementSuggestions(imageData: string) {
+  async getPhotoshootRefinementSuggestions(imageData: string) {
     return this.execute({
       imageData,
       action: 'refine'
     });
   }
 
-  async generateSocialMediaPoster(imageData: string, productDetails?: any) {
+  async generatePhotoshootConcept(imageData: string, productDetails?: any) {
     return this.execute({
       imageData,
       action: 'poster',

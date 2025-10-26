@@ -9,10 +9,10 @@ export class ImageGeneratorTool {
   async execute(args: { 
     prompt: string; 
     productInfo?: any; 
-    style?: 'poster' | 'elegant' | 'vintage' | 'modern' | 'cultural';
+    style?: 'lifestyle' | 'studio' | 'editorial' | 'commercial' | 'artistic';
     dimensions?: 'square' | 'story' | 'landscape';
   }) {
-    const { prompt, productInfo, style = 'poster', dimensions = 'square' } = args;
+    const { prompt, productInfo, style = 'lifestyle', dimensions = 'square' } = args;
 
     try {
       // Try multiple free image generation APIs
@@ -36,13 +36,13 @@ export class ImageGeneratorTool {
         }
       }
 
-      // Option 3: Generate a CSS-based visual poster (always works)
+      // Option 3: Generate a CSS-based photoshoot mockup (always works)
       return this.generateCSSPoster(prompt, productInfo, style, dimensions);
 
     } catch (error: any) {
       console.error('All image generation methods failed:', error);
       
-      // Ultimate fallback to text-based poster description
+      // Ultimate fallback to text-based photoshoot concept description
       return this.generateFallbackPoster(prompt, productInfo, style, dimensions);
     }
   }
@@ -125,14 +125,14 @@ export class ImageGeneratorTool {
   }
 
   private generateCSSPoster(prompt: string, productInfo: any, style: string, dimensions: string) {
-    // Generate a beautiful CSS-based poster that looks like a real image
-    const posterData = this.generateAdvancedHtmlPoster(prompt, productInfo, style, dimensions);
+    // Generate a beautiful CSS-based photoshoot mockup that looks like a real image
+    const photoshootData = this.generateAdvancedHtmlPoster(prompt, productInfo, style, dimensions);
     
     return {
       success: true,
       result: {
-        type: 'css_poster',
-        htmlContent: posterData,
+        type: 'css_photoshoot',
+        htmlContent: photoshootData,
         prompt: prompt,
         style: style,
         dimensions: dimensions,
@@ -146,26 +146,29 @@ export class ImageGeneratorTool {
   private enhancePromptForPoster(prompt: string, productInfo: any, style: string): string {
     let enhancedPrompt = '';
     
-    // Base prompt for sales/marketing poster
-    enhancedPrompt += 'Create a professional marketing poster for selling artisan products, ';
-    enhancedPrompt += 'commercial advertisement style, e-commerce product poster, ';
+    // Base prompt for professional product photoshoot
+    enhancedPrompt += 'Create a professional product photoshoot for artisan products, ';
+    enhancedPrompt += 'high-end photography aesthetic, editorial style product photography, ';
     
-    // Add style modifiers with sales focus
+    // Add style modifiers with photoshoot focus
     switch (style) {
-      case 'elegant':
-        enhancedPrompt += 'luxury brand aesthetic, premium product showcase, elegant typography, gold accents, ';
+      case 'lifestyle':
+        enhancedPrompt += 'lifestyle photography aesthetic, natural settings, authentic moments, everyday luxury, ';
         break;
-      case 'vintage':
-        enhancedPrompt += 'vintage marketplace style, traditional craft advertisement, heritage branding, ';
+      case 'studio':
+        enhancedPrompt += 'professional studio photography, controlled lighting, clean backgrounds, product focus, ';
         break;
-      case 'modern':
-        enhancedPrompt += 'modern e-commerce design, clean product showcase, contemporary branding, ';
+      case 'editorial':
+        enhancedPrompt += 'editorial fashion photography style, artistic composition, magazine quality, storytelling imagery, ';
         break;
-      case 'cultural':
-        enhancedPrompt += 'authentic cultural branding, traditional patterns as background, heritage showcase, ';
+      case 'commercial':
+        enhancedPrompt += 'commercial product photography, brand storytelling, professional styling, market-ready imagery, ';
+        break;
+      case 'artistic':
+        enhancedPrompt += 'artistic photography approach, creative composition, artistic lighting, unique perspectives, ';
         break;
       default:
-        enhancedPrompt += 'professional product showcase, sales-focused design, marketing poster, ';
+        enhancedPrompt += 'lifestyle product photography, authentic brand storytelling, photoshoot aesthetic, ';
     }
 
     // Add product-specific details if available
@@ -179,17 +182,17 @@ export class ImageGeneratorTool {
     // Add the main prompt
     enhancedPrompt += prompt;
     
-    // Add clean, minimal poster requirements - NO pricing or text overlays
-    enhancedPrompt += ', clean professional Instagram poster with minimal text, ';
-    enhancedPrompt += 'only "DM to Buy" call-to-action in small elegant corner, ';
-    enhancedPrompt += 'NO price tags, NO pricing information, NO artist name overlay, ';
-    enhancedPrompt += 'NO product title text, NO watermarks, NO text overlays, ';
-    enhancedPrompt += 'focus on beautiful product photography, clean aesthetic, ';
-    enhancedPrompt += 'minimal design, product-focused composition, ';
-    enhancedPrompt += 'social media optimized, Instagram post format, ';
-    enhancedPrompt += 'high-end product showcase, clean professional background, ';
-    enhancedPrompt += 'perfect lighting, 4k resolution, minimal text poster design, ';
-    enhancedPrompt += 'elegant simplicity, let the product speak for itself';
+    // Add professional photoshoot requirements - NO text overlays, focus on photography
+    enhancedPrompt += ', professional product photoshoot with no text overlays, ';
+    enhancedPrompt += 'pure photography focus, editorial quality imagery, ';
+    enhancedPrompt += 'NO price tags, NO pricing information, NO text overlays, ';
+    enhancedPrompt += 'NO watermarks, NO logos, NO promotional text, ';
+    enhancedPrompt += 'focus on beautiful product photography and styling, ';
+    enhancedPrompt += 'professional lighting setup, expert composition, ';
+    enhancedPrompt += 'brand storytelling through visual narrative only, ';
+    enhancedPrompt += 'Instagram-worthy photoshoot aesthetic, ';
+    enhancedPrompt += 'perfect lighting, 4k resolution, photoshoot quality, ';
+    enhancedPrompt += 'elegant photographic composition, let the artisan product and styling speak';
 
     return enhancedPrompt;
   }
@@ -206,9 +209,9 @@ export class ImageGeneratorTool {
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Artisan Product Poster</title>
+    <title>Artisan Product Photoshoot</title>
     <style>
-        .poster {
+        .photoshoot {
             width: ${dims.width}px;
             height: ${dims.height}px;
             background: linear-gradient(135deg, ${colorScheme.background});
@@ -216,14 +219,15 @@ export class ImageGeneratorTool {
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 40px;
+            padding: 60px;
             box-sizing: border-box;
-            font-family: 'Georgia', serif;
+            font-family: 'Inter', 'Helvetica Neue', sans-serif;
             position: relative;
             overflow: hidden;
+            backdrop-filter: blur(5px);
         }
         
-        .poster::before {
+        .photoshoot::before {
             content: '';
             position: absolute;
             top: 0;
@@ -231,75 +235,81 @@ export class ImageGeneratorTool {
             right: 0;
             bottom: 0;
             background: ${colorScheme.overlay};
-            opacity: 0.1;
+            opacity: 0.05;
+            filter: blur(1px);
         }
         
         .content {
             text-align: center;
             z-index: 2;
-            max-width: 90%;
+            max-width: 85%;
         }
         
-        .description {
-            font-size: ${dimensions === 'story' ? '32px' : '28px'};
+        .brand-story {
+            font-size: ${dimensions === 'story' ? '28px' : '24px'};
             color: ${colorScheme.text};
-            margin-bottom: 50px;
-            line-height: 1.4;
-            font-weight: 300;
+            margin-bottom: 40px;
+            line-height: 1.6;
+            font-weight: 200;
             text-align: center;
+            letter-spacing: 0.5px;
         }
         
-        .cta {
-            background: ${colorScheme.cta};
-            color: white;
-            padding: 18px 40px;
-            border-radius: 30px;
-            font-size: ${dimensions === 'story' ? '24px' : '22px'};
-            font-weight: bold;
+        .photoshoot-cta {
+            background: transparent;
+            color: ${colorScheme.text};
+            border: 2px solid ${colorScheme.cta};
+            padding: 15px 35px;
+            border-radius: 25px;
+            font-size: ${dimensions === 'story' ? '20px' : '18px'};
+            font-weight: 300;
             text-decoration: none;
             display: inline-block;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-            margin-top: 20px;
+            margin-top: 30px;
             transition: all 0.3s ease;
-        }
-        
-        .cta:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-        }
-        
-        .handcrafted-badge {
-            position: absolute;
-            top: 25px;
-            left: 25px;
-            background: rgba(255,255,255,0.9);
-            color: ${colorScheme.cta};
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-            text-transform: uppercase;
             letter-spacing: 1px;
         }
         
-        .cultural-element {
+        .photoshoot-cta:hover {
+            background: ${colorScheme.cta};
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        .artisan-badge {
             position: absolute;
-            ${dimensions === 'story' ? 'bottom: 30px; right: 30px;' : 'bottom: 25px; right: 25px;'}
-            width: 80px;
-            height: 80px;
+            top: 30px;
+            left: 30px;
+            background: rgba(255,255,255,0.15);
+            color: ${colorScheme.text};
+            padding: 10px 20px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 200;
+            text-transform: lowercase;
+            letter-spacing: 2px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .brand-accent {
+            position: absolute;
+            ${dimensions === 'story' ? 'bottom: 40px; right: 40px;' : 'bottom: 30px; right: 30px;'}
+            width: 60px;
+            height: 60px;
             background: ${colorScheme.accent};
-            border-radius: 50%;
-            opacity: 0.2;
+            border-radius: 30px;
+            opacity: 0.1;
+            transform: rotate(45deg);
         }
     </style>
 </head>
 <body>
-    <div class="poster">
-        <div class="handcrafted-badge">Handcrafted</div>
-        <div class="cultural-element"></div>
+    <div class="photoshoot">
+        <div class="artisan-badge">artisan made</div>
+        <div class="brand-accent"></div>
         <div class="content">
-            <p class="description">${description}</p>
-            <div class="cta">DM to Buy</div>
+            <p class="brand-story">${description}</p>
+            <div class="photoshoot-cta">explore collection</div>
         </div>
     </div>
 </body>
@@ -309,16 +319,20 @@ export class ImageGeneratorTool {
   private extractDescription(prompt: string, productInfo: any): string {
     if (productInfo?.description) return productInfo.description;
     
-    // Create a clean, descriptive text without pricing
+    // Create brand storytelling focused description for photoshoots
     const words = prompt.toLowerCase().split(' ');
-    const craftWords = ['handcrafted', 'artisan', 'traditional', 'beautiful', 'unique', 'elegant'];
-    const found = words.find(word => craftWords.includes(word)) || 'beautiful';
+    const storyWords = ['authentic', 'handcrafted', 'artisan', 'creative', 'passionate', 'unique', 'timeless'];
+    const found = words.find(word => storyWords.includes(word)) || 'authentic';
     
     if (productInfo?.materials) {
-      return `${found.charAt(0).toUpperCase() + found.slice(1)} ${productInfo.materials} creation`;
+      return `Where ${found} craftsmanship meets ${productInfo.materials} artistry`;
     }
     
-    return `${found.charAt(0).toUpperCase() + found.slice(1)} handcrafted piece`;
+    if (productInfo?.culture) {
+      return `${found.charAt(0).toUpperCase() + found.slice(1)} heritage, modern expression`;
+    }
+    
+    return `${found.charAt(0).toUpperCase() + found.slice(1)} artisan stories, beautifully crafted`;
   }
 
   private getDimensions(dimensions: string) {
@@ -335,49 +349,58 @@ export class ImageGeneratorTool {
 
   private getColorScheme(style: string) {
     switch (style) {
-      case 'elegant':
-        return {
-          background: '#f8f6f3, #e8e5e1',
-          overlay: 'radial-gradient(circle at 50% 50%, #d4af37, transparent)',
-          title: '#2c1810',
-          text: '#5a4a3a',
-          cta: '#d4af37',
-          accent: '#d4af37'
-        };
-      case 'vintage':
-        return {
-          background: '#f4f1e8, #e6dcc8',
-          overlay: 'radial-gradient(circle at 30% 70%, #8b4513, transparent)',
-          title: '#3e2723',
-          text: '#5d4037',
-          cta: '#8b4513',
-          accent: '#cd853f'
-        };
-      case 'modern':
-        return {
-          background: '#ffffff, #f5f5f5',
-          overlay: 'linear-gradient(45deg, #333333, transparent)',
-          title: '#212121',
-          text: '#424242',
-          cta: '#2196f3',
-          accent: '#03a9f4'
-        };
-      case 'cultural':
-        return {
-          background: '#fff8e1, #f3e5ab',
-          overlay: 'radial-gradient(circle at 70% 30%, #ff6f00, transparent)',
-          title: '#e65100',
-          text: '#bf360c',
-          cta: '#ff6f00',
-          accent: '#ffa726'
-        };
-      default:
+      case 'lifestyle':
         return {
           background: '#fafafa, #f0f0f0',
-          overlay: 'linear-gradient(135deg, #6a1b9a, transparent)',
-          title: '#4a148c',
-          text: '#6a1b9a',
-          cta: '#8e24aa',
+          overlay: 'radial-gradient(circle at 60% 40%, #e8e8e8, transparent)',
+          title: '#333333',
+          text: '#555555',
+          cta: '#8d6e63',
+          accent: '#a1887f'
+        };
+      case 'studio':
+        return {
+          background: '#ffffff, #f8f8f8',
+          overlay: 'linear-gradient(135deg, rgba(0,0,0,0.02), transparent)',
+          title: '#212121',
+          text: '#424242',
+          cta: '#37474f',
+          accent: '#546e7a'
+        };
+      case 'editorial':
+        return {
+          background: '#fcfcfc, #f5f5f5',
+          overlay: 'radial-gradient(circle at 70% 30%, rgba(0,0,0,0.05), transparent)',
+          title: '#1a1a1a',
+          text: '#2e2e2e',
+          cta: '#6d4c41',
+          accent: '#8d6e63'
+        };
+      case 'commercial':
+        return {
+          background: '#f9f9f9, #eeeeee',
+          overlay: 'linear-gradient(45deg, rgba(66,66,66,0.03), transparent)',
+          title: '#263238',
+          text: '#37474f',
+          cta: '#455a64',
+          accent: '#607d8b'
+        };
+      case 'artistic':
+        return {
+          background: '#fefefe, #f7f7f7',
+          overlay: 'radial-gradient(circle at 40% 60%, rgba(121,85,72,0.08), transparent)',
+          title: '#3e2723',
+          text: '#5d4037',
+          cta: '#795548',
+          accent: '#8d6e63'
+        };
+      default: // lifestyle
+        return {
+          background: '#fafafa, #f0f0f0',
+          overlay: 'radial-gradient(circle at 60% 40%, #e8e8e8, transparent)',
+          title: '#333333',
+          text: '#555555',
+          cta: '#8d6e63',
           accent: '#ab47bc'
         };
     }
@@ -387,12 +410,12 @@ export class ImageGeneratorTool {
     return {
       success: true,
       result: {
-        type: 'text_poster',
-        content: `📸 **Professional Product Poster**\n\n${prompt}\n\n✨ **Style**: ${style}\n📐 **Format**: ${dimensions}\n\n💫 **DM to Buy**\n\n*This would be displayed as a beautiful visual poster with minimal text and clean design.*`,
+        type: 'text_photoshoot',
+        content: `📸 **Professional Product Photoshoot Concept**\n\n${prompt}\n\n✨ **Photography Style**: ${style}\n📐 **Format**: ${dimensions}\n🎨 **Brand Story**: Authentic artisan craftsmanship\n\n� **Explore Collection**\n\n*This would be displayed as a beautiful photoshoot-style visual with elegant typography and minimal design.*`,
         style: style,
         dimensions: dimensions,
         tool: 'text-fallback',
-        note: 'Visual poster generation temporarily unavailable. This represents the poster content that would be displayed.'
+        note: 'Visual photoshoot generation temporarily unavailable. This represents the photoshoot concept that would be captured.'
       },
       timestamp: new Date().toISOString()
     };

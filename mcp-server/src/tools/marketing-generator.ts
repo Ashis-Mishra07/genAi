@@ -52,91 +52,95 @@ export class MarketingGenerator {
 
   private createSocialMediaPrompt(productData: any): string {
     return `
-      Create engaging social media content for this artisan product:
+      Create photoshoot-inspired social media content for this artisan product:
       
       Product: ${JSON.stringify(productData)}
       
       Generate:
-      1. Instagram caption (with relevant hashtags)
-      2. Facebook post
-      3. Twitter/X post
-      4. LinkedIn post (professional angle)
+      1. Instagram caption (brand story + photography hashtags)
+      2. Facebook post (behind-the-scenes brand narrative)
+      3. Twitter/X post (visual storytelling focus)
+      4. LinkedIn post (artisan brand journey and creative process)
       
       Requirements:
-      - Highlight craftsmanship and cultural value
-      - Include storytelling elements
-      - Add appropriate hashtags for each platform
-      - Create engaging hooks
-      - Include call-to-action
-      - Mention artisan heritage
+      - Write captions that complement beautiful product photography
+      - Include brand storytelling that feels authentic and personal
+      - Add photography and visual content hashtags
+      - Create content that inspires photoshoot concepts
+      - Focus on the creative process and artisan's brand journey
+      - Include styling and aesthetic appreciation elements
+      - Mention photoshoot-worthy qualities and visual appeal
+      - Write for photography enthusiasts and visual content creators
       
-      Format each platform's content clearly labeled.
+      Format each platform's content clearly labeled with photography-focused approach.
     `;
   }
 
   private createInstagramPrompt(productData: any): string {
     return `
-      Create Instagram content for this artisan product:
+      Create Instagram photoshoot content for this artisan product:
       
       Product: ${JSON.stringify(productData)}
       
       Generate:
-      1. Main caption (engaging story + product details)
-      2. Hashtag strategy (mix of niche and popular tags)
-      3. Stories content ideas (3-5 slides)
-      4. Reel script ideas
+      1. Main caption (brand story behind the photoshoot + creative process)
+      2. Hashtag strategy (photography, lifestyle, artisan brand, styling tags)
+      3. Stories content ideas (5-7 slides: behind-the-scenes, styling process, brand story moments)
+      4. Reel script ideas (photoshoot process, brand story highlights, styling transformations)
       
-      Style: Authentic, visual-first, community-building
-      Focus: Heritage, craftsmanship, uniqueness
+      Style: Editorial photoshoot aesthetic, brand storytelling, visual-first narrative
+      Focus: Creative process, photoshoot concepts, brand journey, styling inspiration
+      Approach: Content that inspires other creators and photographers
     `;
   }
 
   private createFacebookPrompt(productData: any): string {
     return `
-      Create Facebook marketing content for this artisan product:
+      Create Facebook brand story content for this artisan product:
       
       Product: ${JSON.stringify(productData)}
       
       Generate:
-      1. Detailed post with story
-      2. Event announcement (if applicable)
-      3. Community engagement questions
-      4. Share-worthy content angles
+      1. Detailed brand story post with photoshoot behind-the-scenes
+      2. Photoshoot process documentation (if applicable)
+      3. Community engagement about creative process and styling
+      4. Share-worthy brand journey and creative moments
       
-      Style: Community-focused, educational, shareable
-      Focus: Supporting artisans, cultural preservation
+      Style: Documentary-style brand storytelling, photoshoot insights, creative community-focused
+      Focus: Artisan brand journey, creative process, photoshoot concepts, visual storytelling
     `;
   }
 
   private createPosterPrompt(productData: any): string {
     return `
-      Create poster/banner content for this artisan product:
+      Create photoshoot concept brief for this artisan product:
       
       Product: ${JSON.stringify(productData)}
       
-      Generate design brief including:
-      1. Main headline (attention-grabbing)
-      2. Subheadline (product details)
-      3. Key selling points (bullet format)
-      4. Call-to-action text
-      5. Color scheme suggestions
-      6. Layout recommendations
-      7. Typography suggestions
+      Generate photoshoot design brief including:
+      1. Main visual concept (photography style and mood)
+      2. Brand story narrative (storytelling elements)
+      3. Styling direction (props, backgrounds, lighting)
+      4. Shot composition ideas (angles, framing, focus)
+      5. Color palette inspiration (mood and aesthetic)
+      6. Layout concept for final imagery
+      7. Typography pairing suggestions for brand consistency
       
-      Style: Professional, artistic, culturally respectful
-      Purpose: Sales conversion and brand awareness
+      Style: Editorial photoshoot aesthetic, artistic brand storytelling, lifestyle photography
+      Purpose: Brand storytelling through visual narrative and professional photography
     `;
   }
 
   private createGeneralMarketingPrompt(productData: any, platform: string): string {
     return `
-      Create marketing content for ${platform} for this artisan product:
+      Create photoshoot-inspired brand content for ${platform} for this artisan product:
       
       Product: ${JSON.stringify(productData)}
       
-      Adapt the content style and format appropriate for ${platform}.
-      Focus on the unique value proposition of handmade artisan goods.
-      Include cultural storytelling and craftsmanship details.
+      Adapt the content style and format appropriate for ${platform} with photography focus.
+      Focus on brand storytelling through visual narrative and creative process.
+      Include behind-the-scenes creative journey and photoshoot concepts.
+      Emphasize styling opportunities and aesthetic appeal for content creators.
     `;
   }
 
@@ -145,24 +149,24 @@ export class MarketingGenerator {
       const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
       const prompt = `
-        Create a detailed design brief for a product poster:
+        Create a detailed photoshoot concept and styling brief for this artisan product:
         
         Product: ${JSON.stringify(productData)}
-        ${imageData ? 'Product Image: [Image provided]' : ''}
+        ${imageData ? 'Product Image: [Image provided for styling reference]' : ''}
         
-        Design Elements:
-        1. Layout structure (header, body, footer)
-        2. Typography hierarchy
-        3. Color palette (inspired by product/culture)
-        4. Visual elements placement
-        5. Text content for each section
-        6. Call-to-action placement
-        7. Branding considerations
+        Photoshoot Concept Elements:
+        1. Photography style direction (studio, lifestyle, editorial, commercial, artistic)
+        2. Brand story narrative to capture through imagery
+        3. Styling and prop suggestions (backgrounds, textures, complementary objects)
+        4. Lighting mood and setup recommendations
+        5. Composition and framing ideas (close-ups, lifestyle shots, detail shots)
+        6. Color palette and aesthetic mood for brand consistency
+        7. Behind-the-scenes content opportunities
         
-        Output as detailed design specifications that a graphic designer can follow.
+        Output as detailed photoshoot brief that photographers and stylists can follow.
       `;
 
-      const inputs = [prompt];
+      const inputs: any[] = [prompt];
       if (imageData) {
         inputs.push({
           inlineData: {

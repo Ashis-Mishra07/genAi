@@ -65,23 +65,24 @@ export class ContentGeneratorTool {
 
   private createProductDescriptionPrompt(input: any, context?: any): string {
     return `
-      Create an engaging product description for this artisan product:
+      Create a compelling brand story-driven product description for this artisan product:
       
       Product Information: ${JSON.stringify(input, null, 2)}
       Additional Context: ${context ? JSON.stringify(context, null, 2) : 'None'}
       
       Requirements:
-      - Write in an engaging, storytelling style
-      - Highlight the craftsmanship and quality
-      - Mention cultural significance and heritage
-      - Include material and technique details
-      - Emphasize the handmade, authentic nature
-      - Keep between 150-250 words
-      - Make it appealing to international buyers who value authenticity
-      - Include emotional connection points
-      - Mention the artisan's skill and tradition
+      - Write as a brand narrative that tells the product's creative journey
+      - Focus on the artisan's passion, dedication, and artistic process
+      - Describe the photoshoot-worthy qualities and visual appeal
+      - Highlight how each piece tells its own unique story
+      - Include sensory details (texture, visual beauty, craftsmanship feel)
+      - Mention the photogenic qualities and styling potential
+      - Connect the product to lifestyle and personal expression
+      - Keep between 180-280 words
+      - Write for photography enthusiasts and visual content creators
+      - Include elements that would inspire photoshoot concepts
       
-      Format the response as a clean, marketing-ready product description that would work on an e-commerce platform.
+      Format as a brand story that would inspire a photoshoot concept and resonate with creative professionals.
     `;
   }
 

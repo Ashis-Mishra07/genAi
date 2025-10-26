@@ -41,23 +41,29 @@ export class ImageAnalyzer {
 
   async extractProductInfo(imageData: string) {
     const prompt = `
-      Analyze this product image and extract the following information in JSON format:
+      Analyze this product image from a professional photography and brand storytelling perspective. Extract information in JSON format:
       {
         "productName": "estimated product name",
         "category": "product category",
         "materials": ["list of materials"],
         "colors": ["dominant colors"],
-        "style": "artistic style or technique",
+        "photographyStyle": "current photography style (studio, lifestyle, editorial, etc.)",
+        "lightingQuality": "assessment of lighting and shadows",
+        "compositionNotes": "photography composition analysis",
+        "brandStoryElements": ["visual elements that tell the brand story"],
         "culturalElements": ["cultural or traditional elements visible"],
-        "condition": "condition of the product",
-        "estimatedSize": "estimated size description"
+        "photoshootPotential": "assessment of how photogenic this product is",
+        "stylingOpportunities": ["potential styling and photography concepts"],
+        "visualAppeal": "overall aesthetic and visual impact assessment",
+        "backgroundSuitability": "current background and setting analysis",
+        "improvementSuggestions": ["photography and presentation improvement ideas"]
       }
       Only return the JSON, no additional text.
     `;
 
     try {
       const result = await this.analyzeImage(imageData, prompt);
-      if (result.success) {
+      if (result.success && result.analysis) {
         const productInfo = JSON.parse(result.analysis);
         return {
           success: true,
