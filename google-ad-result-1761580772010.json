@@ -1,0 +1,178 @@
+{
+  "success": true,
+  "imagePath": "./hoodie.jpg",
+  "analysis": {
+    "success": true,
+    "manual": true,
+    "labels": [
+      {
+        "description": "clothing",
+        "confidence": 0.9
+      },
+      {
+        "description": "hoodie",
+        "confidence": 0.85
+      },
+      {
+        "description": "casual wear",
+        "confidence": 0.8
+      },
+      {
+        "description": "fashion",
+        "confidence": 0.75
+      }
+    ],
+    "objects": [
+      {
+        "name": "hoodie",
+        "confidence": 0.9
+      }
+    ],
+    "colors": [
+      {
+        "color": "gray",
+        "percentage": 0.6
+      },
+      {
+        "color": "white",
+        "percentage": 0.2
+      },
+      {
+        "color": "black",
+        "percentage": 0.2
+      }
+    ],
+    "texts": [],
+    "imagePath": "./hoodie.jpg",
+    "imageSize": 3854026,
+    "fileType": ".jpg"
+  },
+  "subject": "hoodie",
+  "advertisementStrategy": {
+    "success": true,
+    "strategy": "\n# PROFESSIONAL ADVERTISEMENT STRATEGY FOR HOODIE\n\n## 1. ADVERTISING CONCEPT\nCreate a lifestyle-focused campaign that positions the hoodie as the perfect blend of comfort and style for the modern consumer.\n\n## 2. HEADLINE OPTIONS\n- \"Comfort Meets Style\"\n- \"Your Perfect Hoodie\"\n- \"Everyday Essentials, Elevated\"\n\n## 3. TARGET AUDIENCE\n- **Primary**: Ages 18-35, urban professionals and students\n- **Secondary**: Fashion-conscious individuals seeking comfort\n- **Psychographics**: Values quality, style, and versatility\n\n## 4. KEY SELLING POINTS\n- Premium quality materials\n- Versatile styling options\n- Comfortable all-day wear\n- Modern, contemporary design\n- Perfect for casual and semi-casual occasions\n\n## 5. VISUAL DIRECTION\n- Clean, minimalist background\n- Soft, natural lighting\n- Model in relaxed, confident poses\n- Focus on fabric texture and fit\n- Lifestyle settings (café, park, home)\n\n## 6. ADVERTISING COPY\n**Short Form**: \"Elevate your everyday with premium comfort and style.\"\n**Long Form**: \"Discover the perfect balance of comfort and sophistication. Our hoodie combines premium materials with contemporary design, making it your go-to choice for any occasion.\"\n\n## 7. CALL TO ACTION\n- \"Shop Now\"\n- \"Find Your Perfect Fit\"\n- \"Discover the Collection\"\n\n## 8. PLATFORM STRATEGY\n- **Instagram**: Lifestyle photography, stories, reels\n- **Facebook**: Targeted ads with lifestyle imagery\n- **Website**: Product hero sections with detailed shots\n- **Email**: Product launches and styling tips\n\n## 9. MOOD & TONE\nRelaxed confidence, approachable luxury, everyday elegance\n\n## 10. TECHNICAL SPECS\n- **Camera**: DSLR or mirrorless (Canon EOS R5 or Sony A7R IV)\n- **Lens**: 85mm f/1.4 for portraits, 35mm f/1.8 for lifestyle shots\n- **Lighting**: Soft key light, fill light, rim light for dimension\n- **Styling**: Minimal accessories, focus on the product\n",
+    "subject": "hoodie",
+    "analysisUsed": {
+      "success": true,
+      "manual": true,
+      "labels": [
+        {
+          "description": "clothing",
+          "confidence": 0.9
+        },
+        {
+          "description": "hoodie",
+          "confidence": 0.85
+        },
+        {
+          "description": "casual wear",
+          "confidence": 0.8
+        },
+        {
+          "description": "fashion",
+          "confidence": 0.75
+        }
+      ],
+      "objects": [
+        {
+          "name": "hoodie",
+          "confidence": 0.9
+        }
+      ],
+      "colors": [
+        {
+          "color": "gray",
+          "percentage": 0.6
+        },
+        {
+          "color": "white",
+          "percentage": 0.2
+        },
+        {
+          "color": "black",
+          "percentage": 0.2
+        }
+      ],
+      "texts": [],
+      "imagePath": "./hoodie.jpg",
+      "imageSize": 3854026,
+      "fileType": ".jpg"
+    }
+  },
+  "advertisementImages": {
+    "success": true,
+    "images": [
+      {
+        "concept": "Lifestyle Shot",
+        "prompt": "Professional lifestyle advertisement photo: attractive model wearing gray hoodie, sitting in modern coffee shop, natural lighting, relaxed confident pose, shot with Canon EOS R5 85mm f/1.4, commercial photography, clean background, ultra-realistic, magazine quality, 8K resolution",
+        "images": [
+          {
+            "service": "Pollinations Flux Pro",
+            "url": "https://image.pollinations.ai/prompt/Professional%20lifestyle%20advertisement%20photo%3A%20attractive%20model%20wearing%20gray%20hoodie%2C%20sitting%20in%20modern%20coffee%20shop%2C%20natural%20lighting%2C%20relaxed%20confident%20pose%2C%20shot%20with%20Canon%20EOS%20R5%2085mm%20f%2F1.4%2C%20commercial%20photography%2C%20clean%20background%2C%20ultra-realistic%2C%20magazine%20quality%2C%208K%20resolution?width=1024&height=1024&model=flux-pro&enhance=true&nologo=true&steps=50&guidance=9.5&seed=6570",
+            "concept": "Lifestyle Shot"
+          },
+          {
+            "service": "Pollinations Flux Dev",
+            "url": "https://image.pollinations.ai/prompt/Professional%20lifestyle%20advertisement%20photo%3A%20attractive%20model%20wearing%20gray%20hoodie%2C%20sitting%20in%20modern%20coffee%20shop%2C%20natural%20lighting%2C%20relaxed%20confident%20pose%2C%20shot%20with%20Canon%20EOS%20R5%2085mm%20f%2F1.4%2C%20commercial%20photography%2C%20clean%20background%2C%20ultra-realistic%2C%20magazine%20quality%2C%208K%20resolution?width=1024&height=1024&model=flux-dev&enhance=true&nologo=true&steps=40&guidance=8.5&seed=6571",
+            "concept": "Lifestyle Shot"
+          },
+          {
+            "service": "Pollinations Standard",
+            "url": "https://image.pollinations.ai/prompt/Professional%20lifestyle%20advertisement%20photo%3A%20attractive%20model%20wearing%20gray%20hoodie%2C%20sitting%20in%20modern%20coffee%20shop%2C%20natural%20lighting%2C%20relaxed%20confident%20pose%2C%20shot%20with%20Canon%20EOS%20R5%2085mm%20f%2F1.4%2C%20commercial%20photography%2C%20clean%20background%2C%20ultra-realistic%2C%20magazine%20quality%2C%208K%20resolution?width=1024&height=1024&model=flux&enhance=true&nologo=true&steps=35&guidance=8.0&seed=6572",
+            "concept": "Lifestyle Shot"
+          }
+        ]
+      },
+      {
+        "concept": "Studio Shot",
+        "prompt": "Professional studio advertisement photo: model wearing gray hoodie, white seamless background, three-point lighting setup, confident pose, commercial photography, shot with Canon EOS R5 85mm f/1.4, ultra-realistic, magazine quality, 8K resolution",
+        "images": [
+          {
+            "service": "Pollinations Flux Pro",
+            "url": "https://image.pollinations.ai/prompt/Professional%20studio%20advertisement%20photo%3A%20model%20wearing%20gray%20hoodie%2C%20white%20seamless%20background%2C%20three-point%20lighting%20setup%2C%20confident%20pose%2C%20commercial%20photography%2C%20shot%20with%20Canon%20EOS%20R5%2085mm%20f%2F1.4%2C%20ultra-realistic%2C%20magazine%20quality%2C%208K%20resolution?width=1024&height=1024&model=flux-pro&enhance=true&nologo=true&steps=50&guidance=9.5&seed=1185",
+            "concept": "Studio Shot"
+          },
+          {
+            "service": "Pollinations Flux Dev",
+            "url": "https://image.pollinations.ai/prompt/Professional%20studio%20advertisement%20photo%3A%20model%20wearing%20gray%20hoodie%2C%20white%20seamless%20background%2C%20three-point%20lighting%20setup%2C%20confident%20pose%2C%20commercial%20photography%2C%20shot%20with%20Canon%20EOS%20R5%2085mm%20f%2F1.4%2C%20ultra-realistic%2C%20magazine%20quality%2C%208K%20resolution?width=1024&height=1024&model=flux-dev&enhance=true&nologo=true&steps=40&guidance=8.5&seed=1186",
+            "concept": "Studio Shot"
+          },
+          {
+            "service": "Pollinations Standard",
+            "url": "https://image.pollinations.ai/prompt/Professional%20studio%20advertisement%20photo%3A%20model%20wearing%20gray%20hoodie%2C%20white%20seamless%20background%2C%20three-point%20lighting%20setup%2C%20confident%20pose%2C%20commercial%20photography%2C%20shot%20with%20Canon%20EOS%20R5%2085mm%20f%2F1.4%2C%20ultra-realistic%2C%20magazine%20quality%2C%208K%20resolution?width=1024&height=1024&model=flux&enhance=true&nologo=true&steps=35&guidance=8.0&seed=1187",
+            "concept": "Studio Shot"
+          }
+        ]
+      },
+      {
+        "concept": "Urban Lifestyle",
+        "prompt": "Professional urban lifestyle advertisement: model wearing gray hoodie, modern city background, natural daylight, stylish confident pose, commercial photography, shot with Canon EOS R5 85mm f/1.4, ultra-realistic, magazine quality, 8K resolution",
+        "images": [
+          {
+            "service": "Pollinations Flux Pro",
+            "url": "https://image.pollinations.ai/prompt/Professional%20urban%20lifestyle%20advertisement%3A%20model%20wearing%20gray%20hoodie%2C%20modern%20city%20background%2C%20natural%20daylight%2C%20stylish%20confident%20pose%2C%20commercial%20photography%2C%20shot%20with%20Canon%20EOS%20R5%2085mm%20f%2F1.4%2C%20ultra-realistic%2C%20magazine%20quality%2C%208K%20resolution?width=1024&height=1024&model=flux-pro&enhance=true&nologo=true&steps=50&guidance=9.5&seed=2983",
+            "concept": "Urban Lifestyle"
+          },
+          {
+            "service": "Pollinations Flux Dev",
+            "url": "https://image.pollinations.ai/prompt/Professional%20urban%20lifestyle%20advertisement%3A%20model%20wearing%20gray%20hoodie%2C%20modern%20city%20background%2C%20natural%20daylight%2C%20stylish%20confident%20pose%2C%20commercial%20photography%2C%20shot%20with%20Canon%20EOS%20R5%2085mm%20f%2F1.4%2C%20ultra-realistic%2C%20magazine%20quality%2C%208K%20resolution?width=1024&height=1024&model=flux-dev&enhance=true&nologo=true&steps=40&guidance=8.5&seed=2984",
+            "concept": "Urban Lifestyle"
+          },
+          {
+            "service": "Pollinations Standard",
+            "url": "https://image.pollinations.ai/prompt/Professional%20urban%20lifestyle%20advertisement%3A%20model%20wearing%20gray%20hoodie%2C%20modern%20city%20background%2C%20natural%20daylight%2C%20stylish%20confident%20pose%2C%20commercial%20photography%2C%20shot%20with%20Canon%20EOS%20R5%2085mm%20f%2F1.4%2C%20ultra-realistic%2C%20magazine%20quality%2C%208K%20resolution?width=1024&height=1024&model=flux&enhance=true&nologo=true&steps=35&guidance=8.0&seed=2985",
+            "concept": "Urban Lifestyle"
+          }
+        ]
+      }
+    ],
+    "totalConcepts": 3
+  },
+  "visualSummary": {
+    "success": true,
+    "summary": "\n# 📸 VISUAL ADVERTISEMENT CAMPAIGN FOR HOODIE\n\n## 🎨 GENERATED ADVERTISEMENT IMAGES\n\n### Concept 1: Lifestyle Shot\n**Vision**: Model wearing gray hoodie in modern coffee shop setting\n**Mood**: Relaxed, approachable, everyday luxury\n**Target**: Urban professionals, lifestyle-focused consumers\n\n### Concept 2: Studio Shot  \n**Vision**: Clean studio setup with professional lighting\n**Mood**: Premium, high-quality, focused on product\n**Target**: Quality-conscious consumers, brand-building\n\n### Concept 3: Urban Lifestyle\n**Vision**: City environment showcasing versatility\n**Mood**: Dynamic, modern, street-style influence  \n**Target**: Young professionals, trend-conscious buyers\n\n## 🎯 ADVERTISING STRATEGY SUMMARY\n- **Product**: gray hoodie\n- **Target Audience**: Ages 18-35, urban professionals\n- **Key Message**: Comfort meets style\n- **Brand Position**: Approachable luxury, everyday elegance\n\n## 📱 RECOMMENDED USAGE\n- **Instagram**: Square crops for feed, vertical for stories\n- **Facebook**: Lifestyle shots for targeted ads\n- **Website**: Studio shots for product pages\n- **Email**: Urban lifestyle for newsletters\n\n## 💡 IMPLEMENTATION TIPS\n1. A/B test different concepts across platforms\n2. Use lifestyle shots for brand awareness\n3. Use studio shots for conversion campaigns\n4. Overlay text in clean spaces (upper/lower thirds)\n5. Maintain consistent brand colors and fonts\n",
+    "totalImages": 9
+  },
+  "generatedWith": "Google Cloud Vision + Advertisement Engine + Image Generation",
+  "timestamp": "2025-10-27T15:59:32.005Z"
+}

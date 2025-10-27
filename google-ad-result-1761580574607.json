@@ -1,0 +1,159 @@
+{
+  "success": true,
+  "imagePath": "./hoodie.jpg",
+  "analysis": {
+    "success": true,
+    "manual": true,
+    "labels": [
+      {
+        "description": "clothing",
+        "confidence": 0.9
+      },
+      {
+        "description": "hoodie",
+        "confidence": 0.85
+      },
+      {
+        "description": "casual wear",
+        "confidence": 0.8
+      },
+      {
+        "description": "fashion",
+        "confidence": 0.75
+      }
+    ],
+    "objects": [
+      {
+        "name": "hoodie",
+        "confidence": 0.9
+      }
+    ],
+    "colors": [
+      {
+        "color": "gray",
+        "percentage": 0.6
+      },
+      {
+        "color": "white",
+        "percentage": 0.2
+      },
+      {
+        "color": "black",
+        "percentage": 0.2
+      }
+    ],
+    "texts": [],
+    "imagePath": "./hoodie.jpg",
+    "imageSize": 3854026,
+    "fileType": ".jpg"
+  },
+  "subject": "hoodie",
+  "advertisementStrategy": {
+    "success": true,
+    "strategy": "\n# PROFESSIONAL ADVERTISEMENT STRATEGY FOR HOODIE\n\n## 1. ADVERTISING CONCEPT\nCreate a lifestyle-focused campaign that positions the hoodie as the perfect blend of comfort and style for the modern consumer.\n\n## 2. HEADLINE OPTIONS\n- \"Comfort Meets Style\"\n- \"Your Perfect Hoodie\"\n- \"Everyday Essentials, Elevated\"\n\n## 3. TARGET AUDIENCE\n- **Primary**: Ages 18-35, urban professionals and students\n- **Secondary**: Fashion-conscious individuals seeking comfort\n- **Psychographics**: Values quality, style, and versatility\n\n## 4. KEY SELLING POINTS\n- Premium quality materials\n- Versatile styling options\n- Comfortable all-day wear\n- Modern, contemporary design\n- Perfect for casual and semi-casual occasions\n\n## 5. VISUAL DIRECTION\n- Clean, minimalist background\n- Soft, natural lighting\n- Model in relaxed, confident poses\n- Focus on fabric texture and fit\n- Lifestyle settings (café, park, home)\n\n## 6. ADVERTISING COPY\n**Short Form**: \"Elevate your everyday with premium comfort and style.\"\n**Long Form**: \"Discover the perfect balance of comfort and sophistication. Our hoodie combines premium materials with contemporary design, making it your go-to choice for any occasion.\"\n\n## 7. CALL TO ACTION\n- \"Shop Now\"\n- \"Find Your Perfect Fit\"\n- \"Discover the Collection\"\n\n## 8. PLATFORM STRATEGY\n- **Instagram**: Lifestyle photography, stories, reels\n- **Facebook**: Targeted ads with lifestyle imagery\n- **Website**: Product hero sections with detailed shots\n- **Email**: Product launches and styling tips\n\n## 9. MOOD & TONE\nRelaxed confidence, approachable luxury, everyday elegance\n\n## 10. TECHNICAL SPECS\n- **Camera**: DSLR or mirrorless (Canon EOS R5 or Sony A7R IV)\n- **Lens**: 85mm f/1.4 for portraits, 35mm f/1.8 for lifestyle shots\n- **Lighting**: Soft key light, fill light, rim light for dimension\n- **Styling**: Minimal accessories, focus on the product\n",
+    "subject": "hoodie",
+    "analysisUsed": {
+      "success": true,
+      "manual": true,
+      "labels": [
+        {
+          "description": "clothing",
+          "confidence": 0.9
+        },
+        {
+          "description": "hoodie",
+          "confidence": 0.85
+        },
+        {
+          "description": "casual wear",
+          "confidence": 0.8
+        },
+        {
+          "description": "fashion",
+          "confidence": 0.75
+        }
+      ],
+      "objects": [
+        {
+          "name": "hoodie",
+          "confidence": 0.9
+        }
+      ],
+      "colors": [
+        {
+          "color": "gray",
+          "percentage": 0.6
+        },
+        {
+          "color": "white",
+          "percentage": 0.2
+        },
+        {
+          "color": "black",
+          "percentage": 0.2
+        }
+      ],
+      "texts": [],
+      "imagePath": "./hoodie.jpg",
+      "imageSize": 3854026,
+      "fileType": ".jpg"
+    }
+  },
+  "visualAdvertisement": {
+    "success": true,
+    "visualPrompt": "\n# PROFESSIONAL ADVERTISEMENT VISUAL PROMPT\n\n## MAIN COMPOSITION\nProfessional lifestyle photoshoot featuring a hoodie in gray color. Model wearing the hoodie in a relaxed, confident pose that showcases the fit and style.\n\n## MODEL/PERSON\n- Diverse, approachable model (25-30 years old)\n- Natural, genuine expression\n- Confident but relaxed posture\n- Styled hair and minimal makeup for authenticity\n\n## BACKGROUND\n- Clean, minimalist setting\n- Soft neutral background (light gray or white)\n- Optional: Modern urban lifestyle setting (café, loft, park)\n- Uncluttered, focused on the product\n\n## LIGHTING\n- Soft, diffused natural light\n- Three-point lighting setup:\n  - Key light: Large softbox at 45-degree angle\n  - Fill light: Reflector or second softbox for even illumination  \n  - Rim light: Hair light to separate subject from background\n\n## CAMERA ANGLE\n- Eye-level perspective for connection\n- Medium shots and close-ups to show detail\n- 3/4 angle to show dimension and fit\n\n## STYLING\n- Minimal accessories that don't compete with the hoodie\n- Props that enhance lifestyle (coffee cup, book, phone)\n- Color palette that complements the gray hoodie\n\n## COLOR PALETTE\n- Primary: gray (the hoodie)\n- Secondary: Neutral whites, grays, and beiges\n- Accent: One warm tone for visual interest\n\n## MOOD\n- Relaxed confidence\n- Approachable luxury\n- Everyday elegance\n- Modern and contemporary\n\n## TEXT PLACEMENT\n- Clear space on upper third or lower third for text overlay\n- Ensure contrast for readability\n- Space for logo placement in corner\n\n## TECHNICAL DETAILS\n- Shot with Canon EOS R5, 85mm f/1.4 lens\n- Aperture: f/2.8 for sharp subject with soft background\n- Professional color grading with warm, natural tones\n- High resolution for print and digital use\n- Square (1:1) and vertical (4:5) crops for social media\n",
+    "strategy": {
+      "success": true,
+      "strategy": "\n# PROFESSIONAL ADVERTISEMENT STRATEGY FOR HOODIE\n\n## 1. ADVERTISING CONCEPT\nCreate a lifestyle-focused campaign that positions the hoodie as the perfect blend of comfort and style for the modern consumer.\n\n## 2. HEADLINE OPTIONS\n- \"Comfort Meets Style\"\n- \"Your Perfect Hoodie\"\n- \"Everyday Essentials, Elevated\"\n\n## 3. TARGET AUDIENCE\n- **Primary**: Ages 18-35, urban professionals and students\n- **Secondary**: Fashion-conscious individuals seeking comfort\n- **Psychographics**: Values quality, style, and versatility\n\n## 4. KEY SELLING POINTS\n- Premium quality materials\n- Versatile styling options\n- Comfortable all-day wear\n- Modern, contemporary design\n- Perfect for casual and semi-casual occasions\n\n## 5. VISUAL DIRECTION\n- Clean, minimalist background\n- Soft, natural lighting\n- Model in relaxed, confident poses\n- Focus on fabric texture and fit\n- Lifestyle settings (café, park, home)\n\n## 6. ADVERTISING COPY\n**Short Form**: \"Elevate your everyday with premium comfort and style.\"\n**Long Form**: \"Discover the perfect balance of comfort and sophistication. Our hoodie combines premium materials with contemporary design, making it your go-to choice for any occasion.\"\n\n## 7. CALL TO ACTION\n- \"Shop Now\"\n- \"Find Your Perfect Fit\"\n- \"Discover the Collection\"\n\n## 8. PLATFORM STRATEGY\n- **Instagram**: Lifestyle photography, stories, reels\n- **Facebook**: Targeted ads with lifestyle imagery\n- **Website**: Product hero sections with detailed shots\n- **Email**: Product launches and styling tips\n\n## 9. MOOD & TONE\nRelaxed confidence, approachable luxury, everyday elegance\n\n## 10. TECHNICAL SPECS\n- **Camera**: DSLR or mirrorless (Canon EOS R5 or Sony A7R IV)\n- **Lens**: 85mm f/1.4 for portraits, 35mm f/1.8 for lifestyle shots\n- **Lighting**: Soft key light, fill light, rim light for dimension\n- **Styling**: Minimal accessories, focus on the product\n",
+      "subject": "hoodie",
+      "analysisUsed": {
+        "success": true,
+        "manual": true,
+        "labels": [
+          {
+            "description": "clothing",
+            "confidence": 0.9
+          },
+          {
+            "description": "hoodie",
+            "confidence": 0.85
+          },
+          {
+            "description": "casual wear",
+            "confidence": 0.8
+          },
+          {
+            "description": "fashion",
+            "confidence": 0.75
+          }
+        ],
+        "objects": [
+          {
+            "name": "hoodie",
+            "confidence": 0.9
+          }
+        ],
+        "colors": [
+          {
+            "color": "gray",
+            "percentage": 0.6
+          },
+          {
+            "color": "white",
+            "percentage": 0.2
+          },
+          {
+            "color": "black",
+            "percentage": 0.2
+          }
+        ],
+        "texts": [],
+        "imagePath": "./hoodie.jpg",
+        "imageSize": 3854026,
+        "fileType": ".jpg"
+      }
+    }
+  },
+  "generatedWith": "Google Cloud Vision + Advertisement Engine",
+  "timestamp": "2025-10-27T15:56:14.595Z"
+}
