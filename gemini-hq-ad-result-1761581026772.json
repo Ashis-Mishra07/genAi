@@ -1,0 +1,86 @@
+{
+  "success": true,
+  "imagePath": "./hoodie.jpg",
+  "productAnalysis": {
+    "success": true,
+    "analysis": "Based on the image file analysis:\n      \n1. **EXACT PRODUCT TYPE**: Pullover hoodie/sweatshirt\n2. **PRECISE COLOR**: Medium gray (heather gray)\n3. **MATERIAL TEXTURE**: Cotton blend fleece, soft brushed interior\n4. **DESIGN DETAILS**: Kangaroo front pocket, drawstring hood, ribbed cuffs and hem\n5. **FIT & STYLE**: Regular relaxed fit, casual streetwear style\n6. **CURRENT CONDITION**: Good condition, everyday wear item\n7. **BRAND STYLE**: Casual, contemporary, everyday essential\n8. **SIZE APPEARANCE**: Medium to Large based on proportions",
+    "imagePath": "./hoodie.jpg",
+    "imageSize": 3854026,
+    "mimeType": "image/jpeg",
+    "fallback": true
+  },
+  "subject": "hoodie",
+  "advertisementImages": {
+    "success": true,
+    "images": [
+      {
+        "concept": "Premium Lifestyle",
+        "prompt": "Create a professional commercial advertisement photograph: attractive diverse model wearing heather gray hoodie in fleece fabric, relaxed fit fit. Model sitting in upscale modern coffee shop, natural lighting from large windows, relaxed confident expression, hands holding warm coffee cup. Shot with professional camera (Canon EOS R5, 85mm f/1.4 lens), shallow depth of field, commercial photography style, ultra-realistic, magazine quality, 8K resolution, perfect color grading, soft shadows, premium advertising aesthetic.",
+        "result": {
+          "success": true,
+          "images": [
+            {
+              "quality": "Ultra High (2048x2048)",
+              "url": "https://image.pollinations.ai/prompt/Create%20a%20professional%20commercial%20advertisement%20photograph%3A%20attractive%20diverse%20model%20wearing%20heather%20gray%20hoodie%20in%20fleece%20fabric%2C%20relaxed%20fit%20fit.%20Model%20sitting%20in%20upscale%20modern%20coffee%20shop%2C%20natural%20lighting%20from%20large%20windows%2C%20relaxed%20confident%20expression%2C%20hands%20holding%20warm%20coffee%20cup.%20Shot%20with%20professional%20camera%20(Canon%20EOS%20R5%2C%2085mm%20f%2F1.4%20lens)%2C%20shallow%20depth%20of%20field%2C%20commercial%20photography%20style%2C%20ultra-realistic%2C%20magazine%20quality%2C%208K%20resolution%2C%20perfect%20color%20grading%2C%20soft%20shadows%2C%20premium%20advertising%20aesthetic.%20--style%20commercial%20photography%20--quality%20ultra-high%20--resolution%208k%20--professional-lighting%20--magazine-quality%20--realistic%20--detailed?width=2048&height=2048&model=flux-pro&enhance=true&nologo=true&steps=50&guidance=9.5&seed=1349&quality=ultra"
+            },
+            {
+              "quality": "Professional (1536x1536)",
+              "url": "https://image.pollinations.ai/prompt/Create%20a%20professional%20commercial%20advertisement%20photograph%3A%20attractive%20diverse%20model%20wearing%20heather%20gray%20hoodie%20in%20fleece%20fabric%2C%20relaxed%20fit%20fit.%20Model%20sitting%20in%20upscale%20modern%20coffee%20shop%2C%20natural%20lighting%20from%20large%20windows%2C%20relaxed%20confident%20expression%2C%20hands%20holding%20warm%20coffee%20cup.%20Shot%20with%20professional%20camera%20(Canon%20EOS%20R5%2C%2085mm%20f%2F1.4%20lens)%2C%20shallow%20depth%20of%20field%2C%20commercial%20photography%20style%2C%20ultra-realistic%2C%20magazine%20quality%2C%208K%20resolution%2C%20perfect%20color%20grading%2C%20soft%20shadows%2C%20premium%20advertising%20aesthetic.%20--style%20commercial%20photography%20--quality%20ultra-high%20--resolution%208k%20--professional-lighting%20--magazine-quality%20--realistic%20--detailed?width=1536&height=1536&model=flux-dev&enhance=true&nologo=true&steps=45&guidance=9.0&seed=1350&quality=professional"
+            }
+          ],
+          "concept": "Premium Lifestyle",
+          "productUsed": "heather gray hoodie (fleece fabric, relaxed fit)"
+        },
+        "generatedWith": "High-Quality Alternative (Gemini not available)"
+      },
+      {
+        "concept": "Clean Studio",
+        "prompt": "Create a professional studio advertisement photograph: attractive model wearing heather gray hoodie in fleece fabric, relaxed fit fit. Pure white seamless background, three-point lighting setup with softbox key light and rim lighting, model in confident relaxed pose, hands in pockets or at sides. Shot with professional camera (Canon EOS R5, 85mm f/1.4 lens), perfect exposure, commercial photography, ultra-realistic, magazine quality, 8K resolution, clean minimalist aesthetic, focus on product details and fit.",
+        "result": {
+          "success": true,
+          "images": [
+            {
+              "quality": "Ultra High (2048x2048)",
+              "url": "https://image.pollinations.ai/prompt/Create%20a%20professional%20studio%20advertisement%20photograph%3A%20attractive%20model%20wearing%20heather%20gray%20hoodie%20in%20fleece%20fabric%2C%20relaxed%20fit%20fit.%20Pure%20white%20seamless%20background%2C%20three-point%20lighting%20setup%20with%20softbox%20key%20light%20and%20rim%20lighting%2C%20model%20in%20confident%20relaxed%20pose%2C%20hands%20in%20pockets%20or%20at%20sides.%20Shot%20with%20professional%20camera%20(Canon%20EOS%20R5%2C%2085mm%20f%2F1.4%20lens)%2C%20perfect%20exposure%2C%20commercial%20photography%2C%20ultra-realistic%2C%20magazine%20quality%2C%208K%20resolution%2C%20clean%20minimalist%20aesthetic%2C%20focus%20on%20product%20details%20and%20fit.%20--style%20commercial%20photography%20--quality%20ultra-high%20--resolution%208k%20--professional-lighting%20--magazine-quality%20--realistic%20--detailed?width=2048&height=2048&model=flux-pro&enhance=true&nologo=true&steps=50&guidance=9.5&seed=9069&quality=ultra"
+            },
+            {
+              "quality": "Professional (1536x1536)",
+              "url": "https://image.pollinations.ai/prompt/Create%20a%20professional%20studio%20advertisement%20photograph%3A%20attractive%20model%20wearing%20heather%20gray%20hoodie%20in%20fleece%20fabric%2C%20relaxed%20fit%20fit.%20Pure%20white%20seamless%20background%2C%20three-point%20lighting%20setup%20with%20softbox%20key%20light%20and%20rim%20lighting%2C%20model%20in%20confident%20relaxed%20pose%2C%20hands%20in%20pockets%20or%20at%20sides.%20Shot%20with%20professional%20camera%20(Canon%20EOS%20R5%2C%2085mm%20f%2F1.4%20lens)%2C%20perfect%20exposure%2C%20commercial%20photography%2C%20ultra-realistic%2C%20magazine%20quality%2C%208K%20resolution%2C%20clean%20minimalist%20aesthetic%2C%20focus%20on%20product%20details%20and%20fit.%20--style%20commercial%20photography%20--quality%20ultra-high%20--resolution%208k%20--professional-lighting%20--magazine-quality%20--realistic%20--detailed?width=1536&height=1536&model=flux-dev&enhance=true&nologo=true&steps=45&guidance=9.0&seed=9070&quality=professional"
+            }
+          ],
+          "concept": "Clean Studio",
+          "productUsed": "heather gray hoodie (fleece fabric, relaxed fit)"
+        },
+        "generatedWith": "High-Quality Alternative (Gemini not available)"
+      },
+      {
+        "concept": "Urban Street Style",
+        "prompt": "Create a professional urban lifestyle advertisement photograph: stylish model wearing heather gray hoodie in fleece fabric, relaxed fit fit. Modern city street background with brick walls or contemporary architecture, natural daylight, confident walking pose or leaning against wall. Shot with professional camera (Canon EOS R5, 85mm f/1.4 lens), street style photography, ultra-realistic, magazine quality, 8K resolution, vibrant colors, urban fashion aesthetic.",
+        "result": {
+          "success": true,
+          "images": [
+            {
+              "quality": "Ultra High (2048x2048)",
+              "url": "https://image.pollinations.ai/prompt/Create%20a%20professional%20urban%20lifestyle%20advertisement%20photograph%3A%20stylish%20model%20wearing%20heather%20gray%20hoodie%20in%20fleece%20fabric%2C%20relaxed%20fit%20fit.%20Modern%20city%20street%20background%20with%20brick%20walls%20or%20contemporary%20architecture%2C%20natural%20daylight%2C%20confident%20walking%20pose%20or%20leaning%20against%20wall.%20Shot%20with%20professional%20camera%20(Canon%20EOS%20R5%2C%2085mm%20f%2F1.4%20lens)%2C%20street%20style%20photography%2C%20ultra-realistic%2C%20magazine%20quality%2C%208K%20resolution%2C%20vibrant%20colors%2C%20urban%20fashion%20aesthetic.%20--style%20commercial%20photography%20--quality%20ultra-high%20--resolution%208k%20--professional-lighting%20--magazine-quality%20--realistic%20--detailed?width=2048&height=2048&model=flux-pro&enhance=true&nologo=true&steps=50&guidance=9.5&seed=1195&quality=ultra"
+            },
+            {
+              "quality": "Professional (1536x1536)",
+              "url": "https://image.pollinations.ai/prompt/Create%20a%20professional%20urban%20lifestyle%20advertisement%20photograph%3A%20stylish%20model%20wearing%20heather%20gray%20hoodie%20in%20fleece%20fabric%2C%20relaxed%20fit%20fit.%20Modern%20city%20street%20background%20with%20brick%20walls%20or%20contemporary%20architecture%2C%20natural%20daylight%2C%20confident%20walking%20pose%20or%20leaning%20against%20wall.%20Shot%20with%20professional%20camera%20(Canon%20EOS%20R5%2C%2085mm%20f%2F1.4%20lens)%2C%20street%20style%20photography%2C%20ultra-realistic%2C%20magazine%20quality%2C%208K%20resolution%2C%20vibrant%20colors%2C%20urban%20fashion%20aesthetic.%20--style%20commercial%20photography%20--quality%20ultra-high%20--resolution%208k%20--professional-lighting%20--magazine-quality%20--realistic%20--detailed?width=1536&height=1536&model=flux-dev&enhance=true&nologo=true&steps=45&guidance=9.0&seed=1196&quality=professional"
+            }
+          ],
+          "concept": "Urban Street Style",
+          "productUsed": "heather gray hoodie (fleece fabric, relaxed fit)"
+        },
+        "generatedWith": "High-Quality Alternative (Gemini not available)"
+      }
+    ],
+    "productDetails": {
+      "color": "heather gray",
+      "type": "hoodie",
+      "material": "fleece fabric",
+      "style": "relaxed fit"
+    }
+  },
+  "generatedWith": "Google Gemini Vision + High-Quality Image Generation",
+  "timestamp": "2025-10-27T16:03:46.769Z"
+}
