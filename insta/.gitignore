@@ -1,0 +1,6 @@
+# Add this file to prevent accidentally committing sensitive data
+.env
+node_modules/
+*.log
+.DS_Store
+test-image.jpg

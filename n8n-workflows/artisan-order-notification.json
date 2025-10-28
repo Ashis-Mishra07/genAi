@@ -1,0 +1,102 @@
+{
+  "name": "Artisan Order Notification Email",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "artisan-order-notification",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-artisan-notification",
+      "name": "Webhook - Artisan Notification",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "artisan-order-notification"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract notification data from webhook\nconst notificationData = $input.item.json.body;\n\n// Format products for email\nconst productsHtml = notificationData.products.map(product => `\n  <tr>\n    <td style=\"padding: 15px; border-bottom: 1px solid #e5e7eb;\">\n      <div style=\"display: flex; align-items: center;\">\n        ${product.imageUrl ? `<img src=\"${product.imageUrl}\" alt=\"${product.name}\" style=\"width: 70px; height: 70px; object-fit: cover; border-radius: 10px; margin-right: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);\">` : ''}\n        <div>\n          <div style=\"font-weight: 600; color: #1f2937; font-size: 16px; margin-bottom: 4px;\">${product.name}</div>\n          <div style=\"color: #6b7280; font-size: 14px;\">SKU: ${product.id.substring(0, 8)}</div>\n        </div>\n      </div>\n    </td>\n    <td style=\"padding: 15px; border-bottom: 1px solid #e5e7eb; text-align: center; font-size: 18px; font-weight: 600; color: #1f2937;\">${product.quantity}</td>\n    <td style=\"padding: 15px; border-bottom: 1px solid #e5e7eb; text-align: right;\">\n      <div style=\"font-weight: 700; color: #059669; font-size: 18px;\">₹${product.price.toFixed(2)}</div>\n      <div style=\"color: #6b7280; font-size: 13px; margin-top: 2px;\">per item</div>\n    </td>\n    <td style=\"padding: 15px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 700; color: #1f2937; font-size: 18px;\">₹${(product.price * product.quantity).toFixed(2)}</td>\n  </tr>\n`).join('');\n\n// Calculate total earnings for this artisan\nconst totalEarnings = notificationData.products.reduce((sum, p) => sum + (p.price * p.quantity), 0);\n\n// Format customer address\nconst address = notificationData.shippingAddress;\nconst addressHtml = `\n  ${address.fullName}<br>\n  ${address.addressLine1}<br>\n  ${address.addressLine2 ? address.addressLine2 + '<br>' : ''}\n  ${address.city}, ${address.state} ${address.postalCode}<br>\n  ${address.country}<br>\n  Phone: ${address.phone}\n`;\n\n// Create email HTML for artisan\nconst emailHtml = `\n<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>New Order - Your Products Sold!</title>\n</head>\n<body style=\"margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;\">\n  <div style=\"max-width: 650px; margin: 0 auto; background-color: #ffffff;\">\n    <!-- Header -->\n    <div style=\"background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 20px; text-align: center;\">\n      <div style=\"font-size: 48px; margin-bottom: 10px;\">🎊</div>\n      <h1 style=\"color: #ffffff; margin: 0; font-size: 32px; font-weight: 700;\">Congratulations!</h1>\n      <p style=\"color: #d1fae5; margin: 15px 0 0 0; font-size: 18px; font-weight: 500;\">Your products have been sold</p>\n    </div>\n    \n    <!-- Main Content -->\n    <div style=\"padding: 35px 25px;\">\n      <!-- Greeting -->\n      <div style=\"background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 12px; padding: 25px; margin-bottom: 30px; border-left: 5px solid #10b981;\">\n        <h2 style=\"color: #065f46; margin: 0 0 10px 0; font-size: 22px; font-weight: 700;\">Hi ${notificationData.artisanName},</h2>\n        <p style=\"color: #047857; line-height: 1.7; margin: 0; font-size: 16px;\">Great news! You've received a new order. A customer has purchased ${notificationData.products.length} of your beautiful ${notificationData.products.length === 1 ? 'product' : 'products'}.</p>\n      </div>\n      \n      <!-- Order Stats -->\n      <div style=\"display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 35px;\">\n        <div style=\"background-color: #fef3c7; border-radius: 12px; padding: 20px; text-align: center; border: 2px solid #fbbf24;\">\n          <div style=\"color: #92400e; font-size: 13px; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px;\">Order #</div>\n          <div style=\"color: #1f2937; font-size: 16px; font-weight: 700;\">${notificationData.orderNumber}</div>\n        </div>\n        <div style=\"background-color: #dbeafe; border-radius: 12px; padding: 20px; text-align: center; border: 2px solid #3b82f6;\">\n          <div style=\"color: #1e3a8a; font-size: 13px; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px;\">Items Sold</div>\n          <div style=\"color: #1f2937; font-size: 22px; font-weight: 700;\">${notificationData.products.reduce((sum, p) => sum + p.quantity, 0)}</div>\n        </div>\n        <div style=\"background-color: #d1fae5; border-radius: 12px; padding: 20px; text-align: center; border: 2px solid #10b981;\">\n          <div style=\"color: #065f46; font-size: 13px; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px;\">Earnings</div>\n          <div style=\"color: #059669; font-size: 22px; font-weight: 700;\">₹${totalEarnings.toFixed(2)}</div>\n        </div>\n      </div>\n      \n      <!-- Order Date -->\n      <div style=\"text-align: center; margin-bottom: 30px; color: #6b7280; font-size: 14px;\">\n        <span style=\"font-weight: 600;\">Order Date:</span> ${new Date(notificationData.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}\n      </div>\n      \n      <!-- Products Sold -->\n      <h3 style=\"color: #1f2937; margin: 0 0 20px 0; font-size: 20px; font-weight: 700; border-bottom: 3px solid #10b981; padding-bottom: 10px;\">Your Products in this Order</h3>\n      <table style=\"width: 100%; border-collapse: collapse; margin-bottom: 35px; border: 2px solid #e5e7eb; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);\">\n        <thead>\n          <tr style=\"background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);\">\n            <th style=\"padding: 15px; text-align: left; color: #374151; font-size: 13px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;\">Product</th>\n            <th style=\"padding: 15px; text-align: center; color: #374151; font-size: 13px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;\">Quantity</th>\n            <th style=\"padding: 15px; text-align: right; color: #374151; font-size: 13px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;\">Unit Price</th>\n            <th style=\"padding: 15px; text-align: right; color: #374151; font-size: 13px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;\">Total</th>\n          </tr>\n        </thead>\n        <tbody>\n          ${productsHtml}\n        </tbody>\n        <tfoot>\n          <tr style=\"background-color: #ecfdf5;\">\n            <td colspan=\"3\" style=\"padding: 20px; text-align: right; font-weight: 700; color: #065f46; font-size: 18px;\">Your Total Earnings:</td>\n            <td style=\"padding: 20px; text-align: right; font-weight: 900; color: #059669; font-size: 24px;\">₹${totalEarnings.toFixed(2)}</td>\n          </tr>\n        </tfoot>\n      </table>\n      \n      <!-- Customer Information -->\n      <div style=\"background-color: #f9fafb; border-radius: 12px; padding: 25px; margin-bottom: 30px; border: 1px solid #e5e7eb;\">\n        <h3 style=\"color: #1f2937; margin: 0 0 20px 0; font-size: 18px; font-weight: 700; display: flex; align-items: center;\">\n          <span style=\"margin-right: 10px;\">📦</span> Shipping Details\n        </h3>\n        <div style=\"display: grid; grid-template-columns: 1fr 1fr; gap: 25px;\">\n          <div>\n            <div style=\"color: #6b7280; font-size: 12px; text-transform: uppercase; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px;\">Customer Name</div>\n            <div style=\"color: #1f2937; font-size: 16px; font-weight: 600;\">${notificationData.customerName}</div>\n          </div>\n          <div>\n            <div style=\"color: #6b7280; font-size: 12px; text-transform: uppercase; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px;\">Payment Method</div>\n            <div style=\"color: #1f2937; font-size: 16px; font-weight: 600;\">${notificationData.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}</div>\n          </div>\n        </div>\n        <div style=\"margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;\">\n          <div style=\"color: #6b7280; font-size: 12px; text-transform: uppercase; font-weight: 600; margin-bottom: 10px; letter-spacing: 0.5px;\">Delivery Address</div>\n          <div style=\"color: #4b5563; line-height: 1.8; font-size: 15px;\">\n            ${addressHtml}\n          </div>\n        </div>\n      </div>\n      \n      <!-- Action Required -->\n      <div style=\"background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 25px; margin-bottom: 30px; border-left: 5px solid #f59e0b;\">\n        <h3 style=\"color: #92400e; margin: 0 0 12px 0; font-size: 18px; font-weight: 700; display: flex; align-items: center;\">\n          <span style=\"margin-right: 10px;\">⚡</span> Next Steps\n        </h3>\n        <ul style=\"color: #78350f; line-height: 1.8; margin: 0; padding-left: 20px; font-size: 15px;\">\n          <li style=\"margin-bottom: 8px;\">Prepare your products for shipment</li>\n          <li style=\"margin-bottom: 8px;\">Update the order status in your dashboard</li>\n          <li style=\"margin-bottom: 8px;\">Add tracking information once shipped</li>\n          <li>Ensure quality packaging for customer satisfaction</li>\n        </ul>\n      </div>\n      \n      <!-- Call to Action -->\n      <div style=\"text-align: center; margin: 35px 0;\">\n        <a href=\"${notificationData.dashboardUrl || 'https://yourwebsite.com/artisan/dashboard'}\" style=\"display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-weight: 700; font-size: 16px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); transition: transform 0.2s;\">View Order Details</a>\n      </div>\n      \n      <!-- Support Info -->\n      <div style=\"background-color: #ede9fe; border-radius: 12px; padding: 20px; text-align: center;\">\n        <p style=\"color: #5b21b6; margin: 0 0 8px 0; font-weight: 600; font-size: 15px;\">Questions about this order?</p>\n        <p style=\"color: #6b21a8; margin: 0; font-size: 14px;\">Contact support at <a href=\"mailto:artisan-support@yourwebsite.com\" style=\"color: #7c3aed; text-decoration: none; font-weight: 600;\">artisan-support@yourwebsite.com</a></p>\n      </div>\n    </div>\n    \n    <!-- Footer -->\n    <div style=\"background-color: #1f2937; padding: 30px 20px; text-align: center;\">\n      <p style=\"color: #9ca3af; margin: 0 0 8px 0; font-size: 15px; font-weight: 600;\">Keep creating amazing products! 🎨</p>\n      <p style=\"color: #6b7280; margin: 0; font-size: 12px;\">© 2025 Artisan Marketplace. All rights reserved.</p>\n    </div>\n  </div>\n</body>\n</html>\n`;\n\nreturn {\n  json: {\n    to: notificationData.artisanEmail,\n    subject: `🎉 New Order! ${notificationData.products.length} Product${notificationData.products.length > 1 ? 's' : ''} Sold - ₹${totalEarnings.toFixed(2)}`,\n    html: emailHtml,\n    notificationData: notificationData\n  }\n};"
+      },
+      "id": "format-artisan-email",
+      "name": "Format Artisan Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "message",
+        "operation": "send",
+        "toEmail": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "html",
+        "message": "={{ $json.html }}",
+        "options": {}
+      },
+      "id": "send-artisan-gmail",
+      "name": "Send Gmail to Artisan",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [650, 300],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: true, message: 'Artisan notification email sent', orderNumber: $node[\"Format Artisan Email\"].json.notificationData.orderNumber } }}"
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Webhook - Artisan Notification": {
+      "main": [
+        [
+          {
+            "node": "Format Artisan Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Artisan Email": {
+      "main": [
+        [
+          {
+            "node": "Send Gmail to Artisan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Gmail to Artisan": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

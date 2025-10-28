@@ -1,0 +1,477 @@
+{
+  "name": "Simple Telegram Artisan Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": ["message"]
+      },
+      "id": "telegram-trigger",
+      "name": "Telegram Bot Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1,
+      "position": [250, 400],
+      "webhookId": "simple-artisan-bot",
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-creds",
+          "name": "Artisan Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const message = $input.item.json.message;\nconst chatId = message.chat.id.toString();\nconst messageText = (message.text || '').trim().toLowerCase();\n\nreturn {\n  json: {\n    chatId: chatId,\n    messageText: messageText,\n    originalText: message.text || ''\n  }\n};"
+      },
+      "id": "extract-message",
+      "name": "Extract Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false
+          },
+          "conditions": [
+            {
+              "id": "is_auth",
+              "leftValue": "={{ $json.messageText }}",
+              "rightValue": "/auth",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ]
+        }
+      },
+      "id": "check-command-type",
+      "name": "Check Command Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [650, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const messageText = $input.item.json.messageText;\nconst email = messageText.replace('/auth', '').trim();\n\nreturn {\n  json: {\n    chatId: $input.item.json.chatId,\n    email: email\n  }\n};"
+      },
+      "id": "parse-auth",
+      "name": "Parse Auth Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, email, name, role\nFROM users \nWHERE email = '{{ $json.email }}'\n  AND role = 'ARTISAN'\n  AND is_active = true\nLIMIT 1;",
+        "options": {}
+      },
+      "id": "find-artisan",
+      "name": "Find Artisan in DB",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [1050, 300],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-db",
+          "name": "Artisan Database"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the array of results from PostgreSQL\nconst items = $input.all();\nconst chatId = $node[\"Parse Auth Email\"].json.chatId;\n\n// Check if we got any results\nif (!items || items.length === 0 || !items[0].json) {\n  return {\n    json: {\n      chatId: chatId,\n      message: \"❌ No artisan account found with email: \" + $node[\"Parse Auth Email\"].json.email + \"\\n\\nPlease check your email and try again.\",\n      found: false\n    }\n  };\n}\n\nconst artisan = items[0].json;\n\nreturn {\n  json: {\n    chatId: chatId,\n    artisanId: artisan.id,\n    artisanName: artisan.name,\n    artisanEmail: artisan.email,\n    found: true\n  }\n};"
+      },
+      "id": "check-artisan",
+      "name": "Check Artisan Found",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "found",
+              "leftValue": "={{ $json.found }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            },
+            {
+              "id": "not_found",
+              "leftValue": "={{ $json.found }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "false"
+              }
+            }
+          ]
+        }
+      },
+      "id": "route-auth-result",
+      "name": "Route Auth Result",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE users \nSET \n  telegram_chat_id = '{{ $json.chatId }}',\n  telegram_authorized = true,\n  telegram_authorized_at = NOW()\nWHERE id = '{{ $json.artisanId }}';",
+        "options": {}
+      },
+      "id": "authorize-artisan",
+      "name": "Authorize Artisan",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [1650, 250],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-db",
+          "name": "Artisan Database"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const artisanName = $input.item.json.artisanName;\n\nconst welcomeMessage = `✅ Welcome ${artisanName}! 🎨\n\nYour account is now authorized!\n\n📊 Try these commands:\n\n1️⃣ /earnings - Check total earnings\n2️⃣ /orders - Total orders count\n3️⃣ /products - Products sold\n4️⃣ /stats - Complete statistics\n\nWhat would you like to check?`;\n\nreturn {\n  json: {\n    chatId: $input.item.json.chatId,\n    artisanId: $input.item.json.artisanId,\n    artisanName: artisanName,\n    message: welcomeMessage\n  }\n};"
+      },
+      "id": "welcome-message",
+      "name": "Send Welcome Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1850, 250]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT telegram_chat_id, id, name\nFROM users \nWHERE telegram_chat_id = '{{ $json.chatId }}'\n  AND telegram_authorized = true\n  AND role = 'ARTISAN'\nLIMIT 1;",
+        "options": {}
+      },
+      "id": "check-authorized",
+      "name": "Check If Authorized",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [850, 500],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-db",
+          "name": "Artisan Database"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the array of results from PostgreSQL\nconst items = $input.all();\nconst chatId = $node[\"Extract Message\"].json.chatId;\nconst messageText = $node[\"Extract Message\"].json.messageText;\n\n// Check if user is authorized\nif (!items || items.length === 0 || !items[0].json) {\n  return {\n    json: {\n      chatId: chatId,\n      message: \"❌ Not authorized!\\n\\nPlease send: /auth your@email.com\",\n      authorized: false\n    }\n  };\n}\n\nconst user = items[0].json;\n\nreturn {\n  json: {\n    chatId: chatId,\n    artisanId: user.id,\n    artisanName: user.name,\n    messageText: messageText,\n    authorized: true\n  }\n};"
+      },
+      "id": "check-auth-status",
+      "name": "Check Auth Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 500]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "authorized",
+              "leftValue": "={{ $json.authorized }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            },
+            {
+              "id": "not_authorized",
+              "leftValue": "={{ $json.authorized }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "false"
+              }
+            }
+          ]
+        }
+      },
+      "id": "route-authorized",
+      "name": "Route Authorized",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1250, 500]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false
+          },
+          "conditions": [
+            {
+              "id": "earnings",
+              "leftValue": "={{ $json.messageText }}",
+              "rightValue": "/earnings",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "orders",
+              "leftValue": "={{ $json.messageText }}",
+              "rightValue": "/orders",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "products",
+              "leftValue": "={{ $json.messageText }}",
+              "rightValue": "/products",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "stats",
+              "leftValue": "={{ $json.messageText }}",
+              "rightValue": "/stats",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        }
+      },
+      "id": "route-commands",
+      "name": "Route Commands",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1450, 450]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  COALESCE(SUM(o.total), 0) as total_earnings\nFROM orders o\nJOIN order_items oi ON o.id = oi.order_id\nJOIN products p ON oi.product_id = p.id\nWHERE p.user_id = '{{ $json.artisanId }}';",
+        "options": {}
+      },
+      "id": "get-earnings",
+      "name": "Get Total Earnings",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [1650, 350],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-db",
+          "name": "Artisan Database"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  COUNT(DISTINCT o.id) as total_orders\nFROM orders o\nJOIN order_items oi ON o.id = oi.order_id\nJOIN products p ON oi.product_id = p.id\nWHERE p.user_id = '{{ $json.artisanId }}';",
+        "options": {}
+      },
+      "id": "get-orders-count",
+      "name": "Get Orders Count",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [1650, 450],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-db",
+          "name": "Artisan Database"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  COALESCE(SUM(oi.quantity), 0) as total_products_sold\nFROM order_items oi\nJOIN products p ON oi.product_id = p.id\nWHERE p.user_id = '{{ $json.artisanId }}';",
+        "options": {}
+      },
+      "id": "get-products-sold",
+      "name": "Get Products Sold",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [1650, 550],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-db",
+          "name": "Artisan Database"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  COALESCE(SUM(o.total), 0) as total_earnings,\n  COUNT(DISTINCT o.id) as total_orders,\n  COALESCE(SUM(oi.quantity), 0) as total_products_sold,\n  COALESCE(AVG(o.total), 0) as avg_order_value\nFROM orders o\nJOIN order_items oi ON o.id = oi.order_id\nJOIN products p ON oi.product_id = p.id\nWHERE p.user_id = '{{ $json.artisanId }}';",
+        "options": {}
+      },
+      "id": "get-all-stats",
+      "name": "Get All Stats",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [1650, 650],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-db",
+          "name": "Artisan Database"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get data from PostgreSQL result\nconst items = $input.all();\nconst data = (items && items.length > 0) ? items[0].json : {};\nconst artisanName = $node[\"Route Commands\"].json.artisanName;\n\nconst message = `💰 Total Earnings\\n\\n${artisanName}, your total earnings:\\n\\n₹${parseFloat(data.total_earnings || 0).toFixed(2)}\\n\\n💡 Try /stats for complete overview!`;\n\nreturn {\n  json: {\n    chatId: $node[\"Route Commands\"].json.chatId,\n    message: message\n  }\n};"
+      },
+      "id": "format-earnings",
+      "name": "Format Earnings",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1850, 350]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get data from PostgreSQL result\nconst items = $input.all();\nconst data = (items && items.length > 0) ? items[0].json : {};\nconst artisanName = $node[\"Route Commands\"].json.artisanName;\n\nconst message = `📦 Total Orders\\n\\n${artisanName}, your order count:\\n\\n${data.total_orders || 0} orders\\n\\n💡 Try /earnings to see revenue!`;\n\nreturn {\n  json: {\n    chatId: $node[\"Route Commands\"].json.chatId,\n    message: message\n  }\n};"
+      },
+      "id": "format-orders",
+      "name": "Format Orders",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1850, 450]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get data from PostgreSQL result\nconst items = $input.all();\nconst data = (items && items.length > 0) ? items[0].json : {};\nconst artisanName = $node[\"Route Commands\"].json.artisanName;\n\nconst message = `🛍️ Products Sold\\n\\n${artisanName}, total products sold:\\n\\n${data.total_products_sold || 0} products\\n\\n💡 Try /stats for full details!`;\n\nreturn {\n  json: {\n    chatId: $node[\"Route Commands\"].json.chatId,\n    message: message\n  }\n};"
+      },
+      "id": "format-products",
+      "name": "Format Products",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1850, 550]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get data from PostgreSQL result\nconst items = $input.all();\nconst data = (items && items.length > 0) ? items[0].json : {};\nconst artisanName = $node[\"Route Commands\"].json.artisanName;\n\nconst message = `📊 Complete Statistics\\n\\n${artisanName}, here's your business overview:\\n\\n💰 Total Earnings: ₹${parseFloat(data.total_earnings || 0).toFixed(2)}\\n📦 Total Orders: ${data.total_orders || 0}\\n🛍️ Products Sold: ${data.total_products_sold || 0}\\n📈 Avg Order Value: ₹${parseFloat(data.avg_order_value || 0).toFixed(2)}\\n\\n🎨 Keep creating amazing products!`;\n\nreturn {\n  json: {\n    chatId: $node[\"Route Commands\"].json.chatId,\n    message: message\n  }\n};"
+      },
+      "id": "format-stats",
+      "name": "Format Complete Stats",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1850, 650]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {}
+      },
+      "id": "send-response",
+      "name": "Send Telegram Response",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [2050, 450],
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-creds",
+          "name": "Artisan Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Bot Trigger": {
+      "main": [[{"node": "Extract Message", "type": "main", "index": 0}]]
+    },
+    "Extract Message": {
+      "main": [[{"node": "Check Command Type", "type": "main", "index": 0}]]
+    },
+    "Check Command Type": {
+      "main": [
+        [{"node": "Parse Auth Email", "type": "main", "index": 0}],
+        [{"node": "Check If Authorized", "type": "main", "index": 0}]
+      ]
+    },
+    "Parse Auth Email": {
+      "main": [[{"node": "Find Artisan in DB", "type": "main", "index": 0}]]
+    },
+    "Find Artisan in DB": {
+      "main": [[{"node": "Check Artisan Found", "type": "main", "index": 0}]]
+    },
+    "Check Artisan Found": {
+      "main": [[{"node": "Route Auth Result", "type": "main", "index": 0}]]
+    },
+    "Route Auth Result": {
+      "main": [
+        [{"node": "Authorize Artisan", "type": "main", "index": 0}],
+        [{"node": "Send Telegram Response", "type": "main", "index": 0}]
+      ]
+    },
+    "Authorize Artisan": {
+      "main": [[{"node": "Send Welcome Message", "type": "main", "index": 0}]]
+    },
+    "Send Welcome Message": {
+      "main": [[{"node": "Send Telegram Response", "type": "main", "index": 0}]]
+    },
+    "Check If Authorized": {
+      "main": [[{"node": "Check Auth Status", "type": "main", "index": 0}]]
+    },
+    "Check Auth Status": {
+      "main": [[{"node": "Route Authorized", "type": "main", "index": 0}]]
+    },
+    "Route Authorized": {
+      "main": [
+        [{"node": "Route Commands", "type": "main", "index": 0}],
+        [{"node": "Send Telegram Response", "type": "main", "index": 0}]
+      ]
+    },
+    "Route Commands": {
+      "main": [
+        [{"node": "Get Total Earnings", "type": "main", "index": 0}],
+        [{"node": "Get Orders Count", "type": "main", "index": 0}],
+        [{"node": "Get Products Sold", "type": "main", "index": 0}],
+        [{"node": "Get All Stats", "type": "main", "index": 0}]
+      ]
+    },
+    "Get Total Earnings": {
+      "main": [[{"node": "Format Earnings", "type": "main", "index": 0}]]
+    },
+    "Get Orders Count": {
+      "main": [[{"node": "Format Orders", "type": "main", "index": 0}]]
+    },
+    "Get Products Sold": {
+      "main": [[{"node": "Format Products", "type": "main", "index": 0}]]
+    },
+    "Get All Stats": {
+      "main": [[{"node": "Format Complete Stats", "type": "main", "index": 0}]]
+    },
+    "Format Earnings": {
+      "main": [[{"node": "Send Telegram Response", "type": "main", "index": 0}]]
+    },
+    "Format Orders": {
+      "main": [[{"node": "Send Telegram Response", "type": "main", "index": 0}]]
+    },
+    "Format Products": {
+      "main": [[{"node": "Send Telegram Response", "type": "main", "index": 0}]]
+    },
+    "Format Complete Stats": {
+      "main": [[{"node": "Send Telegram Response", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

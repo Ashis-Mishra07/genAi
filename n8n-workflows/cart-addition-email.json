@@ -1,0 +1,102 @@
+{
+  "name": "Cart Addition Email Notification",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cart-addition-notification",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-cart-addition",
+      "name": "Webhook - Cart Addition",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "cart-addition-notification"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract cart data from webhook\nconst cartData = $input.item.json.body;\n\n// Format product details\nconst productHtml = `\n  <div style=\"background-color: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 25px;\">\n    <div style=\"display: flex; align-items: center; margin-bottom: 20px;\">\n      ${cartData.product.imageUrl ? `<img src=\"${cartData.product.imageUrl}\" alt=\"${cartData.product.name}\" style=\"width: 120px; height: 120px; object-fit: cover; border-radius: 12px; margin-right: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);\">` : ''}\n      <div style=\"flex: 1;\">\n        <h3 style=\"color: #1f2937; margin: 0 0 8px 0; font-size: 22px; font-weight: 700;\">${cartData.product.name}</h3>\n        <div style=\"color: #6b7280; font-size: 14px; margin-bottom: 8px;\">by ${cartData.product.artisanName || 'Artisan'}</div>\n        <div style=\"color: #10b981; font-size: 24px; font-weight: 700; margin-top: 10px;\">₹${cartData.product.price.toFixed(2)}</div>\n      </div>\n    </div>\n    <div style=\"background-color: #f9fafb; border-radius: 10px; padding: 15px;\">\n      <div style=\"display: flex; justify-content: space-between; align-items: center;\">\n        <span style=\"color: #6b7280; font-weight: 600;\">Quantity:</span>\n        <span style=\"color: #1f2937; font-weight: 700; font-size: 20px;\">${cartData.quantity}</span>\n      </div>\n      <div style=\"display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 2px solid #e5e7eb;\">\n        <span style=\"color: #6b7280; font-weight: 600; font-size: 16px;\">Subtotal:</span>\n        <span style=\"color: #10b981; font-weight: 900; font-size: 24px;\">₹${(cartData.product.price * cartData.quantity).toFixed(2)}</span>\n      </div>\n    </div>\n  </div>\n`;\n\n// Create email HTML\nconst emailHtml = `\n<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Item Added to Cart</title>\n</head>\n<body style=\"margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;\">\n  <div style=\"max-width: 600px; margin: 0 auto; background-color: #ffffff;\">\n    <!-- Header -->\n    <div style=\"background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); padding: 40px 20px; text-align: center;\">\n      <div style=\"font-size: 56px; margin-bottom: 10px;\">🛒</div>\n      <h1 style=\"color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;\">Added to Your Cart!</h1>\n      <p style=\"color: #e0e7ff; margin: 10px 0 0 0; font-size: 16px;\">Ready to checkout?</p>\n    </div>\n    \n    <!-- Main Content -->\n    <div style=\"padding: 30px 20px;\">\n      <!-- Greeting -->\n      <div style=\"background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 20px; margin-bottom: 25px; border-left: 5px solid #f59e0b;\">\n        <h2 style=\"color: #92400e; margin: 0 0 8px 0; font-size: 20px; font-weight: 700;\">Hi ${cartData.customerName},</h2>\n        <p style=\"color: #78350f; line-height: 1.6; margin: 0; font-size: 15px;\">Great choice! You've added a wonderful handcrafted item to your cart.</p>\n      </div>\n      \n      <!-- Product Details -->\n      <h3 style=\"color: #1f2937; margin: 0 0 20px 0; font-size: 20px; font-weight: 700;\">Your Item</h3>\n      ${productHtml}\n      \n      <!-- Cart Summary -->\n      <div style=\"background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%); border-radius: 12px; padding: 25px; margin-bottom: 25px;\">\n        <h3 style=\"color: #5b21b6; margin: 0 0 15px 0; font-size: 18px; font-weight: 700; text-align: center;\">🎁 Cart Summary</h3>\n        <div style=\"background-color: #ffffff; border-radius: 10px; padding: 20px;\">\n          <div style=\"display: flex; justify-content: space-between; margin-bottom: 12px;\">\n            <span style=\"color: #6b7280; font-size: 15px;\">Total Items:</span>\n            <span style=\"color: #1f2937; font-weight: 700; font-size: 18px;\">${cartData.cartStats.totalItems}</span>\n          </div>\n          <div style=\"border-top: 2px solid #e5e7eb; margin: 15px 0; padding-top: 15px; display: flex; justify-content: space-between;\">\n            <span style=\"color: #5b21b6; font-size: 18px; font-weight: 700;\">Cart Total:</span>\n            <span style=\"color: #8b5cf6; font-size: 28px; font-weight: 900;\">₹${cartData.cartStats.totalAmount.toFixed(2)}</span>\n          </div>\n        </div>\n      </div>\n      \n      <!-- Call to Action -->\n      <div style=\"text-align: center; margin: 30px 0;\">\n        <a href=\"${cartData.cartUrl || 'https://yourwebsite.com/customer/cart'}\" style=\"display: inline-block; background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-weight: 700; font-size: 18px; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4); margin-bottom: 15px;\">View Cart & Checkout</a>\n        <div>\n          <a href=\"${cartData.continueShoppingUrl || 'https://yourwebsite.com/products'}\" style=\"color: #8b5cf6; text-decoration: none; font-weight: 600; font-size: 15px;\">← Continue Shopping</a>\n        </div>\n      </div>\n      \n      <!-- Features -->\n      <div style=\"background-color: #f9fafb; border-radius: 12px; padding: 25px; margin-bottom: 25px;\">\n        <div style=\"display: grid; grid-template-columns: 1fr 1fr; gap: 20px;\">\n          <div style=\"text-align: center;\">\n            <div style=\"font-size: 32px; margin-bottom: 8px;\">🚚</div>\n            <div style=\"color: #1f2937; font-weight: 600; font-size: 14px;\">Free Shipping</div>\n            <div style=\"color: #6b7280; font-size: 12px;\">On orders over ₹500</div>\n          </div>\n          <div style=\"text-align: center;\">\n            <div style=\"font-size: 32px; margin-bottom: 8px;\">🔒</div>\n            <div style=\"color: #1f2937; font-weight: 600; font-size: 14px;\">Secure Checkout</div>\n            <div style=\"color: #6b7280; font-size: 12px;\">100% safe payment</div>\n          </div>\n          <div style=\"text-align: center;\">\n            <div style=\"font-size: 32px; margin-bottom: 8px;\">🎨</div>\n            <div style=\"color: #1f2937; font-weight: 600; font-size: 14px;\">Handcrafted</div>\n            <div style=\"color: #6b7280; font-size: 12px;\">By talented artisans</div>\n          </div>\n          <div style=\"text-align: center;\">\n            <div style=\"font-size: 32px; margin-bottom: 8px;\">↩️</div>\n            <div style=\"color: #1f2937; font-weight: 600; font-size: 14px;\">Easy Returns</div>\n            <div style=\"color: #6b7280; font-size: 12px;\">7-day return policy</div>\n          </div>\n        </div>\n      </div>\n      \n      <!-- Recommendations -->\n      <div style=\"background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 20px; text-align: center;\">\n        <div style=\"font-size: 32px; margin-bottom: 10px;\">💡</div>\n        <p style=\"color: #92400e; margin: 0; font-weight: 600; font-size: 15px;\">Don't forget to check out similar products!</p>\n        <p style=\"color: #78350f; margin: 8px 0 0 0; font-size: 13px;\">Customers also loved items from the same category</p>\n      </div>\n    </div>\n    \n    <!-- Footer -->\n    <div style=\"background-color: #1f2937; padding: 30px 20px; text-align: center;\">\n      <p style=\"color: #9ca3af; margin: 0 0 10px 0; font-size: 14px;\">Questions? We're here to help!</p>\n      <p style=\"color: #6b7280; margin: 0 0 15px 0; font-size: 12px;\">\n        Email: <a href=\"mailto:support@yourwebsite.com\" style=\"color: #8b5cf6; text-decoration: none;\">support@yourwebsite.com</a>\n      </p>\n      <p style=\"color: #6b7280; margin: 0; font-size: 12px;\">© 2025 Artisan Marketplace. All rights reserved.</p>\n    </div>\n  </div>\n</body>\n</html>\n`;\n\nreturn {\n  json: {\n    to: cartData.customerEmail,\n    subject: `🛒 ${cartData.product.name} added to your cart!`,\n    html: emailHtml,\n    cartData: cartData\n  }\n};"
+      },
+      "id": "format-cart-email",
+      "name": "Format Cart Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "message",
+        "operation": "send",
+        "toEmail": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "html",
+        "message": "={{ $json.html }}",
+        "options": {}
+      },
+      "id": "send-cart-gmail",
+      "name": "Send Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [650, 300],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: true, message: 'Cart notification email sent' } }}"
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Webhook - Cart Addition": {
+      "main": [
+        [
+          {
+            "node": "Format Cart Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Cart Email": {
+      "main": [
+        [
+          {
+            "node": "Send Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Gmail": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

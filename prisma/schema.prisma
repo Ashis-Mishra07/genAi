@@ -1,0 +1,363 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = "postgresql://neondb_owner:npg_5hADVX3ZEziP@ep-small-firefly-ahuvp52g-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+  directUrl = "postgresql://neondb_owner:npg_5hADVX3ZEziP@ep-small-firefly-ahuvp52g-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model admin_messages {
+  id              Int       @id @default(autoincrement())
+  sender_id       String    @db.VarChar(255)
+  sender_type     String    @db.VarChar(20)
+  recipient_id    String    @db.VarChar(255)
+  recipient_type  String    @db.VarChar(20)
+  message         String
+  attachment_url  String?
+  attachment_name String?   @db.VarChar(255)
+  created_at      DateTime? @default(now()) @db.Timestamp(6)
+  is_read         Boolean?  @default(false)
+  updated_at      DateTime? @default(now()) @db.Timestamp(6)
+
+  @@index([created_at], map: "idx_admin_messages_created_at")
+  @@index([is_read], map: "idx_admin_messages_is_read")
+  @@index([recipient_id, recipient_type], map: "idx_admin_messages_recipient")
+  @@index([sender_id, sender_type], map: "idx_admin_messages_sender")
+}
+
+model admin_passcodes {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  passcode   String    @db.VarChar(6)
+  is_active  Boolean?  @default(true)
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  expires_at DateTime? @db.Timestamptz(6)
+  used_count Int?      @default(0)
+  max_uses   Int?      @default(100)
+}
+
+model cart_items {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String?   @db.Uuid
+  product_id String?   @db.Uuid
+  quantity   Int?      @default(1)
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
+  products   products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users      users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, product_id])
+  @@index([user_id], map: "idx_cart_items_user_id")
+}
+
+model chat_messages {
+  id                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  room_id                String?                  @db.Uuid
+  sender_id              String?                  @db.Uuid
+  message_type           String?                  @default("TEXT") @db.VarChar(20)
+  content                String?
+  image_url              String?
+  status                 String?                  @default("SENT") @db.VarChar(20)
+  metadata               Json?
+  created_at             DateTime?                @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime?                @default(now()) @db.Timestamptz(6)
+  chat_rooms             chat_rooms?              @relation(fields: [room_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users                  users?                   @relation(fields: [sender_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  chat_read_status       chat_read_status[]
+  image_processing_queue image_processing_queue[]
+  message_read_status    message_read_status[]
+
+  @@index([room_id], map: "idx_chat_messages_room_id")
+}
+
+model chat_read_status {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  message_id    String?        @db.Uuid
+  user_id       String?        @db.Uuid
+  read_at       DateTime?      @default(now()) @db.Timestamptz(6)
+  chat_messages chat_messages? @relation(fields: [message_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users         users?         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([message_id, user_id])
+  @@index([user_id], map: "idx_chat_read_status_user")
+}
+
+model chat_room_participants {
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  room_id    String?     @db.Uuid
+  user_id    String?     @db.Uuid
+  role       String?     @default("MEMBER") @db.VarChar(20)
+  joined_at  DateTime?   @default(now()) @db.Timestamptz(6)
+  chat_rooms chat_rooms? @relation(fields: [room_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users      users?      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([room_id, user_id])
+}
+
+model chat_rooms {
+  id                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                   String?                  @db.VarChar(255)
+  type                   String?                  @default("DIRECT") @db.VarChar(20)
+  created_at             DateTime?                @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime?                @default(now()) @db.Timestamptz(6)
+  chat_messages          chat_messages[]
+  chat_room_participants chat_room_participants[]
+}
+
+model image_processing_queue {
+  id                      String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  message_id              String?        @db.Uuid
+  original_image_url      String
+  enhanced_image_url      String?
+  poster_url              String?
+  instagram_post_id       String?
+  status                  String?        @default("PENDING") @db.VarChar(20)
+  processing_started_at   DateTime?      @db.Timestamptz(6)
+  processing_completed_at DateTime?      @db.Timestamptz(6)
+  error_message           String?
+  created_at              DateTime?      @default(now()) @db.Timestamptz(6)
+  chat_messages           chat_messages? @relation(fields: [message_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([status], map: "idx_image_processing_status")
+}
+
+model message_read_status {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  message_id    String?        @db.Uuid
+  user_id       String?        @db.Uuid
+  read_at       DateTime?      @default(now()) @db.Timestamptz(6)
+  chat_messages chat_messages? @relation(fields: [message_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users         users?         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([message_id, user_id])
+  @@index([user_id], map: "idx_message_read_status_user_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model notifications {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String?   @db.Uuid
+  type       String    @db.VarChar(50)
+  title      String    @db.VarChar(255)
+  message    String
+  data       Json?     @default("{}")
+  is_read    Boolean?  @default(false)
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  users      users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_notifications_user_id")
+}
+
+model order_items {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id     String?   @db.Uuid
+  product_id   String?   @db.Uuid
+  quantity     Int
+  price        Decimal   @db.Decimal(10, 2)
+  name         String?   @db.VarChar(255)
+  artisan_name String?   @db.VarChar(255)
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  orders       orders?   @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  products     products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model orders {
+  id                              String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_number                    String              @unique @db.VarChar(50)
+  status                          String?             @default("PENDING") @db.VarChar(20)
+  total                           Decimal             @db.Decimal(12, 2)
+  currency                        String?             @default("INR") @db.VarChar(10)
+  user_id                         String?             @db.Uuid
+  customer_id                     String?             @db.Uuid
+  shipping_address                Json?
+  payment_method                  String?             @default("cod") @db.VarChar(20)
+  created_at                      DateTime?           @default(now()) @db.Timestamptz(6)
+  updated_at                      DateTime?           @default(now()) @db.Timestamptz(6)
+  payment_status                  String?             @default("pending") @db.VarChar(20)
+  transaction_id                  String?             @db.VarChar(255)
+  payment_details                 Json?
+  tracking_number                 String?             @db.VarChar(100)
+  carrier                         String?             @default("DHL") @db.VarChar(50)
+  shipment_status                 String?             @default("pending") @db.VarChar(50)
+  shipped_at                      DateTime?           @db.Timestamptz(6)
+  estimated_delivery              DateTime?           @db.Timestamptz(6)
+  actual_delivery                 DateTime?           @db.Timestamptz(6)
+  label_url                       String?
+  tracking_events                 Json?               @default("[]") @db.Json
+  delivery_instructions           String?
+  signature_required              Boolean?            @default(false)
+  delivery_location               String?
+  shipping_latitude               Float?
+  shipping_longitude              Float?
+  location_geocoded_at            DateTime?           @db.Timestamptz(6)
+  delivery_attempts               delivery_attempts[]
+  order_items                     order_items[]
+  users_orders_customer_idTousers users?              @relation("orders_customer_idTousers", fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_orders_user_idTousers     users?              @relation("orders_user_idTousers", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  shipment_tracking               shipment_tracking[]
+
+  @@index([user_id], map: "idx_orders_user_id")
+  @@index([carrier], map: "idx_orders_carrier")
+  @@index([shipment_status], map: "idx_orders_shipment_status")
+}
+
+model product_inquiries {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  product_id  String?   @db.Uuid
+  customer_id String?   @db.Uuid
+  buyer_name  String?   @db.VarChar(255)
+  buyer_email String?   @db.VarChar(255)
+  buyer_phone String?   @db.VarChar(50)
+  message     String
+  source      String?   @default("WEBSITE") @db.VarChar(20)
+  status      String?   @default("NEW") @db.VarChar(20)
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime? @default(now()) @db.Timestamptz(6)
+  products    products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model products {
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                String              @db.VarChar(255)
+  description         String?
+  story               String?
+  price               Decimal             @db.Decimal(10, 2)
+  currency            String?             @default("INR") @db.VarChar(10)
+  image_url           String?
+  poster_url          String?
+  video_url           String?
+  video_status        String?             @default("NOT_GENERATED") @db.VarChar(20)
+  video_generation_id String?
+  category            String?             @db.VarChar(100)
+  tags                String[]
+  is_active           Boolean?            @default(true)
+  user_id             String?             @db.Uuid
+  created_at          DateTime?           @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime?           @default(now()) @db.Timestamptz(6)
+  cart_items          cart_items[]
+  order_items         order_items[]
+  product_inquiries   product_inquiries[]
+  users               users?              @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_products_user_id")
+}
+
+model refresh_tokens {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id     String?   @db.Uuid
+  token_hash  String    @db.VarChar(255)
+  expires_at  DateTime  @db.Timestamptz(6)
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  revoked_at  DateTime? @db.Timestamptz(6)
+  device_info String?
+  users       users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_refresh_tokens_user")
+}
+
+model users {
+  id                               String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                            String                   @unique @db.VarChar(255)
+  name                             String?                  @db.VarChar(255)
+  phone                            String?                  @db.VarChar(50)
+  specialty                        String?                  @db.VarChar(255)
+  location                         String?                  @db.VarChar(255)
+  avatar                           String?
+  status                           String?                  @default("OFFLINE") @db.VarChar(20)
+  last_seen                        DateTime?                @default(now()) @db.Timestamptz(6)
+  language                         String?                  @default("en") @db.VarChar(10)
+  created_at                       DateTime?                @default(now()) @db.Timestamptz(6)
+  updated_at                       DateTime?                @default(now()) @db.Timestamptz(6)
+  password                         String?                  @db.VarChar(255)
+  role                             String?                  @default("CUSTOMER") @db.VarChar(20)
+  is_active                        Boolean?                 @default(true)
+  last_login_at                    DateTime?                @db.Timestamptz(6)
+  bio                              String?
+  telegram_chat_id                 String?                  @unique @db.VarChar(50)
+  telegram_username                String?                  @db.VarChar(100)
+  telegram_authorized              Boolean?                 @default(false)
+  telegram_authorized_at           DateTime?                @db.Timestamptz(6)
+  cart_items                       cart_items[]
+  chat_messages                    chat_messages[]
+  chat_read_status                 chat_read_status[]
+  chat_room_participants           chat_room_participants[]
+  message_read_status              message_read_status[]
+  notifications                    notifications[]
+  orders_orders_customer_idTousers orders[]                 @relation("orders_customer_idTousers")
+  orders_orders_user_idTousers     orders[]                 @relation("orders_user_idTousers")
+  products                         products[]
+  refresh_tokens                   refresh_tokens[]
+
+  @@index([email], map: "idx_users_email")
+  @@index([telegram_chat_id], map: "idx_users_telegram_chat_id")
+}
+
+model telegram_auth_requests {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  telegram_chat_id  String    @db.VarChar(50)
+  telegram_username String?   @db.VarChar(100)
+  email             String?   @db.VarChar(255)
+  phone             String?   @db.VarChar(50)
+  verification_code String    @db.VarChar(10)
+  expires_at        DateTime  @default(dbgenerated("(now() + '00:10:00'::interval)")) @db.Timestamptz(6)
+  used              Boolean?  @default(false)
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([telegram_chat_id], map: "idx_telegram_auth_requests_chat_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model delivery_attempts {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id          String    @db.Uuid
+  tracking_number   String    @db.VarChar(100)
+  attempt_number    Int       @default(1)
+  attempted_at      DateTime  @db.Timestamptz(6)
+  status            String    @db.VarChar(50)
+  reason            String?
+  delivery_location String?
+  recipient_name    String?   @db.VarChar(255)
+  signature_url     String?
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+  orders            orders    @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([order_id], map: "idx_delivery_attempts_order_id")
+  @@index([status], map: "idx_delivery_attempts_status")
+  @@index([tracking_number], map: "idx_delivery_attempts_tracking")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model shipment_tracking {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id          String    @db.Uuid
+  tracking_number   String    @db.VarChar(100)
+  carrier           String    @default("DHL") @db.VarChar(50)
+  event_type        String    @db.VarChar(50)
+  event_status      String    @db.VarChar(50)
+  event_description String?
+  event_location    String?
+  event_datetime    DateTime  @db.Timestamptz(6)
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+  raw_data          Json?     @db.Json
+  orders            orders    @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_shipment_tracking_order")
+
+  @@index([carrier, event_status], map: "idx_shipment_tracking_carrier_status")
+  @@index([event_datetime], map: "idx_shipment_tracking_event_datetime")
+  @@index([tracking_number], map: "idx_shipment_tracking_number")
+  @@index([order_id], map: "idx_shipment_tracking_order_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model shipping_carriers {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                  String    @unique @db.VarChar(100)
+  code                  String    @unique @db.VarChar(20)
+  api_endpoint          String?
+  tracking_url_template String?
+  is_active             Boolean?  @default(true)
+  configuration         Json?     @default("{}") @db.Json
+  created_at            DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime? @default(now()) @db.Timestamptz(6)
+}

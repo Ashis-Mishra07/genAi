@@ -1,0 +1,339 @@
+{
+  "name": "Simple Product Video Generation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-video",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "simple-video-gen"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract product data from webhook\nconst productData = $input.item.json.body;\n\nconst productId = productData.productId;\nconst productName = productData.productName;\nconst productDescription = productData.description;\nconst productImage = productData.imageUrl;\nconst productCategory = productData.category;\nconst callbackUrl = productData.callbackUrl;\n\n// Generate video prompt based on product data\nlet videoPrompt = '';\n\nif (productCategory === 'Textiles & Fabrics' || productCategory === 'Traditional Wear') {\n  videoPrompt = `Create a professional product demonstration video showing a person wearing and showcasing ${productName}. The video should:\n- Show a diverse model elegantly wearing the product\n- Capture the fabric texture, colors, and draping\n- Include close-up shots of intricate details\n- Show the person moving naturally to demonstrate comfort and fit\n- Professional lighting and aesthetic backgrounds\n- Duration: 5-7 seconds\n- Style: Professional product photography aesthetic\n- No text overlays\nProduct details: ${productDescription}`;\n} else if (productCategory === 'Jewelry & Accessories') {\n  videoPrompt = `Create a professional product video showcasing ${productName} being worn by a model. The video should:\n- Show hands/model wearing the jewelry piece\n- Capture light reflections and material quality\n- Include multiple angles showing craftsmanship\n- Elegant hand movements to showcase the piece\n- Professional studio lighting\n- Duration: 5-7 seconds\n- Style: Luxury jewelry advertising\n- No text overlays\nProduct details: ${productDescription}`;\n} else if (productCategory === 'Pottery & Ceramics' || productCategory === 'Home Decor') {\n  videoPrompt = `Create a lifestyle product video showing ${productName} in use. The video should:\n- Show a person using or interacting with the product in a home setting\n- Demonstrate the product's functionality and aesthetic appeal\n- Capture texture, colors, and craftsmanship details\n- Natural, everyday usage scenarios\n- Warm, inviting home environment\n- Duration: 5-7 seconds\n- Style: Lifestyle home product photography\n- No text overlays\nProduct details: ${productDescription}`;\n} else if (productCategory === 'Wood Crafts' || productCategory === 'Metal Work' || productCategory === 'Sculptures') {\n  videoPrompt = `Create an artistic product showcase video for ${productName}. The video should:\n- Show a person examining and appreciating the craftsmanship\n- Hands gently touching and rotating the product\n- Close-ups of intricate details and textures\n- Professional studio or gallery-like setting\n- Emphasis on artisanal quality\n- Duration: 5-7 seconds\n- Style: Art gallery product showcase\n- No text overlays\nProduct details: ${productDescription}`;\n} else if (productCategory === 'Paintings & Art') {\n  videoPrompt = `Create an art appreciation video featuring ${productName}. The video should:\n- Show a person viewing and admiring the artwork\n- Slow pan across the artwork capturing details\n- Professional gallery or home setting\n- Natural reactions of appreciation\n- Proper lighting to capture colors and textures\n- Duration: 5-7 seconds\n- Style: Art gallery presentation\n- No text overlays\nProduct details: ${productDescription}`;\n} else {\n  videoPrompt = `Create a professional product demonstration video for ${productName}. The video should:\n- Show a person interacting naturally with the product\n- Demonstrate the product's features and quality\n- Include close-up shots of key details\n- Professional setting appropriate for the product\n- Natural, authentic usage\n- Duration: 5-7 seconds\n- Style: Professional e-commerce product video\n- No text overlays\nProduct details: ${productDescription}`;\n}\n\nreturn {\n  json: {\n    productId: productId,\n    productName: productName,\n    productImage: productImage,\n    videoPrompt: videoPrompt,\n    callbackUrl: callbackUrl,\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "id": "process-product-data",
+      "name": "Process Product Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "projectId": "={{ $env.GCP_PROJECT_ID }}",
+        "region": "us-central1",
+        "resource": "generateVideo",
+        "options": {
+          "prompt": "={{ $json.videoPrompt }}",
+          "aspectRatio": "9:16",
+          "duration": "7s"
+        }
+      },
+      "id": "vertex-ai-veo",
+      "name": "Vertex AI - Veo 3",
+      "type": "n8n-nodes-base.googleVertexAI",
+      "typeVersion": 1,
+      "position": [650, 300],
+      "credentials": {
+        "googleApi": {
+          "id": "1",
+          "name": "Google Service Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Wait for video generation to complete\n// Veo 3 returns an operation that we need to poll\nconst operation = $input.item.json;\n\nreturn {\n  json: {\n    operationId: operation.name,\n    productId: $node[\"Process Product Data\"].json.productId,\n    status: 'PROCESSING',\n    startTime: new Date().toISOString()\n  }\n};"
+      },
+      "id": "extract-operation-id",
+      "name": "Extract Operation ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "unit": "seconds",
+        "amount": 30
+      },
+      "id": "wait-30s",
+      "name": "Wait 30 Seconds",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "projectId": "={{ $env.GCP_PROJECT_ID }}",
+        "resource": "checkOperation",
+        "operation": "={{ $json.operationId }}",
+        "options": {}
+      },
+      "id": "check-operation-status",
+      "name": "Check Operation Status",
+      "type": "n8n-nodes-base.googleVertexAI",
+      "typeVersion": 1,
+      "position": [1250, 300],
+      "credentials": {
+        "googleApi": {
+          "id": "1",
+          "name": "Google Service Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.done }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "is-video-ready",
+      "name": "Is Video Ready?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract the generated video URL\nconst response = $input.item.json;\nconst videoUri = response.response?.outputVideoGcsUri || response.response?.generatedVideo?.uri;\n\nif (!videoUri) {\n  throw new Error('Video generation failed - no video URI returned');\n}\n\nreturn {\n  json: {\n    videoUrl: videoUri,\n    productId: $node[\"Extract Operation ID\"].json.productId,\n    status: 'COMPLETED',\n    completedAt: new Date().toISOString()\n  }\n};"
+      },
+      "id": "extract-video-url",
+      "name": "Extract Video URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1650, 200]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node[\"Process Product Data\"].json.callbackUrl }}",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "productId",
+              "value": "={{ $json.productId }}"
+            },
+            {
+              "name": "videoUrl",
+              "value": "={{ $json.videoUrl }}"
+            },
+            {
+              "name": "status",
+              "value": "COMPLETED"
+            },
+            {
+              "name": "completedAt",
+              "value": "={{ $json.completedAt }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "callback-success",
+      "name": "Callback - Success",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1850, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: true, message: 'Video generation started', productId: $json.productId, videoUrl: $json.videoUrl } }}"
+      },
+      "id": "respond-success",
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2050, 200]
+    },
+    {
+      "parameters": {},
+      "id": "loop-back",
+      "name": "Loop Back",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1650, 400]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node[\"Process Product Data\"].json.callbackUrl }}",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "productId",
+              "value": "={{ $node[\"Extract Operation ID\"].json.productId }}"
+            },
+            {
+              "name": "status",
+              "value": "FAILED"
+            },
+            {
+              "name": "error",
+              "value": "Video generation timeout or failed"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "callback-error",
+      "name": "Callback - Error",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1850, 500]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: false, message: 'Video generation failed or timed out' } }}",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "id": "respond-error",
+      "name": "Respond Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2050, 500]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Process Product Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Product Data": {
+      "main": [
+        [
+          {
+            "node": "Vertex AI - Veo 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vertex AI - Veo 3": {
+      "main": [
+        [
+          {
+            "node": "Extract Operation ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Operation ID": {
+      "main": [
+        [
+          {
+            "node": "Wait 30 Seconds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 30 Seconds": {
+      "main": [
+        [
+          {
+            "node": "Check Operation Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Operation Status": {
+      "main": [
+        [
+          {
+            "node": "Is Video Ready?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Video Ready?": {
+      "main": [
+        [
+          {
+            "node": "Extract Video URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Back",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Video URL": {
+      "main": [
+        [
+          {
+            "node": "Callback - Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Callback - Success": {
+      "main": [
+        [
+          {
+            "node": "Respond Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Back": {
+      "main": [
+        [
+          {
+            "node": "Wait 30 Seconds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

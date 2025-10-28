@@ -1,0 +1,295 @@
+{
+  "name": "Product Video Generation - Veo 3 with Cloudinary (Final)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-product-video",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-node",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "project-id",
+              "name": "PROJECT_ID",
+              "type": "string",
+              "value": "={{ $env.GCP_PROJECT_ID }}"
+            },
+            {
+              "id": "model-version",
+              "name": "MODEL_VERSION",
+              "type": "string",
+              "value": "veo-3.0-generate-preview"
+            },
+            {
+              "id": "location",
+              "name": "LOCATION",
+              "type": "string",
+              "value": "us-central1"
+            },
+            {
+              "id": "prompt",
+              "name": "TEXT_PROMPT",
+              "type": "string",
+              "value": "={{ $json.body.prompt }}"
+            },
+            {
+              "id": "access-token",
+              "name": "ACCESS_TOKEN",
+              "type": "string",
+              "value": "={{ $env.GCP_ACCESS_TOKEN }}"
+            },
+            {
+              "id": "api-endpoint",
+              "name": "API_ENDPOINT",
+              "type": "string",
+              "value": "us-central1-aiplatform.googleapis.com"
+            },
+            {
+              "id": "product-id",
+              "name": "PRODUCT_ID",
+              "type": "string",
+              "value": "={{ $json.body.productId }}"
+            },
+            {
+              "id": "db-url",
+              "name": "DATABASE_URL",
+              "type": "string",
+              "value": "={{ $env.DATABASE_URL }}"
+            },
+            {
+              "id": "product-image",
+              "name": "PRODUCT_IMAGE_URL",
+              "type": "string",
+              "value": "={{ $json.body.productImage }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "setting-node",
+      "name": "Setting",
+      "type": "n8n-nodes-base.set",
+      "position": [460, 300],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://{{ $json.API_ENDPOINT }}/v1/projects/{{ $json.PROJECT_ID }}/locations/{{ $json.LOCATION }}/publishers/google/models/{{ $json.MODEL_VERSION }}:predictLongRunning",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.ACCESS_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"instances\": [\n    {\n      \"prompt\": {{ JSON.stringify($json.TEXT_PROMPT) }},\n      \"image\": {\n        \"bytesBase64Encoded\": {{ JSON.stringify($json.PRODUCT_IMAGE_BASE64 || '') }},\n        \"gcsUri\": {{ JSON.stringify($json.PRODUCT_IMAGE_URL || '') }}\n      }\n    }\n  ],\n  \"parameters\": {\n    \"aspectRatio\": \"9:16\",\n    \"sampleCount\": 1,\n    \"durationSeconds\": \"7\",\n    \"personGeneration\": \"allow_all\",\n    \"addWatermark\": false,\n    \"includeRaiReason\": true,\n    \"generateAudio\": false\n  }\n}",
+        "options": {}
+      },
+      "id": "veo-generate",
+      "name": "Vertex AI Veo 3 - Generate",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [680, 300],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "minutes"
+      },
+      "id": "wait-node",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "position": [900, 300],
+      "typeVersion": 1.1,
+      "webhookId": "video-wait-webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://{{ $('Setting').item.json.API_ENDPOINT }}/v1/projects/{{ $('Setting').item.json.PROJECT_ID }}/locations/{{ $('Setting').item.json.LOCATION }}/publishers/google/models/{{ $('Setting').item.json.MODEL_VERSION }}:fetchPredictOperation",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Setting').item.json.ACCESS_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"operationName\": \"{{ $json.name }}\"\n}",
+        "options": {}
+      },
+      "id": "veo-fetch",
+      "name": "Vertex AI Veo 3 - Fetch",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1120, 300],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "response.videos[0].bytesBase64Encoded",
+        "options": {
+          "fileName": "=product_{{ $('Setting').item.json.PRODUCT_ID }}.mp4",
+          "mimeType": "video/mp4"
+        }
+      },
+      "id": "convert-file",
+      "name": "Convert to File",
+      "type": "n8n-nodes-base.convertToFile",
+      "position": [1340, 300],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "binaryPropertyName": "data",
+        "publicId": "={{ 'product-videos/video_' + $('Setting').item.json.PRODUCT_ID }}",
+        "options": {
+          "resourceType": "video"
+        }
+      },
+      "id": "upload-cloudinary",
+      "name": "Upload to Cloudinary",
+      "type": "n8n-nodes-base.cloudinary",
+      "position": [1560, 300],
+      "typeVersion": 1,
+      "credentials": {
+        "cloudinaryApi": {
+          "id": "cloudinary-creds",
+          "name": "Cloudinary API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=UPDATE products SET video_url = '{{ $json.secure_url }}', video_status = 'COMPLETED', updated_at = NOW() WHERE id = '{{ $('Setting').item.json.PRODUCT_ID }}'",
+        "options": {}
+      },
+      "id": "update-db",
+      "name": "Update Database",
+      "type": "n8n-nodes-base.postgres",
+      "position": [1780, 300],
+      "typeVersion": 2.4,
+      "credentials": {
+        "postgres": {
+          "id": "postgres-creds",
+          "name": "PostgreSQL account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Setting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setting": {
+      "main": [
+        [
+          {
+            "node": "Vertex AI Veo 3 - Generate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vertex AI Veo 3 - Generate": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Vertex AI Veo 3 - Fetch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vertex AI Veo 3 - Fetch": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Upload to Cloudinary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload to Cloudinary": {
+      "main": [
+        [
+          {
+            "node": "Update Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-10-19T00:00:00.000Z",
+  "versionId": "1"
+}
