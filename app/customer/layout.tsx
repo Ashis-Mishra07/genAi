@@ -7,7 +7,9 @@ import {
     Package,
     ShoppingCart,
     Star,
-    TrendingUp, User
+    TrendingUp,
+    User,
+    Users
 } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -65,6 +67,11 @@ export default function CustomerLayout({
       name: 'Dashboard',
       href: '/customer/dashboard',
       icon: TrendingUp,
+    },
+    {
+      name: 'Artisan Stories',
+      href: '/customer/artisan-stories',
+      icon: Users,
     },
     {
       name: 'Recent Orders',

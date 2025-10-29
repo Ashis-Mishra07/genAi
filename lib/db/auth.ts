@@ -21,15 +21,22 @@ export interface User {
   updatedAt: Date;
 }
 
-export interface CreateUserData {
+interface CreateUserData {
   email: string;
-  password?: string;
+  password: string;
   name?: string;
   phone?: string;
   role: 'ADMIN' | 'ARTISAN' | 'CUSTOMER';
   specialty?: string;
   location?: string;
   bio?: string;
+  gender?: string;
+  photograph?: string;
+  origin_place?: string;
+  artisan_story?: string;
+  work_process?: string;
+  expertise_areas?: string;
+  artistry_description?: string;
 }
 
 // Hash password
@@ -119,7 +126,23 @@ export async function getUserById(id: string): Promise<User | null> {
 
 // Create user
 export async function createUser(userData: CreateUserData): Promise<User> {
-  const { email, password, name, phone, role, specialty, location, bio } = userData;
+  const { 
+    email, 
+    password, 
+    name, 
+    phone, 
+    role, 
+    specialty, 
+    location, 
+    bio,
+    gender,
+    photograph,
+    origin_place,
+    artisan_story,
+    work_process,
+    expertise_areas,
+    artistry_description
+  } = userData;
   
   let hashedPassword = null;
   if (password) {
@@ -127,8 +150,46 @@ export async function createUser(userData: CreateUserData): Promise<User> {
   }
 
   const result = await sql`
-    INSERT INTO users (email, password, name, phone, role, specialty, location, bio, is_active, created_at, updated_at)
-    VALUES (${email}, ${hashedPassword}, ${name}, ${phone}, ${role}, ${specialty}, ${location}, ${bio}, true, NOW(), NOW())
+    INSERT INTO users (
+      email, 
+      password, 
+      name, 
+      phone, 
+      role, 
+      specialty, 
+      location, 
+      bio, 
+      gender,
+      photograph,
+      origin_place,
+      artisan_story,
+      work_process,
+      expertise_areas,
+      artistry_description,
+      is_active, 
+      created_at, 
+      updated_at
+    )
+    VALUES (
+      ${email}, 
+      ${hashedPassword}, 
+      ${name}, 
+      ${phone}, 
+      ${role}, 
+      ${specialty}, 
+      ${location}, 
+      ${bio}, 
+      ${gender},
+      ${photograph},
+      ${origin_place},
+      ${artisan_story},
+      ${work_process},
+      ${expertise_areas},
+      ${artistry_description},
+      true, 
+      NOW(), 
+      NOW()
+    )
     RETURNING 
       id, 
       email, 

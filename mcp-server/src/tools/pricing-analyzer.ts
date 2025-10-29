@@ -9,7 +9,7 @@ export class PricingAnalyzer {
 
   async analyzePricing(productData: any, category: string) {
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
       const prompt = `
         Analyze pricing for this artisan product and provide fair trade pricing suggestions:
@@ -81,7 +81,7 @@ export class PricingAnalyzer {
 
   async getMarketInsights(category: string, region: string = 'global') {
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
       const prompt = `
         Provide market insights for ${category} artisan products in the ${region} market:

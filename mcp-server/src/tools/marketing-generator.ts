@@ -9,7 +9,7 @@ export class MarketingGenerator {
 
   async generateMarketing(productData: any, platform: string = 'social') {
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
       let prompt = '';
       
@@ -142,7 +142,7 @@ export class MarketingGenerator {
 
   async generatePosterDesign(productData: any, imageData?: string) {
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
       const prompt = `
         Create a detailed design brief for a product poster:

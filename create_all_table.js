@@ -31,8 +31,18 @@ async function createAllTables() {
         last_login_at TIMESTAMPTZ,
         bio TEXT,
         telegram_chat_id VARCHAR(255),
+        telegram_username VARCHAR(255),
         telegram_authorized BOOLEAN DEFAULT false,
-        telegram_authorized_at TIMESTAMPTZ
+        telegram_authorized_at TIMESTAMPTZ,
+        photograph TEXT,
+        gender VARCHAR(20),
+        origin_place VARCHAR(255),
+        artisan_story TEXT,
+        artistry_description TEXT,
+        work_process TEXT,
+        expertise_areas TEXT,
+        documentation_video_url TEXT,
+        documentation_video_status VARCHAR(20) DEFAULT 'NOT_GENERATED'
       )
     `;
     console.log("✅ Users table created");
@@ -272,7 +282,14 @@ async function createAllTables() {
     console.log("📦 Creating indexes...");
 
     await sql`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_users_telegram_chat_id ON users(telegram_chat_id)`;
+    
+    // Try to create telegram indexes (column may not exist in old databases)
+    try {
+      await sql`CREATE INDEX IF NOT EXISTS idx_users_telegram_chat_id ON users(telegram_chat_id)`;
+    } catch (e) {
+      console.log("⏭️  Skipping telegram_chat_id index (column may not exist)");
+    }
+    
     await sql`CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_products_user_id ON products(user_id)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_products_category ON products(category)`;
@@ -280,8 +297,14 @@ async function createAllTables() {
     await sql`CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_orders_customer_id ON orders(customer_id)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_orders_coordinates ON orders(shipping_latitude, shipping_longitude)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_orders_geocoded ON orders(location_geocoded_at)`;
+    
+    try {
+      await sql`CREATE INDEX IF NOT EXISTS idx_orders_coordinates ON orders(shipping_latitude, shipping_longitude)`;
+      await sql`CREATE INDEX IF NOT EXISTS idx_orders_geocoded ON orders(location_geocoded_at)`;
+    } catch (e) {
+      console.log("⏭️  Skipping shipping coordinates indexes (columns may not exist)");
+    }
+    
     await sql`CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_order_items_product_id ON order_items(product_id)`;
@@ -292,8 +315,13 @@ async function createAllTables() {
     await sql`CREATE INDEX IF NOT EXISTS idx_chat_messages_sender_id ON chat_messages(sender_id)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_reviews_product_id ON reviews(product_id)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_wishlists_user_id ON wishlists(user_id)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_telegram_auth_chat_id ON telegram_auth_requests(telegram_chat_id)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_telegram_auth_email ON telegram_auth_requests(email)`;
+    
+    try {
+      await sql`CREATE INDEX IF NOT EXISTS idx_telegram_auth_chat_id ON telegram_auth_requests(telegram_chat_id)`;
+      await sql`CREATE INDEX IF NOT EXISTS idx_telegram_auth_email ON telegram_auth_requests(email)`;
+    } catch (e) {
+      console.log("⏭️  Skipping telegram_auth_requests indexes (table may not exist)");
+    }
 
     console.log("✅ Indexes created");
 

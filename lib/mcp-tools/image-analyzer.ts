@@ -19,7 +19,7 @@ export class ImageAnalyzerTool {
   private genAI: GoogleGenerativeAI;
   private imageGenerator: ImageGeneratorTool;
   private modelQueue = [
-    'gemini-1.5-flash',  // Free tier friendly
+    'gemini-2.5-flash',  // Free tier friendly
     'gemini-1.0-pro-vision-latest',  // Fallback vision model
     'gemini-pro-vision'  // Last resort
   ];

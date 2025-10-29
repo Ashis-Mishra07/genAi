@@ -9,7 +9,7 @@ export class ContentGenerator {
 
   async generateContent(type: string, input: any, context?: any) {
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
       let prompt = '';
       

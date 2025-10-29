@@ -15,7 +15,7 @@ export interface ConversationContext {
 
 export class GeminiService {
   private models = [
-    'gemini-1.5-flash',  // Free tier friendly
+    'gemini-2.5-flash',  // Free tier friendly
     'gemini-1.0-pro-latest',  // Fallback text model
     'gemini-pro'  // Last resort
   ];
