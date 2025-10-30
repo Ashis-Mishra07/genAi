@@ -10,7 +10,13 @@ import {
   ShoppingBag, 
   Menu,
   X,
-  Sparkles
+  Sparkles,
+  Home,
+  MessageSquare,
+  Package,
+  Video,
+  BarChart3,
+  ChevronDown
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -58,21 +64,26 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
     switch (user.role) {
       case "admin":
         return [
-          { href: "/dashboard", label: "Dashboard" },
-          { href: "/admin/users", label: "Users" },
-          { href: "/admin/analytics", label: "Analytics" }
+          { href: "/dashboard", label: "Dashboard", icon: "Home" },
+          { href: "/chatbot", label: "AI Assistant", icon: "Sparkles" },
+          { href: "/chats", label: "Chats", icon: "MessageSquare" },
+          { href: "/dashboard/products", label: "Products", icon: "Package" },
+          { href: "/video-generation", label: "Video Gen", icon: "Video" },
+          { href: "/dashboard/orders", label: "Orders", icon: "ShoppingCart" },
+          { href: "/dashboard/analytics", label: "Analytics", icon: "BarChart3" }
         ]
       case "artisan":
         return [
-          { href: "/artisan/dashboard", label: "Dashboard" },
-          { href: "/artisan/products", label: "Products" },
-          { href: "/artisan/orders", label: "Orders" }
+          { href: "/artisan/dashboard", label: "Dashboard", icon: "Home" },
+          { href: "/artisan/products", label: "Products", icon: "Package" },
+          { href: "/artisan/orders", label: "Orders", icon: "ShoppingCart" },
+          { href: "/artisan/chats", label: "Chats", icon: "MessageSquare" }
         ]
       case "customer":
         return [
-          { href: "/products", label: "Products" },
-          { href: "/customer/orders", label: "My Orders" },
-          { href: "/customer/profile", label: "Profile" }
+          { href: "/products", label: "Products", icon: "Package" },
+          { href: "/customer/orders", label: "My Orders", icon: "ShoppingCart" },
+          { href: "/customer/profile", label: "Profile", icon: "User" }
         ]
       default:
         return []
@@ -96,16 +107,51 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
+          <div className="hidden md:flex items-center space-x-6">
+            {user ? (
+              // Show dashboard navigation for logged in users
+              <>
+                {navLinks.slice(0, 4).map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md hover:bg-accent"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+                {navLinks.length > 4 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+                        More
+                        <ChevronDown className="ml-1 h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {navLinks.slice(4).map((link) => (
+                        <DropdownMenuItem key={link.href} asChild>
+                          <Link href={link.href}>
+                            {link.label}
+                          </Link>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </>
+            ) : (
+              // Show general navigation for guests
+              navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))
+            )}
           </div>
 
           {/* Right side actions */}

@@ -514,39 +514,37 @@ Discover authentic artisan crafts that tell a story! 🎭
   };
 
   return (
-    <div className="p-6 space-y-6 bg-black min-h-screen">
+    <div className="p-6 space-y-6 min-h-screen">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold text-foreground">
             Products
           </h1>
-          <p className="text-gray-400 text-lg">
+          <p className="text-muted-foreground text-lg">
             Manage your artisan products with AI-powered features
           </p>
-          <div className="h-1 w-32 bg-gradient-to-r from-orange-400 to-transparent rounded-full"></div>
         </div>
         <Button
           onClick={() => setShowAddModal(true)}
-          className="bg-orange-500 hover:bg-orange-600 text-black">
+          className="bg-primary hover:bg-primary/90 text-primary-foreground">
           <Plus className="h-4 w-4 mr-2" />
           Add Product
         </Button>
       </div>
 
       {/* Filters */}
-      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl border border-gray-800 p-4 shadow-xl backdrop-blur-sm relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600"></div>
+      <div className="bg-card rounded-2xl border border-border p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
-              <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-gray-800 text-gray-300"
+                className="w-full pl-10 pr-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-foreground"
               />
             </div>
           </div>
@@ -554,7 +552,7 @@ Discover authentic artisan crafts that tell a story! 🎭
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-gray-800 text-gray-300">
+              className="px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-foreground">
               <option value="all">All Categories</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.name}>
@@ -569,7 +567,7 @@ Discover authentic artisan crafts that tell a story! 🎭
       {/* Products Grid */}
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="text-gray-400">Loading products...</div>
+          <div className="text-muted-foreground">Loading products...</div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -577,9 +575,9 @@ Discover authentic artisan crafts that tell a story! 🎭
             <div
               key={product.id}
               onClick={() => handleProductClick(product)}
-              className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden hover:shadow-lg hover:border-orange-500 transition-all cursor-pointer">
+              className="bg-card rounded-2xl border border-border overflow-hidden hover:shadow-lg transition-all cursor-pointer group">
               {/* Product Image */}
-              <div className="h-48 bg-gray-800 flex items-center justify-center">
+              <div className="h-48 bg-muted flex items-center justify-center">
                 {product.image_url ? (
                   <img
                     src={product.image_url}
@@ -587,49 +585,49 @@ Discover authentic artisan crafts that tell a story! 🎭
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <ImageIcon className="h-16 w-16 text-gray-600" />
+                  <ImageIcon className="h-16 w-16 text-muted-foreground" />
                 )}
               </div>
 
               {/* Product Info */}
-              <div className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-semibold text-orange-400 truncate">
+              <div className="p-6">
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
                     {product.name}
                   </h3>
                   <span
-                    className={`px-2 py-1 text-xs rounded-full ${
+                    className={`px-3 py-1 text-xs rounded-full ${
                       product.is_active
-                        ? "bg-green-500/20 text-green-400"
-                        : "bg-gray-500/20 text-gray-400"
+                        ? "bg-green-500/10 text-green-600 dark:text-green-400"
+                        : "bg-muted text-muted-foreground"
                     }`}>
                     {product.is_active ? "Active" : "Inactive"}
                   </span>
                 </div>
 
-                <p className="text-sm text-gray-400 mb-3 line-clamp-2">
+                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                   {product.description}
                 </p>
 
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center text-lg font-bold text-orange-400">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center text-lg font-bold text-foreground">
                     {renderCurrencyIcon(product.currency)}
                     <span className="ml-1">
                       {product.price.toLocaleString()}
                     </span>
                   </div>
-                  <span className="text-sm bg-orange-500/20 text-orange-400 px-2 py-1 rounded">
+                  <span className="text-sm bg-primary/10 text-primary px-3 py-1 rounded-full">
                     {product.category}
                   </span>
                 </div>
 
                 {/* Tags */}
                 {product.tags && product.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-3">
+                  <div className="flex flex-wrap gap-2 mb-4">
                     {product.tags.slice(0, 3).map((tag, index) => (
                       <span
                         key={index}
-                        className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">
+                        className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
                         {tag}
                       </span>
                     ))}
@@ -638,21 +636,21 @@ Discover authentic artisan crafts that tell a story! 🎭
 
                 {/* AI Story Indicator */}
                 {product.story && (
-                  <div className="flex items-center text-orange-400 text-sm mb-3">
-                    <Sparkles className="h-4 w-4 mr-1" />
+                  <div className="flex items-center text-primary text-sm mb-4">
+                    <Sparkles className="h-4 w-4 mr-2" />
                     <span>{getStoryStatusText(product.name)}</span>
                   </div>
                 )}
 
                 {/* Actions */}
                 <div className="flex justify-between items-center">
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-1">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleViewProduct(product);
                       }}
-                      className="p-2 text-gray-400 hover:bg-gray-800 hover:text-orange-400 rounded"
+                      className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                       title="View Details">
                       <Eye className="h-4 w-4" />
                     </button>
@@ -661,7 +659,7 @@ Discover authentic artisan crafts that tell a story! 🎭
                         e.stopPropagation();
                         handleEditProduct(product);
                       }}
-                      className="p-2 text-gray-400 hover:bg-gray-800 hover:text-orange-400 rounded"
+                      className="p-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors"
                       title="Edit Product">
                       <Edit3 className="h-4 w-4" />
                     </button>
@@ -670,7 +668,7 @@ Discover authentic artisan crafts that tell a story! 🎭
                         e.stopPropagation();
                         handleDeleteProduct(product);
                       }}
-                      className="p-2 text-red-400 hover:bg-red-500/20 rounded"
+                      className="p-2 text-red-600 dark:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                       title="Delete Product">
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -684,11 +682,11 @@ Discover authentic artisan crafts that tell a story! 🎭
                       handlePostToInstagram(product);
                     }}
                     disabled={postingToInstagram === product.id}
-                    className="border-pink-500 text-pink-400 hover:bg-pink-500/20 disabled:opacity-50">
-                    <Instagram className="h-3 w-3 mr-1" />
+                    className="border-pink-500 text-pink-600 dark:text-pink-400 hover:bg-pink-500/10 disabled:opacity-50">
+                    <Instagram className="h-4 w-4 mr-1" />
                     {postingToInstagram === product.id
                       ? "Posting..."
-                      : "Add to Instagram"}
+                      : "Instagram"}
                   </Button>
                 </div>
               </div>
@@ -699,18 +697,18 @@ Discover authentic artisan crafts that tell a story! 🎭
 
       {filteredProducts.length === 0 && !isLoading && (
         <div className="text-center py-12">
-          <Package className="h-16 w-16 text-gray-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-orange-400 mb-2">
+          <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-foreground mb-2">
             No products found
           </h3>
-          <p className="text-gray-400 mb-4">
+          <p className="text-muted-foreground mb-6">
             {searchQuery || selectedCategory !== "all"
               ? "Try adjusting your search or filters."
               : "Get started by adding your first product."}
           </p>
           <Button
             onClick={() => setShowAddModal(true)}
-            className="bg-orange-500 hover:bg-orange-600 text-black">
+            className="bg-primary hover:bg-primary/90 text-primary-foreground">
             <Plus className="h-4 w-4 mr-2" />
             Add Your First Product
           </Button>

@@ -173,31 +173,31 @@ export default function AdminVideoGenerationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black p-8">
+    <div className="min-h-screen bg-background p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <Video className="h-8 w-8 text-orange-500 mr-3" />
-              <h1 className="text-3xl font-bold text-white">AI Video Generation</h1>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-4">
+              <Video className="h-8 w-8 text-primary" />
+              <h1 className="text-3xl font-bold text-foreground">AI Video Generation</h1>
             </div>
             <button
               onClick={() => {
                 setLoading(true);
                 fetchProducts();
               }}
-              className="flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+              className="flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-colors"
             >
               <Loader className="h-4 w-4 mr-2" />
               Refresh
             </button>
           </div>
-          <p className="text-gray-400">
+          <p className="text-muted-foreground text-lg mb-4">
             Generate AI-powered product demonstration videos using Google Vertex AI Veo 3
           </p>
-          <div className="mt-4 bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-            <p className="text-blue-400 text-sm">
+          <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-6">
+            <p className="text-blue-600 dark:text-blue-400 text-sm">
               💡 <strong>How it works:</strong> Click "Generate Video" to create a 7-second professional product demonstration video showing a person using or wearing the product. Videos are generated using Google's Vertex AI Veo 3 model.
             </p>
           </div>
@@ -205,25 +205,25 @@ export default function AdminVideoGenerationPage() {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-            <p className="text-gray-400 text-sm mb-1">Total Products</p>
-            <p className="text-3xl font-bold text-white">{products.length}</p>
+          <div className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
+            <p className="text-muted-foreground text-sm mb-1">Total Products</p>
+            <p className="text-3xl font-bold text-foreground">{products.length}</p>
           </div>
-          <div className="bg-gray-900 border border-green-800 rounded-lg p-6">
-            <p className="text-gray-400 text-sm mb-1">Videos Ready</p>
-            <p className="text-3xl font-bold text-green-400">
+          <div className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
+            <p className="text-muted-foreground text-sm mb-1">Videos Ready</p>
+            <p className="text-3xl font-bold text-green-600 dark:text-green-400">
               {products.filter(p => p.videoStatus === 'COMPLETED').length}
             </p>
           </div>
-          <div className="bg-gray-900 border border-yellow-800 rounded-lg p-6">
-            <p className="text-gray-400 text-sm mb-1">Processing</p>
-            <p className="text-3xl font-bold text-yellow-400">
+          <div className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
+            <p className="text-muted-foreground text-sm mb-1">Processing</p>
+            <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
               {products.filter(p => p.videoStatus === 'PROCESSING').length}
             </p>
           </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-            <p className="text-gray-400 text-sm mb-1">No Video</p>
-            <p className="text-3xl font-bold text-gray-400">
+          <div className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
+            <p className="text-muted-foreground text-sm mb-1">No Video</p>
+            <p className="text-3xl font-bold text-muted-foreground">
               {products.filter(p => !p.videoStatus || p.videoStatus === 'NOT_GENERATED').length}
             </p>
           </div>
@@ -234,10 +234,10 @@ export default function AdminVideoGenerationPage() {
           {products.map((product) => (
             <div
               key={product.id}
-              className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden hover:border-orange-500/50 transition-colors"
+              className="bg-card border border-border rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300"
             >
               {/* Product Image */}
-              <div className="relative h-48 bg-gray-800">
+              <div className="relative h-48 bg-muted">
                 {product.imageUrl ? (
                   <img
                     src={product.imageUrl}
@@ -245,7 +245,7 @@ export default function AdminVideoGenerationPage() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-600">
+                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                     No Image
                   </div>
                 )}
@@ -255,27 +255,27 @@ export default function AdminVideoGenerationPage() {
               </div>
 
               {/* Product Info */}
-              <div className="p-4">
-                <h3 className="text-lg font-semibold text-white mb-2 truncate">
+              <div className="p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-2 truncate">
                   {product.name}
                 </h3>
-                <p className="text-sm text-gray-400 mb-2 line-clamp-2">
+                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                   {product.description || 'No description'}
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-orange-400 font-bold">₹{product.price}</span>
-                  <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">
+                  <span className="text-foreground font-bold">₹{product.price}</span>
+                  <span className="text-xs text-muted-foreground bg-muted px-3 py-1 rounded-full">
                     {product.category}
                   </span>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {product.videoStatus === 'COMPLETED' && product.videoUrl ? (
                     <div className="space-y-2">
                       <button
                         onClick={() => setSelectedProduct(product)}
-                        className="w-full flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                        className="w-full flex items-center justify-center px-4 py-3 bg-green-600 dark:bg-green-500 text-white rounded-xl hover:bg-green-500 dark:hover:bg-green-400 transition-colors"
                       >
                         <Play className="h-4 w-4 mr-2" />
                         Watch Video
@@ -283,7 +283,7 @@ export default function AdminVideoGenerationPage() {
                       <button
                         onClick={() => handleGenerateVideo(product.id)}
                         disabled={generatingVideo === product.id}
-                        className="w-full flex items-center justify-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full flex items-center justify-center px-4 py-3 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {generatingVideo === product.id ? (
                           <>
@@ -301,7 +301,7 @@ export default function AdminVideoGenerationPage() {
                   ) : product.videoStatus === 'PROCESSING' ? (
                     <button
                       disabled
-                      className="w-full flex items-center justify-center px-4 py-2 bg-yellow-600/50 text-white rounded-lg cursor-not-allowed"
+                      className="w-full flex items-center justify-center px-4 py-3 bg-yellow-600/50 dark:bg-yellow-500/50 text-white rounded-xl cursor-not-allowed"
                     >
                       <Loader className="h-4 w-4 mr-2 animate-spin" />
                       Generating Video...
@@ -310,7 +310,7 @@ export default function AdminVideoGenerationPage() {
                     <button
                       onClick={() => handleGenerateVideo(product.id)}
                       disabled={generatingVideo === product.id}
-                      className="w-full flex items-center justify-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full flex items-center justify-center px-4 py-3 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {generatingVideo === product.id ? (
                         <>
@@ -332,9 +332,9 @@ export default function AdminVideoGenerationPage() {
         </div>
 
         {products.length === 0 && (
-          <div className="text-center py-12">
-            <Video className="h-16 w-16 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400">No products found</p>
+          <div className="text-center py-16">
+            <Video className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground text-lg">No products found</p>
           </div>
         )}
       </div>
@@ -346,17 +346,17 @@ export default function AdminVideoGenerationPage() {
           onClick={() => setSelectedProduct(null)}
         >
           <div
-            className="bg-gray-900 border border-gray-800 rounded-lg max-w-4xl w-full overflow-hidden"
+            className="bg-card border border-border rounded-2xl max-w-4xl w-full overflow-hidden shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-6 border-b border-gray-800 flex items-center justify-between">
+            <div className="p-6 border-b border-border flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-white">{selectedProduct.name}</h2>
-                <p className="text-gray-400 mt-1">AI Generated Product Video</p>
+                <h2 className="text-2xl font-bold text-foreground">{selectedProduct.name}</h2>
+                <p className="text-muted-foreground mt-1">AI Generated Product Video</p>
               </div>
               <button
                 onClick={() => setSelectedProduct(null)}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <XCircle className="h-6 w-6" />
               </button>
@@ -366,7 +366,7 @@ export default function AdminVideoGenerationPage() {
                 src={selectedProduct.videoUrl}
                 controls
                 autoPlay
-                className="w-full rounded-lg"
+                className="w-full rounded-xl"
               >
                 Your browser does not support video playback.
               </video>
@@ -375,11 +375,11 @@ export default function AdminVideoGenerationPage() {
                   href={selectedProduct.videoUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-orange-400 hover:text-orange-300 text-sm"
+                  className="text-primary hover:text-primary/80 text-sm font-medium"
                 >
                   Open in new tab →
                 </a>
-                <span className="text-xs text-gray-500">
+                <span className="text-sm text-muted-foreground">
                   Category: {selectedProduct.category}
                 </span>
               </div>

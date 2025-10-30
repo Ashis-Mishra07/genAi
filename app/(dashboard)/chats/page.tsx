@@ -777,68 +777,79 @@ I'll be back with your poster soon! 📸➡️🎨`;
 
   // Users List View
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center space-x-3 mb-2">
-            <MessageSquare className="h-8 w-8 text-orange-400" />
-            <h1 className="text-3xl font-bold text-white bg-gradient-to-r from-orange-500 to-orange-400 bg-clip-text text-transparent">
+        <div className="mb-8">
+          <div className="flex items-center space-x-4 mb-4">
+            <MessageSquare className="h-8 w-8 text-primary" />
+            <h1 className="text-3xl font-bold text-foreground">
               Support Center
             </h1>
           </div>
-          <div className="h-1 bg-gradient-to-r from-orange-500 to-orange-400 rounded-full w-32"></div>
-          <p className="text-gray-400 mt-2">
+          <p className="text-muted-foreground text-lg">
             Manage artisan support conversations and provide business assistance
           </p>
         </div>
 
         {/* Search Bar */}
-        <div className="mb-6">
+        <div className="mb-8">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search artisans by name or specialty..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white placeholder-gray-400"
+              className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-foreground placeholder-muted-foreground"
             />
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-4 border border-blue-500/20">
-            <div className="flex items-center space-x-2">
-              <MessageSquare className="h-4 w-4 text-blue-400" />
-              <span className="text-blue-400 font-medium">
-                Active Conversations: {artisanConversations.length}
-              </span>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-card rounded-xl p-6 border border-border hover:shadow-lg transition-all duration-300">
+            <div className="flex items-center space-x-3">
+              <MessageSquare className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              <div>
+                <p className="text-sm text-muted-foreground">Active Conversations</p>
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  {artisanConversations.length}
+                </p>
+              </div>
             </div>
           </div>
-          <div className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-4 border border-red-500/20">
-            <div className="flex items-center space-x-2">
-              <AlertCircle className="h-4 w-4 text-red-400" />
-              <span className="text-red-400 font-medium">
-                Pending Support: {artisanConversations.reduce((sum, c) => sum + c.unread_count, 0)}
-              </span>
+          <div className="bg-card rounded-xl p-6 border border-border hover:shadow-lg transition-all duration-300">
+            <div className="flex items-center space-x-3">
+              <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+              <div>
+                <p className="text-sm text-muted-foreground">Pending Support</p>
+                <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                  {artisanConversations.reduce((sum, c) => sum + c.unread_count, 0)}
+                </p>
+              </div>
             </div>
           </div>
-          <div className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-4 border border-green-500/20">
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="h-4 w-4 text-green-400" />
-              <span className="text-green-400 font-medium">
-                Responded Today: {artisanConversations.filter(c => c.last_sender === 'admin').length}
-              </span>
+          <div className="bg-card rounded-xl p-6 border border-border hover:shadow-lg transition-all duration-300">
+            <div className="flex items-center space-x-3">
+              <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+              <div>
+                <p className="text-sm text-muted-foreground">Responded Today</p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  {artisanConversations.filter(c => c.last_sender === 'admin').length}
+                </p>
+              </div>
             </div>
           </div>
-          <div className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-4 border border-purple-500/20">
-            <div className="flex items-center space-x-2">
-              <Sparkles className="h-4 w-4 text-purple-400" />
-              <span className="text-purple-400 font-medium">
-                Admin Support Active
-              </span>
+          <div className="bg-card rounded-xl p-6 border border-border hover:shadow-lg transition-all duration-300">
+            <div className="flex items-center space-x-3">
+              <Sparkles className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              <div>
+                <p className="text-sm text-muted-foreground">Support Status</p>
+                <p className="text-lg font-semibold text-purple-600 dark:text-purple-400">
+                  Active
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -849,12 +860,12 @@ I'll be back with your poster soon! 📸➡️🎨`;
               <div
                 key={conversation.artisan_id}
                 onClick={() => setSelectedArtisan(conversation.artisan_id)}
-                className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-xl p-6 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 cursor-pointer group hover:scale-105">
+                className="bg-card rounded-2xl p-6 border border-border hover:shadow-lg transition-all duration-300 cursor-pointer group">
                 <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-4">
                     <div className="relative">
-                      <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center group-hover:from-purple-400 group-hover:to-purple-500 transition-all duration-300">
-                        <span className="text-white font-semibold">
+                      <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300">
+                        <span className="text-primary font-semibold">
                           {conversation.artisan_name
                             .split(" ")
                             .map((n) => n[0])
@@ -863,34 +874,34 @@ I'll be back with your poster soon! 📸➡️🎨`;
                       </div>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-white group-hover:text-purple-300 transition-colors">
+                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                         {conversation.artisan_name}
                       </h3>
-                      <p className="text-sm text-gray-400">{conversation.artisan_email}</p>
+                      <p className="text-sm text-muted-foreground">{conversation.artisan_email}</p>
                     </div>
                   </div>
                   {conversation.unread_count > 0 && (
-                    <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">
+                    <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                      <span className="text-primary-foreground text-xs font-bold">
                         {conversation.unread_count}
                       </span>
                     </div>
                   )}
                 </div>
 
-                <div className="mb-3">
-                  <p className="text-gray-300 text-sm line-clamp-2">
+                <div className="mb-4">
+                  <p className="text-foreground text-sm line-clamp-2">
                     {conversation.last_message}
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span>{formatLastSeen(conversation.last_message_time)}</span>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{formatLastSeen(conversation.last_message_time)}</span>
                   <span
-                    className={`px-2 py-1 rounded-full ${
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${
                       conversation.last_sender === "admin"
-                        ? "bg-green-500/20 text-green-400"
-                        : "bg-orange-500/20 text-orange-400"
+                        ? "bg-green-500/10 text-green-600 dark:text-green-400"
+                        : "bg-orange-500/10 text-orange-600 dark:text-orange-400"
                     }`}>
                     {conversation.last_sender === "admin" ? "Admin replied" : "Needs response"}
                   </span>
