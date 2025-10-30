@@ -241,13 +241,13 @@ export default function ArtisanProductsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+      <div className="bg-card border-b border-border px-6 py-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white">{t("products")}</h1>
-            <p className="text-slate-400">
+            <h1 className="text-3xl font-bold text-foreground">{t("products")}</h1>
+            <p className="text-muted-foreground mt-1">
               {products.length} {t("productsTotal")}
             </p>
           </div>
@@ -257,7 +257,7 @@ export default function ArtisanProductsPage() {
             <select
               value={currentLocale}
               onChange={(e) => changeLanguage(e.target.value as Locale)}
-              className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
+              className="bg-background border border-border rounded-xl px-4 py-2 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300">
               <option value="en">English</option>
               <option value="hi">हिंदी</option>
               <option value="bn">বাংলা</option>
@@ -272,7 +272,7 @@ export default function ArtisanProductsPage() {
 
             <button
               onClick={() => setShowAddModal(true)}
-              className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors flex items-center">
+              className="bg-primary text-primary-foreground px-6 py-2 rounded-xl hover:bg-primary/90 transition-all duration-300 flex items-center shadow-sm hover:shadow-md">
               <Plus className="h-4 w-4 mr-2" />
               {t("createProduct")}
             </button>
@@ -283,16 +283,16 @@ export default function ArtisanProductsPage() {
       {/* Content */}
       <div className="p-6">
         {/* Filters */}
-        <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 mb-6">
+        <div className="bg-card border border-border rounded-2xl p-6 mb-8 hover:shadow-lg transition-all duration-300">
           <div className="flex items-center space-x-4">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
                 placeholder={t("searchProducts")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 w-full"
+                className="pl-12 pr-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary w-full transition-all duration-300"
               />
             </div>
 
@@ -301,7 +301,7 @@ export default function ArtisanProductsPage() {
               onChange={(e) =>
                 setFilterStatus(e.target.value as "all" | "active" | "inactive")
               }
-              className="bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
+              className="bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300">
               <option value="all">{t("allProducts")}</option>
               <option value="active">{t("active")}</option>
               <option value="inactive">{t("inactive")}</option>
@@ -311,19 +311,21 @@ export default function ArtisanProductsPage() {
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-500/20 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg mb-6">
+          <div className="bg-destructive/10 border border-destructive/20 text-destructive px-6 py-4 rounded-2xl mb-8">
             {error}
           </div>
         )}
 
         {/* Products Grid */}
         {filteredProducts.length === 0 ? (
-          <div className="text-center py-12">
-            <Package className="h-16 w-16 text-slate-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">
+          <div className="text-center py-16">
+            <div className="w-20 h-20 bg-muted rounded-3xl flex items-center justify-center mx-auto mb-6">
+              <Package className="h-10 w-10 text-muted-foreground" />
+            </div>
+            <h3 className="text-2xl font-semibold text-foreground mb-3">
               {t("noProductsFound")}
             </h3>
-            <p className="text-slate-400 mb-6">
+            <p className="text-muted-foreground mb-8 max-w-md mx-auto">
               {searchTerm || filterStatus !== "all"
                 ? t("tryAdjustingFilters")
                 : t("startByCreating")}
@@ -331,18 +333,18 @@ export default function ArtisanProductsPage() {
             {!searchTerm && filterStatus === "all" && (
               <button
                 onClick={() => setShowAddModal(true)}
-                className="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors">
+                className="bg-primary text-primary-foreground px-8 py-3 rounded-xl hover:bg-primary/90 transition-all duration-300 shadow-sm hover:shadow-md">
                 {t("createProduct")}
               </button>
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredProducts.map((product) => (
               <div
                 key={product.id}
-                className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden hover:border-orange-500/50 transition-all hover:shadow-lg">
-                <div className="aspect-w-16 aspect-h-9 bg-slate-700">
+                className="bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-lg transition-all duration-300 group">
+                <div className="aspect-w-16 aspect-h-9 bg-muted">
                   {product.imageUrl ? (
                     <Image
                       src={product.imageUrl}

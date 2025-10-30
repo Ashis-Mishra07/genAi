@@ -248,58 +248,63 @@ export default function ArtisanAnalyticsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-orange-900 to-slate-900 p-4">
+    <div className="min-h-screen bg-background p-6">
       {/* Header */}
       <div className="max-w-7xl mx-auto mb-8">
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => router.push("/artisan/dashboard")}
-            className="flex items-center text-white/70 hover:text-white transition-colors">
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            {t("backToDashboard")}
-          </button>
-          <div className="flex items-center text-white">
-            <BarChart3 className="h-6 w-6 mr-2" />
-            <div>
-              <span className="text-xl font-bold">
-                {t("analytics")}
-              </span>
-              <p className="text-sm text-white/70">
-                {t("trackBusinessPerformance")}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <select
-              value={timeframe}
-              onChange={(e) => setTimeframe(e.target.value)}
-              className="px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
-              <option value="7d" className="bg-slate-800">
-                {t("lastDays")}
-              </option>
-              <option value="30d" className="bg-slate-800">
-                {t("last30Days")}
-              </option>
-              <option value="90d" className="bg-slate-800">
-                {t("last90Days")}
-              </option>
-            </select>
-
+        <div className="bg-card border border-border rounded-3xl p-6">
+          <div className="flex items-center justify-between">
             <button
-              onClick={loadAnalytics}
-              disabled={isRefreshing}
-              className="flex items-center px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg disabled:opacity-50 transition-all duration-200">
-              <RefreshCw
-                className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
-              />
-              {t("refresh")}
+              onClick={() => router.push("/artisan/dashboard")}
+              className="flex items-center text-muted-foreground hover:text-foreground transition-all duration-300 group">
+              <ArrowLeft className="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
+              {t("backToDashboard")}
             </button>
+            
+            <div className="flex items-center text-foreground">
+              <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mr-4">
+                <BarChart3 className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">
+                  {t("analytics")}
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  {t("trackBusinessPerformance")}
+                </p>
+              </div>
+            </div>
 
-            <button className="flex items-center px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white/90 hover:bg-white/20 transition-colors">
-              <Download className="h-4 w-4 mr-2" />
-              {t("export")}
-            </button>
+            <div className="flex items-center space-x-3">
+              <select
+                value={timeframe}
+                onChange={(e) => setTimeframe(e.target.value)}
+                className="px-4 py-2 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300">
+                <option value="7d">
+                  {t("lastDays")}
+                </option>
+                <option value="30d">
+                  {t("last30Days")}
+                </option>
+                <option value="90d">
+                  {t("last90Days")}
+                </option>
+              </select>
+
+              <button
+                onClick={loadAnalytics}
+                disabled={isRefreshing}
+                className="flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-all duration-300 shadow-sm hover:shadow-md">
+                <RefreshCw
+                  className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+                />
+                {t("refresh")}
+              </button>
+
+              <button className="flex items-center px-4 py-2 bg-muted text-muted-foreground border border-border rounded-xl hover:bg-muted/80 hover:text-foreground transition-all duration-300">
+                <Download className="h-4 w-4 mr-2" />
+                {t("export")}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -307,13 +312,13 @@ export default function ArtisanAnalyticsPage() {
       <div className="max-w-7xl mx-auto">
         {/* Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
+          <div className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-white/70">
+                <p className="text-sm font-medium text-muted-foreground">
                   {t("totalViews")}
                 </p>
-                <p className="text-2xl font-bold text-white">
+                <p className="text-2xl font-bold text-foreground">
                   {translatedData.overview.totalViews.toLocaleString()}
                 </p>
               </div>

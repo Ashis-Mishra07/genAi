@@ -16,10 +16,15 @@ import {
   Package,
   Video,
   BarChart3,
-  ChevronDown
+  ChevronDown,
+  Bell,
+  MessageCircle,
+  CreditCard,
+  Headphones
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
+import LanguageSelector from "@/components/ui/language-selector"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -76,8 +81,13 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
         return [
           { href: "/artisan/dashboard", label: "Dashboard", icon: "Home" },
           { href: "/artisan/products", label: "Products", icon: "Package" },
-          { href: "/artisan/orders", label: "Orders", icon: "ShoppingCart" },
-          { href: "/artisan/chats", label: "Chats", icon: "MessageSquare" }
+          { href: "/artisan/analytics", label: "Analytics", icon: "BarChart3" },
+          { href: "/artisan/support-dashboard", label: "Support", icon: "HeadphonesIcon" },
+          { href: "/artisan/messages", label: "Messages", icon: "MessageSquare" },
+          { href: "/artisan/notifications", label: "Notifications", icon: "Bell" },
+          { href: "/artisan/profile", label: "Profile", icon: "User" },
+          { href: "/artisan/feedback", label: "Feedback", icon: "MessageCircle" },
+          { href: "/artisan/payment-reminders", label: "Payments", icon: "CreditCard" }
         ]
       case "customer":
         return [
@@ -111,7 +121,7 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
             {user ? (
               // Show dashboard navigation for logged in users
               <>
-                {navLinks.slice(0, 4).map((link) => (
+                {navLinks.slice(0, 3).map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
@@ -120,19 +130,27 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
                     {link.label}
                   </Link>
                 ))}
-                {navLinks.length > 4 && (
+                {navLinks.length > 3 && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+                      <Button variant="ghost" className="text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-md px-3 py-2">
                         More
                         <ChevronDown className="ml-1 h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {navLinks.slice(4).map((link) => (
+                    <DropdownMenuContent 
+                      align="center" 
+                      side="bottom" 
+                      className="w-48 max-h-80 overflow-y-auto z-50"
+                      sideOffset={8}
+                      alignOffset={0}
+                      avoidCollisions={true}
+                      collisionPadding={16}
+                    >
+                      {navLinks.slice(3).map((link) => (
                         <DropdownMenuItem key={link.href} asChild>
-                          <Link href={link.href}>
-                            {link.label}
+                          <Link href={link.href} className="flex items-center w-full">
+                            <span className="truncate">{link.label}</span>
                           </Link>
                         </DropdownMenuItem>
                       ))}
@@ -155,7 +173,8 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
           </div>
 
           {/* Right side actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
+            <LanguageSelector />
             <ThemeToggle />
             
             {user ? (
@@ -182,7 +201,16 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
                       </span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuContent 
+                    className="w-56 z-50" 
+                    align="end" 
+                    side="bottom"
+                    sideOffset={8}
+                    alignOffset={-4}
+                    avoidCollisions={true}
+                    collisionPadding={16}
+                    forceMount
+                  >
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">{user.name}</p>

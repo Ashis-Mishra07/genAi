@@ -337,8 +337,8 @@ export default function NotificationsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 p-6 flex items-center justify-center">
-        <div className="flex items-center space-x-3 text-slate-400">
+      <div className="min-h-screen bg-background p-6 flex items-center justify-center">
+        <div className="flex items-center space-x-3 text-muted-foreground">
           <RefreshCw className="h-6 w-6 animate-spin" />
           <span>
             {t('loadingNotifications')}
@@ -349,20 +349,20 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center space-x-3">
-              <div className="bg-orange-500 rounded-lg p-3">
-                <Bell className="h-6 w-6 text-white" />
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-primary/10 rounded-xl">
+                <Bell className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">
+                <h1 className="text-3xl font-bold text-foreground">
                   {t('notifications')}
                 </h1>
-                <p className="text-slate-400">
+                <p className="text-muted-foreground mt-1">
                   {totalCount} {t('total')} • {unreadCount}{" "}
                   {t('unread')}
                 </p>
@@ -373,7 +373,7 @@ export default function NotificationsPage() {
               <button
                 onClick={() => fetchNotifications()}
                 disabled={refreshing}
-                className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
+                className="p-3 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-colors">
                 <RefreshCw
                   className={`h-5 w-5 ${refreshing ? "animate-spin" : ""}`}
                 />
@@ -381,10 +381,10 @@ export default function NotificationsPage() {
 
               <button
                 onClick={() => setShowUnreadOnly(!showUnreadOnly)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                   showUnreadOnly
-                    ? "bg-orange-500 text-white"
-                    : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
                 }`}>
                 {showUnreadOnly ? (
                   <div className="flex items-center space-x-2">
@@ -406,7 +406,7 @@ export default function NotificationsPage() {
             <button
               onClick={markAllAsRead}
               disabled={unreadCount === 0 || actionLoading === "all"}
-              className="px-4 py-2 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2">
+              className="px-4 py-2 bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground rounded-xl text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-sm">
               {actionLoading === "all" ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />
               ) : (
@@ -420,7 +420,7 @@ export default function NotificationsPage() {
             <button
               onClick={clearAllNotifications}
               disabled={totalCount === 0 || actionLoading === "clear"}
-              className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2">
+              className="px-4 py-2 bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-sm">
               {actionLoading === "clear" ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />
               ) : (
@@ -432,16 +432,18 @@ export default function NotificationsPage() {
         </div>
 
         {/* Notifications List */}
-        <div className="space-y-3">
+        <div className="space-y-4">
           {filteredNotifications.length === 0 ? (
-            <div className="text-center py-12">
-              <Bell className="h-12 w-12 text-slate-600 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-slate-400 mb-2">
+            <div className="text-center py-16">
+              <div className="p-6 bg-muted/30 rounded-full w-fit mx-auto mb-6">
+                <Bell className="h-12 w-12 text-muted-foreground mx-auto" />
+              </div>
+              <h3 className="text-xl font-semibold text-foreground mb-2">
                 {showUnreadOnly
                   ? t('noUnreadNotifications')
                   : t('noNotificationsFound')}
               </h3>
-              <p className="text-slate-500">
+              <p className="text-muted-foreground">
                 {showUnreadOnly
                   ? t('allCaughtUp')
                   : t('notificationsWillAppear')}
@@ -456,17 +458,17 @@ export default function NotificationsPage() {
               return (
                 <div
                   key={notification.id}
-                  className={`relative bg-slate-800 rounded-lg p-4 border transition-all duration-200 hover:bg-slate-750 cursor-pointer group ${
+                  className={`relative bg-card rounded-2xl p-6 border transition-all duration-200 hover:shadow-sm cursor-pointer group ${
                     notification.isRead
-                      ? "border-slate-700"
-                      : "border-orange-500/30 bg-slate-800/80"
+                      ? "border-border"
+                      : "border-primary/20 bg-primary/5 shadow-sm"
                   }`}
                   onClick={() =>
                     !notification.isRead && markAsRead(notification.id)
                   }>
                   <div className="flex items-start space-x-4">
                     {/* Icon */}
-                    <div className={`flex-shrink-0 p-2 rounded-lg ${bgColor}`}>
+                    <div className={`flex-shrink-0 p-3 rounded-xl ${bgColor}`}>
                       <Icon className={`h-5 w-5 ${iconColor}`} />
                     </div>
 
@@ -474,34 +476,34 @@ export default function NotificationsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <h3
-                          className={`text-sm font-medium ${
+                          className={`text-sm font-semibold ${
                             notification.isRead
-                              ? "text-slate-300"
-                              : "text-white"
+                              ? "text-muted-foreground"
+                              : "text-foreground"
                           }`}>
                           {translateNotificationContent(notification.title, notification.message).translatedTitle}
                         </h3>
                         <div className="flex items-center space-x-2">
-                          <span className="text-xs text-slate-500">
+                          <span className="text-xs text-muted-foreground">
                             {getRelativeTime(notification.createdAt, t)}
                           </span>
                           {!notification.isRead && (
-                            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                            <div className="w-2 h-2 bg-primary rounded-full"></div>
                           )}
                         </div>
                       </div>
 
                       <p
-                        className={`text-sm mt-1 ${
+                        className={`text-sm mt-2 ${
                           notification.isRead
-                            ? "text-slate-400"
-                            : "text-slate-300"
+                            ? "text-muted-foreground"
+                            : "text-foreground/80"
                         }`}>
                         {translateNotificationContent(notification.title, notification.message).translatedMessage}
                       </p>
 
-                      <div className="flex items-center justify-between mt-2">
-                        <span className="text-xs text-slate-500">
+                      <div className="flex items-center justify-between mt-3">
+                        <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-lg">
                           {getNotificationTypeText(notification.type, t)}
                         </span>
 
@@ -512,7 +514,7 @@ export default function NotificationsPage() {
                               markAsRead(notification.id);
                             }}
                             disabled={actionLoading === notification.id}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-orange-400 hover:text-orange-300 flex items-center space-x-1">
+                            className="opacity-0 group-hover:opacity-100 transition-all duration-200 text-xs text-primary hover:text-primary/80 flex items-center space-x-1 bg-primary/10 hover:bg-primary/20 px-2 py-1 rounded-lg">
                             {actionLoading === notification.id ? (
                               <RefreshCw className="h-3 w-3 animate-spin" />
                             ) : (

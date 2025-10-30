@@ -227,28 +227,32 @@ export default function PaymentRemindersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+      <div className="bg-card border-b border-border px-6 py-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-white flex items-center">
-              <IndianRupee className="h-8 w-8 text-orange-500 mr-3" />
-              Payment Reminders
-            </h1>
-            <p className="text-slate-400">Manage automated payment reminder system</p>
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-primary/10 rounded-xl">
+              <IndianRupee className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">
+                Payment Reminders
+              </h1>
+              <p className="text-muted-foreground mt-1">Manage automated payment reminder system</p>
+            </div>
           </div>
           
           <div className="flex items-center space-x-3">
             <button
               onClick={() => {fetchReminders(); fetchStats();}}
-              className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
+              className="p-3 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-colors"
             >
               <RefreshCw className="h-5 w-5" />
             </button>
             <button
               onClick={() => setShowSendModal(true)}
-              className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-xl font-semibold transition-all duration-200 flex items-center shadow-sm hover:shadow-md"
             >
               <Plus className="h-4 w-4 mr-2" />
               Send Reminder
@@ -261,23 +265,23 @@ export default function PaymentRemindersPage() {
         {/* Stats Cards */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+            <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm">Total Reminders</p>
-                  <p className="text-2xl font-bold text-white">{stats.scheduled + stats.completed}</p>
+                  <p className="text-muted-foreground text-sm">Total Reminders</p>
+                  <p className="text-2xl font-bold text-foreground">{stats.scheduled + stats.completed}</p>
                 </div>
-                <BarChart3 className="h-8 w-8 text-blue-400" />
+                <BarChart3 className="h-8 w-8 text-primary" />
               </div>
             </div>
 
-            <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+            <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm">Successfully Sent</p>
-                  <p className="text-2xl font-bold text-green-400">{stats.sent}</p>
+                  <p className="text-muted-foreground text-sm">Successfully Sent</p>
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.sent}</p>
                   <div className="flex items-center mt-1">
-                    <TrendingUp className="h-3 w-3 text-green-400 mr-1" />
+                    <TrendingUp className="h-3 w-3 text-green-600 dark:text-green-400 mr-1" />
                     <span className="text-green-400 text-xs">Active</span>
                   </div>
                 </div>

@@ -245,42 +245,42 @@ export default function ArtisanDashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">{t("loadingDashboard")}</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">{t("loadingDashboard")}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+      <div className="bg-card border-b border-border px-6 py-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white">
+            <h1 className="text-3xl font-bold text-foreground">
               {t("artisanStudio")}
             </h1>
-            <p className="text-slate-400">
+            <p className="text-muted-foreground mt-1">
               {t("welcomeBack")}, {user?.name || user?.email || "Artisan"}
               {user?.location && ` from ${user.location}`}
             </p>
           </div>
 
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-3 bg-slate-700 rounded-lg px-3 py-2">
-              <div className="h-8 w-8 bg-orange-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">
+            <div className="flex items-center space-x-3 bg-muted rounded-2xl px-4 py-3 border border-border hover:shadow-sm transition-all duration-300">
+              <div className="h-10 w-10 bg-primary rounded-full flex items-center justify-center">
+                <span className="text-primary-foreground text-sm font-medium">
                   {user?.name?.charAt(0).toUpperCase() || "A"}
                 </span>
               </div>
-              <div className="text-right">
-                <p className="text-sm font-medium text-white">
+              <div>
+                <p className="text-sm font-medium text-foreground">
                   {user?.name || "Artisan"}
                 </p>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-muted-foreground">
                   {user?.specialty || "Creative Artist"}
                 </p>
               </div>
@@ -293,97 +293,105 @@ export default function ArtisanDashboard() {
       <div className="p-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+          <div className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:border-primary/20">
             <div className="flex items-center">
-              <Package className="h-8 w-8 text-orange-500" />
+              <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center">
+                <Package className="h-6 w-6 text-primary" />
+              </div>
               <div className="ml-4">
-                <p className="text-2xl font-semibold text-white">
+                <p className="text-2xl font-semibold text-foreground">
                   {stats.totalProducts}
                 </p>
-                <p className="text-slate-400">{t("totalProducts")}</p>
+                <p className="text-muted-foreground text-sm">{t("totalProducts")}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+          <div className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:border-primary/20">
             <div className="flex items-center">
-              <Heart className="h-8 w-8 text-green-500" />
+              <div className="w-12 h-12 bg-green-500/10 rounded-2xl flex items-center justify-center">
+                <Heart className="h-6 w-6 text-green-600 dark:text-green-400" />
+              </div>
               <div className="ml-4">
-                <p className="text-2xl font-semibold text-white">
+                <p className="text-2xl font-semibold text-foreground">
                   {stats.activeProducts}
                 </p>
-                <p className="text-slate-400">{t("activeProducts")}</p>
+                <p className="text-muted-foreground text-sm">{t("activeProducts")}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+          <div className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:border-primary/20">
             <div className="flex items-center">
-              <Eye className="h-8 w-8 text-blue-500" />
+              <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center">
+                <Eye className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              </div>
               <div className="ml-4">
-                <p className="text-2xl font-semibold text-white">
+                <p className="text-2xl font-semibold text-foreground">
                   {stats.totalViews}
                 </p>
-                <p className="text-slate-400">{t("totalViews")}</p>
+                <p className="text-muted-foreground text-sm">{t("totalViews")}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+          <div className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:border-primary/20">
             <div className="flex items-center">
-              <DollarSign className="h-8 w-8 text-purple-500" />
+              <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center">
+                <DollarSign className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              </div>
               <div className="ml-4">
-                <p className="text-2xl font-semibold text-white">
+                <p className="text-2xl font-semibold text-foreground">
                   {stats.totalOrders}
                 </p>
-                <p className="text-slate-400">{t("totalOrders")}</p>
+                <p className="text-muted-foreground text-sm">{t("totalOrders")}</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-slate-800 border border-slate-700 rounded-lg mb-8 p-6">
-          <h2 className="text-lg font-semibold text-white mb-4">
+        <div className="bg-card border border-border rounded-2xl mb-8 p-6 hover:shadow-lg transition-all duration-300">
+          <h2 className="text-xl font-semibold text-foreground mb-6">
             {t("quickActions")}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <button
               onClick={handleAddProduct}
-              className="flex items-center justify-center p-4 border-2 border-dashed border-orange-500/30 rounded-lg text-orange-400 hover:border-orange-500/60 hover:text-orange-300 transition-colors bg-orange-500/5">
-              <Plus className="h-6 w-6 mr-2" />
+              className="flex items-center justify-center p-4 border-2 border-dashed border-primary/30 rounded-xl text-primary hover:border-primary/60 hover:bg-primary/5 transition-all duration-300 bg-primary/5">
+              <Plus className="h-5 w-5 mr-2" />
               {t("createProduct")}
             </button>
             <button
               onClick={() => router.push("/artisan/messages")}
-              className="flex items-center justify-center p-4 border-2 border-dashed border-blue-500/30 rounded-lg text-blue-400 hover:border-blue-500/60 hover:text-blue-300 transition-colors bg-blue-500/5">
-              <Users className="h-6 w-6 mr-2" />
+              className="flex items-center justify-center p-4 border-2 border-dashed border-blue-500/30 rounded-xl text-blue-600 dark:text-blue-400 hover:border-blue-500/60 hover:bg-blue-500/5 transition-all duration-300 bg-blue-500/5">
+              <Users className="h-5 w-5 mr-2" />
               {t("chatWithCustomers")}
             </button>
             <button
               onClick={() => router.push("/artisan/feedback")}
-              className="flex items-center justify-center p-4 border-2 border-dashed border-purple-500/30 rounded-lg text-purple-400 hover:border-purple-500/60 hover:text-purple-300 transition-colors bg-purple-500/5">
-              <Heart className="h-6 w-6 mr-2" />
+              className="flex items-center justify-center p-4 border-2 border-dashed border-purple-500/30 rounded-xl text-purple-600 dark:text-purple-400 hover:border-purple-500/60 hover:bg-purple-500/5 transition-all duration-300 bg-purple-500/5">
+              <Heart className="h-5 w-5 mr-2" />
               {t("customerFeedback")}
             </button>
             <button
               onClick={() => router.push("/artisan/analytics")}
-              className="flex items-center justify-center p-4 border-2 border-dashed border-green-500/30 rounded-lg text-green-400 hover:border-green-500/60 hover:text-green-300 transition-colors bg-green-500/5">
-              <TrendingUp className="h-6 w-6 mr-2" />
+              className="flex items-center justify-center p-4 border-2 border-dashed border-green-500/30 rounded-xl text-green-600 dark:text-green-400 hover:border-green-500/60 hover:bg-green-500/5 transition-all duration-300 bg-green-500/5">
+              <TrendingUp className="h-5 w-5 mr-2" />
               {t("viewAnalytics")}
             </button>
           </div>
         </div>
 
         {/* Products Grid */}
-        <div className="bg-slate-800 border border-slate-700 rounded-lg">
-          <div className="px-6 py-4 border-b border-slate-700 flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-white">
+        <div className="bg-card border border-border rounded-2xl hover:shadow-lg transition-all duration-300">
+          <div className="px-6 py-5 border-b border-border flex justify-between items-center">
+            <h2 className="text-xl font-semibold text-foreground">
               {t("recentProducts")}
             </h2>
             <button
               onClick={handleAddProduct}
-              className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors flex items-center">
+              className="bg-primary text-primary-foreground px-4 py-2 rounded-xl hover:bg-primary/90 transition-all duration-300 flex items-center shadow-sm hover:shadow-md">
               <Plus className="h-4 w-4 mr-2" />
               {t("createProduct")}
             </button>
@@ -391,15 +399,17 @@ export default function ArtisanDashboard() {
 
           <div className="p-6">
             {products.length === 0 ? (
-              <div className="text-center py-12">
-                <Package className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-white mb-2">
+              <div className="text-center py-16">
+                <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <Package className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground mb-3">
                   {t("noProducts")}
                 </h3>
-                <p className="text-slate-400 mb-4">{t("startCreating")}</p>
+                <p className="text-muted-foreground mb-6 max-w-sm mx-auto">{t("startCreating")}</p>
                 <button
                   onClick={handleAddProduct}
-                  className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors">
+                  className="bg-primary text-primary-foreground px-6 py-3 rounded-xl hover:bg-primary/90 transition-all duration-300 shadow-sm hover:shadow-md">
                   {t("createProduct")}
                 </button>
               </div>
@@ -407,8 +417,8 @@ export default function ArtisanDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {isTranslating && (
                   <div className="col-span-full text-center py-4">
-                    <div className="inline-flex items-center text-orange-400">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-400 mr-2"></div>
+                    <div className="inline-flex items-center text-primary">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
                       <span className="text-sm">Translating products...</span>
                     </div>
                   </div>
@@ -416,62 +426,62 @@ export default function ArtisanDashboard() {
                 {translatedProducts.map((product) => (
                   <div
                     key={product.id}
-                    className="bg-slate-700 border border-slate-600 rounded-lg overflow-hidden hover:border-orange-500/50 transition-all hover:shadow-lg">
-                    <div className="aspect-w-16 aspect-h-9 bg-slate-600">
+                    className="bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-lg transition-all duration-300 group">
+                    <div className="aspect-w-16 aspect-h-9 bg-muted">
                       {product.imageUrl ? (
                         <img
                           src={product.imageUrl}
                           alt={product.name}
-                          className="w-full h-48 object-cover"
+                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
-                        <div className="w-full h-48 bg-slate-600 flex items-center justify-center">
-                          <Package className="h-8 w-8 text-slate-400" />
+                        <div className="w-full h-48 bg-muted flex items-center justify-center">
+                          <Package className="h-8 w-8 text-muted-foreground" />
                         </div>
                       )}
                     </div>
 
-                    <div className="p-4">
+                    <div className="p-5">
                       <h3
-                        className="font-medium text-white mb-1 cursor-pointer hover:text-orange-400 transition-colors"
+                        className="font-semibold text-foreground mb-2 cursor-pointer hover:text-primary transition-colors line-clamp-1"
                         onClick={() => handleViewProduct(product.id)}>
                         {product.name}
                       </h3>
                       {product.description && (
-                        <p className="text-sm text-slate-300 mb-2 line-clamp-2">
+                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                           {product.description}
                         </p>
                       )}
-                      <p className="text-lg font-semibold text-orange-400 mb-2">
+                      <p className="text-xl font-bold text-primary mb-4">
                         ₹{product.price.toLocaleString()}
                       </p>
 
                       <div className="flex items-center justify-between">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
                             product.isActive
-                              ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                              : "bg-slate-500/10 text-slate-400 border border-slate-500/20"
+                              ? "bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20"
+                              : "bg-muted/50 text-muted-foreground border border-border"
                           }`}>
                           {product.isActive ? t("active") : t("inactive")}
                         </span>
 
-                        <div className="flex space-x-2">
+                        <div className="flex space-x-1">
                           <button
                             onClick={() => handleViewProduct(product.id)}
-                            className="p-1 text-slate-400 hover:text-blue-400 transition-colors"
+                            className="p-2 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200"
                             title={t("viewProduct")}>
                             <Eye className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleEditProduct(product.id)}
-                            className="p-1 text-slate-400 hover:text-green-400 transition-colors"
+                            className="p-2 text-muted-foreground hover:text-green-600 dark:hover:text-green-400 hover:bg-green-500/10 rounded-lg transition-all duration-200"
                             title={t("editProduct")}>
                             <Edit className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleDeleteProduct(product.id)}
-                            className="p-1 text-slate-400 hover:text-red-400 transition-colors"
+                            className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all duration-200"
                             title={t("deleteProduct")}>
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -488,16 +498,16 @@ export default function ArtisanDashboard() {
 
       {/* Product Detail Modal */}
       {showProductModal && selectedProduct && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 border border-slate-700 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-card border border-border rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-slate-700 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-white">
+            <div className="px-6 py-5 border-b border-border flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-foreground">
                 {t("productDetails")}
               </h2>
               <button
                 onClick={() => setShowProductModal(false)}
-                className="p-2 text-slate-400 hover:text-white transition-colors">
+                className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-all duration-200">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -510,33 +520,33 @@ export default function ArtisanDashboard() {
                   <img
                     src={selectedProduct.imageUrl}
                     alt={selectedProduct.name}
-                    className="w-full h-64 object-cover rounded-lg bg-slate-700"
+                    className="w-full h-64 object-cover rounded-2xl bg-muted border border-border"
                   />
                 ) : (
-                  <div className="w-full h-64 bg-slate-700 flex items-center justify-center rounded-lg">
-                    <Package className="h-16 w-16 text-slate-400" />
+                  <div className="w-full h-64 bg-muted flex items-center justify-center rounded-2xl border border-border">
+                    <Package className="h-16 w-16 text-muted-foreground" />
                   </div>
                 )}
               </div>
 
               {/* Product Info */}
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
-                  <h3 className="text-2xl font-bold text-white mb-2">
+                  <h3 className="text-2xl font-bold text-foreground mb-3">
                     {selectedProduct.name}
                   </h3>
-                  <p className="text-3xl font-bold text-orange-400">
+                  <p className="text-3xl font-bold text-primary">
                     ₹{selectedProduct.price.toLocaleString()}
                   </p>
                 </div>
 
                 {selectedProduct.description && (
                   <div>
-                    <h4 className="text-lg font-semibold text-white mb-2 flex items-center">
-                      <Package className="h-5 w-5 mr-2" />
+                    <h4 className="text-lg font-semibold text-foreground mb-3 flex items-center">
+                      <Package className="h-5 w-5 mr-2 text-primary" />
                       {t("description")}
                     </h4>
-                    <p className="text-slate-300 leading-relaxed">
+                    <p className="text-muted-foreground leading-relaxed">
                       {selectedProduct.description}
                     </p>
                   </div>

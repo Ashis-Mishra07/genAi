@@ -21,11 +21,11 @@ export default function LanguageSelector() {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
+        className="flex items-center gap-2 px-3 py-2 bg-background border border-border rounded-full hover:bg-muted/50 transition-all duration-200 shadow-sm min-w-fit"
         aria-label={t('changeLanguage')}
       >
         <svg 
-          className="w-4 h-4 text-gray-600" 
+          className="w-4 h-4 text-muted-foreground" 
           fill="none" 
           stroke="currentColor" 
           viewBox="0 0 24 24"
@@ -37,11 +37,11 @@ export default function LanguageSelector() {
             d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" 
           />
         </svg>
-        <span className="text-sm font-medium text-gray-700">
+        <span className="text-sm font-medium text-foreground">
           {localeNames[currentLocale]}
         </span>
         <svg 
-          className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
           fill="none" 
           stroke="currentColor" 
           viewBox="0 0 24 24"
@@ -56,25 +56,25 @@ export default function LanguageSelector() {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
-          <div className="p-2">
-            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide px-2 py-1 mb-1">
+        <div className="absolute top-full right-0 mt-2 w-64 bg-background/95 backdrop-blur-md border border-border/50 rounded-xl shadow-lg z-[60] max-h-64 overflow-y-auto min-w-max">
+          <div className="p-3">
+            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-2 py-1 mb-2">
               {t('selectLanguage')}
             </div>
             {Object.entries(localeNames).map(([locale, name]) => (
               <button
                 key={locale}
                 onClick={() => handleLanguageChange(locale as Locale)}
-                className={`w-full text-left px-3 py-2 rounded-md transition-colors flex items-center justify-between ${
+                className={`w-full text-left px-3 py-2.5 rounded-lg transition-all duration-200 flex items-center justify-between group ${
                   currentLocale === locale
-                    ? 'bg-blue-50 text-blue-700 font-medium'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    ? 'bg-primary/10 text-primary font-medium border border-primary/20'
+                    : 'text-foreground hover:bg-muted/50 hover:text-foreground'
                 }`}
               >
-                <span>{name}</span>
+                <span className="text-sm">{name}</span>
                 {currentLocale === locale && (
                   <svg 
-                    className="w-4 h-4 text-blue-600" 
+                    className="w-4 h-4 text-primary" 
                     fill="currentColor" 
                     viewBox="0 0 20 20"
                   >

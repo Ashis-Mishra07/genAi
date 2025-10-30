@@ -265,33 +265,35 @@ export default function ArtisanFeedbackPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-orange-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-center">
-          <MessageCircle className="h-12 w-12 mx-auto mb-4 animate-pulse" />
-          <p>{t("loadingMessages")}</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <MessageCircle className="h-12 w-12 mx-auto mb-4 animate-pulse text-primary" />
+          <p className="text-muted-foreground">{t("loadingMessages")}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-orange-900 to-slate-900 p-4">
+    <div className="min-h-screen bg-background p-6">
       {/* Header */}
       <div className="max-w-7xl mx-auto mb-8">
         <div className="flex items-center justify-between">
           <button
             onClick={() => router.push("/artisan/dashboard")}
-            className="flex items-center text-white/70 hover:text-white transition-colors">
+            className="flex items-center text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-5 w-5 mr-2" />
             {t("backToDashboard")}
           </button>
-          <div className="flex items-center text-white">
-            <MessageCircle className="h-6 w-6 mr-2" />
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-primary/10 rounded-xl">
+              <MessageCircle className="h-6 w-6 text-primary" />
+            </div>
             <div>
-              <span className="text-xl font-bold">
+              <h1 className="text-3xl font-bold text-foreground">
                 {t("customerFeedback")}
-              </span>
-              <p className="text-sm text-white/70">
+              </h1>
+              <p className="text-muted-foreground mt-1">
                 {unreadCount > 0
                   ? unreadCount === 1 
                     ? `1 ${t("unreadFeedback")}`
@@ -307,37 +309,37 @@ export default function ArtisanFeedbackPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Messages List */}
           <div className="lg:col-span-1">
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+            <div className="bg-card border border-border rounded-2xl shadow-sm">
               {/* Search and Filter */}
-              <div className="p-4 border-b border-white/20">
+              <div className="p-6 border-b border-border">
                 <div className="relative mb-4">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-white/50" />
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <input
                     type="text"
                     placeholder={t("searchFeedback")}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                   />
                 </div>
 
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
-                  <option value="all" className="bg-slate-800">
+                  className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200">
+                  <option value="all" className="bg-background">
                     {t("allFeedback")}
                   </option>
-                  <option value="new" className="bg-slate-800">
+                  <option value="new" className="bg-background">
                     {t("new")}
                   </option>
-                  <option value="replied" className="bg-slate-800">
+                  <option value="replied" className="bg-background">
                     {t("replied")}
                   </option>
-                  <option value="pending" className="bg-slate-800">
+                  <option value="pending" className="bg-background">
                     {t("pending")}
                   </option>
-                  <option value="closed" className="bg-slate-800">
+                  <option value="closed" className="bg-background">
                     {t("closed")}
                   </option>
                 </select>

@@ -124,10 +124,10 @@ export default function ArtisanProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">
             {t('loadingProfile')}
           </p>
         </div>
@@ -136,18 +136,22 @@ export default function ArtisanProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+      <div className="bg-card border-b border-border px-6 py-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-white">
-            {t('profileSettings')}
-          </h1>
-          <div className="flex items-center text-slate-400">
-            <User className="h-5 w-5 mr-2" />
-            <span>
-              {t('manageYourAccount')}
-            </span>
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-primary/10 rounded-xl">
+              <User className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">
+                {t('profileSettings')}
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                {t('manageYourAccount')}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -156,18 +160,18 @@ export default function ArtisanProfilePage() {
       <div className="p-6">
         <div className="max-w-2xl mx-auto">
           {/* Profile Form */}
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="bg-card border border-border rounded-2xl p-8 shadow-sm">
+            <form onSubmit={handleSubmit} className="space-y-8">
               {/* Avatar Section */}
-              <div className="flex flex-col items-center mb-6">
+              <div className="flex flex-col items-center mb-8">
                 <div className="relative">
-                  <div className="w-24 h-24 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-4">
+                  <div className="w-32 h-32 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center text-primary-foreground text-3xl font-bold shadow-lg">
                     {profile.avatar ? (
                       <Image
                         src={profile.avatar}
                         alt="Profile"
-                        width={96}
-                        height={96}
+                        width={128}
+                        height={128}
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
@@ -176,17 +180,21 @@ export default function ArtisanProfilePage() {
                   </div>
                   <button
                     type="button"
-                    className="absolute bottom-0 right-0 bg-orange-500 hover:bg-orange-600 text-white rounded-full p-2 transition-colors">
+                    className="absolute bottom-2 right-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full p-3 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105">
                     <Camera className="h-4 w-4" />
                   </button>
+                </div>
+                <div className="text-center mt-4">
+                  <h3 className="text-lg font-semibold text-foreground">Profile Photo</h3>
+                  <p className="text-sm text-muted-foreground">Update your avatar to personalize your profile</p>
                 </div>
               </div>
 
               {/* Form Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-slate-300 text-sm font-medium mb-2">
-                    <User className="h-4 w-4 inline mr-1" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="flex items-center text-foreground text-sm font-medium">
+                    <User className="h-4 w-4 mr-2 text-primary" />
                     {t('fullName')} *
                   </label>
                   <input
@@ -194,15 +202,15 @@ export default function ArtisanProfilePage() {
                     name="name"
                     value={profile.name}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                     placeholder={t('enterFullName')}
                     required
                   />
                 </div>
 
-                <div>
-                  <label className="block text-slate-300 text-sm font-medium mb-2">
-                    <Mail className="h-4 w-4 inline mr-1" />
+                <div className="space-y-2">
+                  <label className="flex items-center text-foreground text-sm font-medium">
+                    <Mail className="h-4 w-4 mr-2 text-primary" />
                     {t('emailAddress')} *
                   </label>
                   <input
@@ -210,15 +218,15 @@ export default function ArtisanProfilePage() {
                     name="email"
                     value={profile.email}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                     placeholder={t('enterEmail')}
                     required
                   />
                 </div>
 
-                <div>
-                  <label className="block text-slate-300 text-sm font-medium mb-2">
-                    <Phone className="h-4 w-4 inline mr-1" />
+                <div className="space-y-2">
+                  <label className="flex items-center text-foreground text-sm font-medium">
+                    <Phone className="h-4 w-4 mr-2 text-primary" />
                     {t('phoneNumber')}
                   </label>
                   <input
@@ -226,14 +234,14 @@ export default function ArtisanProfilePage() {
                     name="phone"
                     value={profile.phone || ""}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                     placeholder={t('enterPhoneNumber')}
                   />
                 </div>
 
-                <div>
-                  <label className="block text-slate-300 text-sm font-medium mb-2">
-                    <Palette className="h-4 w-4 inline mr-1" />
+                <div className="space-y-2">
+                  <label className="flex items-center text-foreground text-sm font-medium">
+                    <Palette className="h-4 w-4 mr-2 text-primary" />
                     {t('specialty')}
                   </label>
                   <input
@@ -241,15 +249,15 @@ export default function ArtisanProfilePage() {
                     name="specialty"
                     value={profile.specialty || ""}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                     placeholder={t('specialtyPlaceholder')}
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-slate-300 text-sm font-medium mb-2">
-                  <MapPin className="h-4 w-4 inline mr-1" />
+              <div className="space-y-2">
+                <label className="flex items-center text-foreground text-sm font-medium">
+                  <MapPin className="h-4 w-4 mr-2 text-primary" />
                   {t('location')}
                 </label>
                 <input
@@ -257,14 +265,14 @@ export default function ArtisanProfilePage() {
                   name="location"
                   value={profile.location || ""}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                   placeholder={t('enterLocation')}
                 />
               </div>
 
-              <div>
-                <label className="block text-slate-300 text-sm font-medium mb-2">
-                  <FileText className="h-4 w-4 inline mr-1" />
+              <div className="space-y-2">
+                <label className="flex items-center text-foreground text-sm font-medium">
+                  <FileText className="h-4 w-4 mr-2 text-primary" />
                   {t('bio')}
                 </label>
                 <textarea
@@ -272,20 +280,20 @@ export default function ArtisanProfilePage() {
                   value={profile.bio || ""}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 resize-none"
+                  className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none transition-all duration-200"
                   placeholder={t('bioPlaceholder')}
                 />
               </div>
 
               {/* Error and Success Messages */}
               {error && (
-                <div className="bg-red-500/20 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg">
+                <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-xl">
                   {error}
                 </div>
               )}
 
               {success && (
-                <div className="bg-green-500/20 border border-green-500/50 text-green-400 px-4 py-3 rounded-lg">
+                <div className="bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 px-4 py-3 rounded-xl">
                   {success}
                 </div>
               )}
@@ -294,10 +302,10 @@ export default function ArtisanProfilePage() {
               <button
                 type="submit"
                 disabled={isSaving}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-sm hover:shadow-md hover:scale-[1.02] transform">
                 {isSaving ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground mr-2"></div>
                     {t('saving')}
                   </>
                 ) : (

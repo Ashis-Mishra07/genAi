@@ -250,32 +250,36 @@ export default function SupportDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-orange-500 border-t-transparent mx-auto mb-4"></div>
-          <p className="text-white">{t("loadingSupportDashboard")}</p>
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4"></div>
+          <p className="text-foreground">{t("loadingSupportDashboard")}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+      <div className="bg-card border-b border-border px-6 py-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-white flex items-center">
-              <MessageSquare className="h-8 w-8 text-orange-500 mr-3" />
-              {t("supportDashboard")}
-            </h1>
-            <p className="text-slate-400">{t("manageCustomerSupport")}</p>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center">
+              <MessageSquare className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">
+                {t("supportDashboard")}
+              </h1>
+              <p className="text-muted-foreground mt-1">{t("manageCustomerSupport")}</p>
+            </div>
           </div>
 
           <div className="flex items-center space-x-4">
             <button
               onClick={() => loadSupportData()}
-              className="flex items-center space-x-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors">
+              className="flex items-center space-x-2 bg-primary text-primary-foreground px-6 py-2 rounded-xl hover:bg-primary/90 transition-all duration-300 shadow-sm hover:shadow-md">
               <RefreshCw className="h-4 w-4" />
               <span>{t("refresh")}</span>
             </button>
@@ -287,15 +291,17 @@ export default function SupportDashboardPage() {
         {/* Stats Overview */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-slate-800 rounded-lg border border-slate-700 p-6">
+            <div className="bg-card rounded-2xl border border-border p-6 hover:shadow-lg transition-all duration-300">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm">{t("totalTickets")}</p>
-                  <p className="text-2xl font-bold text-white">{stats.tickets.total}</p>
+                  <p className="text-muted-foreground text-sm">{t("totalTickets")}</p>
+                  <p className="text-2xl font-bold text-foreground">{stats.tickets.total}</p>
                 </div>
-                <FileText className="h-8 w-8 text-blue-500" />
+                <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center">
+                  <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
               </div>
-              <p className="text-slate-400 text-xs mt-2">
+              <p className="text-muted-foreground text-xs mt-2">
                 {stats.tickets.open} {t("open")}, {stats.tickets.inProgress} {t("inProgress")}
               </p>
             </div>

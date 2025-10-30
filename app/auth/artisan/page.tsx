@@ -92,29 +92,29 @@ export default function ArtisanAuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-orange-900 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Back Button */}
         <button
           onClick={() => router.back()}
-          className="flex items-center text-white/70 hover:text-white mb-8 transition-colors">
-          <ArrowLeft className="h-5 w-5 mr-2" />
+          className="flex items-center text-muted-foreground hover:text-foreground mb-8 transition-all duration-300 group">
+          <ArrowLeft className="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
           Back to role selection
         </button>
 
         {/* Artisan Auth Card */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+        <div className="bg-card border border-border rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 backdrop-blur-sm">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Palette className="h-8 w-8 text-orange-400" />
+            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Palette className="h-8 w-8 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-2">
+            <h1 className="text-3xl font-bold text-foreground mb-3">
               {mode === "signin"
                 ? "Welcome Back, Artisan!"
                 : "Join Our Artisan Community"}
             </h1>
-            <p className="text-white/70">
+            <p className="text-muted-foreground">
               {mode === "signin"
                 ? "Sign in to showcase your crafts"
                 : "Share your craft with the world"}
@@ -122,45 +122,45 @@ export default function ArtisanAuthPage() {
           </div>
 
           {/* Mode Toggle */}
-          <div className="flex bg-white/5 rounded-lg p-1 mb-6">
+          <div className="flex bg-muted/30 rounded-xl p-1 mb-8">
             <button
               onClick={() => setMode("signin")}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+              className={`flex-1 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ${
                 mode === "signin"
-                  ? "bg-orange-500 text-white shadow-lg"
-                  : "text-white/70 hover:text-white"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               }`}>
               Sign In
             </button>
             <button
               onClick={() => setMode("signup")}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+              className={`flex-1 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-200 ${
                 mode === "signup"
-                  ? "bg-orange-500 text-white shadow-lg"
-                  : "text-white/70 hover:text-white"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               }`}>
               Sign Up
             </button>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email */}
-            <div>
+            <div className="space-y-2">
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-white/80 mb-2">
+                className="block text-sm font-medium text-foreground">
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <input
                   type="email"
                   id="email"
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full pl-11 pr-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                   placeholder="artisan@example.com"
                   required
                 />
@@ -168,21 +168,21 @@ export default function ArtisanAuthPage() {
             </div>
 
             {/* Password */}
-            <div>
+            <div className="space-y-2">
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-white/80 mb-2">
+                className="block text-sm font-medium text-foreground">
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <input
                   type="password"
                   id="password"
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full pl-11 pr-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                   placeholder="••••••••"
                   required
                 />
@@ -193,21 +193,21 @@ export default function ArtisanAuthPage() {
             {mode === "signup" && (
               <>
                 {/* Name */}
-                <div>
+                <div className="space-y-2">
                   <label
                     htmlFor="name"
-                    className="block text-sm font-medium text-white/80 mb-2">
+                    className="block text-sm font-medium text-foreground">
                     Full Name
                   </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <input
                       type="text"
                       id="name"
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="w-full pl-11 pr-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                       placeholder="Your full name"
                       required={mode === "signup"}
                     />
@@ -215,42 +215,42 @@ export default function ArtisanAuthPage() {
                 </div>
 
                 {/* Phone */}
-                <div>
+                <div className="space-y-2">
                   <label
                     htmlFor="phone"
-                    className="block text-sm font-medium text-white/80 mb-2">
+                    className="block text-sm font-medium text-foreground">
                     Phone Number
                   </label>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40" />
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <input
                       type="tel"
                       id="phone"
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="w-full pl-11 pr-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                       placeholder="+91 9876543210"
                     />
                   </div>
                 </div>
 
                 {/* Specialty */}
-                <div>
+                <div className="space-y-2">
                   <label
                     htmlFor="specialty"
-                    className="block text-sm font-medium text-white/80 mb-2">
+                    className="block text-sm font-medium text-foreground">
                     Craft Specialty
                   </label>
                   <div className="relative">
-                    <Palette className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40" />
+                    <Palette className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <input
                       type="text"
                       id="specialty"
                       name="specialty"
                       value={formData.specialty}
                       onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="w-full pl-11 pr-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                       placeholder="e.g., Pottery, Textile, Jewelry"
                       required={mode === "signup"}
                     />
@@ -258,42 +258,42 @@ export default function ArtisanAuthPage() {
                 </div>
 
                 {/* Location */}
-                <div>
+                <div className="space-y-2">
                   <label
                     htmlFor="location"
-                    className="block text-sm font-medium text-white/80 mb-2">
+                    className="block text-sm font-medium text-foreground">
                     Location
                   </label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40" />
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <input
                       type="text"
                       id="location"
                       name="location"
                       value={formData.location}
                       onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="w-full pl-11 pr-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                       placeholder="City, State, Country"
                     />
                   </div>
                 </div>
 
                 {/* Bio */}
-                <div>
+                <div className="space-y-2">
                   <label
                     htmlFor="bio"
-                    className="block text-sm font-medium text-white/80 mb-2">
+                    className="block text-sm font-medium text-foreground">
                     Brief Bio
                   </label>
                   <div className="relative">
-                    <FileText className="absolute left-3 top-3 h-5 w-5 text-white/40" />
+                    <FileText className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                     <textarea
                       id="bio"
                       name="bio"
                       value={formData.bio}
                       onChange={handleInputChange}
                       rows={3}
-                      className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+                      className="w-full pl-11 pr-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none transition-all duration-200"
                       placeholder="Tell customers about your craft and heritage..."
                     />
                   </div>
@@ -302,7 +302,7 @@ export default function ArtisanAuthPage() {
             )}
 
             {error && (
-              <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 text-red-300 text-sm">
+              <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-xl text-sm">
                 {error}
               </div>
             )}
@@ -310,10 +310,10 @@ export default function ArtisanAuthPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-600 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-4 px-6 rounded-xl font-semibold transition-all duration-200 shadow-sm hover:shadow-md hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
               {isLoading ? (
                 <div className="flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                  <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2"></div>
                   {mode === "signin" ? "Signing In..." : "Creating Account..."}
                 </div>
               ) : mode === "signin" ? (

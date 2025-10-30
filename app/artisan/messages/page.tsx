@@ -710,48 +710,52 @@ Product Data: ${JSON.stringify(product)}`;
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">Loading messages...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading messages...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+      <div className="bg-card border-b border-border px-6 py-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-white flex items-center">
-              <MessageCircle className="h-6 w-6 mr-2" />
-              {isHindi ? "एडमिन सहायता" : "Admin Support"}
-            </h1>
-            <p className="text-slate-400">
-              {isHindi
-                ? "अपने व्यवसाय को बढ़ाने में सहायता प्राप्त करें"
-                : "Get help to grow your business"}
-            </p>
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-primary/10 rounded-xl">
+              <MessageCircle className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">
+                {isHindi ? "एडमिन सहायता" : "Admin Support"}
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                {isHindi
+                  ? "अपने व्यवसाय को बढ़ाने में सहायता प्राप्त करें"
+                  : "Get help to grow your business"}
+              </p>
+            </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             {/* Connection Status Indicator */}
             <div
-              className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs ${
+              className={`flex items-center space-x-2 px-3 py-2 rounded-xl text-sm ${
                 connectionStatus === "online"
-                  ? "bg-green-500/20 text-green-400"
+                  ? "bg-green-500/10 text-green-600 border border-green-500/20"
                   : connectionStatus === "offline"
-                  ? "bg-yellow-500/20 text-yellow-400"
-                  : "bg-gray-500/20 text-gray-400"
+                  ? "bg-yellow-500/10 text-yellow-600 border border-yellow-500/20"
+                  : "bg-muted text-muted-foreground border border-border"
               }`}>
               <div
                 className={`w-2 h-2 rounded-full ${
                   connectionStatus === "online"
-                    ? "bg-green-400"
+                    ? "bg-green-500"
                     : connectionStatus === "offline"
-                    ? "bg-yellow-400 animate-pulse"
-                    : "bg-gray-400 animate-pulse"
+                    ? "bg-yellow-500 animate-pulse"
+                    : "bg-muted-foreground animate-pulse"
                 }`}></div>
               <span>
                 {connectionStatus === "online"
@@ -768,13 +772,13 @@ Product Data: ${JSON.stringify(product)}`;
               </span>
             </div>
 
-            <button className="p-2 text-slate-400 hover:text-orange-400 transition-colors">
+            <button className="p-2 text-muted-foreground hover:text-primary hover:bg-muted rounded-xl transition-colors">
               <Phone className="h-5 w-5" />
             </button>
-            <button className="p-2 text-slate-400 hover:text-orange-400 transition-colors">
+            <button className="p-2 text-muted-foreground hover:text-primary hover:bg-muted rounded-xl transition-colors">
               <Video className="h-5 w-5" />
             </button>
-            <button className="p-2 text-slate-400 hover:text-orange-400 transition-colors">
+            <button className="p-2 text-muted-foreground hover:text-primary hover:bg-muted rounded-xl transition-colors">
               <MoreVertical className="h-5 w-5" />
             </button>
           </div>
@@ -786,27 +790,27 @@ Product Data: ${JSON.stringify(product)}`;
         {/* Support Categories */}
         {messages.length === 0 && !isLoading && (
           <div className="mb-8">
-            <h3 className="text-lg font-semibold text-white mb-4">
+            <h3 className="text-xl font-semibold text-foreground mb-6">
               {isHindi
                 ? "आज हम आपकी कैसे सहायता कर सकते हैं?"
                 : "How can we help you today?"}
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {supportCategories.map((category) => {
                 const IconComponent = category.icon;
                 return (
                   <button
                     key={category.id}
                     onClick={() => handleCategorySelect(category)}
-                    className="bg-slate-800 border border-slate-700 rounded-lg p-4 text-left hover:bg-slate-700 hover:border-orange-500/50 transition-all duration-200 group">
+                    className="bg-card border border-border rounded-2xl p-6 text-left hover:shadow-sm hover:border-primary/20 transition-all duration-200 group">
                     <div
-                      className={`w-10 h-10 bg-gradient-to-r ${category.color} rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
-                      <IconComponent className="h-5 w-5 text-white" />
+                      className={`w-12 h-12 bg-gradient-to-r ${category.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm`}>
+                      <IconComponent className="h-6 w-6 text-white" />
                     </div>
-                    <h4 className="font-semibold text-white mb-2">
+                    <h4 className="font-semibold text-foreground mb-2">
                       {category.name}
                     </h4>
-                    <p className="text-sm text-slate-400">
+                    <p className="text-sm text-muted-foreground">
                       {category.description}
                     </p>
                   </button>
@@ -817,25 +821,27 @@ Product Data: ${JSON.stringify(product)}`;
         )}
 
         {/* Messages Container */}
-        <div className="bg-slate-800 border border-slate-700 rounded-lg h-[600px] flex flex-col">
+        <div className="bg-card border border-border rounded-2xl h-[600px] flex flex-col shadow-sm">
           {/* Messages Area */}
           <div className="flex-1 p-6 overflow-y-auto space-y-4">
             {messages.length === 0 ? (
-              <div className="text-center text-slate-400 py-12">
-                <HeartHandshake className="h-16 w-16 text-slate-600 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-white mb-2">
+              <div className="text-center py-16">
+                <div className="p-6 bg-muted/30 rounded-full w-fit mx-auto mb-6">
+                  <HeartHandshake className="h-16 w-16 text-muted-foreground mx-auto" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground mb-3">
                   {isHindi
                     ? "एडमिन सहायता में आपका स्वागत है!"
                     : "Welcome to Admin Support!"}
                 </h3>
-                <p className="text-slate-400 mb-4">
+                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                   {isHindi
                     ? "हमारी टीम आपकी सफलता में मदद करने के लिए यहाँ है। ऊपर एक श्रेणी चुनें या अपना प्रश्न टाइप करना शुरू करें।"
                     : "Our team is here to help you succeed. Choose a category above or start typing your question."}
                 </p>
                 {connectionStatus === "offline" && (
-                  <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mt-4 max-w-md mx-auto">
-                    <p className="text-yellow-400 text-sm">
+                  <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 mt-6 max-w-md mx-auto">
+                    <p className="text-yellow-600 dark:text-yellow-400 text-sm">
                       📱{" "}
                       {isHindi
                         ? "ऑफ़लाइन मोड में काम कर रहे हैं। आपके संदेश सुरक्षित हैं और कनेक्शन वापस आने पर भेजे जाएंगे।"
