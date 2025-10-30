@@ -63,36 +63,36 @@ export default function AdminAuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Back Button */}
         <button
           onClick={() => router.back()}
-          className="flex items-center text-white/70 hover:text-white mb-8 transition-colors">
-          <ArrowLeft className="h-5 w-5 mr-2" />
+          className="flex items-center text-muted-foreground hover:text-foreground mb-8 transition-all duration-300 group">
+          <ArrowLeft className="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
           Back to role selection
         </button>
 
         {/* Admin Auth Card */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+        <div className="bg-card border border-border rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 backdrop-blur-sm">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Shield className="h-8 w-8 text-indigo-400" />
+            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+              <Shield className="h-8 w-8 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-2">Admin Access</h1>
-            <p className="text-white/70">Enter your 6-digit admin passcode</p>
+            <h1 className="text-3xl font-bold text-foreground mb-3">Admin Access</h1>
+            <p className="text-muted-foreground">Enter your secure 6-digit passcode</p>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="space-y-4">
               <label
                 htmlFor="passcode"
-                className="block text-sm font-medium text-white/80 mb-2">
+                className="block text-sm font-medium text-foreground mb-3">
                 Admin Passcode
               </label>
-              <div className="relative">
+              <div className="relative group">
                 <input
                   type={showPasscode ? "text" : "password"}
                   id="passcode"
@@ -100,13 +100,13 @@ export default function AdminAuthPage() {
                   onChange={handlePasscodeChange}
                   placeholder="••••••"
                   maxLength={6}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-center text-2xl font-mono tracking-widest"
+                  className="w-full px-6 py-4 bg-background border-2 border-border rounded-2xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-center text-2xl font-mono tracking-[0.5em] transition-all duration-300 hover:border-primary/50"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPasscode(!showPasscode)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/80 transition-colors">
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-all duration-300 p-1 rounded-lg hover:bg-muted">
                   {showPasscode ? (
                     <EyeOff className="h-5 w-5" />
                   ) : (
@@ -114,41 +114,66 @@ export default function AdminAuthPage() {
                   )}
                 </button>
               </div>
-              <div className="mt-2 text-sm text-white/60">
-                {passcode.length}/6 digits entered
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">
+                  {passcode.length}/6 digits entered
+                </span>
+                <div className="flex space-x-1">
+                  {[...Array(6)].map((_, i) => (
+                    <div
+                      key={i}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        i < passcode.length
+                          ? 'bg-primary shadow-sm'
+                          : 'bg-muted'
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 
             {error && (
-              <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 text-red-300 text-sm">
-                {error}
+              <div className="bg-destructive/10 border border-destructive/20 rounded-2xl p-4 text-destructive text-sm flex items-start gap-3">
+                <div className="w-4 h-4 rounded-full bg-destructive/20 flex-shrink-0 mt-0.5"></div>
+                <span>{error}</span>
               </div>
             )}
 
             <button
               type="submit"
               disabled={isLoading || passcode.length !== 6}
-              className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+              className="w-full bg-primary text-primary-foreground py-4 px-6 rounded-2xl font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl">
               {isLoading ? (
                 <div className="flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
-                  Verifying...
+                  <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-3"></div>
+                  Verifying Access...
                 </div>
               ) : (
-                "Access Admin Panel"
+                <div className="flex items-center justify-center">
+                  <Shield className="w-5 h-5 mr-2" />
+                  Access Admin Panel
+                </div>
               )}
             </button>
           </form>
 
           {/* Security Notice */}
-          <div className="mt-6 text-center text-xs text-white/50">
-            <p>🔒 Secure admin access with 6-digit verification</p>
+          <div className="mt-8 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/5 rounded-full border border-primary/10">
+              <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+              <span className="text-xs font-medium text-primary">Secure 6-digit verification</span>
+            </div>
           </div>
         </div>
 
         {/* Helper Info */}
-        <div className="mt-6 text-center text-sm text-white/60">
-          <p>Don't have admin access? Contact the system administrator.</p>
+        <div className="mt-8 text-center">
+          <div className="bg-muted/50 rounded-2xl p-4 border border-border/50">
+            <p className="text-sm text-muted-foreground">
+              Need admin access? Contact your system administrator for assistance.
+            </p>
+          </div>
         </div>
       </div>
     </div>

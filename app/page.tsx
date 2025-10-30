@@ -40,31 +40,36 @@ const RoleCard = ({
 }: RoleCardProps) => (
   <div
     onClick={onClick}
-    className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${gradient} p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl group`}>
+    className="group relative overflow-hidden rounded-3xl bg-card border border-border/50 p-8 cursor-pointer transition-all duration-500 hover:shadow-lg hover:shadow-primary/5 hover:border-primary/20 hover:bg-card/80 backdrop-blur-sm">
+    
+    {/* Subtle gradient overlay */}
+    <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-secondary/[0.02] rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+    
     <div className="relative z-10">
-      <div className="mb-6 flex items-center justify-center w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm">
+      <div className="mb-6 flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary group-hover:bg-primary/15 group-hover:scale-110 transition-all duration-300">
         {icon}
       </div>
 
-      <h3 className="text-2xl font-bold text-white mb-3">{title}</h3>
-      <p className="text-white/90 mb-6">{description}</p>
+      <h3 className="text-2xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors duration-300">{title}</h3>
+      <p className="text-muted-foreground mb-6 leading-relaxed">{description}</p>
 
-      <ul className="space-y-2 mb-6">
+      <ul className="space-y-3 mb-8">
         {features.map((feature, index) => (
-          <li key={index} className="flex items-center text-white/80 text-sm">
-            <div className="w-1.5 h-1.5 bg-white/60 rounded-full mr-3"></div>
+          <li key={index} className="flex items-center text-muted-foreground text-sm group-hover:text-foreground transition-colors duration-300">
+            <div className="w-2 h-2 bg-primary/60 rounded-full mr-3 group-hover:bg-primary group-hover:scale-125 transition-all duration-300"></div>
             {feature}
           </li>
         ))}
       </ul>
 
-      <div className="flex items-center text-white group-hover:translate-x-2 transition-transform duration-300">
-        <span className="font-medium">Get Started</span>
-        <ArrowRight className="ml-2 h-5 w-5" />
+      <div className="flex items-center text-primary font-medium group-hover:translate-x-1 transition-all duration-300">
+        <span>Get Started</span>
+        <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
       </div>
     </div>
 
-    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500"></div>
+    {/* Subtle accent */}
+    <div className="absolute top-4 right-4 w-8 h-8 bg-primary/5 rounded-full opacity-0 group-hover:opacity-100 group-hover:scale-150 transition-all duration-500"></div>
   </div>
 );
 
@@ -269,14 +274,14 @@ export default function HomePage() {
             <RoleCard
               title="Admin"
               description="Manage the platform, oversee operations, and support the artisan community"
-              icon={<Shield className="h-8 w-8 text-white" />}
+              icon={<Shield className="h-8 w-8" />}
               features={[
                 "Platform management",
-                "User oversight",
+                "User oversight", 
                 "Analytics dashboard",
                 "System configuration",
               ]}
-              gradient="from-blue-600 to-purple-600"
+              gradient=""
               path="/auth/admin"
               onClick={() => handleRoleSelect("admin")}
             />
@@ -284,14 +289,14 @@ export default function HomePage() {
             <RoleCard
               title="Artisan"
               description="Showcase your crafts, tell your story, and connect with customers worldwide"
-              icon={<Palette className="h-8 w-8 text-white" />}
+              icon={<Palette className="h-8 w-8" />}
               features={[
                 "Product showcase",
                 "Story creation",
-                "Customer chat",
+                "Customer chat", 
                 "Order management",
               ]}
-              gradient="from-orange-500 to-red-500"
+              gradient=""
               path="/auth/artisan"
               onClick={() => handleRoleSelect("artisan")}
             />
@@ -299,14 +304,14 @@ export default function HomePage() {
             <RoleCard
               title="Customer"
               description="Discover unique handmade products and connect directly with talented artisans"
-              icon={<ShoppingBag className="h-8 w-8 text-white" />}
+              icon={<ShoppingBag className="h-8 w-8" />}
               features={[
                 "Browse products",
                 "Chat with artisans",
                 "Place orders",
                 "Cultural stories",
               ]}
-              gradient="from-emerald-500 to-teal-600"
+              gradient=""
               path="/auth/customer"
               onClick={() => handleRoleSelect("customer")}
             />
