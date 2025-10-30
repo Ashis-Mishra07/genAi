@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/lib/i18n/hooks";
-import { useTranslateContent } from "@/lib/hooks/useTranslateContent";
 import {
   ArrowLeft,
   Upload,
@@ -43,7 +42,6 @@ interface ProductFormData {
 export default function NewProductPage() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { translateText, isHindi } = useTranslateContent();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -112,16 +110,10 @@ export default function NewProductPage() {
     try {
       // Validation
       if (!formData.name.trim()) {
-        throw new Error(
-          isHindi ? "उत्पाद का नाम आवश्यक है" : "Product name is required"
-        );
+        throw new Error(t("productNameRequired"));
       }
       if (formData.price <= 0) {
-        throw new Error(
-          isHindi
-            ? "मूल्य 0 से अधिक होना चाहिए"
-            : "Price must be greater than 0"
-        );
+        throw new Error(t("priceGreaterThanZero"));
       }
 
       const response = await fetch("/api/products", {
@@ -137,16 +129,11 @@ export default function NewProductPage() {
 
       if (!response.ok) {
         throw new Error(
-          data.error ||
-            (isHindi ? "उत्पाद बनाने में विफल" : "Failed to create product")
+          data.error || t("failedToCreateProduct")
         );
       }
 
-      setSuccess(
-        isHindi
-          ? "उत्पाद सफलतापूर्वक बनाया गया!"
-          : "Product created successfully!"
-      );
+      setSuccess(t("productCreatedSuccess"));
 
       // Redirect to dashboard after a short delay
       setTimeout(() => {
@@ -154,11 +141,7 @@ export default function NewProductPage() {
       }, 1500);
     } catch (error) {
       setError(
-        error instanceof Error
-          ? error.message
-          : isHindi
-          ? "एक त्रुटि हुई"
-          : "An error occurred"
+        error instanceof Error ? error.message : t("unexpectedError")
       );
     } finally {
       setIsLoading(false);
@@ -167,11 +150,7 @@ export default function NewProductPage() {
 
   const handlePreview = () => {
     // TODO: Implement preview functionality
-    alert(
-      isHindi
-        ? "पूर्वावलोकन सुविधा जल्द आ रही है!"
-        : "Preview functionality coming soon!"
-    );
+    alert(t("previewComingSoon"));
   };
 
   return (
@@ -292,7 +271,7 @@ export default function NewProductPage() {
 
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
-                  {isHindi ? "स्टॉक मात्रा" : "Stock Quantity"}
+                  {t("stockQuantity")}
                 </label>
                 <input
                   type="number"
@@ -314,7 +293,7 @@ export default function NewProductPage() {
                     className="w-4 h-4 text-orange-500 bg-white/5 border-white/20 rounded focus:ring-orange-500"
                   />
                   <span className="ml-2 text-sm text-white/90">
-                    {isHindi ? "सक्रिय" : "Active"}
+                    {t("active")}
                   </span>
                 </label>
 
@@ -327,7 +306,7 @@ export default function NewProductPage() {
                     className="w-4 h-4 text-orange-500 bg-white/5 border-white/20 rounded focus:ring-orange-500"
                   />
                   <span className="ml-2 text-sm text-white/90">
-                    {isHindi ? "फीचर्ड" : "Featured"}
+                    {t("featured")}
                   </span>
                 </label>
               </div>
@@ -338,13 +317,13 @@ export default function NewProductPage() {
           <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
             <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
               <FileText className="h-5 w-5 mr-2 text-orange-400" />
-              {isHindi ? "विवरण और कहानी" : "Description & Story"}
+              {t("descriptionStory")}
             </h2>
 
             <div className="space-y-6">
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
-                  {isHindi ? "उत्पाद विवरण" : "Product Description"}
+                  {t("productDescription")}
                 </label>
                 <textarea
                   name="description"
@@ -352,17 +331,13 @@ export default function NewProductPage() {
                   onChange={handleInputChange}
                   rows={4}
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 resize-none"
-                  placeholder={
-                    isHindi
-                      ? "अपने उत्पाद का विवरण दें..."
-                      : "Describe your product..."
-                  }
+                  placeholder={t("describeProduct")}
                 />
               </div>
 
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
-                  {isHindi ? "सांस्कृतिक कहानी" : "Cultural Story"}
+                  {t("culturalStory")}
                 </label>
                 <textarea
                   name="story"
@@ -370,11 +345,7 @@ export default function NewProductPage() {
                   onChange={handleInputChange}
                   rows={4}
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 resize-none"
-                  placeholder={
-                    isHindi
-                      ? "अपने उत्पाद के पीछे की सांस्कृतिक कहानी बताएं..."
-                      : "Tell the cultural story behind your product..."
-                  }
+                  placeholder={t("culturalStoryPlaceholder")}
                 />
               </div>
             </div>
@@ -384,14 +355,14 @@ export default function NewProductPage() {
           <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
             <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
               <Tag className="h-5 w-5 mr-2 text-orange-400" />
-              {isHindi ? "उत्पाद विवरण" : "Product Details"}
+              {t("productDetails")}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
                   <Palette className="h-4 w-4 inline mr-1" />
-                  {isHindi ? "सामग्री" : "Materials"}
+                  {t("materials")}
                 </label>
                 <input
                   type="text"
@@ -399,18 +370,14 @@ export default function NewProductPage() {
                   value={formData.materials}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={
-                    isHindi
-                      ? "जैसे: कपास, रेशम, लकड़ी"
-                      : "e.g., Cotton, Silk, Wood"
-                  }
+                  placeholder={t("materialsPlaceholder")}
                 />
               </div>
 
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
                   <MapPin className="h-4 w-4 inline mr-1" />
-                  {isHindi ? "सांस्कृतिक मूल" : "Cultural Origin"}
+                  {t("culturalOrigin")}
                 </label>
                 <input
                   type="text"
@@ -418,17 +385,13 @@ export default function NewProductPage() {
                   value={formData.culture}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={
-                    isHindi
-                      ? "जैसे: राजस्थानी, बंगाली"
-                      : "e.g., Rajasthani, Bengali"
-                  }
+                  placeholder={t("culturalOriginPlaceholder")}
                 />
               </div>
 
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
-                  {isHindi ? "कलाकार का नाम" : "Artist Name"}
+                  {t("artistName")}
                 </label>
                 <input
                   type="text"
@@ -436,14 +399,14 @@ export default function NewProductPage() {
                   value={formData.artistName}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={isHindi ? "निर्माता का नाम" : "Creator's name"}
+                  placeholder={t("creatorName")}
                 />
               </div>
 
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
                   <Ruler className="h-4 w-4 inline mr-1" />
-                  {isHindi ? "आयाम" : "Dimensions"}
+                  {t("dimensions")}
                 </label>
                 <input
                   type="text"
@@ -451,18 +414,14 @@ export default function NewProductPage() {
                   value={formData.dimensions}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={
-                    isHindi
-                      ? "जैसे: 30सेमी x 20सेमी x 5सेमी"
-                      : "e.g., 30cm x 20cm x 5cm"
-                  }
+                  placeholder={t("dimensionsPlaceholder")}
                 />
               </div>
 
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
                   <Weight className="h-4 w-4 inline mr-1" />
-                  {isHindi ? "वजन" : "Weight"}
+                  {t("weight")}
                 </label>
                 <input
                   type="text"
@@ -470,7 +429,7 @@ export default function NewProductPage() {
                   value={formData.weight}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={isHindi ? "जैसे: 500ग्राम" : "e.g., 500g"}
+                  placeholder={t("weightPlaceholder")}
                 />
               </div>
             </div>
@@ -480,13 +439,13 @@ export default function NewProductPage() {
           <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
             <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
               <Upload className="h-5 w-5 mr-2 text-orange-400" />
-              {isHindi ? "छवियां और लिंक" : "Images & Links"}
+              {t("imagesLinks")}
             </h2>
 
             <div className="space-y-6">
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
-                  {isHindi ? "उत्पाद छवि URL" : "Product Image URL"}
+                  {t("productImageUrl")}
                 </label>
                 <input
                   type="url"
@@ -500,7 +459,7 @@ export default function NewProductPage() {
 
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
-                  {isHindi ? "मार्केटिंग पोस्टर URL" : "Marketing Poster URL"}
+                  {t("marketingPosterUrl")}
                 </label>
                 <input
                   type="url"
@@ -514,7 +473,7 @@ export default function NewProductPage() {
 
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
-                  {isHindi ? "इंस्टाग्राम पोस्ट URL" : "Instagram Post URL"}
+                  {t("instagramPostUrl")}
                 </label>
                 <input
                   type="url"
@@ -535,7 +494,7 @@ export default function NewProductPage() {
               onClick={handlePreview}
               className="flex items-center px-6 py-3 bg-white/10 border border-white/20 rounded-lg text-white/90 hover:bg-white/20 transition-colors">
               <Eye className="h-4 w-4 mr-2" />
-              {isHindi ? "पूर्वावलोकन" : "Preview"}
+              {t("preview")}
             </button>
 
             <div className="flex space-x-4">
@@ -543,7 +502,7 @@ export default function NewProductPage() {
                 type="button"
                 onClick={() => router.back()}
                 className="px-6 py-3 bg-white/10 border border-white/20 rounded-lg text-white/90 hover:bg-white/20 transition-colors">
-                {isHindi ? "रद्द करें" : "Cancel"}
+                {t("cancel")}
               </button>
 
               <button
@@ -553,7 +512,7 @@ export default function NewProductPage() {
                 {isLoading ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    {isHindi ? "बना रहे हैं..." : "Creating..."}
+                    {t("creating")}
                   </>
                 ) : (
                   <>

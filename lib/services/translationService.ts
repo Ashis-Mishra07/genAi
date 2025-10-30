@@ -1,8 +1,10 @@
+import { Locale } from '@/lib/i18n/config';
+
 class TranslationService {
   private cache = new Map<string, string>();
   private isTranslating = new Set<string>();
   
-  async translateText(text: string, targetLang: 'hi' | 'en' = 'hi'): Promise<string> {
+  async translateText(text: string, targetLang: Locale = 'hi'): Promise<string> {
     if (!text || targetLang === 'en') return text;
     
     console.log('TranslationService: Translating text:', text, 'to', targetLang);
@@ -48,10 +50,6 @@ class TranslationService {
       this.cache.set(cacheKey, translatedText);
       return translatedText;
       
-      // Cache the translation
-      this.cache.set(cacheKey, translatedText);
-      
-      return translatedText;
     } catch (error) {
       console.error('Translation error:', error);
       return text; // Fallback to original text
@@ -60,7 +58,7 @@ class TranslationService {
     }
   }
 
-  async translateProduct(product: any, targetLang: 'hi' | 'en' = 'hi') {
+  async translateProduct(product: any, targetLang: Locale = 'hi') {
     if (targetLang === 'en') return product;
     
     try {
@@ -83,7 +81,7 @@ class TranslationService {
     }
   }
 
-  async translateProducts(products: any[], targetLang: 'hi' | 'en' = 'hi'): Promise<any[]> {
+  async translateProducts(products: any[], targetLang: Locale = 'hi'): Promise<any[]> {
     if (targetLang === 'en') return products;
     
     try {
@@ -100,36 +98,20 @@ class TranslationService {
   }
 
   // Method to translate activity messages
-  async translateActivity(activity: any, targetLang: 'hi' | 'en' = 'hi') {
+  async translateActivity(activity: any, targetLang: Locale = 'hi') {
     if (targetLang === 'en') return activity;
     
     try {
       // Translate activity text while preserving product names, order IDs etc.
       let translatedText = activity.text || activity.message || '';
       
-      // Simple activity translations
-      const activityTranslations: Record<string, string> = {
-        'New order': 'नया ऑर्डर',
-        'received': 'प्राप्त',
-        'Product': 'उत्पाद',
-        'updated': 'अपडेट',
-        'Order': 'ऑर्डर',
-        'shipped': 'भेजा गया',
-        'AI generated cultural story for': 'AI ने सांस्कृतिक कहानी बनाई',
-        'minutes ago': 'मिनट पहले',
-        'hour ago': 'घंटे पहले',
-        'hours ago': 'घंटे पहले',
-        'days ago': 'दिन पहले',
-      };
-      
-      for (const [english, hindi] of Object.entries(activityTranslations)) {
-        translatedText = translatedText.replace(new RegExp(english, 'gi'), hindi);
-      }
+      // Get basic activity translations for the target language
+      const translatedActivityText = await this.translateText(translatedText, targetLang);
       
       return {
         ...activity,
-        text: translatedText,
-        message: translatedText,
+        text: translatedActivityText,
+        message: translatedActivityText,
       };
     } catch (error) {
       console.error('Activity translation error:', error);
@@ -138,14 +120,16 @@ class TranslationService {
   }
 
   // Preload common translations for better UX
-  async preloadCommonTranslations() {
+  async preloadCommonTranslations(targetLang: Locale = 'hi') {
+    if (targetLang === 'en') return;
+    
     const commonTerms = [
       'cricket bat', 'pottery', 'ball', 'active', 'inactive',
       'handmade', 'traditional', 'available', 'sold'
     ];
     
     await Promise.all(
-      commonTerms.map(term => this.translateText(term, 'hi'))
+      commonTerms.map(term => this.translateText(term, targetLang))
     );
   }
 
@@ -160,15 +144,10 @@ class TranslationService {
   }
 
   // Method to get cached translation without API call
-  getCachedTranslation(text: string, targetLang: 'hi' | 'en' = 'hi'): string | null {
+  getCachedTranslation(text: string, targetLang: Locale = 'hi'): string | null {
     const cacheKey = `${text}_${targetLang}`;
     return this.cache.get(cacheKey) || null;
   }
 }
 
 export const translationService = new TranslationService();
-
-// Preload common translations on service initialization
-if (typeof window !== 'undefined') {
-  translationService.preloadCommonTranslations().catch(console.error);
-}

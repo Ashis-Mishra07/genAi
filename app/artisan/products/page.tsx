@@ -1,22 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useTranslation } from "@/lib/i18n/hooks";
+import { useLanguageContext } from "@/lib/i18n/provider";
+import { Locale } from "@/lib/i18n/config";
 import {
   useTranslatedProducts,
-  useTranslateContent,
 } from "@/lib/hooks/useTranslateContent";
 import {
   Plus,
   Search,
-  Filter,
   Edit,
   Trash2,
   Eye,
   Package,
-  DollarSign,
-  Camera,
   Save,
   X,
 } from "lucide-react";
@@ -43,7 +42,7 @@ interface NewProduct {
 export default function ArtisanProductsPage() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { translateText, isHindi } = useTranslateContent();
+  const { currentLocale, changeLanguage } = useLanguageContext();
   const [products, setProducts] = useState<Product[]>([]);
   const { translatedProducts, isLoading: isTranslating } =
     useTranslatedProducts(products);
@@ -65,11 +64,16 @@ export default function ArtisanProductsPage() {
   });
 
   useEffect(() => {
-    checkAuth();
-    fetchProducts();
+    const initializeData = async () => {
+      if (checkAuth()) {
+        await fetchProducts();
+      }
+    };
+    initializeData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const checkAuth = () => {
+  const checkAuth = useCallback(() => {
     const token =
       localStorage.getItem("auth_token") || localStorage.getItem("accessToken");
     const role = localStorage.getItem("user_role");
@@ -79,9 +83,9 @@ export default function ArtisanProductsPage() {
       return false;
     }
     return true;
-  };
+  }, [router]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setIsLoading(true);
       const token =
@@ -104,13 +108,11 @@ export default function ArtisanProductsPage() {
       }
     } catch (error) {
       console.error("Error fetching products:", error);
-      setError(
-        isHindi ? "उत्पाद लोड करने में विफल" : "Failed to load products"
-      );
+      setError(t("errorLoading"));
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [router, t]);
 
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,22 +150,18 @@ export default function ArtisanProductsPage() {
       } else {
         const errorData = await response.json();
         setError(
-          errorData.error ||
-            (isHindi ? "उत्पाद बनाने में विफल" : "Failed to create product")
+          errorData.error || t("errorGeneric")
         );
       }
-    } catch (error) {
-      setError(isHindi ? "उत्पाद बनाने में विफल" : "Failed to create product");
+    } catch {
+      setError(t("errorGeneric"));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDeleteProduct = async (productId: string) => {
-    const confirmMessage = isHindi
-      ? "क्या आप वाकई इस उत्पाद को हटाना चाहते हैं?"
-      : "Are you sure you want to delete this product?";
-    if (!confirm(confirmMessage)) return;
+    if (!confirm(t("confirmDeleteProduct"))) return;
 
     try {
       const token =
@@ -208,8 +206,8 @@ export default function ArtisanProductsPage() {
       if (response.ok) {
         fetchProducts();
       }
-    } catch (error) {
-      console.error("Error updating product status:", error);
+    } catch {
+      console.error("Error updating product status");
     }
   };
 
@@ -234,11 +232,7 @@ export default function ArtisanProductsPage() {
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
           <p className="text-slate-400">
             {isTranslating
-              ? isHindi
-                ? "अनुवाद हो रहा है..."
-                : "Translating..."
-              : isHindi
-              ? "उत्पाद लोड हो रहे हैं..."
+              ? "Translating..."
               : "Loading products..."}
           </p>
         </div>
@@ -254,16 +248,35 @@ export default function ArtisanProductsPage() {
           <div>
             <h1 className="text-2xl font-bold text-white">{t("products")}</h1>
             <p className="text-slate-400">
-              {products.length} {isHindi ? "उत्पाद कुल" : "products total"}
+              {products.length} {t("productsTotal")}
             </p>
           </div>
 
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors flex items-center">
-            <Plus className="h-4 w-4 mr-2" />
-            {t("createProduct")}
-          </button>
+          <div className="flex items-center space-x-4">
+            {/* Language Selector */}
+            <select
+              value={currentLocale}
+              onChange={(e) => changeLanguage(e.target.value as Locale)}
+              className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
+              <option value="en">English</option>
+              <option value="hi">हिंदी</option>
+              <option value="bn">বাংলা</option>
+              <option value="te">తెలుగు</option>
+              <option value="ta">தமிழ்</option>
+              <option value="ml">മലയാളം</option>
+              <option value="kn">ಕನ್ನಡ</option>
+              <option value="gu">ગુજરાતી</option>
+              <option value="mr">मराठी</option>
+              <option value="or">ଓଡ଼ିଆ</option>
+            </select>
+
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors flex items-center">
+              <Plus className="h-4 w-4 mr-2" />
+              {t("createProduct")}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -276,7 +289,7 @@ export default function ArtisanProductsPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input
                 type="text"
-                placeholder={isHindi ? "उत्पाद खोजें..." : "Search products..."}
+                placeholder={t("searchProducts")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 w-full"
@@ -289,9 +302,7 @@ export default function ArtisanProductsPage() {
                 setFilterStatus(e.target.value as "all" | "active" | "inactive")
               }
               className="bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
-              <option value="all">
-                {isHindi ? "सभी उत्पाद" : "All Products"}
-              </option>
+              <option value="all">{t("allProducts")}</option>
               <option value="active">{t("active")}</option>
               <option value="inactive">{t("inactive")}</option>
             </select>
@@ -310,16 +321,12 @@ export default function ArtisanProductsPage() {
           <div className="text-center py-12">
             <Package className="h-16 w-16 text-slate-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2">
-              {isHindi ? "कोई उत्पाद नहीं मिला" : "No products found"}
+              {t("noProductsFound")}
             </h3>
             <p className="text-slate-400 mb-6">
               {searchTerm || filterStatus !== "all"
-                ? isHindi
-                  ? "अपनी खोज या फ़िल्टर को समायोजित करने का प्रयास करें"
-                  : "Try adjusting your search or filter"
-                : isHindi
-                ? "अपना पहला उत्पाद बनाकर शुरुआत करें"
-                : "Start by creating your first product"}
+                ? t("tryAdjustingFilters")
+                : t("startByCreating")}
             </p>
             {!searchTerm && filterStatus === "all" && (
               <button
@@ -337,9 +344,11 @@ export default function ArtisanProductsPage() {
                 className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden hover:border-orange-500/50 transition-all hover:shadow-lg">
                 <div className="aspect-w-16 aspect-h-9 bg-slate-700">
                   {product.imageUrl ? (
-                    <img
+                    <Image
                       src={product.imageUrl}
                       alt={product.name}
+                      width={400}
+                      height={192}
                       className="w-full h-48 object-cover"
                     />
                   ) : (
@@ -389,7 +398,7 @@ export default function ArtisanProductsPage() {
                       <button
                         onClick={() => router.push(`/products/${product.id}`)}
                         className="p-2 text-slate-400 hover:text-blue-400 transition-colors"
-                        title={isHindi ? "उत्पाद देखें" : "View Product"}>
+                        title={t("viewProduct")}>
                         <Eye className="h-4 w-4" />
                       </button>
                       <button
@@ -397,15 +406,13 @@ export default function ArtisanProductsPage() {
                           router.push(`/artisan/products/edit/${product.id}`)
                         }
                         className="p-2 text-slate-400 hover:text-green-400 transition-colors"
-                        title={
-                          isHindi ? "उत्पाद संपादित करें" : "Edit Product"
-                        }>
+                        title={t("editProduct")}>
                         <Edit className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => handleDeleteProduct(product.id)}
                         className="p-2 text-slate-400 hover:text-red-400 transition-colors"
-                        title={isHindi ? "उत्पाद हटाएं" : "Delete Product"}>
+                        title={t("deleteProduct")}>
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
@@ -437,7 +444,7 @@ export default function ArtisanProductsPage() {
             <form onSubmit={handleAddProduct} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {isHindi ? "उत्पाद का नाम" : "Product Name"}
+                  {t("productName")}
                 </label>
                 <input
                   type="text"
@@ -447,15 +454,13 @@ export default function ArtisanProductsPage() {
                     setNewProduct({ ...newProduct, name: e.target.value })
                   }
                   className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={
-                    isHindi ? "उत्पाद का नाम दर्ज करें" : "Enter product name"
-                  }
+                  placeholder={t("enterProductName")}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {isHindi ? "विवरण" : "Description"}
+                  {t("description")}
                 </label>
                 <textarea
                   required
@@ -468,17 +473,13 @@ export default function ArtisanProductsPage() {
                   }
                   rows={3}
                   className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={
-                    isHindi
-                      ? "उत्पाद का विवरण दर्ज करें"
-                      : "Enter product description"
-                  }
+                  placeholder={t("enterProductDescription")}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {isHindi ? "मूल्य (₹)" : "Price (₹)"}
+                  {t("priceInRupees")}
                 </label>
                 <input
                   type="number"
@@ -496,7 +497,7 @@ export default function ArtisanProductsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {isHindi ? "श्रेणी" : "Category"}
+                  {t("category")}
                 </label>
                 <input
                   type="text"
@@ -506,17 +507,13 @@ export default function ArtisanProductsPage() {
                     setNewProduct({ ...newProduct, category: e.target.value })
                   }
                   className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={
-                    isHindi
-                      ? "जैसे: वस्त्र, मिट्टी के बर्तन, आभूषण"
-                      : "e.g., Textiles, Pottery, Jewelry"
-                  }
+                  placeholder={t("categoryPlaceholder")}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {isHindi ? "छवि URL (वैकल्पिक)" : "Image URL (optional)"}
+                  {t("imageUrlOptional")}
                 </label>
                 <input
                   type="url"

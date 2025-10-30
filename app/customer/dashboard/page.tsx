@@ -31,6 +31,15 @@ interface Order {
   itemCount: number;
 }
 
+interface ApiOrder {
+  id: string;
+  orderNumber: string;
+  status: 'pending' | 'confirmed' | 'shipped' | 'delivered';
+  total: number;
+  createdAt: string;
+  items?: unknown[];
+}
+
 interface DashboardStats {
   totalOrders: number;
   totalSpent: number;
@@ -88,11 +97,11 @@ export default function CustomerDashboardPage() {
           const data = await response.json();
           console.log('API Response:', data);
           if (data.success && data.orders) {
-            const formattedOrders = data.orders.map((order: any) => ({
+            const formattedOrders = data.orders.map((order: ApiOrder) => ({
               id: order.id,
               orderNumber: order.orderNumber,
               status: order.status,
-              total: order.total,
+              total: Number(order.total) || 0,
               date: order.createdAt,
               itemCount: order.items?.length || 1
             }));
@@ -116,6 +125,7 @@ export default function CustomerDashboardPage() {
                 wishlistItems: 2,
                 cartItems: 2
               };
+              console.log('Calculated stats:', calculatedStats);
               setStats(calculatedStats);
             }
           } else {
@@ -170,38 +180,41 @@ export default function CustomerDashboardPage() {
   ]);
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    // Convert to lowercase to handle case variations
+    const normalizedStatus = status.toLowerCase();
+    
+    switch (normalizedStatus) {
       case 'pending':
-        return 'bg-yellow-500/20 text-yellow-400';
+        return 'bg-red-600/20 text-red-400';
       case 'confirmed':
-        return 'bg-blue-500/20 text-blue-400';
+        return 'bg-green-600/20 text-green-400';
       case 'shipped':
-        return 'bg-purple-500/20 text-purple-400';
+        return 'bg-purple-600/20 text-purple-400';
       case 'delivered':
-        return 'bg-green-500/20 text-green-400';
+        return 'bg-emerald-600/20 text-emerald-400';
       default:
-        return 'bg-slate-500/20 text-slate-400';
+        return 'bg-slate-600/20 text-slate-400';
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
       {/* Header */}
-      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+      <div className="bg-gradient-to-r from-slate-800 to-gray-800 border-b border-slate-700 px-6 py-6 backdrop-blur-sm" style={{boxShadow: '0 25px 50px -12px rgba(255, 255, 255, 0.1)'}}>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-            <p className="text-slate-400">Welcome back, Arjun!</p>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-100 bg-clip-text text-transparent" style={{filter: 'drop-shadow(0 4px 8px rgba(255, 255, 255, 0.2))'}}>Dashboard</h1>
+            <p className="text-slate-300 mt-1">Welcome back, Arjun!</p>
           </div>
           
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-3 bg-slate-700 rounded-lg px-3 py-2">
-              <div className="h-8 w-8 bg-orange-500 rounded-full flex items-center justify-center">
-                <User className="h-4 w-4 text-white" />
+            <div className="flex items-center space-x-3 bg-slate-700/50 border border-slate-600 rounded-xl px-4 py-3 backdrop-blur-sm" style={{boxShadow: '0 20px 25px -5px rgba(255, 255, 255, 0.1), 0 10px 10px -5px rgba(255, 255, 255, 0.05)'}}>
+              <div className="h-10 w-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center">
+                <User className="h-5 w-5 text-white" />
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium text-white">Customer</p>
-                <p className="text-xs text-slate-400">Premium Member</p>
+                <p className="text-sm font-semibold text-white">Customer</p>
+                <p className="text-xs text-blue-400 font-medium">Premium Member</p>
               </div>
             </div>
           </div>
@@ -211,72 +224,80 @@ export default function CustomerDashboardPage() {
       <div className="p-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 hover:border-orange-500/50 transition-colors">
+          <div className="bg-gradient-to-br from-slate-800 to-slate-700 rounded-xl p-6 border border-slate-600 transition-all duration-200 hover:scale-[1.02]" style={{boxShadow: '0 25px 50px -12px rgba(255, 255, 255, 0.1), 0 10px 25px -5px rgba(255, 255, 255, 0.05)'}}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Total Orders</p>
-                <p className="text-2xl font-bold text-white">{stats.totalOrders}</p>
-                <div className="flex items-center mt-1">
-                  <ArrowUp className="h-3 w-3 text-green-400 mr-1" />
-                  <span className="text-green-400 text-xs">+2 this month</span>
+                <p className="text-slate-400 text-sm font-medium">Total Orders</p>
+                <p className="text-3xl font-bold text-white mt-2" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.1))'}}>{stats.totalOrders}</p>
+                <div className="flex items-center mt-3">
+                  <ArrowUp className="h-4 w-4 text-emerald-400 mr-1" />
+                  <span className="text-emerald-400 text-sm font-medium">+2 this month</span>
                 </div>
               </div>
-              <Package className="h-8 w-8 text-orange-500" />
+              <div className="bg-blue-600/20 p-3 rounded-xl" style={{boxShadow: '0 10px 15px -3px rgba(255, 255, 255, 0.1)'}}>
+                <Package className="h-8 w-8 text-blue-400" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.2))'}} />
+              </div>
             </div>
           </div>
 
-          <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 hover:border-orange-500/50 transition-colors">
+          <div className="bg-gradient-to-br from-slate-800 to-slate-700 rounded-xl p-6 border border-slate-600 transition-all duration-200 hover:scale-[1.02]" style={{boxShadow: '0 25px 50px -12px rgba(255, 255, 255, 0.1), 0 10px 25px -5px rgba(255, 255, 255, 0.05)'}}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Total Spent</p>
-                <p className="text-2xl font-bold text-white">₹{stats.totalSpent.toLocaleString()}</p>
-                <div className="flex items-center mt-1">
-                  <ArrowUp className="h-3 w-3 text-green-400 mr-1" />
-                  <span className="text-green-400 text-xs">+15% this month</span>
+                <p className="text-slate-400 text-sm font-medium">Total Spent</p>
+                <p className="text-3xl font-bold text-white mt-2" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.1))'}}>₹{parseFloat(String(stats.totalSpent)).toLocaleString()}</p>
+                <div className="flex items-center mt-3">
+                  <ArrowUp className="h-4 w-4 text-emerald-400 mr-1" />
+                  <span className="text-emerald-400 text-sm font-medium">+15% this month</span>
                 </div>
               </div>
-              <TrendingUp className="h-8 w-8 text-green-400" />
+              <div className="bg-emerald-600/20 p-3 rounded-xl" style={{boxShadow: '0 10px 15px -3px rgba(255, 255, 255, 0.1)'}}>
+                <TrendingUp className="h-8 w-8 text-emerald-400" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.2))'}} />
+              </div>
             </div>
           </div>
 
-          <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 hover:border-orange-500/50 transition-colors">
+          <div className="bg-gradient-to-br from-slate-800 to-slate-700 rounded-xl p-6 border border-slate-600 transition-all duration-200 hover:scale-[1.02]" style={{boxShadow: '0 25px 50px -12px rgba(255, 255, 255, 0.1), 0 10px 25px -5px rgba(255, 255, 255, 0.05)'}}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Wishlist Items</p>
-                <p className="text-2xl font-bold text-white">{stats.wishlistItems}</p>
-                <div className="flex items-center mt-1">
-                  <ArrowUp className="h-3 w-3 text-blue-400 mr-1" />
-                  <span className="text-blue-400 text-xs">+3 this week</span>
+                <p className="text-slate-400 text-sm font-medium">Wishlist Items</p>
+                <p className="text-3xl font-bold text-white mt-2" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.1))'}}>{stats.wishlistItems}</p>
+                <div className="flex items-center mt-3">
+                  <ArrowUp className="h-4 w-4 text-purple-400 mr-1" />
+                  <span className="text-purple-400 text-sm font-medium">+3 this week</span>
                 </div>
               </div>
-              <Heart className="h-8 w-8 text-red-400" />
+              <div className="bg-purple-600/20 p-3 rounded-xl" style={{boxShadow: '0 10px 15px -3px rgba(255, 255, 255, 0.1)'}}>
+                <Heart className="h-8 w-8 text-purple-400" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.2))'}} />
+              </div>
             </div>
           </div>
 
-          <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 hover:border-orange-500/50 transition-colors">
+          <div className="bg-gradient-to-br from-slate-800 to-slate-700 rounded-xl p-6 border border-slate-600 transition-all duration-200 hover:scale-[1.02]" style={{boxShadow: '0 25px 50px -12px rgba(255, 255, 255, 0.1), 0 10px 25px -5px rgba(255, 255, 255, 0.05)'}}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Cart Items</p>
-                <p className="text-2xl font-bold text-white">{stats.cartItems}</p>
-                <div className="flex items-center mt-1">
-                  <ArrowDown className="h-3 w-3 text-yellow-400 mr-1" />
-                  <span className="text-yellow-400 text-xs">Ready to checkout</span>
+                <p className="text-slate-400 text-sm font-medium">Cart Items</p>
+                <p className="text-3xl font-bold text-white mt-2" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.1))'}}>{stats.cartItems}</p>
+                <div className="flex items-center mt-3">
+                  <ArrowDown className="h-4 w-4 text-orange-400 mr-1" />
+                  <span className="text-orange-400 text-sm font-medium">Ready to checkout</span>
                 </div>
               </div>
-              <ShoppingCart className="h-8 w-8 text-purple-400" />
+              <div className="bg-orange-600/20 p-3 rounded-xl" style={{boxShadow: '0 10px 15px -3px rgba(255, 255, 255, 0.1)'}}>
+                <ShoppingCart className="h-8 w-8 text-orange-400" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.2))'}} />
+              </div>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Recent Orders */}
-          <div className="bg-slate-800 rounded-lg border border-slate-700">
-            <div className="p-6 border-b border-slate-700">
+          <div className="bg-gradient-to-br from-slate-800 to-slate-700 rounded-xl border border-slate-600 transition-all duration-300" style={{boxShadow: '0 25px 50px -12px rgba(255, 255, 255, 0.1), 0 10px 25px -5px rgba(255, 255, 255, 0.05)'}}>
+            <div className="p-6 border-b border-slate-600">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-white">Recent Orders</h2>
+                <h2 className="text-xl font-bold text-white" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.1))'}}>Recent Orders</h2>
                 <button
                   onClick={() => router.push('/customer/orders')}
-                  className="text-orange-500 hover:text-orange-400 text-sm font-medium flex items-center"
+                  className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center transition-colors"
                 >
                   View All
                   <ChevronRight className="h-4 w-4 ml-1" />
@@ -288,9 +309,9 @@ export default function CustomerDashboardPage() {
               {loading ? (
                 <div className="space-y-4">
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex items-center justify-between p-4 bg-slate-700 rounded-lg animate-pulse">
+                    <div key={i} className="flex items-center justify-between p-4 bg-slate-700/50 rounded-xl animate-pulse">
                       <div className="flex items-center space-x-4">
-                        <div className="h-10 w-10 bg-slate-600 rounded-full"></div>
+                        <div className="h-12 w-12 bg-slate-600 rounded-xl"></div>
                         <div>
                           <div className="h-4 bg-slate-600 rounded w-24 mb-2"></div>
                           <div className="h-3 bg-slate-600 rounded w-32"></div>
@@ -304,13 +325,15 @@ export default function CustomerDashboardPage() {
                   ))}
                 </div>
               ) : recentOrders.length === 0 ? (
-                <div className="text-center py-8">
-                  <Package className="h-16 w-16 text-slate-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-white mb-2">No orders yet</h3>
-                  <p className="text-slate-400 mb-4">Start shopping to see your orders here</p>
+                <div className="text-center py-12">
+                  <div className="bg-slate-700 rounded-full p-4 w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                    <Package className="h-10 w-10 text-slate-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white mb-2">No orders yet</h3>
+                  <p className="text-slate-400 mb-6">Start shopping to see your orders here</p>
                   <button
                     onClick={() => router.push('/customer/products')}
-                    className="bg-orange-500 text-white px-6 py-2 rounded-lg font-medium hover:bg-orange-600 transition-colors"
+                    className="bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition-colors shadow-lg"
                   >
                     Browse Products
                   </button>
@@ -318,10 +341,10 @@ export default function CustomerDashboardPage() {
               ) : (
                 <div className="space-y-4">
                   {recentOrders.map((order) => (
-                    <div key={order.id} className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
+                    <div key={order.id} className="flex items-center justify-between p-4 bg-slate-700/50 rounded-xl hover:bg-slate-700 transition-colors">
                       <div className="flex items-center space-x-4">
-                        <div className="h-10 w-10 bg-orange-500 rounded-full flex items-center justify-center">
-                          <Package className="h-5 w-5 text-white" />
+                        <div className="h-12 w-12 bg-blue-600/20 rounded-xl flex items-center justify-center">
+                          <Package className="h-6 w-6 text-blue-400" />
                         </div>
                         <div>
                           <p className="font-medium text-white">{order.orderNumber}</p>
@@ -331,8 +354,8 @@ export default function CustomerDashboardPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-white">₹{order.total.toLocaleString()}</p>
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(order.status)}`}>
+                        <p className="font-bold text-white">₹{(order.total && !isNaN(order.total) ? Math.round(order.total) : 0).toLocaleString('en-IN')}</p>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                           {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                         </span>
                       </div>
@@ -344,13 +367,13 @@ export default function CustomerDashboardPage() {
           </div>
 
           {/* Recommended Products */}
-          <div className="bg-slate-800 rounded-lg border border-slate-700">
-            <div className="p-6 border-b border-slate-700">
+          <div className="bg-gradient-to-br from-slate-800 to-slate-700 rounded-xl border border-slate-600 transition-all duration-300" style={{boxShadow: '0 25px 50px -12px rgba(255, 255, 255, 0.1), 0 10px 25px -5px rgba(255, 255, 255, 0.05)'}}>
+            <div className="p-6 border-b border-slate-600">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-white">Recommended for You</h2>
+                <h2 className="text-xl font-bold text-white" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.1))'}}>Recommended for You</h2>
                 <button
                   onClick={() => router.push('/customer/products')}
-                  className="text-orange-500 hover:text-orange-400 text-sm font-medium flex items-center"
+                  className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center transition-colors"
                 >
                   Browse All
                   <ChevronRight className="h-4 w-4 ml-1" />
@@ -361,39 +384,39 @@ export default function CustomerDashboardPage() {
             <div className="p-6">
               <div className="space-y-4">
                 {recommendedProducts.map((product) => (
-                  <div key={product.id} className="flex items-center space-x-4 p-4 bg-slate-700 rounded-lg hover:bg-slate-600 transition-colors cursor-pointer">
-                    <div className="w-16 h-16 bg-slate-600 rounded-lg flex items-center justify-center">
-                      <Package className="h-8 w-8 text-slate-400" />
+                  <div key={product.id} className="flex items-center space-x-4 p-4 bg-slate-700/50 rounded-xl hover:bg-slate-700 transition-colors cursor-pointer group">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-600/20 to-indigo-600/20 rounded-xl flex items-center justify-center group-hover:from-blue-600/30 group-hover:to-indigo-600/30 transition-colors">
+                      <Package className="h-8 w-8 text-blue-400" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-1">
                         <h3 className="font-medium text-white">{product.name}</h3>
                         {product.isNew && (
-                          <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">New</span>
+                          <span className="px-2 py-1 bg-emerald-600/20 text-emerald-400 text-xs rounded-full font-medium">New</span>
                         )}
                         {product.isTrending && (
-                          <span className="px-2 py-1 bg-orange-500/20 text-orange-400 text-xs rounded">Trending</span>
+                          <span className="px-2 py-1 bg-orange-600/20 text-orange-400 text-xs rounded-full font-medium">Trending</span>
                         )}
                       </div>
                       <p className="text-slate-400 text-sm">by {product.artisanName}</p>
-                      <div className="flex items-center space-x-2 mt-1">
+                      <div className="flex items-center space-x-2 mt-2">
                         <div className="flex items-center">
-                          <Star className="h-3 w-3 text-yellow-400 fill-current" />
-                          <span className="text-slate-400 text-xs ml-1">{product.rating}</span>
+                          <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                          <span className="text-slate-400 text-sm ml-1">{product.rating}</span>
                         </div>
-                        <span className="text-slate-400 text-xs">•</span>
-                        <span className="text-slate-400 text-xs">{product.reviewCount} reviews</span>
+                        <span className="text-slate-500 text-sm">•</span>
+                        <span className="text-slate-400 text-sm">{product.reviewCount} reviews</span>
                       </div>
                     </div>
                     <div className="text-right">
                       <div className="flex items-center space-x-2">
-                        <span className="text-lg font-bold text-white">₹{product.price.toLocaleString()}</span>
+                        <span className="text-lg font-bold text-white">₹{(product.price && !isNaN(product.price) ? Math.round(product.price) : 0).toLocaleString('en-IN')}</span>
                         {product.originalPrice && (
-                          <span className="text-slate-400 text-sm line-through">₹{product.originalPrice.toLocaleString()}</span>
+                          <span className="text-slate-400 text-sm line-through">₹{(product.originalPrice && !isNaN(product.originalPrice) ? Math.round(product.originalPrice) : 0).toLocaleString('en-IN')}</span>
                         )}
                       </div>
                       {product.discount && (
-                        <span className="text-green-400 text-xs">{product.discount}% off</span>
+                        <span className="text-emerald-400 text-sm font-medium">{product.discount}% off</span>
                       )}
                     </div>
                   </div>
@@ -404,37 +427,46 @@ export default function CustomerDashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="mt-8">
-          <h2 className="text-xl font-bold text-white mb-6">Quick Actions</h2>
+        {/* <div className="mt-8">
+          <h2 className="text-xl font-bold text-white mb-6" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.1))'}}>Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <button
               onClick={() => router.push('/customer/products')}
-              className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-6 text-left hover:from-orange-600 hover:to-orange-700 transition-all transform hover:scale-105"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-6 text-left hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-[1.02] group"
+              style={{boxShadow: '0 25px 50px -12px rgba(255, 255, 255, 0.1), 0 10px 25px -5px rgba(255, 255, 255, 0.08)'}}
             >
-              <Package className="h-8 w-8 text-white mb-3" />
-              <h3 className="text-lg font-bold text-white">Browse Products</h3>
-              <p className="text-orange-100 text-sm">Discover amazing handcrafted items</p>
+              <div className="bg-white/10 p-3 rounded-xl w-fit mb-4 group-hover:bg-white/20 transition-colors" style={{boxShadow: '0 10px 15px -3px rgba(255, 255, 255, 0.1)'}}>
+                <Package className="h-8 w-8 text-white" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.2))'}} />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.1))'}}>Browse Products</h3>
+              <p className="text-blue-100 text-sm">Discover amazing handcrafted items</p>
             </button>
 
             <button
               onClick={() => router.push('/customer/orders')}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-left hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105"
+              className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl p-6 text-left hover:from-emerald-700 hover:to-teal-700 transition-all transform hover:scale-[1.02] group"
+              style={{boxShadow: '0 25px 50px -12px rgba(255, 255, 255, 0.1), 0 10px 25px -5px rgba(255, 255, 255, 0.08)'}}
             >
-              <Eye className="h-8 w-8 text-white mb-3" />
-              <h3 className="text-lg font-bold text-white">Track Orders</h3>
-              <p className="text-blue-100 text-sm">Monitor your order status</p>
+              <div className="bg-white/10 p-3 rounded-xl w-fit mb-4 group-hover:bg-white/20 transition-colors" style={{boxShadow: '0 10px 15px -3px rgba(255, 255, 255, 0.1)'}}>
+                <Eye className="h-8 w-8 text-white" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.2))'}} />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.1))'}}>Track Orders</h3>
+              <p className="text-emerald-100 text-sm">Monitor your order status</p>
             </button>
 
             <button
               onClick={() => router.push('/customer/wishlist')}
-              className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-6 text-left hover:from-purple-600 hover:to-purple-700 transition-all transform hover:scale-105"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-6 text-left hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-[1.02] group"
+              style={{boxShadow: '0 25px 50px -12px rgba(255, 255, 255, 0.1), 0 10px 25px -5px rgba(255, 255, 255, 0.08)'}}
             >
-              <Heart className="h-8 w-8 text-white mb-3" />
-              <h3 className="text-lg font-bold text-white">My Wishlist</h3>
+              <div className="bg-white/10 p-3 rounded-xl w-fit mb-4 group-hover:bg-white/20 transition-colors" style={{boxShadow: '0 10px 15px -3px rgba(255, 255, 255, 0.1)'}}>
+                <Heart className="h-8 w-8 text-white" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.2))'}} />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.1))'}}>My Wishlist</h3>
               <p className="text-purple-100 text-sm">View your saved items</p>
             </button>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

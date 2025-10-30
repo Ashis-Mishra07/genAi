@@ -96,13 +96,13 @@ export default function CustomerLayout({
   const isActive = (href: string) => pathname === href;
 
   return (
-    <div className="min-h-screen bg-slate-900 flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 flex">
       {/* Fixed Sidebar */}
-      <div className="w-64 bg-slate-800 border-r border-slate-700 flex flex-col fixed h-full">
+      <div className="w-64 bg-slate-800 border-r border-slate-700 flex flex-col fixed h-full shadow-2xl">
         {/* Logo/Brand */}
         <div className="p-6 border-b border-slate-700">
           <div className="flex items-center">
-            <div className="bg-orange-500 rounded-lg p-2 mr-3">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-2 mr-3">
               <User className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -121,9 +121,9 @@ export default function CustomerLayout({
                 <button
                   key={item.name}
                   onClick={() => router.push(item.href)}
-                  className={`w-full flex items-center px-3 py-2 text-left rounded-lg transition-colors ${
+                  className={`w-full flex items-center px-4 py-3 text-left rounded-xl transition-all duration-200 font-medium ${
                     isActive(item.href)
-                      ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20'
+                      ? 'bg-blue-600/20 text-blue-400 border border-blue-600/30 shadow-lg'
                       : 'text-slate-300 hover:bg-slate-700 hover:text-white'
                   }`}
                 >
@@ -136,9 +136,9 @@ export default function CustomerLayout({
             <div className="pt-4 border-t border-slate-700 mt-4">
               <button
                 onClick={() => router.push('/customer/help')}
-                className={`w-full flex items-center px-3 py-2 text-left rounded-lg transition-colors ${
+                className={`w-full flex items-center px-4 py-3 text-left rounded-xl transition-all duration-200 font-medium ${
                   isActive('/customer/help')
-                    ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20'
+                    ? 'bg-blue-600/20 text-blue-400 border border-blue-600/30 shadow-lg'
                     : 'text-slate-300 hover:bg-slate-700 hover:text-white'
                 }`}
               >
@@ -154,14 +154,14 @@ export default function CustomerLayout({
           <button
             onClick={handleSignOut}
             disabled={isLoggingOut}
-            className={`w-full flex items-center px-3 py-2 text-left rounded-lg transition-colors ${
+            className={`w-full flex items-center px-4 py-3 text-left rounded-xl transition-all duration-200 font-medium ${
               isLoggingOut
                 ? "text-slate-500 cursor-not-allowed"
-                : "text-slate-300 hover:bg-red-500/10 hover:text-red-400"
+                : "text-slate-300 hover:bg-red-600/20 hover:text-red-400"
             }`}
           >
             {isLoggingOut ? (
-              <div className="h-5 w-5 mr-3 animate-spin rounded-full border-2 border-slate-400 border-t-transparent" />
+              <div className="h-5 w-5 mr-3 animate-spin rounded-full border-2 border-slate-400 border-t-slate-200" />
             ) : (
               <LogOut className="h-5 w-5 mr-3" />
             )}

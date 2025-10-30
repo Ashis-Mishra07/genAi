@@ -14,12 +14,10 @@ const nextConfig: NextConfig = {
   },
   
   // Additional configurations
-  experimental: {
-    turbo: {
-      // Ignore some parsing errors in turbo mode
-      resolveAlias: {
-        canvas: './empty-module.js',
-      },
+  turbopack: {
+    // Ignore some parsing errors in turbo mode
+    resolveAlias: {
+      canvas: './empty-module.js',
     },
   },
   
@@ -27,7 +25,7 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   
   // Webpack configuration to handle potential module issues
-  webpack: (config, { isServer }) => {
+  webpack: (config) => {
     // Ignore specific warnings/errors
     config.ignoreWarnings = [
       /Critical dependency/,

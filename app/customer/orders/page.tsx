@@ -227,7 +227,10 @@ export default function CustomerOrdersPage() {
                   <div className="h-8 w-8 bg-orange-500 rounded-full flex items-center justify-center">
                     <Package className="h-4 w-4 text-white" />
                   </div>
-                  <span className="text-orange-400 font-medium">₹{orders.reduce((sum, order) => sum + order.total, 0).toLocaleString()}</span>
+                  <span className="text-orange-400 font-medium">₹{orders.reduce((sum, order) => {
+                    const orderTotal = Number(order.total) || 0;
+                    return sum + orderTotal;
+                  }, 0).toLocaleString()}</span>
                   <span className="text-slate-400 text-sm">Total Value</span>
                 </div>
               </div>
@@ -331,7 +334,7 @@ export default function CustomerOrdersPage() {
                       </div>
 
                       <div className="text-right">
-                        <div className="text-xl font-bold text-white">₹{order.total.toLocaleString()}</div>
+                        <div className="text-xl font-bold text-white">₹{Number(order.total).toLocaleString()}</div>
                         <div className="text-slate-400 text-sm">{order.items.length} items</div>
                       </div>
                     </div>
@@ -429,8 +432,8 @@ export default function CustomerOrdersPage() {
                         <p className="text-sm text-slate-400">Quantity: {item.quantity}</p>
                       </div>
                       <div className="text-right">
-                        <div className="font-semibold text-white">₹{(item.price * item.quantity).toLocaleString()}</div>
-                        <div className="text-sm text-slate-400">₹{item.price.toLocaleString()} each</div>
+                        <div className="font-semibold text-white">₹{(Number(item.price) * item.quantity).toLocaleString()}</div>
+                        <div className="text-sm text-slate-400">₹{Number(item.price).toLocaleString()} each</div>
                       </div>
                     </div>
                   ))}
@@ -443,7 +446,7 @@ export default function CustomerOrdersPage() {
                 <div className="bg-slate-700 rounded p-4">
                   <div className="flex justify-between text-slate-300 mb-2">
                     <span>Subtotal:</span>
-                    <span>₹{selectedOrder.total.toLocaleString()}</span>
+                    <span>₹{Number(selectedOrder.total).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-slate-300 mb-2">
                     <span>Shipping:</span>
@@ -452,7 +455,7 @@ export default function CustomerOrdersPage() {
                   <div className="border-t border-slate-600 pt-2 mt-2">
                     <div className="flex justify-between text-white font-semibold text-lg">
                       <span>Total:</span>
-                      <span>₹{selectedOrder.total.toLocaleString()}</span>
+                      <span>₹{Number(selectedOrder.total).toLocaleString()}</span>
                     </div>
                   </div>
                 </div>
