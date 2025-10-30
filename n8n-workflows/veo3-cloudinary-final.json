@@ -1,5 +1,4 @@
 {
-  "name": "Product Video Generation - Veo 3 with Cloudinary (Final)",
   "nodes": [
     {
       "parameters": {
@@ -8,11 +7,15 @@
         "responseMode": "lastNode",
         "options": {}
       },
-      "id": "webhook-node",
+      "id": "9a53a0ba-4814-4136-a1fc-ca9ab7d4d981",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
-      "position": [240, 300]
+      "position": [
+        -64,
+        144
+      ],
+      "webhookId": "860ce817-4920-402f-a0a6-69416c5477b5"
     },
     {
       "parameters": {
@@ -22,7 +25,7 @@
               "id": "project-id",
               "name": "PROJECT_ID",
               "type": "string",
-              "value": "={{ $env.GCP_PROJECT_ID }}"
+              "value": "=genai-456413"
             },
             {
               "id": "model-version",
@@ -61,31 +64,66 @@
               "value": "={{ $json.body.productId }}"
             },
             {
-              "id": "db-url",
-              "name": "DATABASE_URL",
+              "id": "cloudinary-name",
+              "name": "CLOUDINARY_CLOUD_NAME",
               "type": "string",
-              "value": "={{ $env.DATABASE_URL }}"
+              "value": "=swasthik"
             },
             {
-              "id": "product-image",
-              "name": "PRODUCT_IMAGE_URL",
+              "id": "cloudinary-key",
+              "name": "CLOUDINARY_API_KEY",
               "type": "string",
-              "value": "={{ $json.body.productImage }}"
+              "value": "=855762179536577"
+            },
+            {
+              "id": "cloudinary-secret",
+              "name": "CLOUDINARY_API_SECRET",
+              "type": "string",
+              "value": "=XEhMTHhYpRFXUGKbgtF21jyXATU"
+            },
+            {
+              "id": "timestamp",
+              "name": "TIMESTAMP",
+              "type": "number",
+              "value": "={{ Math.floor(Date.now() / 1000) }}"
+            },
+            {
+              "id": "c772c7e5-ac3a-482b-b94e-6fe01afa94ef",
+              "name": "service_key",
+              "value": "-----BEGIN PRIVATE KEY-----\\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDKbdJHoLdDvzrq\\nCYpHeLO7rbKARYhntgUEz4O3yz34QvbsVUFSfsTvUqTbjys35TM4c5WPVcUN/yxj\\nC+FKCukSqmjMZafMZR36TesWkEd+IORJRbbqj0dd1hXklqNjvPkIHTIMn7OK8qhv\\nZGBs/54gUp2FLmIq8JIGg1RvIh8XMzra9EfA0a0k0WRNyJ1uC+1ZGpHs8wLDDLh6\\nPEge3IqlU1wrBZyEtiHvfPpBM2oL3/5YNjEhJdxy+NyUJf2eA6efK7OiiA/0Gpqa\\nDt2l/YsJ2k6r7Lv3Rbhqgd8nL61HonxDsVUZuWCOzI+vCe58homMJeGQq1fEOtZP\\n8w7s3VQzAgMBAAECggEAIcPSvN7aYsL9fTctKQHBnQ76hLnUaFQsnyJL+ra8dfIZ\\nhM8tr6h0ieTTmcnWMCMbeZGSA1APp+eFzFmZcQPD37ir9VgJdqbxKqSfj2puemPb\\nIDuwKIzQnx7MFQ5pX4QQV+GizQdAZ+9U2Au6p8O1aPfOzX2woy/wc4Spa0YaQICf\\nm3lnmMVsgchikJBKHErmIyaXF+U0ogJSdFIYAtHcMqJ+4BmC6jEcIR8O3SaZfZgs\\nX8zLwJdWBX79ZLEfDTOQGG3xZfN8yf8nHiYSxlxCkl0lpDfuaAZrLIfZecE9oAL3\\nT6vmKrfjvJdG2vn0c0YX3OnXgK6RoEGngzNxQyUriQKBgQDpfhQUyVlRSPF/sOwX\\nNUt+P/15jxd4QDJA3BQGG1BAiXPse3j4u1j5rNhDD0XYub4yHnVuPEKF4WG2WPkQ\\nihf3+M6qrZqIZ7Sj2uFdt328nUuqLyMnZNrW1iAWhLy43iCqjrNqu0emmGcss/c1\\nSLuFXn3BZRJdAmuPTTcl+9dFWQKBgQDd8S9sI5Qaci1segqbotNqlr+4O9jJ6XB/\\nxpyX8EcNVnwkLpwDhFNNX5KaCLZR6RiPU4Vn3mkmMJ0oppWZ8jH7UL6Hzk02TFCU\\nfLYdG1tPYx1I7I0BXSf1PZ2bNjoP6UzQvl22gXoifd9CEl4KDK7aME9ZDa2+nE9b\\n4UgbIxsYawKBgFbOfc7AkMlMkiRD9XInaTq1tZn03efiDgzZBUTD8NEdiRCZUv8+\\nP7ULUpeT3QbW/2QIuOXT13OIuFgfufExNfoF8We5BSPDUoA8ht7dsgxmelP6FFq3\\n/zgyAVn93V/pjUF7ri53FAtWy7zt53FS6gyKdbxpxCr6FF0BewhPGdh5AoGBANmn\\noPktPx5cYN2kJekR2sIKSsSTtHv3OgOlNIbw9c1HxoD5ULlGOSeFFdGHv70+mn5c\\ny1Tc0kPIoydtjwMleQzc1615jVE1sESetT6ASKDnM54DlhkDUZ95KKpBmNln05RX\\nTLIh8jQHOz6hoqW6YHPLstVDy+NFibIykbNDT1w3AoGBAIkjSqWDAh9Mu5r2QuJ3\\n6C5nS2ly1E9204KX6zPNVjevyv1oAlPh8DzgfBMjaOZ4b1ZOMBxblMHGsUyzVkgo\\ng3PWehzRsdgWcz7fmrLQVaa04/6VQGKOz64jANGwBmQ/6VjkgHRsQPjsjXvwNnAx\\nYjdOm2GvMtDN05vvA3reBf2o\\n-----END PRIVATE KEY-----\\n",
+              "type": "string"
+            },
+            {
+              "id": "e16058dd-f74d-4499-b2a9-e7865d78c850",
+              "name": "email",
+              "value": "n8n-veo-sa@genai-456413.iam.gserviceaccount.com",
+              "type": "string"
+            },
+            {
+              "id": "c4ce6b5e-67a5-4215-9e04-5fadd191db4e",
+              "name": "imageUrl",
+              "value": "={{ $json.body.productImage }}",
+              "type": "string"
             }
           ]
         },
         "options": {}
       },
-      "id": "setting-node",
+      "id": "2a7cbf24-d60e-4296-9a73-3089fb412217",
       "name": "Setting",
       "type": "n8n-nodes-base.set",
-      "position": [460, 300],
+      "position": [
+        192,
+        -192
+      ],
       "typeVersion": 3.4
     },
     {
       "parameters": {
         "method": "POST",
         "url": "=https://{{ $json.API_ENDPOINT }}/v1/projects/{{ $json.PROJECT_ID }}/locations/{{ $json.LOCATION }}/publishers/google/models/{{ $json.MODEL_VERSION }}:predictLongRunning",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -101,24 +139,36 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"instances\": [\n    {\n      \"prompt\": {{ JSON.stringify($json.TEXT_PROMPT) }},\n      \"image\": {\n        \"bytesBase64Encoded\": {{ JSON.stringify($json.PRODUCT_IMAGE_BASE64 || '') }},\n        \"gcsUri\": {{ JSON.stringify($json.PRODUCT_IMAGE_URL || '') }}\n      }\n    }\n  ],\n  \"parameters\": {\n    \"aspectRatio\": \"9:16\",\n    \"sampleCount\": 1,\n    \"durationSeconds\": \"7\",\n    \"personGeneration\": \"allow_all\",\n    \"addWatermark\": false,\n    \"includeRaiReason\": true,\n    \"generateAudio\": false\n  }\n}",
+        "jsonBody": "={\n  \"instances\": [\n    {\n      \"prompt\": {{ JSON.stringify($json.TEXT_PROMPT) }}\n    }\n  ],\n  \"parameters\": {\n    \"aspectRatio\": \"9:16\",\n    \"sampleCount\": 1,\n    \"durationSeconds\": \"7\",\n    \"personGeneration\": \"allow_all\",\n    \"addWatermark\": false,\n    \"includeRaiReason\": true,\n    \"generateAudio\": false\n  }\n}",
         "options": {}
       },
-      "id": "veo-generate",
+      "id": "7018133a-7eec-40ac-a6f3-02ffe0ceb47b",
       "name": "Vertex AI Veo 3 - Generate",
       "type": "n8n-nodes-base.httpRequest",
-      "position": [680, 300],
-      "typeVersion": 4.2
+      "position": [
+        1232,
+        16
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "googleApi": {
+          "id": "TXpkmuobnviW73sU",
+          "name": "Google Service Account account"
+        }
+      }
     },
     {
       "parameters": {
         "amount": 2,
         "unit": "minutes"
       },
-      "id": "wait-node",
+      "id": "6ee76f50-b8e8-45ba-be25-dc04c49bf24f",
       "name": "Wait",
       "type": "n8n-nodes-base.wait",
-      "position": [900, 300],
+      "position": [
+        1440,
+        -336
+      ],
       "typeVersion": 1.1,
       "webhookId": "video-wait-webhook"
     },
@@ -126,6 +176,8 @@
       "parameters": {
         "method": "POST",
         "url": "=https://{{ $('Setting').item.json.API_ENDPOINT }}/v1/projects/{{ $('Setting').item.json.PROJECT_ID }}/locations/{{ $('Setting').item.json.LOCATION }}/publishers/google/models/{{ $('Setting').item.json.MODEL_VERSION }}:fetchPredictOperation",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -144,11 +196,20 @@
         "jsonBody": "={\n  \"operationName\": \"{{ $json.name }}\"\n}",
         "options": {}
       },
-      "id": "veo-fetch",
+      "id": "a881544a-8e89-4af1-ae35-752ce178ef8a",
       "name": "Vertex AI Veo 3 - Fetch",
       "type": "n8n-nodes-base.httpRequest",
-      "position": [1120, 300],
-      "typeVersion": 4.2
+      "position": [
+        1664,
+        112
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "googleApi": {
+          "id": "TXpkmuobnviW73sU",
+          "name": "Google Service Account account"
+        }
+      }
     },
     {
       "parameters": {
@@ -159,32 +220,14 @@
           "mimeType": "video/mp4"
         }
       },
-      "id": "convert-file",
+      "id": "534c0a91-4bfe-4d15-a579-aad754087ee7",
       "name": "Convert to File",
       "type": "n8n-nodes-base.convertToFile",
-      "position": [1340, 300],
+      "position": [
+        1824,
+        -144
+      ],
       "typeVersion": 1.1
-    },
-    {
-      "parameters": {
-        "operation": "upload",
-        "binaryPropertyName": "data",
-        "publicId": "={{ 'product-videos/video_' + $('Setting').item.json.PRODUCT_ID }}",
-        "options": {
-          "resourceType": "video"
-        }
-      },
-      "id": "upload-cloudinary",
-      "name": "Upload to Cloudinary",
-      "type": "n8n-nodes-base.cloudinary",
-      "position": [1560, 300],
-      "typeVersion": 1,
-      "credentials": {
-        "cloudinaryApi": {
-          "id": "cloudinary-creds",
-          "name": "Cloudinary API"
-        }
-      }
     },
     {
       "parameters": {
@@ -192,17 +235,105 @@
         "query": "=UPDATE products SET video_url = '{{ $json.secure_url }}', video_status = 'COMPLETED', updated_at = NOW() WHERE id = '{{ $('Setting').item.json.PRODUCT_ID }}'",
         "options": {}
       },
-      "id": "update-db",
+      "id": "fb6e8c7a-a172-41b9-827c-91f321724cbc",
       "name": "Update Database",
       "type": "n8n-nodes-base.postgres",
-      "position": [1780, 300],
+      "position": [
+        2224,
+        112
+      ],
       "typeVersion": 2.4,
       "credentials": {
         "postgres": {
-          "id": "postgres-creds",
-          "name": "PostgreSQL account"
+          "id": "RjyzKYaEgAFYXtkw",
+          "name": "Postgres account"
         }
       }
+    },
+    {
+      "parameters": {
+        "operation": "uploadFile",
+        "resource_type_file": "video",
+        "additionalFieldsFile": {}
+      },
+      "type": "n8n-nodes-cloudinary.cloudinary",
+      "typeVersion": 1,
+      "position": [
+        2016,
+        112
+      ],
+      "id": "1701a36d-4a2a-427f-aa0d-9a87d6e5049a",
+      "name": "Upload an asset from file data",
+      "credentials": {
+        "cloudinaryApi": {
+          "id": "VBE5VQQklKnne6h9",
+          "name": "Cloudinary account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.imageUrl }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        448,
+        144
+      ],
+      "id": "92ddb75f-60fd-4712-8960-3b40ee0dd0f7",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get Gemini analysis\nconst geminiResponse = $json.candidates[0].content.parts[0].text;\n\n// Get product details from Setting node\nconst settingData = $node[\"Setting\"].json;\nconst category = settingData.CATEGORY || 'Other';\nconst productName = settingData.PRODUCT_NAME || 'product';\n\n// Build enhanced video prompt\nlet enhancedPrompt = '';\n\nif (category === 'Textiles & Fabrics' || category === 'Traditional Wear') {\n  enhancedPrompt = `Create a professional product demonstration video showing a person wearing ${productName}. Based on the detailed product analysis: ${geminiResponse}. The model elegantly wears this specific product, matching exactly the colors, patterns, fabric texture, and design elements described. Show the draping, fit, and movement of the fabric. Professional lighting, aesthetic background. Duration 7 seconds. Style: Professional product photography.`;\n} else if (category === 'Jewelry & Accessories') {\n  enhancedPrompt = `Create a professional jewelry showcase video featuring ${productName}. Based on the detailed analysis: ${geminiResponse}. Show hands and model wearing this specific piece, capturing the exact colors, materials, and design details described. Highlight light reflections and craftsmanship. Professional studio lighting. Duration 7 seconds. Style: Luxury jewelry advertising.`;\n} else if (category === 'Pottery & Ceramics' || category === 'Home Decor') {\n  enhancedPrompt = `Create a lifestyle product video showing ${productName} in use. Based on the analysis: ${geminiResponse}. Show a person using this specific product in a home setting, matching the exact colors, textures, and design features described. Demonstrate functionality and aesthetic appeal. Duration 7 seconds. Style: Lifestyle home product photography.`;\n} else {\n  enhancedPrompt = `Create a professional product demonstration video for ${productName}. Based on the detailed analysis: ${geminiResponse}. Show a person interacting with this specific product, matching exactly the colors, materials, design, and features described. Close-up shots of key details. Professional setting. Duration 7 seconds. Style: Professional e-commerce product video.`;\n}\n\nreturn [{\n  json: {\n    ...settingData,\n    TEXT_PROMPT: enhancedPrompt,\n    GEMINI_ANALYSIS: geminiResponse,\n    imageBase64: $json.imageBase64,\n    imageMimeType: $json.imageMimeType\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        -480
+      ],
+      "id": "f939b136-06a8-40d0-8ca9-62f73d021e8f",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyCJBpi9dq1kWuvYV6io7YVZXtJbOLdt02E",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"Analyze this artisan product image in extreme detail. Provide: 1) Exact product type and craft category 2) Precise color descriptions (specific shades, tones) 3) Materials identified (fabric type, metal, wood species, etc.) 4) Detailed design patterns, motifs, or decorative elements 5) Size estimation and proportions 6) Cultural or artistic style (traditional, contemporary, regional) 7) Craftsmanship techniques visible 8) Texture descriptions 9) Any unique or distinctive features 10) Quality indicators. Be extremely descriptive as this will be used to generate a product demonstration video.\"\n        },\n        {\n          \"inline_data\": {\n            \"mime_type\": \"{{ $json.imageMimeType }}\",\n            \"data\": \"{{ $json.imageBase64 }}\"\n          }\n        }\n      ]\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        816,
+        16
+      ],
+      "id": "36b7ea07-f22b-4fc9-93a8-1b75b0600bf9",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the input item\nconst inputItem = $input.first();\n\nconsole.log('Input item keys:', Object.keys(inputItem));\nconsole.log('Binary keys:', inputItem.binary ? Object.keys(inputItem.binary) : 'No binary');\n\n// N8N stores binary data differently - let's handle all cases\nlet base64String;\nlet mimeType;\n\ntry {\n  // Method 1: Check if data is already base64 encoded\n  if (inputItem.binary && inputItem.binary.data) {\n    const binaryData = inputItem.binary.data;\n    \n    console.log('Binary data type:', typeof binaryData);\n    console.log('Binary data constructor:', binaryData.constructor.name);\n    \n    // If it's already a base64 string\n    if (typeof binaryData === 'string') {\n      base64String = binaryData;\n    }\n    // If it's a Buffer\n    else if (Buffer.isBuffer(binaryData)) {\n      base64String = binaryData.toString('base64');\n    }\n    // If it's an object with base64 data\n    else if (binaryData.data && typeof binaryData.data === 'string') {\n      base64String = binaryData.data;\n    }\n    // If it's a Uint8Array or similar\n    else if (binaryData.constructor.name === 'Uint8Array' || Array.isArray(binaryData)) {\n      base64String = Buffer.from(binaryData).toString('base64');\n    }\n    // Last resort: try to convert the object\n    else {\n      console.log('Attempting to convert object to Buffer');\n      const buffer = Buffer.from(Object.values(binaryData));\n      base64String = buffer.toString('base64');\n    }\n    \n    mimeType = inputItem.binary.mimeType || 'image/png';\n  }\n  // Method 2: Check if the data is in a different format\n  else if (inputItem.data) {\n    base64String = inputItem.data;\n    mimeType = 'image/png';\n  }\n  else {\n    throw new Error('No binary data found in any expected format');\n  }\n  \n  // Clean the base64 string\n  base64String = base64String.replace(/^data:image\\/[a-z]+;base64,/, '');\n  \n  // Validate the result\n  if (!base64String || typeof base64String !== 'string') {\n    throw new Error('Failed to extract valid base64 string');\n  }\n  \n} catch (error) {\n  console.error('Error processing binary data:', error);\n  throw new Error(`Binary data processing failed: ${error.message}`);\n}\n\n// Get setting data\nconst settingData = $node[\"Setting\"].json;\n\nconsole.log('Successfully processed image');\nconsole.log('Base64 length:', base64String.length);\nconsole.log('MIME type:', mimeType);\n\nreturn [{\n  json: {\n    ...settingData,\n    imageBase64: base64String,\n    imageMimeType: mimeType\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        -320
+      ],
+      "id": "16d37ae8-9434-4d5f-a467-0a173e3125c9",
+      "name": "Code in JavaScript1"
     }
   ],
   "connections": {
@@ -221,7 +352,7 @@
       "main": [
         [
           {
-            "node": "Vertex AI Veo 3 - Generate",
+            "node": "HTTP Request",
             "type": "main",
             "index": 0
           }
@@ -265,14 +396,14 @@
       "main": [
         [
           {
-            "node": "Upload to Cloudinary",
+            "node": "Upload an asset from file data",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Upload to Cloudinary": {
+    "Upload an asset from file data": {
       "main": [
         [
           {
@@ -282,14 +413,55 @@
           }
         ]
       ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Vertex AI Veo 3 - Generate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "staticData": null,
-  "tags": [],
-  "triggerCount": 0,
-  "updatedAt": "2025-10-19T00:00:00.000Z",
-  "versionId": "1"
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f65c35e81d7c8ed56ed8ab438a58198c3d157f187e1055a579226e47ac9a59c8"
+  }
 }

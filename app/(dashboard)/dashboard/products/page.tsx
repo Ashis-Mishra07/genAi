@@ -14,6 +14,8 @@ import {
   Search,
   IndianRupee,
   Instagram,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -25,6 +27,9 @@ interface Product {
   price: number;
   currency: string;
   image_url?: string;
+  video_url?: string;
+  video_status?: string;
+  poster_url?: string;
   category: string;
   tags: string[];
   is_active: boolean;
@@ -55,6 +60,9 @@ export default function ProductsPage() {
   const [postingToInstagram, setPostingToInstagram] = useState<number | null>(
     null
   );
+
+  // Carousel state for each product
+  const [currentSlides, setCurrentSlides] = useState<{ [key: number]: number }>({});
 
   // Add product form state
   const [newProduct, setNewProduct] = useState({
@@ -118,14 +126,23 @@ export default function ProductsPage() {
     setShowDeleteModal(true);
   };
 
-  // Instagram post handler - Updated to use n8n workflow
+  // Instagram post handler - Updated to use n8n workflow with carousel support
   const handlePostToInstagram = async (product: Product) => {
     try {
       setPostingToInstagram(product.id);
 
       console.log("📱 Starting Instagram post for product:", product.name);
-      console.log("🖼️ Product image URL:", product.image_url);
+      console.log("🖼️ Product poster URL:", product.poster_url || product.image_url);
+      console.log("🎬 Product video URL:", product.video_url);
       console.log("💰 Product price:", product.price);
+
+      // Determine poster URL (prefer poster_url, fallback to image_url)
+      const posterUrl = product.poster_url || product.image_url;
+      const hasVideo = product.video_url && product.video_status === 'COMPLETED';
+
+      if (!posterUrl) {
+        throw new Error("Product must have a poster image");
+      }
 
       // Generate Instagram caption for the product
       const caption = `✨ ${product.name} ✨
@@ -146,8 +163,9 @@ Discover authentic artisan crafts that tell a story! 🎭
 #handmade #artisan #traditional #authentic #craft #handcrafted #artisanal #culture #heritage #madewithlove #ArtisanAI #SupportArtisans`;
 
       console.log("📝 Generated caption:", caption.substring(0, 100) + "...");
+      console.log(`📊 Post type: ${hasVideo ? 'CAROUSEL (poster + video)' : 'SINGLE IMAGE'}`);
 
-      // Call the new n8n API endpoint
+      // Call the new n8n API endpoint with both poster and video
       const response = await fetch("/api/instagram/post-via-n8n", {
         method: "POST",
         headers: {
@@ -155,7 +173,8 @@ Discover authentic artisan crafts that tell a story! 🎭
         },
         body: JSON.stringify({
           productId: product.id,
-          cloudinaryUrl: product.image_url, // ← This should be your Cloudinary poster URL
+          cloudinaryUrl: posterUrl, // Poster image (first slide)
+          videoUrl: hasVideo ? product.video_url : undefined, // Video (second slide, if exists)
           caption: caption,
         }),
       });
@@ -170,16 +189,12 @@ Discover authentic artisan crafts that tell a story! 🎭
       console.log("📊 Result:", result);
 
       // Show success message with details
-      const successMessage = `Successfully posted "${
-        product.name
-      }" to Instagram! 🎉
+      const postType = hasVideo ? 'CAROUSEL POST (Poster + Video)' : 'SINGLE IMAGE';
+      const successMessage = `Successfully posted "${product.name}" to Instagram! 🎉
 
-📸 Image: ${
-        product.image_url?.includes("cloudinary.com")
-          ? "Cloudinary Poster"
-          : "Product Image"
-      }
-📱 Account: ${result.data?.instagramAccountId || "Unknown"}
+� Post Type: ${postType}
+📸 Poster: ${posterUrl.includes("cloudinary.com") ? "Cloudinary Poster" : "Product Image"}
+${hasVideo ? `🎬 Video: Included in carousel\n` : ''}📱 Account: ${result.data?.instagramAccountId || "Unknown"}
 🆔 Creation ID: ${result.data?.n8nResult?.id || "Unknown"}
 ⏰ Posted at: ${new Date().toLocaleTimeString()}`;
 
@@ -260,6 +275,28 @@ Discover authentic artisan crafts that tell a story! 🎭
     }
   };
 
+  // Carousel navigation functions
+  const nextSlide = (productId: number, totalSlides: number) => {
+    setCurrentSlides(prev => ({
+      ...prev,
+      [productId]: ((prev[productId] || 0) + 1) % totalSlides
+    }));
+  };
+
+  const prevSlide = (productId: number, totalSlides: number) => {
+    setCurrentSlides(prev => ({
+      ...prev,
+      [productId]: ((prev[productId] || 0) - 1 + totalSlides) % totalSlides
+    }));
+  };
+
+  const goToSlide = (productId: number, slideIndex: number) => {
+    setCurrentSlides(prev => ({
+      ...prev,
+      [productId]: slideIndex
+    }));
+  };
+
   const resetAddForm = () => {
     setNewProduct({
       name: "",
@@ -308,6 +345,9 @@ Discover authentic artisan crafts that tell a story! 🎭
             price: product.price,
             currency: product.currency || "INR",
             image_url: product.imageUrl || product.image_url,
+            video_url: product.videoUrl || product.video_url,
+            video_status: product.videoStatus || product.video_status,
+            poster_url: product.posterUrl || product.poster_url,
             category: product.category,
             tags: product.tags
               ? Array.isArray(product.tags)
@@ -320,6 +360,20 @@ Discover authentic artisan crafts that tell a story! 🎭
               product.created_at ||
               new Date().toISOString(),
           }));
+          
+          // Debug log to check video data
+          console.log('🔍 PRODUCTS LOADED:', formattedProducts.length);
+          formattedProducts.forEach((p: any) => {
+            if (p.video_url) {
+              console.log(`📹 Product "${p.name}" has video:`, {
+                video_url: p.video_url,
+                video_status: p.video_status,
+                poster_url: p.poster_url,
+                image_url: p.image_url
+              });
+            }
+          });
+          
           setProducts(formattedProducts);
         } else {
           console.error("Failed to load products:", data.error);
@@ -573,23 +627,108 @@ Discover authentic artisan crafts that tell a story! 🎭
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProducts.map((product) => (
-            <div
-              key={product.id}
-              onClick={() => handleProductClick(product)}
-              className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden hover:shadow-lg hover:border-orange-500 transition-all cursor-pointer">
-              {/* Product Image */}
-              <div className="h-48 bg-gray-800 flex items-center justify-center">
-                {product.image_url ? (
-                  <img
-                    src={product.image_url}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <ImageIcon className="h-16 w-16 text-gray-600" />
-                )}
-              </div>
+          {filteredProducts.map((product) => {
+            const currentSlide = currentSlides[product.id] || 0;
+            const posterUrl = product.poster_url || product.image_url;
+            const hasVideo = product.video_url && product.video_status === 'COMPLETED';
+            const totalSlides = hasVideo ? 2 : 1;
+
+            // Debug log for each product
+            if (product.video_url || product.video_status) {
+              console.log(`🎬 Product "${product.name}" carousel check:`, {
+                video_url: product.video_url,
+                video_status: product.video_status,
+                hasVideo: hasVideo,
+                totalSlides: totalSlides
+              });
+            }
+
+            return (
+              <div
+                key={product.id}
+                onClick={() => handleProductClick(product)}
+                className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden hover:shadow-lg hover:border-orange-500 transition-all cursor-pointer">
+                {/* Carousel Container */}
+                <div className="relative h-48 bg-gray-800 group">
+                  {/* Image Slide */}
+                  <div className={`absolute inset-0 ${currentSlide === 0 ? 'block' : 'hidden'}`}>
+                    {posterUrl ? (
+                      <img
+                        src={posterUrl}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <ImageIcon className="h-16 w-16 text-gray-600" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Video Slide */}
+                  {hasVideo && (
+                    <div className={`absolute inset-0 ${currentSlide === 1 ? 'block' : 'hidden'}`}>
+                      <video
+                        src={product.video_url}
+                        className="w-full h-full object-cover"
+                        controls
+                        muted
+                        loop
+                      />
+                    </div>
+                  )}
+
+                  {/* Carousel Navigation - only show if video exists */}
+                  {hasVideo && (
+                    <>
+                      {/* Previous Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          prevSlide(product.id, totalSlides);
+                        }}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                        aria-label="Previous slide">
+                        <ChevronLeft className="h-4 w-4" />
+                      </button>
+
+                      {/* Next Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          nextSlide(product.id, totalSlides);
+                        }}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                        aria-label="Next slide">
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+
+                      {/* Slide Indicators */}
+                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
+                        {[...Array(totalSlides)].map((_, index) => (
+                          <button
+                            key={index}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              goToSlide(product.id, index);
+                            }}
+                            className={`w-2 h-2 rounded-full transition-all ${
+                              currentSlide === index
+                                ? 'bg-orange-500 w-4'
+                                : 'bg-white/50 hover:bg-white/75'
+                            }`}
+                            aria-label={`Go to slide ${index + 1}`}
+                          />
+                        ))}
+                      </div>
+
+                      {/* Media Type Badge */}
+                      <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs font-medium z-10">
+                        {currentSlide === 0 ? '📸 Poster' : '🎬 Video'}
+                      </div>
+                    </>
+                  )}
+                </div>
 
               {/* Product Info */}
               <div className="p-4">
@@ -693,7 +832,8 @@ Discover authentic artisan crafts that tell a story! 🎭
                 </div>
               </div>
             </div>
-          ))}
+          );
+          })}
         </div>
       )}
 

@@ -1,0 +1,527 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "imageUrl",
+              "value": "={{ $json.body.imageURL }}"
+            },
+            {
+              "name": "videoUrl",
+              "value": "={{ $json.body.videoURL }}"
+            },
+            {
+              "name": "captionText",
+              "value": "={{ $json.body.captionText }}"
+            },
+            {
+              "name": "Node",
+              "value": "17841477359386904"
+            },
+            {
+              "name": "carouselRetryCount",
+              "value": "0"
+            },
+            {
+              "name": "publishRetryCount",
+              "value": "0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set Media & Caption",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        176,
+        -16
+      ],
+      "id": "626909bd-58dd-41fc-99a0-33536b0a9ebf"
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "={{ $json.Node }}",
+        "edge": "media",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "image_url",
+                "value": "={{ $json.imageUrl }}"
+              },
+              {
+                "name": "is_carousel_item",
+                "value": "true"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        384,
+        -96
+      ],
+      "id": "3048ca8a-fd72-41c1-8d9c-61447bfbd54e",
+      "name": "Create Image Container",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "iAeryi90YQUVadBp",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "={{ $('Set Media & Caption').item.json.Node }}",
+        "edge": "media",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "media_type",
+                "value": "VIDEO"
+              },
+              {
+                "name": "video_url",
+                "value": "={{ $('Set Media & Caption').item.json.videoUrl }}"
+              },
+              {
+                "name": "is_carousel_item",
+                "value": "true"
+              }
+            ]
+          }
+        },
+        "continueOnFail": false
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        384,
+        64
+      ],
+      "id": "video-container-node",
+      "name": "Create Video Container",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "iAeryi90YQUVadBp",
+          "name": "Facebook Graph account"
+        }
+      },
+      "continueOnFail": false
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst videoData = items[0].json;\nconst videoContainerId = videoData.id;\nconst settingData = $('Set Media & Caption').first().json;\n\nconst allItems = $('Create Image Container').all();\nconst imageData = allItems[0].json;\nconst imageContainerId = imageData.id;\n\nconsole.log('✅ Image Container ID:', imageContainerId);\nconsole.log('✅ Video Container ID:', videoContainerId);\n\nreturn [{\n  json: {\n    Node: settingData.Node,\n    captionText: settingData.captionText,\n    imageUrl: settingData.imageUrl,\n    videoUrl: settingData.videoUrl,\n    imageContainerId: imageContainerId,\n    videoContainerId: videoContainerId,\n    children: [imageContainerId, videoContainerId],\n    carouselRetryCount: 0,\n    publishRetryCount: 0\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        -16
+      ],
+      "id": "merge-containers-node",
+      "name": "Merge Container IDs"
+    },
+    {
+      "parameters": {
+        "amount": 30,
+        "unit": "seconds"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        -16
+      ],
+      "id": "wait-for-containers",
+      "name": "Wait for Containers"
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "={{ $json.Node }}",
+        "edge": "media",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "media_type",
+                "value": "CAROUSEL"
+              },
+              {
+                "name": "children",
+                "value": "={{ $json.children.join(',') }}"
+              },
+              {
+                "name": "caption",
+                "value": "={{ $json.captionText }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        832,
+        -16
+      ],
+      "id": "create-carousel-container",
+      "name": "Create Carousel Container",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "iAeryi90YQUVadBp",
+          "name": "Facebook Graph account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if carousel creation was successful or failed\nconst items = $input.all();\nconst data = items[0].json;\nconst previousData = $('Wait for Containers').item.json;\n\nconsole.log('📦 Carousel creation response:', JSON.stringify(data, null, 2));\n\n// Check for various error conditions\nconst hasError = data.error || \n                 data.statusCode >= 400 || \n                 !data.id || \n                 (data.headers && data.headers['www-authenticate'] && data.headers['www-authenticate'].includes('error'));\n\nif (hasError) {\n  const retryCount = parseInt(previousData.carouselRetryCount || 0);\n  \n  console.log('❌ Carousel creation failed. Retry count:', retryCount);\n  console.log('Status Code:', data.statusCode);\n  console.log('Error details:', data.error || data.headers?.['www-authenticate'] || 'No ID in response');\n  \n  if (retryCount < 3) {\n    // Increment retry count and loop back\n    console.log('🔄 Retrying carousel creation in 10 seconds...');\n    return [{\n      json: {\n        ...previousData,\n        carouselRetryCount: retryCount + 1,\n        shouldRetryCarousel: true\n      }\n    }];\n  } else {\n    const errorMsg = data.error || data.headers?.['www-authenticate'] || 'No ID returned after 3 attempts';\n    throw new Error('Failed to create carousel after 3 attempts: ' + errorMsg);\n  }\n}\n\n// Success - pass through the carousel ID\nconst carouselId = data.id;\nconsole.log('✅ Carousel created successfully with ID:', carouselId);\n\nreturn [{\n  json: {\n    ...previousData,\n    carouselId: carouselId,\n    shouldRetryCarousel: false\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        -16
+      ],
+      "id": "check-carousel-result",
+      "name": "Check Carousel Result"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.shouldRetryCarousel }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1056,
+        -16
+      ],
+      "id": "should-retry-carousel",
+      "name": "Should Retry Carousel?"
+    },
+    {
+      "parameters": {
+        "amount": 15,
+        "unit": "seconds"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1168,
+        -96
+      ],
+      "id": "wait-before-retry",
+      "name": "Wait Before Retry"
+    },
+    {
+      "parameters": {
+        "amount": 15,
+        "unit": "seconds"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1168,
+        64
+      ],
+      "id": "wait-before-publish",
+      "name": "Wait Before Publish"
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "={{ $json.Node }}",
+        "edge": "media_publish",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "creation_id",
+                "value": "={{ $json.carouselId }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        64
+      ],
+      "id": "d4b991af-278a-4637-8677-6ff23cc1c23b",
+      "name": "Publish Carousel Post",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "iAeryi90YQUVadBp",
+          "name": "Facebook Graph account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if publish was successful\nconst items = $input.all();\nconst data = items[0].json;\n\nif (data.error) {\n  const retryCount = parseInt($('Wait Before Publish').item.json.publishRetryCount || 0);\n  \n  console.log('❌ Publish failed. Retry count:', retryCount);\n  \n  if (retryCount < 3) {\n    console.log('🔄 Retrying publish...');\n    return [{\n      json: {\n        ...$('Wait Before Publish').item.json,\n        publishRetryCount: retryCount + 1,\n        shouldRetryPublish: true\n      }\n    }];\n  } else {\n    throw new Error('Failed to publish after 3 attempts: ' + JSON.stringify(data.error));\n  }\n}\n\nconsole.log('✅ Published successfully:', data.id);\nreturn [{\n  json: {\n    success: true,\n    postId: data.id,\n    message: 'Carousel posted successfully to Instagram!'\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1392,
+        64
+      ],
+      "id": "check-publish-result",
+      "name": "Check Publish Result"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.shouldRetryPublish }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1504,
+        64
+      ],
+      "id": "should-retry-publish",
+      "name": "Should Retry Publish?"
+    },
+    {
+      "parameters": {
+        "amount": 10,
+        "unit": "seconds"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1616,
+        -16
+      ],
+      "id": "wait-before-publish-retry",
+      "name": "Wait Before Publish Retry"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "instagram-post",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -32,
+        -16
+      ],
+      "id": "53ab29e9-3e3e-450b-84fc-59e9dee828f5",
+      "name": "Webhook",
+      "webhookId": "6d586f76-fe0c-4d99-bd21-7e06213aa3d3"
+    }
+  ],
+  "connections": {
+    "Set Media & Caption": {
+      "main": [
+        [
+          {
+            "node": "Create Image Container",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Image Container": {
+      "main": [
+        [
+          {
+            "node": "Create Video Container",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Video Container": {
+      "main": [
+        [
+          {
+            "node": "Merge Container IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Container IDs": {
+      "main": [
+        [
+          {
+            "node": "Wait for Containers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for Containers": {
+      "main": [
+        [
+          {
+            "node": "Create Carousel Container",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Carousel Container": {
+      "main": [
+        [
+          {
+            "node": "Check Carousel Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Carousel Result": {
+      "main": [
+        [
+          {
+            "node": "Should Retry Carousel?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Should Retry Carousel?": {
+      "main": [
+        [
+          {
+            "node": "Wait Before Retry",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait Before Publish",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Before Retry": {
+      "main": [
+        [
+          {
+            "node": "Create Carousel Container",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Before Publish": {
+      "main": [
+        [
+          {
+            "node": "Publish Carousel Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish Carousel Post": {
+      "main": [
+        [
+          {
+            "node": "Check Publish Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Publish Result": {
+      "main": [
+        [
+          {
+            "node": "Should Retry Publish?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Should Retry Publish?": {
+      "main": [
+        [
+          {
+            "node": "Wait Before Publish Retry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Before Publish Retry": {
+      "main": [
+        [
+          {
+            "node": "Publish Carousel Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set Media & Caption",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f65c35e81d7c8ed56ed8ab438a58198c3d157f187e1055a579226e47ac9a59c8"
+  }
+}

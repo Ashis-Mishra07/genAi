@@ -19,6 +19,8 @@ import {
   Camera,
   Save,
   X,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 interface Product {
@@ -28,6 +30,8 @@ interface Product {
   price: number;
   category: string;
   imageUrl?: string;
+  videoUrl?: string;
+  videoStatus?: string;
   isActive: boolean;
   createdAt: string;
 }
@@ -55,6 +59,7 @@ export default function ArtisanProductsPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentSlides, setCurrentSlides] = useState<{ [key: string]: number }>({});
 
   const [newProduct, setNewProduct] = useState<NewProduct>({
     name: "",
@@ -227,6 +232,27 @@ export default function ArtisanProductsPage() {
     return matchesSearch && matchesFilter;
   });
 
+  const nextSlide = (productId: string, totalSlides: number) => {
+    setCurrentSlides(prev => ({
+      ...prev,
+      [productId]: ((prev[productId] || 0) + 1) % totalSlides
+    }));
+  };
+
+  const prevSlide = (productId: string, totalSlides: number) => {
+    setCurrentSlides(prev => ({
+      ...prev,
+      [productId]: ((prev[productId] || 0) - 1 + totalSlides) % totalSlides
+    }));
+  };
+
+  const goToSlide = (productId: string, slideIndex: number) => {
+    setCurrentSlides(prev => ({
+      ...prev,
+      [productId]: slideIndex
+    }));
+  };
+
   if (isLoading || isTranslating) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
@@ -331,23 +357,87 @@ export default function ArtisanProductsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden hover:border-orange-500/50 transition-all hover:shadow-lg">
-                <div className="aspect-w-16 aspect-h-9 bg-slate-700">
-                  {product.imageUrl ? (
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      className="w-full h-48 object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-48 bg-slate-700 flex items-center justify-center">
-                      <Package className="h-12 w-12 text-slate-400" />
+            {filteredProducts.map((product) => {
+              const currentSlide = currentSlides[product.id] || 0;
+              const hasVideo = product.videoUrl && product.videoStatus === 'COMPLETED';
+              const totalSlides = hasVideo ? 2 : 1;
+
+              return (
+                <div
+                  key={product.id}
+                  className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden hover:border-orange-500/50 transition-all hover:shadow-lg">
+                  {/* Carousel Container */}
+                  <div className="relative aspect-w-16 aspect-h-9 bg-slate-700 group">
+                    {/* Image Slide */}
+                    <div className={`w-full h-48 ${currentSlide === 0 ? 'block' : 'hidden'}`}>
+                      {product.imageUrl ? (
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-slate-700 flex items-center justify-center">
+                          <Package className="h-12 w-12 text-slate-400" />
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+
+                    {/* Video Slide */}
+                    {hasVideo && (
+                      <div className={`w-full h-48 ${currentSlide === 1 ? 'block' : 'hidden'}`}>
+                        <video
+                          src={product.videoUrl}
+                          className="w-full h-full object-cover"
+                          controls
+                          muted
+                          loop
+                        />
+                      </div>
+                    )}
+
+                    {/* Carousel Navigation - only show if video exists */}
+                    {hasVideo && (
+                      <>
+                        {/* Previous Button */}
+                        <button
+                          onClick={() => prevSlide(product.id, totalSlides)}
+                          className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          aria-label="Previous slide">
+                          <ChevronLeft className="h-4 w-4" />
+                        </button>
+
+                        {/* Next Button */}
+                        <button
+                          onClick={() => nextSlide(product.id, totalSlides)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          aria-label="Next slide">
+                          <ChevronRight className="h-4 w-4" />
+                        </button>
+
+                        {/* Slide Indicators */}
+                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-2">
+                          {[...Array(totalSlides)].map((_, index) => (
+                            <button
+                              key={index}
+                              onClick={() => goToSlide(product.id, index)}
+                              className={`w-2 h-2 rounded-full transition-all ${
+                                currentSlide === index
+                                  ? 'bg-orange-500 w-4'
+                                  : 'bg-white/50 hover:bg-white/75'
+                              }`}
+                              aria-label={`Go to slide ${index + 1}`}
+                            />
+                          ))}
+                        </div>
+
+                        {/* Media Type Badge */}
+                        <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs font-medium">
+                          {currentSlide === 0 ? '📸 Poster' : '🎬 Video'}
+                        </div>
+                      </>
+                    )}
+                  </div>
 
                 <div className="p-4">
                   <div className="flex items-start justify-between mb-2">
@@ -412,7 +502,8 @@ export default function ArtisanProductsPage() {
                   </div>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         )}
       </div>

@@ -20,17 +20,22 @@ function transformCloudinaryForSocialMedia(originalUrl: string, platform: 'faceb
 
 export async function POST(request: NextRequest) {
   try {
-    const { productId, cloudinaryUrl, caption } = await request.json();
+    const { productId, cloudinaryUrl, videoUrl, caption } = await request.json();
+
+    // Determine post type based on available media
+    const postType = videoUrl ? 'CAROUSEL' : 'SINGLE_IMAGE';
 
     console.log('🚀 ===============================================');
-    console.log('🚀 STARTING INSTAGRAM POST VIA N8N WORKFLOW');
+    console.log(`🚀 STARTING INSTAGRAM ${postType} POST VIA N8N WORKFLOW`);
     console.log('📦 Product ID:', productId);
-    console.log('📸 Original Cloudinary URL:', cloudinaryUrl);
+    console.log('📸 Poster Image URL:', cloudinaryUrl);
+    console.log('🎬 Video URL:', videoUrl || 'Not available (posting single image)');
     console.log('📝 Caption Length:', caption?.length || 0);
+    console.log('🎯 Post Type:', postType);
     console.log('===============================================');
 
     if (!cloudinaryUrl) {
-      throw new Error('Cloudinary URL is required');
+      throw new Error('Poster image URL is required');
     }
 
     if (!caption) {
@@ -40,29 +45,43 @@ export async function POST(request: NextRequest) {
     // Transform Cloudinary URL for Facebook (since Instagram uses Facebook's API)
     const transformedImageUrl = transformCloudinaryForSocialMedia(cloudinaryUrl, 'facebook');
     
-    console.log('🔄 Image URL Transformation:');
-    console.log('📸 Original URL:', cloudinaryUrl);
-    console.log('✨ Transformed URL:', transformedImageUrl);
+    console.log('🔄 Media URL Transformation:');
+    console.log('📸 Original Poster URL:', cloudinaryUrl);
+    console.log('✨ Transformed Poster URL:', transformedImageUrl);
+    if (videoUrl) {
+      console.log('🎬 Video URL:', videoUrl);
+    }
 
-    // Your n8n webhook URL - update this with your actual n8n URL
-    const n8nWebhookUrl = process.env.N8N_INSTAGRAM_WEBHOOK_URL || 'http://localhost:5678/webhook/instagram-post';
+    // Your n8n webhook URL - different endpoints for single image vs carousel
+    const webhookPath = videoUrl ? 'instagram-post' : 'instagram-single-image';
+    const n8nWebhookUrl = process.env.N8N_INSTAGRAM_WEBHOOK_URL || `http://localhost:5678/webhook/${webhookPath}`;
 
-    // Prepare data for n8n workflow (matching your n8n structure)
-    const n8nPayload = {
-      imageURL: transformedImageUrl,  // Use transformed URL with correct aspect ratio
+    // Prepare data for n8n workflow
+    const n8nPayload: any = {
+      imageURL: transformedImageUrl,  // Poster image (required)
       captionText: caption,
       Node: "17841477359386904", // Your Instagram business account ID
       productId: productId,
       timestamp: new Date().toISOString()
     };
 
+    // Add video URL only if it exists (for carousel posts)
+    if (videoUrl) {
+      n8nPayload.videoURL = videoUrl;
+      n8nPayload.postType = 'CAROUSEL';
+    } else {
+      n8nPayload.postType = 'SINGLE_IMAGE';
+    }
+
     console.log('📤 Sending payload to n8n workflow:');
     console.log('🌐 n8n Webhook URL:', n8nWebhookUrl);
     console.log('📊 Payload:', {
       imageURL: n8nPayload.imageURL,
+      videoURL: n8nPayload.videoURL || 'N/A (single image post)',
       captionText: n8nPayload.captionText.substring(0, 100) + '...',
       Node: n8nPayload.Node,
-      productId: n8nPayload.productId
+      productId: n8nPayload.productId,
+      postType: n8nPayload.postType
     });
 
     // Call n8n webhook
@@ -88,19 +107,26 @@ export async function POST(request: NextRequest) {
     console.log('📊 n8n Result:', n8nResult);
 
     console.log('🎉 ===============================================');
-    console.log('🎉 INSTAGRAM POST COMPLETED SUCCESSFULLY!');
-    console.log('📸 Posted Image URL:', transformedImageUrl);
+    console.log(`🎉 INSTAGRAM ${postType} POST COMPLETED SUCCESSFULLY!`);
+    console.log('📸 Posted Poster URL:', transformedImageUrl);
+    if (videoUrl) {
+      console.log('🎬 Posted Video URL:', videoUrl);
+    }
     console.log('📱 Instagram Business Account:', n8nPayload.Node);
     console.log('🆔 Creation ID:', n8nResult?.id || 'Unknown');
     console.log('===============================================');
 
     return NextResponse.json({
       success: true,
-      message: 'Posted to Instagram via n8n successfully',
+      message: videoUrl 
+        ? 'Posted carousel to Instagram via n8n successfully' 
+        : 'Posted single image to Instagram via n8n successfully',
+      postType: postType,
       data: {
         n8nResult: n8nResult,
         originalCloudinaryUrl: cloudinaryUrl,
         transformedImageUrl: transformedImageUrl,
+        videoUrl: videoUrl || null,
         productId: productId,
         instagramAccountId: n8nPayload.Node,
         postedAt: new Date().toISOString()
