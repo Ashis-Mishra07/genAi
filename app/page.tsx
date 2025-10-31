@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/navbar";
+import { GoogleLoaderInline } from '@/components/ui/google-loader';
 
 // User will be managed by actual auth system
 
@@ -322,11 +323,12 @@ export default function HomePage() {
       {/* Loading States */}
       {isLoading && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-card rounded-2xl p-8 flex items-center space-x-4 border border-border shadow-lg">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            <span className="text-card-foreground font-medium">
-              Loading {isLoading} portal...
-            </span>
+          <div className="bg-card rounded-2xl p-8 border border-border shadow-lg">
+            <GoogleLoaderInline 
+              size="md" 
+              text={`Loading ${isLoading} portal...`}
+              textClassName="text-card-foreground font-medium"
+            />
           </div>
         </div>
       )}

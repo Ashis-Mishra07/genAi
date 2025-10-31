@@ -18,6 +18,7 @@ import {
   Video,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { GoogleLoaderInline } from '@/components/ui/google-loader';
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: Home },
@@ -194,7 +195,7 @@ export default function Sidebar({ children }: SidebarProps) {
               title="Sign Out"
             >
               {isLoggingOut ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-500 border-t-transparent" />
+                <GoogleLoaderInline size="sm" />
               ) : (
                 <LogOut className="h-4 w-4" />
               )}
@@ -232,7 +233,7 @@ export default function Sidebar({ children }: SidebarProps) {
               title="Sign Out"
             >
               {isLoggingOut ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-500 border-t-transparent" />
+                <GoogleLoaderInline size="sm" />
               ) : (
                 <LogOut className="h-4 w-4" />
               )}

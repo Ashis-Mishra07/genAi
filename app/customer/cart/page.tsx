@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   ShoppingCart, Plus, Minus, Trash2, Heart, ArrowRight, Package
 } from 'lucide-react';
+import { GoogleLoaderWithText } from '@/components/ui/google-loader';
 
 interface CartItem {
   id: number;
@@ -148,23 +149,23 @@ export default function CustomerCartPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+      <div className="bg-card border-b border-border px-6 py-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white">Shopping Cart</h1>
-            <p className="text-slate-400">{cartItems.length} items in your cart</p>
+            <h1 className="text-3xl font-bold text-foreground">Shopping Cart</h1>
+            <p className="text-muted-foreground mt-1">{cartItems.length} items in your cart</p>
           </div>
           
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-3 bg-slate-700 rounded-lg px-3 py-2">
-              <div className="h-8 w-8 bg-orange-500 rounded-full flex items-center justify-center">
-                <ShoppingCart className="h-4 w-4 text-white" />
+            <div className="flex items-center space-x-3 bg-secondary rounded-xl px-4 py-3">
+              <div className="h-10 w-10 bg-orange-500 rounded-full flex items-center justify-center">
+                <ShoppingCart className="h-5 w-5 text-white" />
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium text-white">Total: ₹{totals.total.toLocaleString()}</p>
-                <p className="text-xs text-slate-400">{cartItems.length} items</p>
+                <p className="text-sm font-medium text-foreground">Total: ₹{totals.total.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">{cartItems.length} items</p>
               </div>
             </div>
           </div>
@@ -175,14 +176,13 @@ export default function CustomerCartPage() {
         {/* Loading State */}
         {isLoading ? (
           <div className="text-center py-16">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
-            <p className="text-slate-400">Loading your cart...</p>
+            <GoogleLoaderWithText size="lg" text="Loading your cart..." />
           </div>
         ) : error ? (
           <div className="text-center py-16">
-            <ShoppingCart className="h-24 w-24 text-slate-400 mx-auto mb-6" />
-            <h2 className="text-2xl font-bold text-white mb-4">Error loading cart</h2>
-            <p className="text-slate-400 mb-8">{error}</p>
+            <ShoppingCart className="h-24 w-24 text-muted-foreground mx-auto mb-6" />
+            <h2 className="text-2xl font-bold text-foreground mb-4">Error loading cart</h2>
+            <p className="text-muted-foreground mb-8">{error}</p>
             <button
               onClick={fetchCartItems}
               className="bg-orange-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors"
@@ -193,9 +193,9 @@ export default function CustomerCartPage() {
         ) : cartItems.length === 0 ? (
           // Empty Cart
           <div className="text-center py-16">
-            <ShoppingCart className="h-24 w-24 text-slate-400 mx-auto mb-6" />
-            <h2 className="text-2xl font-bold text-white mb-4">Your cart is empty</h2>
-            <p className="text-slate-400 mb-8">Add some amazing handcrafted products to your cart</p>
+            <ShoppingCart className="h-24 w-24 text-muted-foreground mx-auto mb-6" />
+            <h2 className="text-2xl font-bold text-foreground mb-4">Your cart is empty</h2>
+            <p className="text-muted-foreground mb-8">Add some amazing handcrafted products to your cart</p>
             <button
               onClick={() => router.push('/customer/products')}
               className="bg-orange-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors"
@@ -208,18 +208,18 @@ export default function CustomerCartPage() {
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-4">
               {cartItems.map((item) => (
-                <div key={item.id} className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                <div key={item.id} className="bg-card rounded-2xl p-6 border border-border shadow-sm">
                   <div className="flex items-center space-x-4">
                     {/* Product Image */}
-                    <div className="w-24 h-24 bg-slate-700 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    <div className="w-24 h-24 bg-secondary rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
                       {item.imageUrl ? (
                         <img
                           src={item.imageUrl}
                           alt={item.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover rounded-xl"
                         />
                       ) : (
-                        <Package className="h-8 w-8 text-slate-400" />
+                        <Package className="h-8 w-8 text-muted-foreground" />
                       )}
                     </div>
 
@@ -227,11 +227,11 @@ export default function CustomerCartPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between">
                         <div>
-                          <h3 className="font-semibold text-white text-lg">{item.name}</h3>
-                          <p className="text-slate-400 text-sm">by {item.artisanName}</p>
-                          <p className="text-slate-400 text-xs">{item.artisanLocation}</p>
+                          <h3 className="font-semibold text-foreground text-lg">{item.name}</h3>
+                          <p className="text-muted-foreground text-sm">by {item.artisanName}</p>
+                          <p className="text-muted-foreground text-xs">{item.artisanLocation}</p>
                           {item.category && (
-                            <span className="inline-block bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs mt-2">
+                            <span className="inline-block bg-secondary text-foreground px-3 py-1 rounded-full text-xs mt-2">
                               {item.category}
                             </span>
                           )}
@@ -239,10 +239,10 @@ export default function CustomerCartPage() {
 
                         <div className="text-right">
                           <div className="flex items-center space-x-2">
-                            <span className="text-lg font-bold text-white">₹{item.price.toLocaleString()}</span>
+                            <span className="text-xl font-bold text-foreground">₹{item.price.toLocaleString()}</span>
                           </div>
                           {!item.inStock && (
-                            <span className="text-red-400 text-sm font-medium">Out of Stock</span>
+                            <span className="text-red-500 text-sm font-medium">Out of Stock</span>
                           )}
                         </div>
                       </div>
@@ -250,39 +250,39 @@ export default function CustomerCartPage() {
                       {/* Quantity and Actions */}
                       <div className="flex items-center justify-between mt-4">
                         <div className="flex items-center space-x-3">
-                          <div className="flex items-center bg-slate-700 rounded-lg">
+                          <div className="flex items-center bg-secondary rounded-lg border border-border">
                             <button
                               onClick={() => updateQuantity(item.id, -1)}
-                              className="p-2 hover:bg-slate-600 rounded-l-lg transition-colors"
+                              className="p-2 hover:bg-background rounded-l-lg transition-colors"
                               disabled={!item.inStock}
                             >
-                              <Minus className="h-4 w-4 text-slate-400" />
+                              <Minus className="h-4 w-4 text-muted-foreground" />
                             </button>
-                            <span className="px-4 py-2 text-white font-medium">{item.quantity}</span>
+                            <span className="px-4 py-2 text-foreground font-medium min-w-[40px] text-center">{item.quantity}</span>
                             <button
                               onClick={() => updateQuantity(item.id, 1)}
-                              className="p-2 hover:bg-slate-600 rounded-r-lg transition-colors"
+                              className="p-2 hover:bg-background rounded-r-lg transition-colors"
                               disabled={!item.inStock}
                             >
-                              <Plus className="h-4 w-4 text-slate-400" />
+                              <Plus className="h-4 w-4 text-muted-foreground" />
                             </button>
                           </div>
 
-                          <span className="text-slate-400">×</span>
-                          <span className="text-white font-semibold">₹{(item.price * item.quantity).toLocaleString()}</span>
+                          <span className="text-muted-foreground">×</span>
+                          <span className="text-foreground font-semibold">₹{(item.price * item.quantity).toLocaleString()}</span>
                         </div>
 
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={() => moveToWishlist(item.id)}
-                            className="p-2 text-slate-400 hover:text-red-400 transition-colors"
+                            className="p-2 text-muted-foreground hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
                             title="Move to Wishlist"
                           >
                             <Heart className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => removeItem(item.id)}
-                            className="p-2 text-slate-400 hover:text-red-400 transition-colors"
+                            className="p-2 text-muted-foreground hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
                             title="Remove Item"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -297,7 +297,7 @@ export default function CustomerCartPage() {
               {/* Continue Shopping */}
               <button
                 onClick={() => router.push('/customer/products')}
-                className="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 text-slate-400 hover:text-white hover:border-orange-500 transition-colors"
+                className="w-full bg-card border border-border rounded-xl p-4 text-muted-foreground hover:text-foreground hover:border-orange-500 transition-colors"
               >
                 + Add more items
               </button>
@@ -305,33 +305,33 @@ export default function CustomerCartPage() {
 
             {/* Order Summary */}
             <div className="space-y-6">
-              <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-                <h3 className="text-lg font-semibold text-white mb-4">Order Summary</h3>
+              <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
+                <h3 className="text-xl font-semibold text-foreground mb-6">Order Summary</h3>
                 
-                <div className="space-y-3">
-                  <div className="flex justify-between text-slate-400">
+                <div className="space-y-4">
+                  <div className="flex justify-between text-muted-foreground">
                     <span>Subtotal ({cartItems.length} items)</span>
-                    <span>₹{totals.subtotal.toLocaleString()}</span>
+                    <span className="font-medium">₹{totals.subtotal.toLocaleString()}</span>
                   </div>
                   
-                  <div className="flex justify-between text-slate-400">
+                  <div className="flex justify-between text-muted-foreground">
                     <span>Shipping</span>
-                    <span>{totals.shipping === 0 ? 'Free' : `₹${totals.shipping}`}</span>
+                    <span className="font-medium">{totals.shipping === 0 ? 'Free' : `₹${totals.shipping}`}</span>
                   </div>
                   
-                  <div className="flex justify-between text-slate-400">
+                  <div className="flex justify-between text-muted-foreground">
                     <span>Tax (GST 18%)</span>
-                    <span>₹{totals.tax.toLocaleString()}</span>
+                    <span className="font-medium">₹{totals.tax.toLocaleString()}</span>
                   </div>
                   
                   {totals.shipping === 0 && (
-                    <div className="text-green-400 text-sm">
+                    <div className="text-green-600 text-sm bg-green-50 p-2 rounded-lg">
                       🎉 Free shipping on orders above ₹5,000
                     </div>
                   )}
                   
-                  <div className="border-t border-slate-700 pt-3">
-                    <div className="flex justify-between text-white font-semibold text-lg">
+                  <div className="border-t border-border pt-4">
+                    <div className="flex justify-between text-foreground font-semibold text-xl">
                       <span>Total</span>
                       <span>₹{totals.total.toLocaleString()}</span>
                     </div>
@@ -354,26 +354,38 @@ export default function CustomerCartPage() {
               </div>
 
               {/* Delivery Info */}
-              <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-                <h4 className="font-semibold text-white mb-3">Delivery Information</h4>
-                <div className="space-y-2 text-sm text-slate-400">
-                  <p>📦 Standard Delivery: 5-7 business days</p>
-                  <p>🚚 Express Delivery: 2-3 business days (+₹199)</p>
-                  <p>🏪 Store Pickup: Available at 15+ locations</p>
-                  <p>↩️ Easy Returns: 30-day return policy</p>
+              <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
+                <h4 className="font-semibold text-foreground mb-4">Delivery Information</h4>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p className="flex items-center space-x-2">
+                    <span>📦</span>
+                    <span>Standard Delivery: 5-7 business days</span>
+                  </p>
+                  <p className="flex items-center space-x-2">
+                    <span>🚚</span>
+                    <span>Express Delivery: 2-3 business days (+₹199)</span>
+                  </p>
+                  <p className="flex items-center space-x-2">
+                    <span>🏪</span>
+                    <span>Store Pickup: Available at 15+ locations</span>
+                  </p>
+                  <p className="flex items-center space-x-2">
+                    <span>↩️</span>
+                    <span>Easy Returns: 30-day return policy</span>
+                  </p>
                 </div>
               </div>
 
               {/* Promo Code */}
-              <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-                <h4 className="font-semibold text-white mb-3">Promo Code</h4>
+              <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
+                <h4 className="font-semibold text-foreground mb-4">Promo Code</h4>
                 <div className="flex space-x-2">
                   <input
                     type="text"
                     placeholder="Enter promo code"
-                    className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white placeholder-slate-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    className="flex-1 px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
                   />
-                  <button className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors">
+                  <button className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium">
                     Apply
                   </button>
                 </div>

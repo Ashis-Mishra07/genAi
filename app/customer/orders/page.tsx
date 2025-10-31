@@ -6,6 +6,7 @@ import {
   Package, Truck, CheckCircle, Clock, Eye, Star, MapPin, Calendar,
   Filter, Search, ChevronDown, X
 } from 'lucide-react';
+import { GoogleLoaderWithText } from '@/components/ui/google-loader';
 
 interface Order {
   id: string;
@@ -180,13 +181,10 @@ export default function CustomerOrdersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-background">
       {loading ? (
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
-            <p className="text-slate-400">Loading your orders...</p>
-          </div>
+          <GoogleLoaderWithText size="lg" text="Loading your orders..." />
         </div>
       ) : orders.length === 0 ? (
         <div className="flex items-center justify-center min-h-screen">
@@ -316,7 +314,7 @@ export default function CustomerOrdersPage() {
             ) : (
               <div className="space-y-4">
                 {filteredOrders.map((order) => (
-                  <div key={order.id} className="bg-slate-800 rounded-lg p-6 border border-slate-700 hover:border-orange-500/50 transition-colors">
+                  <div key={order.id} className="bg-card rounded-2xl p-6 border border-border hover:border-primary/20 transition-colors shadow-sm">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center space-x-2">

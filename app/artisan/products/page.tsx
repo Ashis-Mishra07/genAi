@@ -19,6 +19,7 @@ import {
   Save,
   X,
 } from "lucide-react";
+import { GoogleLoaderWithText, GoogleLoaderInline } from '@/components/ui/google-loader';
 
 interface Product {
   id: string;
@@ -227,15 +228,11 @@ export default function ArtisanProductsPage() {
 
   if (isLoading || isTranslating) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">
-            {isTranslating
-              ? "Translating..."
-              : "Loading products..."}
-          </p>
-        </div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <GoogleLoaderWithText 
+          size="xl" 
+          text={isTranslating ? "Translating..." : "Loading products..."} 
+        />
       </div>
     );
   }
@@ -546,7 +543,7 @@ export default function ArtisanProductsPage() {
                   disabled={isSubmitting}
                   className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
                   {isSubmitting ? (
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <GoogleLoaderInline size="sm" />
                   ) : (
                     <>
                       <Save className="h-4 w-4 mr-2" />

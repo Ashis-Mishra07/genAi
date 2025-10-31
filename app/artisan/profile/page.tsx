@@ -14,6 +14,7 @@ import {
   Save,
   Palette,
 } from "lucide-react";
+import { GoogleLoaderWithText, GoogleLoaderInline } from '@/components/ui/google-loader';
 
 interface ArtisanProfile {
   id: string;
@@ -126,10 +127,7 @@ export default function ArtisanProfilePage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">
-            {t('loadingProfile')}
-          </p>
+                    <GoogleLoaderWithText size="xl" text="Loading profile..." />
         </div>
       </div>
     );
@@ -305,7 +303,7 @@ export default function ArtisanProfilePage() {
                 className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-sm hover:shadow-md hover:scale-[1.02] transform">
                 {isSaving ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground mr-2"></div>
+                    <GoogleLoaderInline size="sm" />
                     {t('saving')}
                   </>
                 ) : (

@@ -17,6 +17,7 @@ import {
   Palette,
   Wand2,
 } from "lucide-react";
+import { GoogleLoaderWithText } from '@/components/ui/google-loader';
 
 // Type definitions
 interface User {
@@ -475,8 +476,7 @@ I'll be back with your poster soon! 📸➡️🎨`;
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-6 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-white">Loading chats...</p>
+                    <GoogleLoaderWithText size="xl" text="Loading conversations..." />
         </div>
       </div>
     );

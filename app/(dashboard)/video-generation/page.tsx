@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Video, Play, Loader, Eye, AlertCircle, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { GoogleLoaderWithText, GoogleLoaderInline } from '@/components/ui/google-loader';
 
 interface Product {
   id: string;
@@ -153,10 +154,7 @@ export default function AdminVideoGenerationPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <Loader className="h-12 w-12 text-orange-500 animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Loading products...</p>
-        </div>
+        <GoogleLoaderWithText size="xl" text="Loading products..." />
       </div>
     );
   }
@@ -189,7 +187,7 @@ export default function AdminVideoGenerationPage() {
               }}
               className="flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-colors"
             >
-              <Loader className="h-4 w-4 mr-2" />
+              <GoogleLoaderInline size="sm" />
               Refresh
             </button>
           </div>
@@ -287,7 +285,7 @@ export default function AdminVideoGenerationPage() {
                       >
                         {generatingVideo === product.id ? (
                           <>
-                            <Loader className="h-4 w-4 mr-2 animate-spin" />
+                            <GoogleLoaderInline size="sm" />
                             Regenerating...
                           </>
                         ) : (
@@ -303,8 +301,8 @@ export default function AdminVideoGenerationPage() {
                       disabled
                       className="w-full flex items-center justify-center px-4 py-3 bg-yellow-600/50 dark:bg-yellow-500/50 text-white rounded-xl cursor-not-allowed"
                     >
-                      <Loader className="h-4 w-4 mr-2 animate-spin" />
-                      Generating Video...
+                      <GoogleLoaderInline size="sm" />
+                      <span className="ml-2">Generating Video...</span>
                     </button>
                   ) : (
                     <button
@@ -314,8 +312,8 @@ export default function AdminVideoGenerationPage() {
                     >
                       {generatingVideo === product.id ? (
                         <>
-                          <Loader className="h-4 w-4 mr-2 animate-spin" />
-                          Starting...
+                          <GoogleLoaderInline size="sm" />
+                          <span className="ml-2">Starting...</span>
                         </>
                       ) : (
                         <>

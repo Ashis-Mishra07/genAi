@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Shield, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { GoogleLoaderInline } from '@/components/ui/google-loader';
 
 export default function AdminAuthPage() {
   const router = useRouter();
@@ -145,10 +146,12 @@ export default function AdminAuthPage() {
               disabled={isLoading || passcode.length !== 6}
               className="w-full bg-primary text-primary-foreground py-4 px-6 rounded-2xl font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl">
               {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-3"></div>
-                  Verifying Access...
-                </div>
+                <GoogleLoaderInline 
+                  size="sm" 
+                  text="Verifying Access..."
+                  className="text-primary-foreground"
+                  textClassName="text-primary-foreground"
+                />
               ) : (
                 <div className="flex items-center justify-center">
                   <Shield className="w-5 h-5 mr-2" />

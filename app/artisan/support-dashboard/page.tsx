@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "@/lib/i18n/hooks";
+import { GoogleLoaderWithText } from '@/components/ui/google-loader';
 
 interface SupportTicket {
   id: string;
@@ -251,10 +252,7 @@ export default function SupportDashboardPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4"></div>
-          <p className="text-foreground">{t("loadingSupportDashboard")}</p>
-        </div>
+        <GoogleLoaderWithText size="xl" text={t("loadingSupportDashboard")} />
       </div>
     );
   }

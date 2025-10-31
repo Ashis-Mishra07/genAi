@@ -6,6 +6,7 @@ import {
   Package, Heart, ShoppingCart, User, TrendingUp, Star, 
   ChevronRight, Eye, ArrowUp, ArrowDown
 } from 'lucide-react';
+import { GoogleLoaderWithText } from '@/components/ui/google-loader';
 
 interface Product {
   id: string;
@@ -198,23 +199,28 @@ export default function CustomerDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-800 to-gray-800 border-b border-slate-700 px-6 py-6 backdrop-blur-sm" style={{boxShadow: '0 25px 50px -12px rgba(255, 255, 255, 0.1)'}}>
+      <div className="bg-card border-b border-border px-6 py-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-100 bg-clip-text text-transparent" style={{filter: 'drop-shadow(0 4px 8px rgba(255, 255, 255, 0.2))'}}>Dashboard</h1>
-            <p className="text-slate-300 mt-1">Welcome back, Arjun!</p>
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-primary/10 rounded-xl">
+              <User className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+              <p className="text-muted-foreground mt-1">Welcome back, Arjun!</p>
+            </div>
           </div>
           
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-3 bg-slate-700/50 border border-slate-600 rounded-xl px-4 py-3 backdrop-blur-sm" style={{boxShadow: '0 20px 25px -5px rgba(255, 255, 255, 0.1), 0 10px 10px -5px rgba(255, 255, 255, 0.05)'}}>
-              <div className="h-10 w-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center">
-                <User className="h-5 w-5 text-white" />
+            <div className="flex items-center space-x-3 bg-muted/50 border border-border rounded-xl px-4 py-3">
+              <div className="h-10 w-10 bg-primary rounded-full flex items-center justify-center">
+                <User className="h-5 w-5 text-primary-foreground" />
               </div>
               <div className="text-right">
-                <p className="text-sm font-semibold text-white">Customer</p>
-                <p className="text-xs text-blue-400 font-medium">Premium Member</p>
+                <p className="text-sm font-semibold text-foreground">Customer</p>
+                <p className="text-xs text-primary font-medium">Premium Member</p>
               </div>
             </div>
           </div>
@@ -224,66 +230,66 @@ export default function CustomerDashboardPage() {
       <div className="p-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-gradient-to-br from-slate-800 to-slate-700 rounded-xl p-6 border border-slate-600 transition-all duration-200 hover:scale-[1.02]" style={{boxShadow: '0 25px 50px -12px rgba(255, 255, 255, 0.1), 0 10px 25px -5px rgba(255, 255, 255, 0.05)'}}>
+          <div className="bg-card rounded-2xl p-6 border border-border transition-all duration-200 hover:shadow-sm shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm font-medium">Total Orders</p>
-                <p className="text-3xl font-bold text-white mt-2" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.1))'}}>{stats.totalOrders}</p>
+                <p className="text-muted-foreground text-sm font-medium">Total Orders</p>
+                <p className="text-3xl font-bold text-foreground mt-2">{stats.totalOrders}</p>
                 <div className="flex items-center mt-3">
-                  <ArrowUp className="h-4 w-4 text-emerald-400 mr-1" />
-                  <span className="text-emerald-400 text-sm font-medium">+2 this month</span>
+                  <ArrowUp className="h-4 w-4 text-green-600 dark:text-green-400 mr-1" />
+                  <span className="text-green-600 dark:text-green-400 text-sm font-medium">+2 this month</span>
                 </div>
               </div>
-              <div className="bg-blue-600/20 p-3 rounded-xl" style={{boxShadow: '0 10px 15px -3px rgba(255, 255, 255, 0.1)'}}>
-                <Package className="h-8 w-8 text-blue-400" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.2))'}} />
+              <div className="bg-primary/10 p-3 rounded-xl">
+                <Package className="h-8 w-8 text-primary" />
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-slate-800 to-slate-700 rounded-xl p-6 border border-slate-600 transition-all duration-200 hover:scale-[1.02]" style={{boxShadow: '0 25px 50px -12px rgba(255, 255, 255, 0.1), 0 10px 25px -5px rgba(255, 255, 255, 0.05)'}}>
+          <div className="bg-card rounded-2xl p-6 border border-border transition-all duration-200 hover:shadow-sm shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm font-medium">Total Spent</p>
-                <p className="text-3xl font-bold text-white mt-2" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.1))'}}>₹{parseFloat(String(stats.totalSpent)).toLocaleString()}</p>
+                <p className="text-muted-foreground text-sm font-medium">Total Spent</p>
+                <p className="text-3xl font-bold text-foreground mt-2">₹{parseFloat(String(stats.totalSpent)).toLocaleString()}</p>
                 <div className="flex items-center mt-3">
-                  <ArrowUp className="h-4 w-4 text-emerald-400 mr-1" />
-                  <span className="text-emerald-400 text-sm font-medium">+15% this month</span>
+                  <ArrowUp className="h-4 w-4 text-green-600 dark:text-green-400 mr-1" />
+                  <span className="text-green-600 dark:text-green-400 text-sm font-medium">+15% this month</span>
                 </div>
               </div>
-              <div className="bg-emerald-600/20 p-3 rounded-xl" style={{boxShadow: '0 10px 15px -3px rgba(255, 255, 255, 0.1)'}}>
-                <TrendingUp className="h-8 w-8 text-emerald-400" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.2))'}} />
+              <div className="bg-green-500/10 p-3 rounded-xl">
+                <TrendingUp className="h-8 w-8 text-green-600 dark:text-green-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-slate-800 to-slate-700 rounded-xl p-6 border border-slate-600 transition-all duration-200 hover:scale-[1.02]" style={{boxShadow: '0 25px 50px -12px rgba(255, 255, 255, 0.1), 0 10px 25px -5px rgba(255, 255, 255, 0.05)'}}>
+          <div className="bg-card rounded-2xl p-6 border border-border transition-all duration-200 hover:shadow-sm shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm font-medium">Wishlist Items</p>
-                <p className="text-3xl font-bold text-white mt-2" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.1))'}}>{stats.wishlistItems}</p>
+                <p className="text-muted-foreground text-sm font-medium">Wishlist Items</p>
+                <p className="text-3xl font-bold text-foreground mt-2">{stats.wishlistItems}</p>
                 <div className="flex items-center mt-3">
-                  <ArrowUp className="h-4 w-4 text-purple-400 mr-1" />
-                  <span className="text-purple-400 text-sm font-medium">+3 this week</span>
+                  <ArrowUp className="h-4 w-4 text-purple-600 dark:text-purple-400 mr-1" />
+                  <span className="text-purple-600 dark:text-purple-400 text-sm font-medium">+3 this week</span>
                 </div>
               </div>
-              <div className="bg-purple-600/20 p-3 rounded-xl" style={{boxShadow: '0 10px 15px -3px rgba(255, 255, 255, 0.1)'}}>
-                <Heart className="h-8 w-8 text-purple-400" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.2))'}} />
+              <div className="bg-purple-500/10 p-3 rounded-xl">
+                <Heart className="h-8 w-8 text-purple-600 dark:text-purple-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-slate-800 to-slate-700 rounded-xl p-6 border border-slate-600 transition-all duration-200 hover:scale-[1.02]" style={{boxShadow: '0 25px 50px -12px rgba(255, 255, 255, 0.1), 0 10px 25px -5px rgba(255, 255, 255, 0.05)'}}>
+          <div className="bg-card rounded-2xl p-6 border border-border transition-all duration-200 hover:shadow-sm shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm font-medium">Cart Items</p>
-                <p className="text-3xl font-bold text-white mt-2" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.1))'}}>{stats.cartItems}</p>
+                <p className="text-muted-foreground text-sm font-medium">Cart Items</p>
+                <p className="text-3xl font-bold text-foreground mt-2">{stats.cartItems}</p>
                 <div className="flex items-center mt-3">
-                  <ArrowDown className="h-4 w-4 text-orange-400 mr-1" />
-                  <span className="text-orange-400 text-sm font-medium">Ready to checkout</span>
+                  <ArrowDown className="h-4 w-4 text-orange-600 dark:text-orange-400 mr-1" />
+                  <span className="text-orange-600 dark:text-orange-400 text-sm font-medium">Ready to checkout</span>
                 </div>
               </div>
-              <div className="bg-orange-600/20 p-3 rounded-xl" style={{boxShadow: '0 10px 15px -3px rgba(255, 255, 255, 0.1)'}}>
-                <ShoppingCart className="h-8 w-8 text-orange-400" style={{filter: 'drop-shadow(0 2px 4px rgba(255, 255, 255, 0.2))'}} />
+              <div className="bg-orange-500/10 p-3 rounded-xl">
+                <ShoppingCart className="h-8 w-8 text-orange-600 dark:text-orange-400" />
               </div>
             </div>
           </div>
@@ -307,22 +313,8 @@ export default function CustomerDashboardPage() {
 
             <div className="p-6">
               {loading ? (
-                <div className="space-y-4">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex items-center justify-between p-4 bg-slate-700/50 rounded-xl animate-pulse">
-                      <div className="flex items-center space-x-4">
-                        <div className="h-12 w-12 bg-slate-600 rounded-xl"></div>
-                        <div>
-                          <div className="h-4 bg-slate-600 rounded w-24 mb-2"></div>
-                          <div className="h-3 bg-slate-600 rounded w-32"></div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="h-4 bg-slate-600 rounded w-16 mb-2"></div>
-                        <div className="h-3 bg-slate-600 rounded w-12"></div>
-                      </div>
-                    </div>
-                  ))}
+                <div className="flex items-center justify-center py-8">
+                  <GoogleLoaderWithText size="md" text="Loading recent orders..." />
                 </div>
               ) : recentOrders.length === 0 ? (
                 <div className="text-center py-12">

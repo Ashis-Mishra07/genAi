@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { GoogleLoaderWithText, GoogleLoaderInline } from '@/components/ui/google-loader';
 
 interface Product {
   id: string;
@@ -246,10 +247,7 @@ export default function ArtisanDashboard() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">{t("loadingDashboard")}</p>
-        </div>
+        <GoogleLoaderWithText size="xl" text={t("loadingDashboard")} />
       </div>
     );
   }
@@ -418,7 +416,7 @@ export default function ArtisanDashboard() {
                 {isTranslating && (
                   <div className="col-span-full text-center py-4">
                     <div className="inline-flex items-center text-primary">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+                      <GoogleLoaderInline size="sm" />
                       <span className="text-sm">Translating products...</span>
                     </div>
                   </div>

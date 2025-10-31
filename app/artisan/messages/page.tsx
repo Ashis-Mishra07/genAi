@@ -18,6 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { GoogleLoaderWithText, GoogleLoaderInline } from '@/components/ui/google-loader';
 import { useEffect, useState } from "react";
 import { useTranslation } from "@/lib/i18n/hooks";
 import { useTranslateContent } from "@/lib/hooks/useTranslateContent";
@@ -712,8 +713,7 @@ Product Data: ${JSON.stringify(product)}`;
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading messages...</p>
+          <GoogleLoaderWithText size="xl" text="Loading messages..." />
         </div>
       </div>
     );
@@ -1035,7 +1035,7 @@ Product Data: ${JSON.stringify(product)}`;
                   disabled={uploadingFile}
                 />
                 {uploadingFile ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-orange-500"></div>
+                  <GoogleLoaderInline size="sm" />
                 ) : (
                   <Paperclip className="h-5 w-5" />
                 )}
@@ -1059,7 +1059,7 @@ Product Data: ${JSON.stringify(product)}`;
                 disabled={isSending || !newMessage.trim()}
                 className="p-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
                 {isSending ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <GoogleLoaderInline size="sm" />
                 ) : (
                   <Send className="h-5 w-5" />
                 )}
@@ -1145,7 +1145,7 @@ Product Data: ${JSON.stringify(product)}`;
                           disabled={isSending}
                           className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg disabled:opacity-50 transition-all duration-200 flex items-center justify-center text-lg font-medium">
                           {isSending ? (
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                            <GoogleLoaderInline size="sm" />
                           ) : (
                             <>
                               <Send className="h-5 w-5 mr-2" />

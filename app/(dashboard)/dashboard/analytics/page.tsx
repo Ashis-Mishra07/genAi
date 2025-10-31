@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { GoogleLoaderWithText } from '@/components/ui/google-loader';
 
 interface AnalyticsData {
   revenue: {
@@ -122,10 +123,7 @@ export default function AnalyticsPage() {
   if (isLoading || !analytics) {
     return (
       <div className="p-6 flex items-center justify-center min-h-[50vh]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Loading analytics...</p>
-        </div>
+        <GoogleLoaderWithText size="lg" text="Loading analytics..." />
       </div>
     );
   }

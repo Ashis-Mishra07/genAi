@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/navbar";
+import { GoogleLoaderInline } from '@/components/ui/google-loader';
 
 // Mock user data - replace with actual auth state
 const mockUser = null; // Set to user object when logged in
@@ -320,7 +321,7 @@ export default function HomePage() {
       {isLoading && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-card rounded-2xl p-8 flex items-center space-x-4 border border-border shadow-lg">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <GoogleLoaderInline size="md" />
             <span className="text-card-foreground font-medium">
               Loading {isLoading} portal...
             </span>
