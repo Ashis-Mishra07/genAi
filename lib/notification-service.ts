@@ -4,16 +4,16 @@ import nodemailer from 'nodemailer';
 const emailConfig = {
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER || 'mishralucky074@gmail.com',
-    pass: process.env.EMAIL_PASS || 'yrle bezd fesh hieh',
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 };
 
 // SMS configuration (Twilio)
 const smsConfig = {
-  accountSid: process.env.TWILIO_ACCOUNT_SID || 'AC7541d47d533c4ff9571e7956fbe0079a',
-  authToken: process.env.TWILIO_AUTH_TOKEN || 'b5f851e0c398d5f0ff3a69bb6c1ec4ba',
-  phoneNumber: process.env.TWILIO_PHONE_NUMBER || '+16693123723',
+  accountSid: process.env.TWILIO_ACCOUNT_SID,
+  authToken: process.env.TWILIO_AUTH_TOKEN,
+  phoneNumber: process.env.TWILIO_PHONE_NUMBER,
 };
 
 interface NotificationData {
