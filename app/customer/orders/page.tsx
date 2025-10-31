@@ -189,21 +189,21 @@ export default function CustomerOrdersPage() {
       ) : orders.length === 0 ? (
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center max-w-md mx-auto px-6">
-            <Package className="h-16 w-16 text-slate-400 mx-auto mb-6" />
-            <h2 className="text-2xl font-bold text-white mb-4">No Orders Found</h2>
-            <p className="text-slate-400 mb-8">
+            <Package className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
+            <h2 className="text-2xl font-bold text-foreground mb-4">No Orders Found</h2>
+            <p className="text-muted-foreground mb-8">
               You haven't placed any orders yet. Start shopping to see your orders here!
             </p>
             <div className="space-y-3">
               <button
                 onClick={() => router.push('/customer/products')}
-                className="w-full bg-orange-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors"
+                className="w-full bg-primary text-primary-foreground px-8 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
               >
                 Start Shopping
               </button>
               <button
                 onClick={() => router.push('/auth/customer')}
-                className="w-full bg-slate-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-slate-600 transition-colors"
+                className="w-full bg-muted text-muted-foreground px-8 py-3 rounded-lg font-semibold hover:bg-muted/80 transition-colors"
               >
                 Sign In / Sign Up
               </button>
@@ -213,60 +213,60 @@ export default function CustomerOrdersPage() {
       ) : (
         <>
           {/* Header */}
-          <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+          <div className="bg-card border-b border-border px-6 py-4">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-white">My Orders</h1>
-                <p className="text-slate-400">{orders.length} orders placed</p>
+                <h1 className="text-2xl font-bold text-card-foreground">My Orders</h1>
+                <p className="text-muted-foreground">{orders.length} orders placed</p>
               </div>
               
               <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-3 bg-slate-700 rounded-lg px-3 py-2">
-                  <div className="h-8 w-8 bg-orange-500 rounded-full flex items-center justify-center">
-                    <Package className="h-4 w-4 text-white" />
+                <div className="flex items-center space-x-3 bg-muted rounded-lg px-3 py-2">
+                  <div className="h-8 w-8 bg-primary rounded-full flex items-center justify-center">
+                    <Package className="h-4 w-4 text-primary-foreground" />
                   </div>
-                  <span className="text-orange-400 font-medium">₹{orders.reduce((sum, order) => {
+                  <span className="text-primary font-medium">₹{orders.reduce((sum, order) => {
                     const orderTotal = Number(order.total) || 0;
                     return sum + orderTotal;
                   }, 0).toLocaleString()}</span>
-                  <span className="text-slate-400 text-sm">Total Value</span>
+                  <span className="text-muted-foreground text-sm">Total Value</span>
                 </div>
               </div>
             </div>
 
             {/* Order Statistics */}
             <div className="mt-6 grid grid-cols-4 gap-4">
-              <div className="bg-slate-700 rounded-lg p-4 text-center">
-                <div className="text-2xl font-bold text-white">{orderStats.total}</div>
-                <div className="text-slate-400 text-sm">Total Orders</div>
+              <div className="bg-muted rounded-lg p-4 text-center">
+                <div className="text-2xl font-bold text-card-foreground">{orderStats.total}</div>
+                <div className="text-muted-foreground text-sm">Total Orders</div>
               </div>
-              <div className="bg-slate-700 rounded-lg p-4 text-center">
-                <div className="text-2xl font-bold text-yellow-400">{orderStats.pending}</div>
-                <div className="text-slate-400 text-sm">Pending</div>
+              <div className="bg-muted rounded-lg p-4 text-center">
+                <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{orderStats.pending}</div>
+                <div className="text-muted-foreground text-sm">Pending</div>
               </div>
-              <div className="bg-slate-700 rounded-lg p-4 text-center">
-                <div className="text-2xl font-bold text-purple-400">{orderStats.shipped}</div>
-                <div className="text-slate-400 text-sm">Shipped</div>
+              <div className="bg-muted rounded-lg p-4 text-center">
+                <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{orderStats.shipped}</div>
+                <div className="text-muted-foreground text-sm">Shipped</div>
               </div>
-              <div className="bg-slate-700 rounded-lg p-4 text-center">
-                <div className="text-2xl font-bold text-green-400">{orderStats.delivered}</div>
-                <div className="text-slate-400 text-sm">Delivered</div>
+              <div className="bg-muted rounded-lg p-4 text-center">
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400">{orderStats.delivered}</div>
+                <div className="text-muted-foreground text-sm">Delivered</div>
               </div>
             </div>
           </div>
 
           {/* Filters and Search */}
-          <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+          <div className="bg-card border-b border-border px-6 py-4">
             <div className="flex items-center justify-between space-x-4">
               <div className="flex items-center space-x-4">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <input
                     type="text"
                     placeholder="Search orders or products..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 w-80"
+                    className="pl-10 pr-4 py-2 bg-muted border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-80"
                   />
                 </div>
 
@@ -274,7 +274,7 @@ export default function CustomerOrdersPage() {
                   <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="appearance-none bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 pr-10"
+                    className="appearance-none bg-muted border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary pr-10"
                   >
                     <option value="all">All Orders</option>
                     <option value="pending">Pending</option>
@@ -283,11 +283,11 @@ export default function CustomerOrdersPage() {
                     <option value="delivered">Delivered</option>
                     <option value="cancelled">Cancelled</option>
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 </div>
               </div>
 
-              <div className="text-slate-400 text-sm">
+              <div className="text-muted-foreground text-sm">
                 {filteredOrders.length} of {orders.length} orders
               </div>
             </div>
@@ -297,16 +297,16 @@ export default function CustomerOrdersPage() {
           <div className="p-6">
             {filteredOrders.length === 0 ? (
               <div className="text-center py-12">
-                <Package className="h-16 w-16 text-slate-400 mx-auto mb-4" />
-                <h2 className="text-2xl font-bold text-white mb-4">No orders found</h2>
-                <p className="text-slate-400 mb-8">
+                <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-foreground mb-4">No orders found</h2>
+                <p className="text-muted-foreground mb-8">
                   {filterStatus === 'all' 
                     ? "You haven't placed any orders yet" 
                     : `No ${filterStatus} orders found`}
                 </p>
                 <button
                   onClick={() => router.push('/customer/products')}
-                  className="bg-orange-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors"
+                  className="bg-primary text-primary-foreground px-8 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
                 >
                   Start Shopping
                 </button>
@@ -320,8 +320,8 @@ export default function CustomerOrdersPage() {
                         <div className="flex items-center space-x-2">
                           {getStatusIcon(order.status)}
                           <div>
-                            <h3 className="font-semibold text-white">{order.orderNumber}</h3>
-                            <p className="text-slate-400 text-sm">
+                            <h3 className="font-semibold text-card-foreground">{order.orderNumber}</h3>
+                            <p className="text-muted-foreground text-sm">
                               {new Date(order.date).toLocaleDateString()}
                             </p>
                           </div>
@@ -332,20 +332,20 @@ export default function CustomerOrdersPage() {
                       </div>
 
                       <div className="text-right">
-                        <div className="text-xl font-bold text-white">₹{Number(order.total).toLocaleString()}</div>
-                        <div className="text-slate-400 text-sm">{order.items.length} items</div>
+                        <div className="text-xl font-bold text-card-foreground">₹{Number(order.total).toLocaleString()}</div>
+                        <div className="text-muted-foreground text-sm">{order.items.length} items</div>
                       </div>
                     </div>
 
                     {order.trackingNumber && (
-                      <div className="mb-4 flex items-center space-x-2 text-sm text-slate-400">
+                      <div className="mb-4 flex items-center space-x-2 text-sm text-muted-foreground">
                         <Truck className="h-4 w-4" />
                         <span>Tracking: {order.trackingNumber}</span>
                       </div>
                     )}
 
                     {order.estimatedDelivery && (
-                      <div className="mb-4 flex items-center space-x-2 text-sm text-slate-400">
+                      <div className="mb-4 flex items-center space-x-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
                         <span>Expected: {new Date(order.estimatedDelivery).toLocaleDateString()}</span>
                       </div>
@@ -354,13 +354,13 @@ export default function CustomerOrdersPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex space-x-2">
                         {order.items.slice(0, 3).map((item, index) => (
-                          <div key={index} className="text-sm text-slate-300">
+                          <div key={index} className="text-sm text-muted-foreground">
                             {item.name}
                             {index < Math.min(order.items.length - 1, 2) && ', '}
                           </div>
                         ))}
                         {order.items.length > 3 && (
-                          <span className="text-sm text-slate-400">
+                          <span className="text-sm text-muted-foreground">
                             +{order.items.length - 3} more
                           </span>
                         )}
@@ -371,7 +371,7 @@ export default function CustomerOrdersPage() {
                           setSelectedOrder(order);
                           setShowOrderDetails(true);
                         }}
-                        className="flex items-center space-x-2 text-orange-400 hover:text-orange-300 transition-colors"
+                        className="flex items-center space-x-2 text-primary hover:text-primary/80 transition-colors"
                       >
                         <Eye className="h-4 w-4" />
                         <span>View Details</span>
@@ -388,16 +388,16 @@ export default function CustomerOrdersPage() {
       {/* Order Details Modal */}
       {showOrderDetails && selectedOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-slate-700">
+          <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold text-white">{selectedOrder.orderNumber}</h2>
-                  <p className="text-slate-400">Order placed on {new Date(selectedOrder.date).toLocaleDateString()}</p>
+                  <h2 className="text-2xl font-bold text-card-foreground">{selectedOrder.orderNumber}</h2>
+                  <p className="text-muted-foreground">Order placed on {new Date(selectedOrder.date).toLocaleDateString()}</p>
                 </div>
                 <button
                   onClick={() => setShowOrderDetails(false)}
-                  className="text-slate-400 hover:text-white"
+                  className="text-muted-foreground hover:text-card-foreground"
                 >
                   <X className="h-6 w-6" />
                 </button>

@@ -183,9 +183,9 @@ export default function ArtisanFeedbackPage() {
       case "pending":
         return "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30";
       case "closed":
-        return "bg-gray-500/20 text-gray-400 border border-gray-500/30";
+        return "bg-muted/20 text-muted-foreground border border-border";
       default:
-        return "bg-gray-500/20 text-gray-400 border border-gray-500/30";
+        return "bg-muted/20 text-muted-foreground border border-border";
     }
   };
 
@@ -348,8 +348,8 @@ export default function ArtisanFeedbackPage() {
               {/* Messages List */}
               <div className="max-h-[600px] overflow-y-auto">
                 {filteredMessages.length === 0 ? (
-                  <div className="p-8 text-center text-white/70">
-                    <MessageCircle className="h-12 w-12 mx-auto mb-4 text-white/30" />
+                  <div className="p-8 text-center text-muted-foreground">
+                    <MessageCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
                     <p>
                       {t("noMessagesFound")}
                     </p>
@@ -364,9 +364,9 @@ export default function ArtisanFeedbackPage() {
                           handleMarkAsRead(message.id);
                         }
                       }}
-                      className={`p-4 border-b border-white/10 hover:bg-white/5 cursor-pointer transition-colors ${
+                      className={`p-4 border-b border-border hover:bg-muted/50 cursor-pointer transition-colors ${
                         selectedMessage?.id === message.id
-                          ? "bg-orange-500/20 border-l-4 border-l-orange-500"
+                          ? "bg-primary/20 border-l-4 border-l-primary"
                           : ""
                       } ${!message.isRead ? "bg-blue-500/20" : ""}`}>
                       <div className="flex items-start justify-between mb-2">
@@ -375,7 +375,7 @@ export default function ArtisanFeedbackPage() {
                             {!message.isRead ? (
                               <Mail className="h-4 w-4 text-blue-400 mr-2" />
                             ) : (
-                              <MailOpen className="h-4 w-4 text-white/50 mr-2" />
+                              <MailOpen className="h-4 w-4 text-muted-foreground mr-2" />
                             )}
                             {message.isImportant && (
                               <Star className="h-4 w-4 text-yellow-500 mr-2" />
@@ -383,7 +383,7 @@ export default function ArtisanFeedbackPage() {
                           </div>
                           <span
                             className={`text-sm font-medium ${
-                              !message.isRead ? "text-white" : "text-white/90"
+                              !message.isRead ? "text-card-foreground" : "text-muted-foreground"
                             }`}>
                             {message.customerName}
                           </span>
@@ -405,23 +405,23 @@ export default function ArtisanFeedbackPage() {
                       <h3
                         className={`text-sm mb-1 ${
                           !message.isRead
-                            ? "font-semibold text-white"
-                            : "text-white/80"
+                            ? "font-semibold text-card-foreground"
+                            : "text-muted-foreground"
                         }`}>
                         {getMessageSubject(message)}
                       </h3>
 
-                      <p className="text-xs text-white/60 mb-2 line-clamp-2">
+                      <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
                         {getMessageText(message)}
                       </p>
 
                       {message.productName && (
-                        <div className="text-xs text-orange-400 mb-2">
+                        <div className="text-xs text-primary mb-2">
                           {t("about")}: {getProductName(message.productName)}
                         </div>
                       )}
 
-                      <div className="flex items-center justify-between text-xs text-white/50">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
                         <span>
                           {new Date(message.createdAt).toLocaleDateString()}
                         </span>
@@ -437,19 +437,19 @@ export default function ArtisanFeedbackPage() {
           {/* Message Detail */}
           <div className="lg:col-span-2">
             {selectedMessage ? (
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+              <div className="bg-card backdrop-blur-sm rounded-lg border border-border">
                 {/* Message Header */}
-                <div className="p-6 border-b border-white/20">
+                <div className="p-6 border-b border-border">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center">
-                      <div className="h-10 w-10 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full flex items-center justify-center text-white font-medium mr-3">
+                      <div className="h-10 w-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-medium mr-3">
                         {selectedMessage.customerName.charAt(0)}
                       </div>
                       <div>
-                        <h2 className="text-lg font-semibold text-white">
+                        <h2 className="text-lg font-semibold text-card-foreground">
                           {selectedMessage.customerName}
                         </h2>
-                        <p className="text-sm text-white/70">
+                        <p className="text-sm text-muted-foreground">
                           {selectedMessage.customerEmail}
                         </p>
                       </div>
@@ -468,24 +468,24 @@ export default function ArtisanFeedbackPage() {
 
                       <button
                         onClick={() => handleDelete(selectedMessage.id)}
-                        className="p-2 text-white/50 hover:text-red-400 transition-colors">
+                        className="p-2 text-muted-foreground hover:text-red-400 transition-colors">
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-semibold text-white mb-2">
+                    <h3 className="text-xl font-semibold text-card-foreground mb-2">
                       {getMessageSubject(selectedMessage)}
                     </h3>
                     {selectedMessage.productName && (
-                      <div className="flex items-center text-sm text-orange-400 mb-2">
+                      <div className="flex items-center text-sm text-primary mb-2">
                         <span>
                           {t("regarding")}: {getProductName(selectedMessage.productName)}
                         </span>
                       </div>
                     )}
-                    <div className="flex items-center text-sm text-white/60">
+                    <div className="flex items-center text-sm text-muted-foreground">
                       <Clock className="h-4 w-4 mr-1" />
                       <span>
                         {new Date(selectedMessage.createdAt).toLocaleString()}
@@ -505,15 +505,15 @@ export default function ArtisanFeedbackPage() {
                 {/* Message Content */}
                 <div className="p-6">
                   <div className="prose max-w-none">
-                    <p className="text-white/90 whitespace-pre-wrap">
+                    <p className="text-card-foreground whitespace-pre-wrap">
                       {getMessageText(selectedMessage)}
                     </p>
                   </div>
 
-                  <div className="mt-6 pt-6 border-t border-white/20">
+                  <div className="mt-6 pt-6 border-t border-border">
                     <button
                       onClick={() => setShowReplyModal(true)}
-                      className="flex items-center px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg transition-all duration-200">
+                      className="flex items-center px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-all duration-200">
                       <Reply className="h-4 w-4 mr-2" />
                       {t("reply")}
                     </button>
@@ -521,12 +521,12 @@ export default function ArtisanFeedbackPage() {
                 </div>
               </div>
             ) : (
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-12 text-center">
-                <MessageCircle className="h-16 w-16 text-white/30 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-white mb-2">
+              <div className="bg-card backdrop-blur-sm rounded-lg border border-border p-12 text-center">
+                <MessageCircle className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-card-foreground mb-2">
                   {t("selectFeedback")}
                 </h3>
-                <p className="text-white/70">
+                <p className="text-muted-foreground">
                   {t("selectFeedbackDescription")}
                 </p>
               </div>
@@ -538,12 +538,12 @@ export default function ArtisanFeedbackPage() {
       {/* Reply Modal */}
       {showReplyModal && selectedMessage && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-800 rounded-lg border border-white/20 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="p-6 border-b border-white/20">
-              <h3 className="text-lg font-semibold text-white">
+          <div className="bg-card rounded-lg border border-border max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6 border-b border-border">
+              <h3 className="text-lg font-semibold text-card-foreground">
                 {t("replyTo")} {selectedMessage.customerName}
               </h3>
-              <p className="text-sm text-white/70">
+              <p className="text-sm text-muted-foreground">
                 Re: {selectedMessage.subject}
               </p>
             </div>
@@ -553,27 +553,27 @@ export default function ArtisanFeedbackPage() {
                 value={replyMessage}
                 onChange={(e) => setReplyMessage(e.target.value)}
                 rows={8}
-                className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 resize-none"
+                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none"
                 placeholder={t("typeYourReply")}
               />
             </div>
 
-            <div className="p-6 border-t border-white/20 flex justify-end space-x-4">
+            <div className="p-6 border-t border-border flex justify-end space-x-4">
               <button
                 onClick={() => {
                   setShowReplyModal(false);
                   setReplyMessage("");
                 }}
-                className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white/90 hover:bg-white/20 transition-colors">
+                className="px-4 py-2 bg-muted border border-border rounded-lg text-muted-foreground hover:bg-muted/80 transition-colors">
                 {t("cancel")}
               </button>
 
               <button
                 onClick={handleReply}
                 disabled={isReplying || !replyMessage.trim()}
-                className="flex items-center px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+                className="flex items-center px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
                 {isReplying ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground mr-2"></div>
                 ) : (
                   <Reply className="h-4 w-4 mr-2" />
                 )}

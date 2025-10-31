@@ -225,9 +225,9 @@ export default function SupportDashboardPage() {
       case "resolved":
         return "bg-green-500/20 text-green-400 border-green-500/20";
       case "closed":
-        return "bg-slate-500/20 text-slate-400 border-slate-500/20";
+        return "bg-muted/20 text-muted-foreground border-border";
       default:
-        return "bg-slate-500/20 text-slate-400 border-slate-500/20";
+        return "bg-muted/20 text-muted-foreground border-border";
     }
   };
 
@@ -304,20 +304,20 @@ export default function SupportDashboardPage() {
               </p>
             </div>
 
-            <div className="bg-slate-800 rounded-lg border border-slate-700 p-6">
+            <div className="bg-card rounded-lg border border-border p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm">{t("refundRequests")}</p>
-                  <p className="text-2xl font-bold text-white">{stats.refunds.total}</p>
+                  <p className="text-muted-foreground text-sm">{t("refundRequests")}</p>
+                  <p className="text-2xl font-bold text-card-foreground">{stats.refunds.total}</p>
                 </div>
                 <RefreshCw className="h-8 w-8 text-green-500" />
               </div>
-              <p className="text-slate-400 text-xs mt-2">
+              <p className="text-muted-foreground text-xs mt-2">
                 {stats.refunds.pending} {t("pendingReview")}
               </p>
             </div>
 
-            <div className="bg-slate-800 rounded-lg border border-slate-700 p-6">
+            <div className="bg-card rounded-lg border border-border p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-slate-400 text-sm">{t("avgResponse")}</p>
@@ -328,18 +328,18 @@ export default function SupportDashboardPage() {
               <p className="text-slate-400 text-xs mt-2">{t("targetHours")}</p>
             </div>
 
-            <div className="bg-slate-800 rounded-lg border border-slate-700 p-6">
+            <div className="bg-card rounded-lg border border-border p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm">{t("satisfaction")}</p>
-                  <p className="text-2xl font-bold text-white flex items-center">
+                  <p className="text-muted-foreground text-sm">{t("satisfaction")}</p>
+                  <p className="text-2xl font-bold text-card-foreground flex items-center">
                     {stats.customerSatisfaction}
                     <Star className="h-5 w-5 text-yellow-400 ml-1" />
                   </p>
                 </div>
                 <TrendingUp className="h-8 w-8 text-yellow-500" />
               </div>
-              <p className="text-slate-400 text-xs mt-2">
+              <p className="text-muted-foreground text-xs mt-2">
                 {t("basedOnResponses").replace("{count}", String(stats.responseCount || 0))}
               </p>
             </div>
@@ -347,7 +347,7 @@ export default function SupportDashboardPage() {
         )}
 
         {/* Tab Navigation */}
-        <div className="flex space-x-1 bg-slate-800 p-1 rounded-lg mb-8 max-w-md">
+        <div className="flex space-x-1 bg-card p-1 rounded-lg mb-8 max-w-md border border-border">
           {[
             { key: "tickets", label: t("supportTickets"), icon: FileText },
             { key: "refunds", label: t("refundRequests"), icon: RefreshCw },
@@ -358,8 +358,8 @@ export default function SupportDashboardPage() {
               onClick={() => setActiveTab(key as "tickets" | "refunds" | "stats")}
               className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-all ${
                 activeTab === key
-                  ? "bg-orange-500 text-white shadow-md"
-                  : "text-slate-400 hover:text-white hover:bg-slate-700"
+                  ? "bg-primary text-primary-foreground shadow-md"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
               }`}>
               <Icon className="h-4 w-4 mr-2" />
               {label}
@@ -369,15 +369,15 @@ export default function SupportDashboardPage() {
 
         {/* Support Tickets Tab */}
         {activeTab === "tickets" && (
-          <div className="bg-slate-800 rounded-lg border border-slate-700">
-            <div className="p-6 border-b border-slate-700">
+          <div className="bg-card rounded-lg border border-border">
+            <div className="p-6 border-b border-border">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-white">{t("supportTickets")}</h3>
+                <h3 className="text-xl font-bold text-card-foreground">{t("supportTickets")}</h3>
                 <div className="flex items-center space-x-3">
                   <select
                     value={ticketFilter}
                     onChange={(e) => setTicketFilter(e.target.value as typeof ticketFilter)}
-                    className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-orange-500">
+                    className="bg-background border border-border rounded-lg px-3 py-2 text-foreground text-sm focus:outline-none focus:border-primary">
                     <option value="all">{t("allStatus")}</option>
                     <option value="open">{t("active")}</option>
                     <option value="in-progress">{t("inProgress")}</option>
@@ -466,19 +466,19 @@ export default function SupportDashboardPage() {
 
         {/* Update Modal */}
         {showUpdateModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-lg border border-slate-700 w-full max-w-md">
-              <div className="p-6 border-b border-slate-700">
-                <h3 className="text-xl font-bold text-white">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-card rounded-lg border border-border w-full max-w-md">
+              <div className="p-6 border-b border-border">
+                <h3 className="text-xl font-bold text-card-foreground">
                   {updateType === "ticket" ? t("updateTicket") : t("updateRefundRequest")}
                 </h3>
               </div>
 
               <div className="p-6">
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-white mb-2">{t("status")}</label>
+                  <label className="block text-sm font-medium text-card-foreground mb-2">{t("status")}</label>
                   <select
-                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+                    className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground focus:outline-none focus:border-primary"
                     defaultValue={
                       updateType === "ticket" ? selectedTicket?.status : selectedRefund?.status
                     }
@@ -502,11 +502,11 @@ export default function SupportDashboardPage() {
                 </div>
 
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-white mb-2">{t("adminNotes")}</label>
+                  <label className="block text-sm font-medium text-card-foreground mb-2">{t("adminNotes")}</label>
                   <textarea
                     id="update-notes"
                     rows={3}
-                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500"
+                    className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary"
                     placeholder={t("addNotesForCustomer")}
                   />
                 </div>

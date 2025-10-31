@@ -552,29 +552,29 @@ export default function ArtisanDashboard() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {selectedProduct.category && (
-                    <div className="bg-slate-700 border border-slate-600 rounded-lg p-4">
-                      <div className="flex items-center text-slate-300">
-                        <Tag className="h-5 w-5 mr-2 text-blue-400" />
+                    <div className="bg-card border border-border rounded-lg p-4">
+                      <div className="flex items-center text-muted-foreground">
+                        <Tag className="h-5 w-5 mr-2 text-primary" />
                         <span className="font-medium">{t("category")}</span>
                       </div>
-                      <p className="text-white mt-1">
+                      <p className="text-card-foreground mt-1">
                         {getCategoryTranslation(selectedProduct.category)}
                       </p>
                     </div>
                   )}
 
-                  <div className="bg-slate-700 border border-slate-600 rounded-lg p-4">
-                    <div className="flex items-center text-slate-300">
+                  <div className="bg-card border border-border rounded-lg p-4">
+                    <div className="flex items-center text-muted-foreground">
                       <Calendar className="h-5 w-5 mr-2 text-green-400" />
                       <span className="font-medium">{t("createdAt")}</span>
                     </div>
-                    <p className="text-white mt-1">
+                    <p className="text-card-foreground mt-1">
                       {new Date(selectedProduct.createdAt).toLocaleDateString()}
                     </p>
                   </div>
 
-                  <div className="bg-slate-700 border border-slate-600 rounded-lg p-4">
-                    <div className="flex items-center text-slate-300">
+                  <div className="bg-card border border-border rounded-lg p-4">
+                    <div className="flex items-center text-muted-foreground">
                       <Heart className="h-5 w-5 mr-2 text-purple-400" />
                       <span className="font-medium">{t("status")}</span>
                     </div>
@@ -582,18 +582,18 @@ export default function ArtisanDashboard() {
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${
                         selectedProduct.isActive
                           ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                          : "bg-slate-500/20 text-slate-400 border border-slate-500/30"
+                          : "bg-muted/20 text-muted-foreground border border-border"
                       }`}>
                       {selectedProduct.isActive ? t("active") : t("inactive")}
                     </span>
                   </div>
 
-                  <div className="bg-slate-700 border border-slate-600 rounded-lg p-4">
-                    <div className="flex items-center text-slate-300">
+                  <div className="bg-card border border-border rounded-lg p-4">
+                    <div className="flex items-center text-muted-foreground">
                       <DollarSign className="h-5 w-5 mr-2 text-yellow-400" />
                       <span className="font-medium">{t("productId")}</span>
                     </div>
-                    <p className="text-white mt-1 text-sm font-mono">
+                    <p className="text-card-foreground mt-1 text-sm font-mono">
                       {selectedProduct.id}
                     </p>
                   </div>

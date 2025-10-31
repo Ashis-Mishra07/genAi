@@ -1051,13 +1051,13 @@ Product Data: ${JSON.stringify(product)}`;
                       ? "एडमिन सहायता के लिए अपना संदेश टाइप करें..."
                       : "Type your message to admin support..."
                   }
-                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
               <button
                 onClick={handleSendMessage}
                 disabled={isSending || !newMessage.trim()}
-                className="p-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+                className="p-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
                 {isSending ? (
                   <GoogleLoaderInline size="sm" />
                 ) : (
@@ -1071,9 +1071,9 @@ Product Data: ${JSON.stringify(product)}`;
         {/* Product Sharing Modal */}
         {showProductModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="bg-card border border-border rounded-lg p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-white">
+                <h3 className="text-xl font-bold text-card-foreground">
                   {isHindi
                     ? "एडमिन के साथ उत्पाद साझा करें"
                     : "Share Product with Admin"}
@@ -1121,9 +1121,9 @@ Product Data: ${JSON.stringify(product)}`;
                     .map((product) => (
                       <div
                         key={product.id}
-                        className="bg-slate-700 border border-slate-600 rounded-lg p-4 hover:bg-slate-600 hover:border-orange-500/50 transition-all duration-200 text-center">
+                        className="bg-card border border-border rounded-lg p-4 hover:bg-muted hover:border-primary/50 transition-all duration-200 text-center">
                         {product.imageUrl && (
-                          <div className="w-full h-40 rounded-lg overflow-hidden mb-3 bg-slate-600">
+                          <div className="w-full h-40 rounded-lg overflow-hidden mb-3 bg-muted">
                             <img
                               src={product.imageUrl}
                               alt={product.name}
@@ -1134,7 +1134,7 @@ Product Data: ${JSON.stringify(product)}`;
                             />
                           </div>
                         )}
-                        <h4 className="font-bold text-white mb-2">
+                        <h4 className="font-bold text-card-foreground mb-2">
                           {product.name}
                         </h4>
                         <div className="text-2xl font-bold text-green-300 mb-4">

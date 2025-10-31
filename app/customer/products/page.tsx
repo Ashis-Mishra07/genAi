@@ -152,23 +152,25 @@ export default function CustomerProductsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-white">Featured Products</h1>
-            <p className="text-slate-400">Discover amazing handcrafted products from talented artisans</p>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-3 bg-slate-700 rounded-lg px-3 py-2">
-              <div className="h-8 w-8 bg-orange-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">C</span>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-medium text-white">Customer</p>
-                <p className="text-xs text-slate-400">{isLoading ? 'Loading...' : `${sortedProducts.length} products`}</p>
+      <div className="bg-card border-b border-border px-6 py-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-card-foreground mb-2">Artisan Marketplace</h1>
+              <p className="text-muted-foreground text-lg">Discover unique handcrafted products from talented artisans worldwide</p>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3 bg-muted/50 backdrop-blur-sm rounded-xl px-4 py-3 border border-border">
+                <div className="h-10 w-10 bg-primary rounded-full flex items-center justify-center shadow-lg">
+                  <Package className="h-5 w-5 text-primary-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-card-foreground">Browse Products</p>
+                  <p className="text-xs text-muted-foreground">{isLoading ? 'Loading...' : `${sortedProducts.length} items available`}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -176,52 +178,62 @@ export default function CustomerProductsPage() {
       </div>
 
       {/* Main Content */}
-      <div className="p-6">
+      <div className="max-w-7xl mx-auto p-6">
         {/* Error Message */}
         {error && (
-          <div className="bg-red-500/20 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg mb-6">
-            {error}
-            <button 
-              onClick={fetchProducts} 
-              className="ml-4 text-red-400 hover:text-red-300 underline"
-            >
-              Try Again
-            </button>
+          <div className="bg-destructive/10 border border-destructive/30 text-destructive px-6 py-4 rounded-xl mb-6 backdrop-blur-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold mb-1">Error Loading Products</h3>
+                <p className="text-sm">{error}</p>
+              </div>
+              <button 
+                onClick={fetchProducts} 
+                className="bg-destructive hover:bg-destructive/90 text-destructive-foreground px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
           </div>
-        )}
-
-        {/* Loading State */}
+        )}        {/* Loading State */}
         {isLoading ? (
-          <div className="text-center py-16">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
-            <h2 className="text-xl font-bold text-white mb-2">Loading Products...</h2>
-            <p className="text-slate-400">Fetching the latest artisan creations</p>
+          <div className="text-center py-20">
+            <div className="relative">
+              <div className="animate-spin rounded-full h-20 w-20 border-4 border-muted border-t-primary mx-auto mb-6"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Package className="h-8 w-8 text-primary animate-pulse" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-foreground mb-3">Discovering Amazing Products</h2>
+            <p className="text-muted-foreground text-lg">Fetching the latest artisan creations for you...</p>
           </div>
         ) : (
           <>
             {/* Search and Filters */}
-            <div className="bg-slate-800 rounded-lg p-6 mb-6 border border-slate-700">
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            <div className="bg-card backdrop-blur-sm rounded-2xl p-8 mb-8 border border-border shadow-xl">
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 {/* Search */}
                 <div className="lg:col-span-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Search Products</label>
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
+                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                     <input
                       type="text"
-                      placeholder="Search products or artisans..."
+                      placeholder="Search products, artisans, or descriptions..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="w-full pl-12 pr-4 py-3 bg-muted border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary/50 transition-all"
                     />
                   </div>
                 </div>
 
                 {/* Category Filter */}
                 <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Category</label>
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-foreground focus:ring-2 focus:ring-primary focus:border-primary/50 transition-all"
                   >
                     {categories.map(category => (
                       <option key={category} value={category}>{category}</option>
@@ -231,72 +243,81 @@ export default function CustomerProductsPage() {
 
                 {/* Sort */}
                 <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Sort By</label>
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-foreground focus:ring-2 focus:ring-primary focus:border-primary/50 transition-all"
                   >
-                    <option value="newest">Newest First</option>
-                    <option value="price-low">Price: Low to High</option>
-                    <option value="price-high">Price: High to Low</option>
-                    <option value="alphabetical">Name: A to Z</option>
-                    <option value="rating">Highest Rated</option>
-                    <option value="popular">Most Popular</option>
+                    <option value="newest">✨ Newest First</option>
+                    <option value="price-low">💰 Price: Low to High</option>
+                    <option value="price-high">💎 Price: High to Low</option>
+                    <option value="alphabetical">🔤 Name: A to Z</option>
+                    <option value="rating">⭐ Highest Rated</option>
+                    <option value="popular">🔥 Most Popular</option>
                   </select>
                 </div>
               </div>
 
-              {/* Price Range Filter */}
-              <div className="mt-4 pt-4 border-t border-slate-700">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+              {/* Advanced Filters */}
+              <div className="mt-6 pt-6 border-t border-border">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
                   <div>
-                    <label className="block text-sm text-slate-400 mb-2">Price Range</label>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="number"
-                        placeholder="Min"
-                        value={priceRange.min || ''}
-                        onChange={(e) => setPriceRange(prev => ({ ...prev, min: Number(e.target.value) || 0 }))}
-                        className="w-20 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-sm"
-                      />
-                      <span className="text-slate-400">to</span>
-                      <input
-                        type="number"
-                        placeholder="Max"
-                        value={priceRange.max || ''}
-                        onChange={(e) => setPriceRange(prev => ({ ...prev, max: Number(e.target.value) || 50000 }))}
-                        className="w-20 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-sm"
-                      />
+                    <label className="block text-sm font-medium text-muted-foreground mb-3">Price Range</label>
+                    <div className="flex items-center space-x-3">
+                      <div className="flex-1">
+                        <input
+                          type="number"
+                          placeholder="Min ₹"
+                          value={priceRange.min || ''}
+                          onChange={(e) => setPriceRange(prev => ({ ...prev, min: Number(e.target.value) || 0 }))}
+                          className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                      <span className="text-muted-foreground font-medium">—</span>
+                      <div className="flex-1">
+                        <input
+                          type="number"
+                          placeholder="Max ₹"
+                          value={priceRange.max || ''}
+                          onChange={(e) => setPriceRange(prev => ({ ...prev, max: Number(e.target.value) || 50000 }))}
+                          className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
                       <button
                         onClick={() => setPriceRange({ min: 0, max: 50000 })}
-                        className="text-orange-400 hover:text-orange-300 text-sm"
+                        className="text-primary hover:text-primary/80 text-sm font-medium px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors"
                       >
                         Reset
                       </button>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-center space-x-4">
-                    <span className="text-slate-400 text-sm">View:</span>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => setViewMode('grid')}
-                        className={`p-2 rounded ${viewMode === 'grid' ? 'bg-orange-500 text-white' : 'text-slate-400 hover:text-white'}`}
-                      >
-                        <Grid3X3 className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => setViewMode('list')}
-                        className={`p-2 rounded ${viewMode === 'list' ? 'bg-orange-500 text-white' : 'text-slate-400 hover:text-white'}`}
-                      >
-                        <List className="h-4 w-4" />
-                      </button>
+                  <div className="flex items-center justify-center space-x-6">
+                    <div>
+                      <label className="block text-sm font-medium text-muted-foreground mb-3">View Mode</label>
+                      <div className="flex items-center space-x-2 bg-muted/30 rounded-lg p-1">
+                        <button
+                          onClick={() => setViewMode('grid')}
+                          className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                        >
+                          <Grid3X3 className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => setViewMode('list')}
+                          className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                        >
+                          <List className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
 
                   <div className="text-right">
-                    <div className="text-slate-400 text-sm">
-                      Showing {sortedProducts.length} of {products.length} products
+                    <label className="block text-sm font-medium text-muted-foreground mb-3">Results</label>
+                    <div className="text-foreground font-medium">
+                      <span className="text-primary text-lg font-bold">{sortedProducts.length}</span>
+                      <span className="text-muted-foreground text-sm ml-1">of {products.length} products</span>
                     </div>
                   </div>
                 </div>
@@ -305,11 +326,18 @@ export default function CustomerProductsPage() {
 
             {/* Products Grid/List */}
             {sortedProducts.length === 0 ? (
-              <div className="text-center py-16">
-                <Package className="h-24 w-24 text-slate-400 mx-auto mb-6" />
-                <h2 className="text-2xl font-bold text-white mb-4">No products found</h2>
-                <p className="text-slate-400 mb-8">
-                  {error ? 'Unable to load products. Please try again.' : 'Try adjusting your search or filter criteria'}
+              <div className="text-center py-20">
+                <div className="relative mb-8">
+                  <div className="w-32 h-32 bg-muted/50 rounded-full flex items-center justify-center mx-auto border-4 border-border">
+                    <Package className="h-16 w-16 text-muted-foreground" />
+                  </div>
+                  <div className="absolute -top-2 -right-2 w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
+                    <Search className="h-6 w-6 text-primary" />
+                  </div>
+                </div>
+                <h2 className="text-3xl font-bold text-foreground mb-4">No Products Found</h2>
+                <p className="text-muted-foreground text-lg mb-8 max-w-md mx-auto">
+                  {error ? 'Unable to load products. Please check your connection and try again.' : 'No products match your current search and filter criteria. Try adjusting your filters.'}
                 </p>
                 <button
                   onClick={() => {
@@ -318,9 +346,9 @@ export default function CustomerProductsPage() {
                     setPriceRange({ min: 0, max: 50000 });
                     if (error) fetchProducts();
                   }}
-                  className="bg-orange-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg"
                 >
-                  {error ? 'Retry' : 'Clear Filters'}
+                  {error ? '🔄 Retry Loading' : '✨ Clear All Filters'}
                 </button>
               </div>
             ) : (
@@ -331,7 +359,7 @@ export default function CustomerProductsPage() {
                 {sortedProducts.map((product) => (
                   <div 
                     key={product.id} 
-                    className={`bg-slate-800 rounded-lg overflow-hidden border border-slate-700 hover:border-orange-500/50 transition-colors ${
+                    className={`group bg-card backdrop-blur-sm rounded-2xl overflow-hidden border border-border hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 transform hover:scale-[1.02] ${
                       viewMode === 'list' ? 'flex items-center' : ''
                     }`}
                   >
@@ -362,7 +390,7 @@ export default function CustomerProductsPage() {
                           />
                           {/* Video overlay badge - now clickable */}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent group-hover:from-black/70 transition-all flex items-center justify-center">
-                            <div className="bg-emerald-500 group-hover:bg-emerald-600 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center shadow-2xl transform group-hover:scale-110 transition-all">
+                            <div className="bg-primary group-hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-full text-sm font-bold flex items-center shadow-2xl transform group-hover:scale-110 transition-all">
                               <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M8 5v10l7-5-7-5z"/>
                               </svg>
@@ -386,35 +414,38 @@ export default function CustomerProductsPage() {
                         </div>
                       )}
                       {product.isNew && (
-                        <div className="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded text-xs font-medium z-10">
-                          NEW
+                        <div className="absolute top-3 right-3 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-bold z-10 shadow-lg">
+                          ✨ NEW
                         </div>
                       )}
                       <button 
-                        className="absolute top-2 left-2 p-2 bg-slate-800/80 rounded-full hover:bg-slate-700 z-10"
+                        className="absolute top-3 left-3 p-2 bg-background/70 backdrop-blur-sm rounded-full hover:bg-background/80 hover:scale-110 transition-all z-10 group/heart"
                         onClick={(e) => {
                           e.stopPropagation();
                           // Add to wishlist logic here
                         }}
                       >
-                        <Heart className="h-4 w-4 text-slate-400 hover:text-red-400" />
+                        <Heart className="h-4 w-4 text-muted-foreground group-hover/heart:text-red-400 group-hover/heart:fill-current transition-all" />
                       </button>
                       {!product.isActive && (
-                        <div className="absolute inset-0 bg-slate-900/80 flex items-center justify-center z-20">
-                          <span className="text-red-400 font-medium text-sm">Unavailable</span>
+                        <div className="absolute inset-0 bg-background/80 flex items-center justify-center z-20">
+                          <span className="text-destructive font-medium text-sm">Unavailable</span>
                         </div>
                       )}
                     </div>
                     
-                    <div className={`p-4 ${viewMode === 'list' ? 'flex-1' : ''}`}>
+                    <div className={`p-5 ${viewMode === 'list' ? 'flex-1' : ''}`}>
                       <div className={viewMode === 'list' ? 'flex items-center justify-between' : ''}>
                         <div className={viewMode === 'list' ? 'flex-1' : ''}>
-                          <h3 className="font-semibold text-white mb-1">{product.name}</h3>
+                          <h3 className="font-bold text-card-foreground mb-2 text-lg group-hover:text-primary transition-colors">{product.name}</h3>
                           {product.artisanName && (
-                            <p className="text-slate-400 text-sm mb-2">by {product.artisanName}</p>
+                            <p className="text-muted-foreground text-sm mb-1 font-medium">by {product.artisanName}</p>
                           )}
                           {product.artisanLocation && (
-                            <p className="text-slate-400 text-xs mb-3">{product.artisanLocation}</p>
+                            <p className="text-muted-foreground text-xs mb-3 flex items-center">
+                              <span className="w-1 h-1 bg-muted-foreground rounded-full mr-2"></span>
+                              {product.artisanLocation}
+                            </p>
                           )}
                           
                           <div className="flex items-center mb-3">
@@ -425,53 +456,58 @@ export default function CustomerProductsPage() {
                                 return (
                                   <Star 
                                     key={i} 
-                                    className={`h-4 w-4 ${i < Math.floor(productRating) ? 'text-yellow-400 fill-current' : 'text-slate-600'}`} 
+                                    className={`h-4 w-4 ${i < Math.floor(productRating) ? 'text-yellow-400 fill-current' : 'text-muted'}`} 
                                   />
                                 );
                               })}
                             </div>
-                            <span className="text-slate-400 text-sm ml-2">
+                            <span className="text-muted-foreground text-sm ml-2">
                               ({product.reviewCount || Math.floor(Math.random() * 50) + 10})
                             </span>
                           </div>
 
-                          <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center justify-between mb-4">
                             <div>
-                              <span className="text-lg font-bold text-white">
+                              <span className="text-2xl font-bold text-primary">
                                 {product.currency === 'INR' ? '₹' : '$'}{product.price.toLocaleString()}
                               </span>
                             </div>
                             {product.category && (
-                              <span className="text-xs bg-slate-700 text-slate-300 px-2 py-1 rounded">{product.category}</span>
+                              <span className="text-xs bg-muted text-muted-foreground px-3 py-1 rounded-full font-medium border border-border">
+                                {product.category}
+                              </span>
                             )}
                           </div>
 
                           {viewMode === 'list' && product.description && (
-                            <p className="text-slate-400 text-sm mb-3 line-clamp-2">{product.description}</p>
+                            <p className="text-muted-foreground text-sm mb-3 line-clamp-2">{product.description}</p>
                           )}
                         </div>
 
-                        <div className={`flex space-x-2 ${viewMode === 'list' ? 'ml-4' : ''}`}>
+                        <div className={`flex space-x-3 ${viewMode === 'list' ? 'ml-4' : ''}`}>
                           <button 
                             onClick={() => product.isActive && addToCart(product.id)}
-                            className={`${viewMode === 'list' ? 'px-6 py-2' : 'flex-1 py-2 px-4'} rounded-lg font-medium transition-colors flex items-center justify-center ${
+                            className={`${viewMode === 'list' ? 'px-6 py-3' : 'flex-1 py-3 px-4'} rounded-xl font-semibold transition-all transform hover:scale-105 flex items-center justify-center shadow-lg ${
                               product.isActive 
-                                ? 'bg-orange-500 text-white hover:bg-orange-600' 
-                                : 'bg-slate-600 text-slate-400 cursor-not-allowed'
+                                ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-primary/30' 
+                                : 'bg-muted/50 text-muted-foreground cursor-not-allowed'
                             }`}
                             disabled={!product.isActive || addingToCart === product.id}
                           >
                             {addingToCart === product.id ? (
-                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
                             ) : (
-                              product.isActive ? 'Add to Cart' : 'Notify Me'
+                              <>
+                                <ShoppingCart className="h-4 w-4 mr-2" />
+                                {product.isActive ? 'Add to Cart' : 'Notify Me'}
+                              </>
                             )}
                           </button>
                           <button 
-                            onClick={() => router.push(`/products/${product.id}`)}
-                            className="p-2 border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors"
+                            onClick={() => router.push(`/customer/products/${product.id}`)}
+                            className="p-3 border border-border rounded-xl hover:bg-muted/50 hover:border-primary/50 transition-all group/view"
                           >
-                            <Eye className="h-4 w-4 text-slate-400" />
+                            <Eye className="h-4 w-4 text-muted-foreground group-hover/view:text-primary transition-colors" />
                           </button>
                         </div>
                       </div>
@@ -491,15 +527,15 @@ export default function CustomerProductsPage() {
           onClick={() => setVideoModalProduct(null)}
         >
           <div 
-            className="relative max-w-4xl w-full bg-slate-800 rounded-2xl overflow-hidden shadow-2xl"
+            className="relative max-w-4xl w-full bg-card rounded-2xl overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close button */}
             <button
               onClick={() => setVideoModalProduct(null)}
-              className="absolute top-4 right-4 z-10 p-2 bg-slate-900/80 hover:bg-slate-900 rounded-full transition-colors"
+              className="absolute top-4 right-4 z-10 p-2 bg-background/80 hover:bg-background rounded-full transition-colors"
             >
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -518,23 +554,23 @@ export default function CustomerProductsPage() {
             </div>
 
             {/* Product Info */}
-            <div className="p-6 bg-slate-800">
+            <div className="p-6 bg-card">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-white mb-2">{videoModalProduct.name}</h2>
+                  <h2 className="text-2xl font-bold text-card-foreground mb-2">{videoModalProduct.name}</h2>
                   {videoModalProduct.artisanName && (
-                    <p className="text-slate-400 text-sm mb-3">by {videoModalProduct.artisanName}</p>
+                    <p className="text-muted-foreground text-sm mb-3">by {videoModalProduct.artisanName}</p>
                   )}
                   {videoModalProduct.description && (
-                    <p className="text-slate-300 text-sm mb-4">{videoModalProduct.description}</p>
+                    <p className="text-muted-foreground text-sm mb-4">{videoModalProduct.description}</p>
                   )}
                   <div className="flex items-center space-x-4">
-                    <span className="text-2xl font-bold text-emerald-400">
+                    <span className="text-2xl font-bold text-primary">
                       {videoModalProduct.currency === 'INR' ? '₹' : '$'}
                       {videoModalProduct.price.toLocaleString()}
                     </span>
                     {videoModalProduct.category && (
-                      <span className="text-xs bg-slate-700 text-slate-300 px-3 py-1 rounded-full">
+                      <span className="text-xs bg-muted text-muted-foreground px-3 py-1 rounded-full">
                         {videoModalProduct.category}
                       </span>
                     )}
@@ -549,7 +585,7 @@ export default function CustomerProductsPage() {
                     setVideoModalProduct(null);
                     router.push(`/customer/products/${videoModalProduct.id}`);
                   }}
-                  className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3 px-6 rounded-lg font-medium transition-colors"
+                  className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground py-3 px-6 rounded-lg font-medium transition-colors"
                 >
                   View Full Details
                 </button>
@@ -562,8 +598,8 @@ export default function CustomerProductsPage() {
                   }}
                   className={`flex-1 py-3 px-6 rounded-lg font-medium transition-colors ${
                     videoModalProduct.isActive
-                      ? 'bg-orange-500 hover:bg-orange-600 text-white'
-                      : 'bg-slate-600 text-slate-400 cursor-not-allowed'
+                      ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                      : 'bg-muted text-muted-foreground cursor-not-allowed'
                   }`}
                   disabled={!videoModalProduct.isActive}
                 >

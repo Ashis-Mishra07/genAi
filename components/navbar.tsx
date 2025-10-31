@@ -20,7 +20,8 @@ import {
   Bell,
   MessageCircle,
   CreditCard,
-  Headphones
+  Headphones,
+  ShoppingCart
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -91,8 +92,9 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
         ]
       case "customer":
         return [
-          { href: "/products", label: "Products", icon: "Package" },
-          { href: "/customer/orders", label: "My Orders", icon: "ShoppingCart" },
+          { href: "/customer/products", label: "Products", icon: "Package" },
+          { href: "/customer/cart", label: "Cart", icon: "ShoppingCart" },
+          { href: "/customer/orders", label: "My Orders", icon: "ShoppingBag" },
           { href: "/customer/profile", label: "Profile", icon: "User" }
         ]
       default:

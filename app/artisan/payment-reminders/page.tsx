@@ -201,8 +201,8 @@ export default function PaymentRemindersPage() {
       case 'pending': return 'text-blue-400 bg-blue-400/20';
       case 'sent': return 'text-green-400 bg-green-400/20';
       case 'failed': return 'text-red-400 bg-red-400/20';
-      case 'cancelled': return 'text-slate-400 bg-slate-400/20';
-      default: return 'text-slate-400 bg-slate-400/20';
+      case 'cancelled': return 'text-muted-foreground bg-muted/20';
+      default: return 'text-muted-foreground bg-muted/20';
     }
   };
 
@@ -211,7 +211,7 @@ export default function PaymentRemindersPage() {
       case 'gentle': return 'text-green-400 bg-green-400/20';
       case 'urgent': return 'text-yellow-400 bg-yellow-400/20';
       case 'final': return 'text-red-400 bg-red-400/20';
-      default: return 'text-slate-400 bg-slate-400/20';
+      default: return 'text-muted-foreground bg-muted/20';
     }
   };
 
@@ -290,10 +290,10 @@ export default function PaymentRemindersPage() {
               </div>
             </div>
 
-            <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+            <div className="bg-card rounded-lg p-6 border border-border">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm">Scheduled</p>
+                  <p className="text-muted-foreground text-sm">Scheduled</p>
                   <p className="text-2xl font-bold text-blue-400">{stats.scheduled}</p>
                   <div className="flex items-center mt-1">
                     <Clock className="h-3 w-3 text-blue-400 mr-1" />
@@ -304,10 +304,10 @@ export default function PaymentRemindersPage() {
               </div>
             </div>
 
-            <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+            <div className="bg-card rounded-lg p-6 border border-border">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm">Failed/Cancelled</p>
+                  <p className="text-muted-foreground text-sm">Failed/Cancelled</p>
                   <p className="text-2xl font-bold text-red-400">{stats.failed + stats.cancelled}</p>
                   <div className="flex items-center mt-1">
                     <TrendingDown className="h-3 w-3 text-red-400 mr-1" />
@@ -321,7 +321,7 @@ export default function PaymentRemindersPage() {
         )}
 
         {/* Tab Navigation */}
-        <div className="flex space-x-1 bg-slate-800 p-1 rounded-lg mb-6 max-w-md">
+        <div className="flex space-x-1 bg-card p-1 rounded-lg mb-6 max-w-md border border-border">
           {[
             { key: 'scheduled', label: 'Scheduled', icon: Calendar },
             { key: 'history', label: 'History', icon: Clock },
@@ -332,8 +332,8 @@ export default function PaymentRemindersPage() {
               onClick={() => setActiveTab(key as any)}
               className={`flex-1 flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-all ${
                 activeTab === key
-                  ? 'bg-orange-500 text-white shadow-md'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                  ? 'bg-primary text-primary-foreground shadow-md'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
               }`}
             >
               <Icon className="h-4 w-4 mr-2" />
@@ -346,11 +346,11 @@ export default function PaymentRemindersPage() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <Filter className="h-4 w-4 text-slate-400" />
+              <Filter className="h-4 w-4 text-muted-foreground" />
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value as any)}
-                className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-1 text-white text-sm focus:outline-none focus:border-orange-500"
+                className="bg-background border border-border rounded-lg px-3 py-1 text-foreground text-sm focus:outline-none focus:border-primary"
               >
                 <option value="all">All Types</option>
                 <option value="gentle">Gentle Reminders</option>
@@ -362,7 +362,7 @@ export default function PaymentRemindersPage() {
         </div>
 
         {/* Content based on active tab */}
-        <div className="bg-slate-800 rounded-lg border border-slate-700">
+        <div className="bg-card rounded-lg border border-border">
           {loading ? (
             <div className="p-8 text-center">
               <GoogleLoaderWithText size="xl" text="Loading payment reminders..." />

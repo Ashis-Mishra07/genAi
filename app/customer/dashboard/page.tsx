@@ -194,7 +194,7 @@ export default function CustomerDashboardPage() {
       case 'delivered':
         return 'bg-emerald-600/20 text-emerald-400';
       default:
-        return 'bg-slate-600/20 text-slate-400';
+        return 'bg-muted/20 text-muted-foreground';
     }
   };
 
@@ -318,11 +318,11 @@ export default function CustomerDashboardPage() {
                 </div>
               ) : recentOrders.length === 0 ? (
                 <div className="text-center py-12">
-                  <div className="bg-slate-700 rounded-full p-4 w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-                    <Package className="h-10 w-10 text-slate-400" />
+                  <div className="bg-muted rounded-full p-4 w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                    <Package className="h-10 w-10 text-muted-foreground" />
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">No orders yet</h3>
-                  <p className="text-slate-400 mb-6">Start shopping to see your orders here</p>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">No orders yet</h3>
+                  <p className="text-muted-foreground mb-6">Start shopping to see your orders here</p>
                   <button
                     onClick={() => router.push('/customer/products')}
                     className="bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition-colors shadow-lg"
@@ -333,14 +333,14 @@ export default function CustomerDashboardPage() {
               ) : (
                 <div className="space-y-4">
                   {recentOrders.map((order) => (
-                    <div key={order.id} className="flex items-center justify-between p-4 bg-slate-700/50 rounded-xl hover:bg-slate-700 transition-colors">
+                    <div key={order.id} className="flex items-center justify-between p-4 bg-muted/50 rounded-xl hover:bg-muted transition-colors">
                       <div className="flex items-center space-x-4">
-                        <div className="h-12 w-12 bg-blue-600/20 rounded-xl flex items-center justify-center">
-                          <Package className="h-6 w-6 text-blue-400" />
+                        <div className="h-12 w-12 bg-primary/20 rounded-xl flex items-center justify-center">
+                          <Package className="h-6 w-6 text-primary" />
                         </div>
                         <div>
-                          <p className="font-medium text-white">{order.orderNumber}</p>
-                          <p className="text-slate-400 text-sm">
+                          <p className="font-medium text-foreground">{order.orderNumber}</p>
+                          <p className="text-muted-foreground text-sm">
                             {new Date(order.date).toLocaleDateString()} • {order.itemCount} items
                           </p>
                         </div>
@@ -376,18 +376,18 @@ export default function CustomerDashboardPage() {
             <div className="p-6">
               <div className="space-y-4">
                 {recommendedProducts.map((product) => (
-                  <div key={product.id} className="flex items-center space-x-4 p-4 bg-slate-700/50 rounded-xl hover:bg-slate-700 transition-colors cursor-pointer group">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-600/20 to-indigo-600/20 rounded-xl flex items-center justify-center group-hover:from-blue-600/30 group-hover:to-indigo-600/30 transition-colors">
-                      <Package className="h-8 w-8 text-blue-400" />
+                  <div key={product.id} className="flex items-center space-x-4 p-4 bg-muted/50 rounded-xl hover:bg-muted transition-colors cursor-pointer group">
+                    <div className="w-16 h-16 bg-primary/20 rounded-xl flex items-center justify-center group-hover:bg-primary/30 transition-colors">
+                      <Package className="h-8 w-8 text-primary" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-1">
-                        <h3 className="font-medium text-white">{product.name}</h3>
+                        <h3 className="font-medium text-foreground">{product.name}</h3>
                         {product.isNew && (
-                          <span className="px-2 py-1 bg-emerald-600/20 text-emerald-400 text-xs rounded-full font-medium">New</span>
+                          <span className="px-2 py-1 bg-primary/20 text-primary text-xs rounded-full font-medium">New</span>
                         )}
                         {product.isTrending && (
-                          <span className="px-2 py-1 bg-orange-600/20 text-orange-400 text-xs rounded-full font-medium">Trending</span>
+                          <span className="px-2 py-1 bg-secondary/20 text-secondary-foreground text-xs rounded-full font-medium">Trending</span>
                         )}
                       </div>
                       <p className="text-slate-400 text-sm">by {product.artisanName}</p>

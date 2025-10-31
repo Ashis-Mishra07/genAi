@@ -351,15 +351,15 @@ export default function ArtisanProductsPage() {
                       className="w-full h-48 object-cover"
                     />
                   ) : (
-                    <div className="w-full h-48 bg-slate-700 flex items-center justify-center">
-                      <Package className="h-12 w-12 text-slate-400" />
+                    <div className="w-full h-48 bg-muted flex items-center justify-center">
+                      <Package className="h-12 w-12 text-muted-foreground" />
                     </div>
                   )}
                 </div>
 
                 <div className="p-4">
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-white line-clamp-1">
+                    <h3 className="font-semibold text-card-foreground line-clamp-1">
                       {product.name}
                     </h3>
                     <button
@@ -369,21 +369,21 @@ export default function ArtisanProductsPage() {
                       className={`px-2 py-1 text-xs rounded-full ${
                         product.isActive
                           ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                          : "bg-slate-500/20 text-slate-400 border border-slate-500/30"
+                          : "bg-muted/20 text-muted-foreground border border-border"
                       }`}>
                       {product.isActive ? t("active") : t("inactive")}
                     </button>
                   </div>
 
-                  <p className="text-slate-400 text-sm mb-3 line-clamp-2">
+                  <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
                     {product.description}
                   </p>
 
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-xl font-bold text-orange-400">
+                    <span className="text-xl font-bold text-primary">
                       ₹{product.price.toLocaleString()}
                     </span>
-                    <span className="text-sm text-slate-500 bg-slate-700 px-2 py-1 rounded">
+                    <span className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded">
                       {product.category}
                     </span>
                   </div>
@@ -425,16 +425,16 @@ export default function ArtisanProductsPage() {
 
       {/* Add Product Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-slate-700">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-card rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto border border-border">
+            <div className="p-6 border-b border-border">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-white">
+                <h2 className="text-xl font-bold text-card-foreground">
                   {t("createProduct")}
                 </h2>
                 <button
                   onClick={() => setShowAddModal(false)}
-                  className="text-slate-400 hover:text-white">
+                  className="text-muted-foreground hover:text-foreground">
                   <X className="h-6 w-6" />
                 </button>
               </div>
@@ -442,7 +442,7 @@ export default function ArtisanProductsPage() {
 
             <form onSubmit={handleAddProduct} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   {t("productName")}
                 </label>
                 <input
@@ -452,13 +452,13 @@ export default function ArtisanProductsPage() {
                   onChange={(e) =>
                     setNewProduct({ ...newProduct, name: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   placeholder={t("enterProductName")}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   {t("description")}
                 </label>
                 <textarea
@@ -471,13 +471,13 @@ export default function ArtisanProductsPage() {
                     })
                   }
                   rows={3}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   placeholder={t("enterProductDescription")}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   {t("priceInRupees")}
                 </label>
                 <input
@@ -489,13 +489,13 @@ export default function ArtisanProductsPage() {
                   onChange={(e) =>
                     setNewProduct({ ...newProduct, price: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   placeholder="0.00"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   {t("category")}
                 </label>
                 <input
@@ -505,13 +505,13 @@ export default function ArtisanProductsPage() {
                   onChange={(e) =>
                     setNewProduct({ ...newProduct, category: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   placeholder={t("categoryPlaceholder")}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   {t("imageUrlOptional")}
                 </label>
                 <input
@@ -520,7 +520,7 @@ export default function ArtisanProductsPage() {
                   onChange={(e) =>
                     setNewProduct({ ...newProduct, imageUrl: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   placeholder="https://example.com/image.jpg"
                 />
               </div>
@@ -535,13 +535,13 @@ export default function ArtisanProductsPage() {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 px-4 py-2 text-slate-300 border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors">
+                  className="flex-1 px-4 py-2 text-muted-foreground border border-border rounded-lg hover:bg-muted transition-colors">
                   {t("cancel")}
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
+                  className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
                   {isSubmitting ? (
                     <GoogleLoaderInline size="sm" />
                   ) : (
