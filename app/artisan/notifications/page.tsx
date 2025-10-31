@@ -13,10 +13,9 @@ import {
   Trash2,
   Zap,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslation } from "@/lib/i18n/hooks";
-import { useTranslateContent } from "@/lib/hooks/useTranslateContent";
+import type { TranslationKey } from "@/lib/i18n/translations";
 
 interface Notification {
   id: number;
@@ -43,36 +42,6 @@ const getNotificationIcon = (type: string) => {
     case "order_updated":
       return Package;
     case "product_sold":
-      const getNotificationColor = (type: string) => {
-        switch (type) {
-          case "order_placed":
-          case "purchase":
-            return "text-green-400";
-          case "order_updated":
-            return "text-blue-400";
-          case "product_sold":
-            return "text-emerald-400";
-          case "ticket":
-            return "text-cyan-400";
-          case "review":
-            return "text-yellow-400";
-          case "system":
-          case "general":
-            return "text-purple-400";
-          case "payment":
-            return "text-indigo-400";
-          case "message":
-            return "text-rose-400";
-          case "promotion":
-            return "text-pink-400";
-          case "settings":
-            return "text-slate-400";
-          case "urgent":
-            return "text-red-400";
-          default:
-            return "text-gray-400";
-        }
-      };
       return Gift;
     case "settings":
       return Settings;
@@ -129,7 +98,7 @@ const getNotificationBgColor = (type: string) => {
   }
 };
 
-const getRelativeTime = (dateString: string, isHindi: boolean = false) => {
+const getRelativeTime = (dateString: string, t: (key: TranslationKey) => string) => {
   const now = new Date();
   const date = new Date(dateString);
   const diff = now.getTime() - date.getTime();
@@ -141,58 +110,34 @@ const getRelativeTime = (dateString: string, isHindi: boolean = false) => {
   const weeks = Math.floor(days / 7);
   const months = Math.floor(days / 30);
 
-  if (isHindi) {
-    if (months > 0) return `${months} महीने पहले`;
-    if (weeks > 0) return `${weeks} सप्ताह पहले`;
-    if (days > 0) return `${days} दिन पहले`;
-    if (hours > 0) return `${hours} घंटे पहले`;
-    if (minutes > 0) return `${minutes} मिनट पहले`;
-    if (seconds > 30) return `${seconds} सेकंड पहले`;
-    return "अभी";
-  }
-
-  if (months > 0) return `${months} month${months > 1 ? "s" : ""} ago`;
-  if (weeks > 0) return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
-  if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
-  if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-  if (minutes > 0) return `${minutes} min${minutes > 1 ? "s" : ""} ago`;
-  if (seconds > 30) return `${seconds} seconds ago`;
-  return "Just now";
+  if (months > 0) return `${months} ${months > 1 ? t('monthsAgo') : t('monthAgo')}`;
+  if (weeks > 0) return `${weeks} ${weeks > 1 ? t('weeksAgo') : t('weekAgo')}`;
+  if (days > 0) return `${days} ${days > 1 ? t('daysAgo') : t('dayAgo')}`;
+  if (hours > 0) return `${hours} ${hours > 1 ? t('hoursAgo') : t('hourAgo')}`;
+  if (minutes > 0) return `${minutes} ${minutes > 1 ? t('minutesAgo') : t('minuteAgo')}`;
+  if (seconds > 30) return `${seconds} ${t('secondsAgo')}`;
+  return t('justNow');
 };
 
-const getNotificationTypeText = (type: string, isHindi: boolean = false) => {
-  if (!isHindi) return type.charAt(0).toUpperCase() + type.slice(1);
-
-  switch (type) {
-    case "purchase":
-      return "खरीदारी";
-    case "ticket":
-      return "टिकट";
-    case "review":
-      return "समीक्षा";
-    case "system":
-      return "सिस्टम";
-    case "order":
-      return "ऑर्डर";
-    case "payment":
-      return "भुगतान";
-    case "message":
-      return "संदेश";
-    case "promotion":
-      return "प्रचार";
-    case "settings":
-      return "सेटिंग्स";
-    case "urgent":
-      return "तत्काल";
-    default:
-      return type;
-  }
+const getNotificationTypeText = (type: string, t: (key: TranslationKey) => string) => {
+  const typeMap: { [key: string]: string } = {
+    purchase: t('purchase'),
+    ticket: t('ticket'),
+    review: t('review'),
+    system: t('system'),
+    order: t('order'),
+    payment: t('payment'),
+    message: t('message'),
+    promotion: t('promotion'),
+    settings: t('settings'),
+    urgent: t('urgent'),
+  };
+  
+  return typeMap[type] || type.charAt(0).toUpperCase() + type.slice(1);
 };
 
 export default function NotificationsPage() {
-  const router = useRouter();
   const { t } = useTranslation();
-  const { translateText, isHindi } = useTranslateContent();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -203,43 +148,62 @@ export default function NotificationsPage() {
     null
   );
 
-  // Translation cache for notification content
-  const [translatedTitles, setTranslatedTitles] = useState<{
-    [key: string]: string;
-  }>({});
-  const [translatedMessages, setTranslatedMessages] = useState<{
-    [key: string]: string;
-  }>({});
+  // Translation cache for notification content - removed since using proper translation system
 
-  // Function to translate notification content
-  const translateNotificationContent = async (
-    notificationId: number,
-    title: string,
-    message: string
-  ) => {
-    if (!isHindi) return;
+  // Function to translate notification content - removed since using proper translation system
 
-    try {
-      // Translate title if not already translated
-      if (title && !translatedTitles[notificationId]) {
-        const translatedTitle = await translateText(title);
-        setTranslatedTitles((prev) => ({
-          ...prev,
-          [notificationId]: translatedTitle,
-        }));
-      }
-
-      // Translate message if not already translated
-      if (message && !translatedMessages[notificationId]) {
-        const translatedMessage = await translateText(message);
-        setTranslatedMessages((prev) => ({
-          ...prev,
-          [notificationId]: translatedMessage,
-        }));
-      }
-    } catch (error) {
-      console.error("Translation failed:", error);
+  // Function to translate notification content based on common patterns
+  const translateNotificationContent = (title: string, message: string) => {
+    // Translate common notification titles
+    if (title.includes('New Order Received')) {
+      return {
+        translatedTitle: t('newOrderReceived'),
+        translatedMessage: message.replace('You have received a new order', t('orderReceivedMessage'))
+          .replace('for your products', t('forYourProducts'))
+          .replace('Total value', t('totalValue'))
+      };
     }
+    
+    if (title.includes('New Review Received')) {
+      return {
+        translatedTitle: t('newReviewReceived'),
+        translatedMessage: message.replace('A customer left a review for your product', t('customerLeftReview'))
+      };
+    }
+    
+    if (title.includes('New Message Received')) {
+      return {
+        translatedTitle: t('newMessageReceived'),
+        translatedMessage: message.replace('A customer sent you a message', t('customerSentMessage'))
+      };
+    }
+    
+    if (title.includes('Payment Received')) {
+      return {
+        translatedTitle: t('paymentReceived'),
+        translatedMessage: message.replace('Payment has been processed for order', t('paymentProcessed'))
+      };
+    }
+    
+    if (title.includes('Product Viewed')) {
+      return {
+        translatedTitle: t('productViewed'),
+        translatedMessage: message.replace('Someone viewed your product', t('someoneViewedProduct'))
+      };
+    }
+    
+    if (title.includes('System Notification')) {
+      return {
+        translatedTitle: t('systemNotification'),
+        translatedMessage: message.replace('Important system update', t('importantUpdate'))
+      };
+    }
+    
+    // Return original if no translation pattern matches
+    return {
+      translatedTitle: title,
+      translatedMessage: message
+    };
   };
 
   // Fetch notifications function
@@ -270,19 +234,6 @@ export default function NotificationsPage() {
   useEffect(() => {
     fetchNotifications();
   }, []);
-
-  // Effect to translate notification content when language changes to Hindi
-  useEffect(() => {
-    if (isHindi && notifications.length > 0) {
-      notifications.forEach((notification) => {
-        translateNotificationContent(
-          notification.id,
-          notification.title,
-          notification.message
-        );
-      });
-    }
-  }, [isHindi, notifications.length]);
 
   // Auto-refresh every 30 seconds
   useEffect(() => {
@@ -390,7 +341,7 @@ export default function NotificationsPage() {
         <div className="flex items-center space-x-3 text-slate-400">
           <RefreshCw className="h-6 w-6 animate-spin" />
           <span>
-            {isHindi ? "सूचनाएं लोड हो रही हैं..." : "Loading notifications..."}
+            {t('loadingNotifications')}
           </span>
         </div>
       </div>
@@ -409,11 +360,11 @@ export default function NotificationsPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-white">
-                  {isHindi ? "सूचनाएं" : "Notifications"}
+                  {t('notifications')}
                 </h1>
                 <p className="text-slate-400">
-                  {totalCount} {isHindi ? "कुल" : "total"} • {unreadCount}{" "}
-                  {isHindi ? "अपठित" : "unread"}
+                  {totalCount} {t('total')} • {unreadCount}{" "}
+                  {t('unread')}
                 </p>
               </div>
             </div>
@@ -438,12 +389,12 @@ export default function NotificationsPage() {
                 {showUnreadOnly ? (
                   <div className="flex items-center space-x-2">
                     <EyeOff className="h-4 w-4" />
-                    <span>{isHindi ? "सभी दिखाएं" : "Show All"}</span>
+                    <span>{t('showAll')}</span>
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2">
                     <Eye className="h-4 w-4" />
-                    <span>{isHindi ? "केवल अपठित" : "Unread Only"}</span>
+                    <span>{t('unreadOnly')}</span>
                   </div>
                 )}
               </button>
@@ -462,7 +413,7 @@ export default function NotificationsPage() {
                 <CheckCircle2 className="h-4 w-4" />
               )}
               <span>
-                {isHindi ? "सभी को पढ़ा गया चिह्नित करें" : "Mark All Read"}
+                {t('markAllRead')}
               </span>
             </button>
 
@@ -475,7 +426,7 @@ export default function NotificationsPage() {
               ) : (
                 <Trash2 className="h-4 w-4" />
               )}
-              <span>{isHindi ? "सभी साफ करें" : "Clear All"}</span>
+              <span>{t('clearAll')}</span>
             </button>
           </div>
         </div>
@@ -487,21 +438,13 @@ export default function NotificationsPage() {
               <Bell className="h-12 w-12 text-slate-600 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-slate-400 mb-2">
                 {showUnreadOnly
-                  ? isHindi
-                    ? "कोई अपठित सूचना नहीं"
-                    : "No unread notifications"
-                  : isHindi
-                  ? "कोई सूचना नहीं"
-                  : "No notifications"}
+                  ? t('noUnreadNotifications')
+                  : t('noNotificationsFound')}
               </h3>
               <p className="text-slate-500">
                 {showUnreadOnly
-                  ? isHindi
-                    ? "सभी पूर्ण! आपके पास कोई अपठित सूचना नहीं है।"
-                    : "All caught up! You have no unread notifications."
-                  : isHindi
-                  ? "जब आपको सूचनाएं प्राप्त होंगी, तो वे यहाँ दिखाई देंगी।"
-                  : "When you receive notifications, they will appear here."}
+                  ? t('allCaughtUp')
+                  : t('notificationsWillAppear')}
               </p>
             </div>
           ) : (
@@ -536,13 +479,11 @@ export default function NotificationsPage() {
                               ? "text-slate-300"
                               : "text-white"
                           }`}>
-                          {isHindi && translatedTitles[notification.id]
-                            ? translatedTitles[notification.id]
-                            : notification.title}
+                          {translateNotificationContent(notification.title, notification.message).translatedTitle}
                         </h3>
                         <div className="flex items-center space-x-2">
                           <span className="text-xs text-slate-500">
-                            {getRelativeTime(notification.createdAt, isHindi)}
+                            {getRelativeTime(notification.createdAt, t)}
                           </span>
                           {!notification.isRead && (
                             <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
@@ -556,14 +497,12 @@ export default function NotificationsPage() {
                             ? "text-slate-400"
                             : "text-slate-300"
                         }`}>
-                        {isHindi && translatedMessages[notification.id]
-                          ? translatedMessages[notification.id]
-                          : notification.message}
+                        {translateNotificationContent(notification.title, notification.message).translatedMessage}
                       </p>
 
                       <div className="flex items-center justify-between mt-2">
                         <span className="text-xs text-slate-500">
-                          {getNotificationTypeText(notification.type, isHindi)}
+                          {getNotificationTypeText(notification.type, t)}
                         </span>
 
                         {!notification.isRead && (
@@ -580,9 +519,7 @@ export default function NotificationsPage() {
                               <Eye className="h-3 w-3" />
                             )}
                             <span>
-                              {isHindi
-                                ? "पढ़ा गया चिह्नित करें"
-                                : "Mark as read"}
+                              {t('markAsRead')}
                             </span>
                           </button>
                         )}

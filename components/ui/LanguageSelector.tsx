@@ -1,42 +1,36 @@
 "use client";
 
-import { Locale } from "@/lib/i18n/config";
+import { Locale, locales, localeNames } from "@/lib/i18n/config";
 import { useLanguageContext } from "@/lib/i18n/provider";
 import { ChevronDown, Globe } from "lucide-react";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 
-// Define available languages with their native names (English and Hindi only)
-const languages: { code: Locale; name: string; nativeName: string }[] = [
-  { code: "en", name: "English", nativeName: "English" },
-  { code: "hi", name: "Hindi", nativeName: "हिंदी" },
-];
+// Use all available languages from config
+const languages: { code: Locale; name: string; nativeName: string }[] =
+  locales.map((code) => ({
+    code,
+    name: code === "en" ? "English" : localeNames[code],
+    nativeName: localeNames[code],
+  }));
 
 export default function LanguageSelector() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
-  // Only show language selector on artisan routes
+  // Always call the hook - React hooks must be called unconditionally
+  const contextData = useLanguageContext();
+  const { currentLocale, changeLanguage } = contextData || {
+    currentLocale: "en" as const,
+    changeLanguage: () => console.warn("Language change not available"),
+  };
+
+  const currentLanguage = languages.find((lang) => lang.code === currentLocale);
+
+  // Only show language selector on artisan routes - return early after hooks
   if (!pathname.startsWith("/artisan")) {
     return null;
   }
-
-  // Add error handling for context
-  let contextData;
-  try {
-    contextData = useLanguageContext();
-  } catch (error) {
-    console.warn("LanguageSelector: Language context not available", error);
-    // Fallback to default values when context is not available
-    contextData = {
-      currentLocale: "en" as const,
-      changeLanguage: () =>
-        console.warn("Language change not available - context not loaded"),
-    };
-  }
-
-  const { currentLocale, changeLanguage } = contextData;
-  const currentLanguage = languages.find((lang) => lang.code === currentLocale);
 
   return (
     <div className="relative">
@@ -55,7 +49,7 @@ export default function LanguageSelector() {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-full bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-50">
+        <div className="absolute bottom-full left-0 mb-1 w-full bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
           <div className="py-1">
             {languages.map((lang) => (
               <button

@@ -65,7 +65,16 @@ interface SupportCategory {
 export default function ArtisanAdminMessagesPage() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { translateText, isHindi } = useTranslateContent();
+  const { translateText, isHindi, currentLocale } = useTranslateContent();
+
+  // Helper function for quick translations
+  const tl = (
+    englishText: string,
+    translations: Record<string, string> = {}
+  ) => {
+    if (currentLocale === "en") return englishText;
+    return translations[currentLocale] || translations["hi"] || englishText;
+  };
   const [messages, setMessages] = useState<AdminMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -87,7 +96,7 @@ export default function ArtisanAdminMessagesPage() {
 
   // Function to translate AI-generated messages
   const translateAIMessage = async (message: string): Promise<string> => {
-    if (!isHindi || !message.trim()) return message;
+    if (currentLocale === "en" || !message.trim()) return message;
 
     try {
       // Use the existing translateText function
@@ -102,67 +111,238 @@ export default function ArtisanAdminMessagesPage() {
   const supportCategories: SupportCategory[] = [
     {
       id: "sales",
-      name: isHindi ? "बिक्री सहायता" : "Sales Support",
+      name: tl("Sales Support", {
+        hi: "बिक्री सहायता",
+        bn: "বিক্রয় সহায়তা",
+        te: "అమ్మకాల మద్దతు",
+        mr: "विक्री सहाय्य",
+        ta: "விற்பனை ஆதரவு",
+        gu: "વેચાણ સપોર્ટ",
+        kn: "ಮಾರಾಟ ಬೆಂಬಲ",
+        or: "ବିକ୍ରୟ ସହାୟତା",
+        pa: "ਵਿਕਰੀ ਸਹਾਇਤਾ",
+      }),
       icon: TrendingUp,
-      description: isHindi
-        ? "अपने उत्पादों को बेचने और अधिक ग्राहकों तक पहुंचने में सहायता प्राप्त करें"
-        : "Get help selling your products and reaching more customers",
+      description: tl(
+        "Get help selling your products and reaching more customers",
+        {
+          hi: "अपने उत्पादों को बेचने और अधिक ग्राहकों तक पहुंचने में सहायता प्राप्त करें",
+          bn: "আপনার পণ্য বিক্রি এবং আরও গ্রাহকদের কাছে পৌঁছানোর জন্য সাহায্য নিন",
+          te: "మీ ఉత్పత్తులను అమ్మడంలో మరియు మరిన్ని కస్టమర్లను చేరుకోవడంలో సహాయం పొందండి",
+          mr: "तुमची उत्पादने विकण्यास आणि अधिक ग्राहकांपर्यंत पोहोचण्यास मदत मिळवा",
+          ta: "உங்கள் தயாரிப்புகளை விற்பனை செய்வதற்கும் அதிகமான வாடிக்கையாளர்களை அடைவதற்கும் உதவி பெறுங்கள்",
+          gu: "તમારા ઉત્પાદનો વેચવામાં અને વધુ ગ્રાહકો સુધી પહોંચવામાં મદદ મેળવો",
+          kn: "ನಿಮ್ಮ ಉತ್ಪನ್ನಗಳನ್ನು ಮಾರಾಟ ಮಾಡಲು ಮತ್ತು ಹೆಚ್ಚು ಗ್ರಾಹಕರನ್ನು ತಲುಪಲು ಸಹಾಯ ಪಡೆಯಿರಿ",
+          or: "ଆପଣଙ୍କ ଉତ୍ପାଦ ବିକ୍ରି କରିବା ଏବଂ ଅଧିକ ଗ୍ରାହକଙ୍କ ନିକଟରେ ପହଞ୍ଚିବା ପାଇଁ ସାହାଯ୍ୟ ପାଆନ୍ତୁ",
+          pa: "ਆਪਣੇ ਉਤਪਾਦਾਂ ਨੂੰ ਵੇਚਣ ਅਤੇ ਵਧੇਰੇ ਗਾਹਕਾਂ ਤੱਕ ਪਹੁੰਚਣ ਵਿੱਚ ਮਦਦ ਲਓ",
+        }
+      ),
       color: "from-green-500 to-emerald-500",
     },
     {
       id: "marketing",
-      name: isHindi ? "मार्केटिंग सहायता" : "Marketing Help",
+      name: tl("Marketing Help", {
+        hi: "मार्केटिंग सहायता",
+        bn: "মার্কেটিং সাহায্য",
+        te: "మార్కెటింగ్ సహాయం",
+        mr: "मार्केटिंग मदत",
+        ta: "சந்தைப்படுத்தல் உதவி",
+        gu: "માર્કેટિંગ મદદ",
+        kn: "ಮಾರ್ಕೆಟಿಂಗ್ ಸಹಾಯ",
+        or: "ମାର୍କେଟିଂ ସାହାଯ୍ୟ",
+        pa: "ਮਾਰਕੀਟਿੰਗ ਮਦਦ",
+      }),
       icon: Lightbulb,
-      description: isHindi
-        ? "मार्केटिंग रणनीति और प्रचार तकनीकें सीखें"
-        : "Learn marketing strategies and promotional techniques",
+      description: tl("Learn marketing strategies and promotional techniques", {
+        hi: "मार्केटिंग रणनीति और प्रचार तकनीकें सीखें",
+        bn: "মার্কেটিং কৌশল এবং প্রচারণামূলক কৌশল শিখুন",
+        te: "మార్కెటింగ్ వ్యూహాలు మరియు ప్రమోషనల్ టెక్నిక్స్ నేర్చుకోండి",
+        mr: "मार्केटिंग धोरणे आणि प्रचार तंत्रे शिका",
+        ta: "சந்தைப்படுத்தல் உத்திகள் மற்றும் விளம்பர நுட்பங்களைக் கற்றுக் கொள்ளுங்கள்",
+        gu: "માર્કેટિંગ વ્યૂહરચના અને પ્રમોશનલ તકનીકો શીખો",
+        kn: "ಮಾರ್ಕೆಟಿಂಗ್ ತಂತ್ರಗಳು ಮತ್ತು ಪ್ರಚಾರದ ತಂತ್ರಗಳನ್ನು ಕಲಿಯಿರಿ",
+        or: "ମାର୍କେଟିଂ ରଣନୀତି ଏବଂ ପ୍ରଚାରଣା କୌଶଳ ଶିଖନ୍ତୁ",
+        pa: "ਮਾਰਕੀਟਿੰਗ ਰਣਨੀਤੀਆਂ ਅਤੇ ਪ੍ਰਚਾਰ ਤਕਨੀਕਾਂ ਸਿੱਖੋ",
+      }),
       color: "from-blue-500 to-cyan-500",
     },
     {
       id: "product",
-      name: isHindi ? "उत्पाद मार्गदर्शन" : "Product Guidance",
+      name: tl("Product Guidance", {
+        hi: "उत्पाद मार्गदर्शन",
+        bn: "পণ্য নির্দেশনা",
+        te: "ఉత్పత్తి మార్గదర్శకత్వం",
+        mr: "उत्पादन मार्गदर्शन",
+        ta: "தயாரிப்பு வழிகாட்டுதல்",
+        gu: "ઉત્પાદન માર્گદર્શન",
+        kn: "ಉತ್ಪನ್ನ ಮಾರ್ಗದರ್ಶನ",
+        or: "ଉତ୍ପାଦ ମାର୍ଗଦର୍ଶନ",
+        pa: "ਉਤਪਾਦ ਮਾਰਗਦਰਸ਼ਨ",
+      }),
       icon: Package,
-      description: isHindi
-        ? "अपनी उत्पाद सूची और विवरण को अनुकूलित करें"
-        : "Optimize your product listings and descriptions",
+      description: tl("Optimize your product listings and descriptions", {
+        hi: "अपनी उत्पाद सूची और विवरण को अनुकूलित करें",
+        bn: "আপনার পণ্যের তালিকা এবং বিবরণ অপ্টিমাইজ করুন",
+        te: "మీ ఉత్పత్తి జాబితాలు మరియు వివరణలను అనుకూలీకరించండి",
+        mr: "तुमची उत्पादन यादी आणि वर्णन अनुकूल करा",
+        ta: "உங்கள் தயாரிப்பு பட்டியலகள் மற்றும் விளக்கங்களை மேம்படுத்துங்கள்",
+        gu: "તમારી ઉત્પાદન સૂચિ અને વર્ણનોને અનુકૂલિત કરો",
+        kn: "ನಿಮ್ಮ ಉತ್ಪನ್ನ ಪಟ್ಟಿಗಳು ಮತ್ತು ವಿವರಣೆಗಳನ್ನು ಅತ್ಯುತ್ತಮಗೊಳಿಸಿ",
+        or: "ଆପଣଙ୍କ ଉତ୍ପାଦ ତାଲିକା ଏବଂ ବର୍ଣ୍ଣନାକୁ ଅପ୍ଟିମାଇଜ୍ କରନ୍ତୁ",
+        pa: "ਆਪਣੀ ਉਤਪਾਦ ਸੂਚੀ ਅਤੇ ਵਰਣਨਾਂ ਨੂੰ ਅਨੁਕੂਲ ਬਣਾਓ",
+      }),
       color: "from-purple-500 to-violet-500",
     },
     {
       id: "platform",
-      name: isHindi ? "प्लेटफॉर्म सहायता" : "Platform Support",
+      name: tl("Platform Support", {
+        hi: "प्लेटफॉर्म सहायता",
+        bn: "প্ল্যাটফর্ম সাপোর্ট",
+        te: "ప్లాట్‌ఫారమ్ మద్దతు",
+        mr: "प्लॅटफॉर्म सहाय्य",
+        ta: "மென்பொருள் ஆதரவு",
+        gu: "પ્લેટફોર્મ સપોર્ટ",
+        kn: "ಪ್ಲಾಟ್‌ಫಾರ್ಮ್ ಬೆಂಬಲ",
+        or: "ପ୍ଲାଟଫର୍ମ ସହାୟତା",
+        pa: "ਪਲੈਟਫਾਰਮ ਸਹਾਇਤਾ",
+      }),
       icon: Shield,
-      description: isHindi
-        ? "तकनीकी सहायता और प्लेटफॉर्म संबंधी प्रश्न"
-        : "Technical help and platform-related questions",
+      description: tl("Technical help and platform-related questions", {
+        hi: "तकनीकी सहायता और प्लेटफॉर्म संबंधी प्रश्न",
+        bn: "প্রযুক্তিগত সাহায্য এবং প্ল্যাটফর্ম সংক্রান্ত প্রশ্ন",
+        te: "సాంకేతిక సహాయం మరియు ప్లాట్‌ఫారమ్ సంబంధిత ప్రశ్నలు",
+        mr: "तांत्रिक मदत आणि प्लॅटफॉर्म संबंधित प्रश्न",
+        ta: "தொழில்நுட்ப உதவி மற்றும் மென்பொருள் தொடர்பான கேள்விகள்",
+        gu: "ટેકનિકલ હેલ્પ અને પ્લેટફોર્મ સંબંધિત પ્રશ્નો",
+        kn: "ತಾಂತ್ರಿಕ ಸಹಾಯ ಮತ್ತು ಪ್ಲಾಟ್‌ಫಾರ್ಮ್ ಸಂಬಂಧಿತ ಪ್ರಶ್ನೆಗಳು",
+        or: "ବୈଷୟିକ ସାହାଯ୍ୟ ଏବଂ ପ୍ଲାଟଫର୍ମ ସମ୍ବନ୍ଧୀୟ ପ୍ରଶ୍ନ",
+        pa: "ਤਕਨੀਕੀ ਮਦਦ ਅਤੇ ਪਲੈਟਫਾਰਮ ਸਬੰਧੀ ਸਵਾਲ",
+      }),
       color: "from-orange-500 to-red-500",
     },
     {
       id: "community",
-      name: isHindi ? "समुदायिक संपर्क" : "Community Connect",
+      name: tl("Community Connect", {
+        hi: "समुदायिक संपर्क",
+        bn: "কমিউনিটি সংযোগ",
+        te: "కమ్యూనిటీ కనెక్ట్",
+        mr: "समुदायिक संपर्क",
+        ta: "சமூக இணைப்பு",
+        gu: "કોમ્યુનિટી કનેક્ટ",
+        kn: "ಸಮುದಾಯ ಸಂಪರ್ಕ",
+        or: "ସମୁଦାୟ ସଂଯୋଗ",
+        pa: "ਭਾਈਚਾਰਕ ਸੰਪਰਕ",
+      }),
       icon: Users,
-      description: isHindi
-        ? "अन्य कारीगरों से जुड़ें और अनुभव साझा करें"
-        : "Connect with other artisans and share experiences",
+      description: tl("Connect with other artisans and share experiences", {
+        hi: "अन्य कारीगरों से जुड़ें और अनुभव साझा करें",
+        bn: "অন্যান্য কারিগরদের সাথে সংযোগ করুন এবং অভিজ্ঞতা ভাগ করুন",
+        te: "ఇతర కళాకారులతో కనెక్ట్ అవ్వండి మరియు అనుభవాలను పంచుకోండి",
+        mr: "इतर कारागिरांशी जोडुन आणि अनुभव सामायिक करा",
+        ta: "மற்ற கைவினைஞர்களுடன் இணைந்து அனுபவங்களைப் பகிரவும்",
+        gu: "અન્ય કારીગરો સાથે જોડાઓ અને અનુભવો શેર કરો",
+        kn: "ಇತರ ಕುಶಲಕರ್ಮಿಗಳೊಂದಿಗೆ ಸಂಪರ್ಕ ಸಾಧಿಸಿ ಮತ್ತು ಅನುಭವಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಿ",
+        or: "ଅନ୍ୟ କାରିଗରମାନଙ୍କ ସହିତ ସଂଯୋଗ କରନ୍ତୁ ଏବଂ ଅଭିଜ୍ଞତା ସେୟାର କରନ୍ତୁ",
+        pa: "ਹੋਰ ਕਾਰੀਗਰਾਂ ਨਾਲ ਜੁੜੋ ਅਤੇ ਤਜਰਬੇ ਸਾਂਝੇ ਕਰੋ",
+      }),
       color: "from-pink-500 to-rose-500",
     },
     {
       id: "general",
-      name: isHindi ? "सामान्य सहायता" : "General Help",
+      name: tl("General Help", {
+        hi: "सामान्य सहायता",
+        bn: "সাধারণ সাহায্য",
+        te: "సాధారణ సహాయం",
+        mr: "सामान्य मदत",
+        ta: "பொது உதவி",
+        gu: "સામાન્ય મદદ",
+        kn: "ಸಾಮಾನ್ಯ ಸಹಾಯ",
+        or: "ସାଧାରଣ ସାହାଯ୍ୟ",
+        pa: "ਆਮ ਮਦਦ",
+      }),
       icon: HeartHandshake,
-      description: isHindi
-        ? "कोई अन्य प्रश्न या सहायता आवश्यकता"
-        : "Any other questions or support needs",
+      description: tl("Any other questions or support needs", {
+        hi: "कोई अन्य प्रश्न या सहायता आवश्यकता",
+        bn: "অন্য কোন প্রশ্ন বা সহায়তার প্রয়োজন",
+        te: "ఏదైనా ఇతర ప్రశ్నలు లేదా మద్దతు అవసరాలు",
+        mr: "कोणताही इतर प्रश्न किंवा सहाय्याची गरज",
+        ta: "வேறு ஏதேனும் கேள்விகள் அல்லது ஆதரவு தேவைகள்",
+        gu: "કોઈપણ અન્ય પ્રશ્નો અથવા સપોર્ટની જરૂરિયાતો",
+        kn: "ಯಾವುದೇ ಇತರ ಪ್ರಶ್ನೆಗಳು ಅಥವಾ ಬೆಂಬಲ ಅಗತ್ಯಗಳು",
+        or: "ଅନ୍ୟ କୌଣସି ପ୍ରଶ୍ନ କିମ୍ବା ସହାୟତା ଆବଶ୍ୟକତା",
+        pa: "ਕੋਈ ਹੋਰ ਸਵਾਲ ਜਾਂ ਸਹਾਇਤਾ ਦੀ ਲੋੜ",
+      }),
       color: "from-indigo-500 to-purple-500",
     },
   ];
 
   const quickActions = [
-    isHindi ? "बेचने में बेहतर सहायता करें" : "Help me sell better",
-    isHindi ? "क्या मेरी कीमत अच्छी है?" : "Is my price good?",
-    isHindi ? "अधिक ग्राहक कैसे प्राप्त करें?" : "How to get more customers?",
-    isHindi ? "मेरा उत्पाद नहीं बिक रहा" : "My product is not selling",
-    isHindi ? "मुझे क्या बदलना चाहिए?" : "What should I change?",
-    isHindi ? "कृपया मुझे सलाह दें" : "Please give me advice",
+    tl("Help me sell better", {
+      hi: "बेचने में बेहतर सहायता करें",
+      bn: "ভালো বিক্রিতে সাহায্য করুন",
+      te: "మెరుగ్గా అమ్మడంలో సహాయం చేయండి",
+      mr: "चांगल्या विक्रीसाठी मदत करा",
+      ta: "சிறப்பாக விற்க உதவுங்கள்",
+      gu: "વધુ સારી વેચાણમાં મદદ કરો",
+      kn: "ಉತ್ತಮವಾಗಿ ಮಾರಾಟ ಮಾಡಲು ಸಹಾಯ ಮಾಡಿ",
+      or: "ଭଲ ବିକ୍ରିରେ ସାହାଯ୍ୟ କରନ୍ତୁ",
+      pa: "ਬਿਹਤਰ ਵੇਚਣ ਵਿੱਚ ਮਦਦ ਕਰੋ",
+    }),
+    tl("Is my price good?", {
+      hi: "क्या मेरी कीमत अच्छी है?",
+      bn: "আমার দাম কি ভাল?",
+      te: "నా ధర బాగుందా?",
+      mr: "माझी किंमत चांगली आहे का?",
+      ta: "என் விலை நல்லதா?",
+      gu: "મારી કિંમત સારી છે?",
+      kn: "ನನ್ನ ಬೆಲೆ ಒಳ್ಳೆಯದು?",
+      or: "ମୋର ଦାମ ଭଲ କି?",
+      pa: "ਕੀ ਮੇਰੀ ਕੀਮਤ ਚੰਗੀ ਹੈ?",
+    }),
+    tl("How to get more customers?", {
+      hi: "अधिक ग्राहक कैसे प्राप्त करें?",
+      bn: "আরও গ্রাহক কীভাবে পাবেন?",
+      te: "మరిన్ని కస్టమర్లను ఎలా పొందాలి?",
+      mr: "अधिक ग्राहक कसे मिळवावे?",
+      ta: "அதிக வாடிக்கையாளர்களை எப்படிப் பெறுவது?",
+      gu: "વધુ ગ્રાહકો કેવી રીતે મેળવવા?",
+      kn: "ಹೆಚ್ಚು ಗ್ರಾಹಕರನ್ನು ಹೇಗೆ ಪಡೆಯುವುದು?",
+      or: "ଅଧିକ ଗ୍ରାହକ କିପରି ପାଇବେ?",
+      pa: "ਹੋਰ ਗਾਹਕ ਕਿਵੇਂ ਪ੍ਰਾਪਤ ਕਰਨਾ?",
+    }),
+    tl("My product is not selling", {
+      hi: "मेरा उत्पाद नहीं बिक रहा",
+      bn: "আমার পণ্য বিক্রি হচ্ছে না",
+      te: "నా ఉత్పత్తి అమ్ముడుపోవడం లేదు",
+      mr: "माझे उत्पादन विकत नाही",
+      ta: "என் தயாரிப்பு விற்கவில்லை",
+      gu: "મારું ઉત્પાદન વેચાતું નથી",
+      kn: "ನನ್ನ ಉತ್ಪನ್ನ ಮಾರಾಟವಾಗುತ್ತಿಲ್ಲ",
+      or: "ମୋର ଉତ୍ପାଦ ବିକିନାହିଁ",
+      pa: "ਮੇਰਾ ਉਤਪਾਦ ਨਹੀਂ ਵਿਕ ਰਿਹਾ",
+    }),
+    tl("What should I change?", {
+      hi: "मुझे क्या बदलना चाहिए?",
+      bn: "আমার কি পরিবর্তন করা উচিত?",
+      te: "నేను ఏమి మార్చాలి?",
+      mr: "मी काय बदलावे?",
+      ta: "நான் எதை மாற்ற வேண்டும்?",
+      gu: "મારે શું બદલવું જોઈએ?",
+      kn: "ನಾನು ಏನನ್ನು ಬದಲಾಯಿಸಬೇಕು?",
+      or: "ମୁଁ କଣ ବଦଳାଇବା ଉଚିତ?",
+      pa: "ਮੈਨੂੰ ਕੀ ਬਦਲਣਾ ਚਾਹੀਦਾ ਹੈ?",
+    }),
+    tl("Please give me advice", {
+      hi: "कृपया मुझे सलाह दें",
+      bn: "দয়া করে আমাকে পরামর্শ দিন",
+      te: "దయచేసి నాకు సలహా ఇవ్వండి",
+      mr: "कृपया मला सल्ला द्या",
+      ta: "தயவுசெய்து எனக்கு அறிவுரை கொடுங்கள்",
+      gu: "કૃપા કરીને મને સલાહ આપો",
+      kn: "ದಯವಿಟ್ಟು ನನಗೆ ಸಲಹೆ ನೀಡಿ",
+      or: "ଦୟାକରି ମୋତେ ପରାମର୍ଶ ଦିଅନ୍ତୁ",
+      pa: "ਕਿਰਪਾ ਕਰਕੇ ਮੈਨੂੰ ਸਲਾਹ ਦਿਓ",
+    }),
   ];
 
   // Mock messages for fallback when API fails
@@ -170,27 +350,42 @@ export default function ArtisanAdminMessagesPage() {
     {
       id: "1",
       isFromAdmin: true,
-      message: isHindi
-        ? "नमस्ते! आर्टिसनक्राफ्ट में आपका स्वागत है! मैं सपोर्ट टीम की सारा हूं, और मैं यहां आपको हमारे प्लेटफॉर्म पर सफल होने में मदद करने के लिए हूं। आज मैं आपकी कैसे सहायता कर सकती हूं?"
-        : "Hello! Welcome to ArtisanCraft! I'm Sarah from the support team, and I'm here to help you succeed on our platform. How can I assist you today?",
+      message: tl(
+        "Hello! Welcome to ArtisanCraft! I'm Sarah from the support team, and I'm here to help you succeed on our platform. How can I assist you today?",
+        {
+          hi: "नमस्ते! आर्टिसनक्राफ्ट में आपका स्वागत है! मैं सपोर्ट टीम की सारा हूं, और मैं यहां आपको हमारे प्लेटफॉर्म पर सफल होने में मदद करने के लिए हूं। आज मैं आपकी कैसे सहायता कर सकती हूं?",
+          bn: "হ্যালো! আর্টিসানক্রাফ্টে আপনাকে স্বাগতম! আমি সাপোর্ট টিমের সারা, এবং আমি আমাদের প্ল্যাটফর্মে আপনাকে সফল হতে সাহায্য করতে এখানে আছি। আজ আমি আপনাকে কীভাবে সাহায্য করতে পারি?",
+          te: "హలో! ఆర్టిసాన్‌క్రాఫ్ట్‌కు స్వాగతం! నేను సపోర్ట్ టీమ్‌కి చెందిన సారా, మరియు మా ప్లాట్‌ఫారమ్‌లో మీకు విజయవంతం కావడానికి సహాయం చేయడానికి నేను ఇక్కడ ఉన్నాను. ఈ రోజు నేను మీకు ఎలా సహాయం చేయగలను?",
+        }
+      ),
       timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
       status: "read",
     },
     {
       id: "2",
       isFromAdmin: false,
-      message: isHindi
-        ? "नमस्ते सारा! संपर्क करने के लिए धन्यवाद। मैं इस प्लेटफॉर्म का हिस्सा बनने के लिए बहुत उत्साहित हूं। मुझे अपने हस्तनिर्मित मिट्टी के बर्तनों के लिए अधिक दृश्यता प्राप्त करने में मदद की आवश्यकता है।"
-        : "Hi Sarah! Thank you for reaching out. I'm really excited to be part of this platform. I could use some help with getting more visibility for my handmade pottery.",
+      message: tl(
+        "Hi Sarah! Thank you for reaching out. I'm really excited to be part of this platform. I could use some help with getting more visibility for my handmade pottery.",
+        {
+          hi: "नमस्ते सारा! संपर्क करने के लिए धन्यवाद। मैं इस प्लेटफॉर्म का हिस्सा बनने के लिए बहुत उत्साहित हूं। मुझे अपने हस्तनिर्मित मिट्टी के बर्तनों के लिए अधिक दृश्यता प्राप्त करने में मदद की आवश्यकता है।",
+          bn: "হাই সারা! যোগাযোগ করার জন্য ধন্যবাদ। আমি এই প্ল্যাটফর্মের অংশ হতে পেরে খুবই উত্সাহিত। আমার হাতে তৈরি মাটির পাত্রের জন্য আরও দৃশ্যমানতা পেতে আমার সাহায্য দরকার।",
+          te: "హాయ్ సారా! చేరుకున్నందుకు ధన్యవాదాలు. నేను ఈ ప్లాట్‌ఫారమ్‌లో భాగమవుతున్నందుకు చాలా ఉత్సాహంగా ఉన్నాను. నా చేతితో తయారు చేసిన కుండలకు మరింత కనిపించడానికి నాకు సహాయం కావాలి।",
+        }
+      ),
       timestamp: new Date(Date.now() - 110 * 60 * 1000).toISOString(), // 1 hour 50 minutes ago
       status: "delivered",
     },
     {
       id: "3",
       isFromAdmin: true,
-      message: isHindi
-        ? "यह अद्भुत है! मिट्टी के बर्तन बनाना इतनी सुंदर कला है। मैं बेहतर दृश्यता के लिए आपकी सूचियों को अनुकूलित करने में आपकी मदद करना चाहूंगी। यहां कुछ सुझाव हैं:\n\n1. उच्च गुणवत्ता वाली, अच्छी रोशनी वाली तस्वीरें उपयोग करें\n2. कीवर्ड्स के साथ विस्तृत विवरण लिखें\n3. प्रतिस्पर्धी कीमत रखें लेकिन अपने काम को कम न आंकें\n4. अपनी निर्माण प्रक्रिया साझा करें\n\nक्या आप अपने उत्पादों में से एक साझा करना चाहेंगे ताकि मैं विशिष्ट फीडबैक दे सकूं?"
-        : "That's wonderful! Pottery is such a beautiful craft. I'd love to help you optimize your listings for better visibility. Here are a few tips:\n\n1. Use high-quality, well-lit photos\n2. Write detailed descriptions with keywords\n3. Price competitively but don't undervalue your work\n4. Share your creation process\n\nWould you like to share one of your products so I can give specific feedback?",
+      message: tl(
+        "That's wonderful! Pottery is such a beautiful craft. I'd love to help you optimize your listings for better visibility. Here are a few tips:\n\n1. Use high-quality, well-lit photos\n2. Write detailed descriptions with keywords\n3. Price competitively but don't undervalue your work\n4. Share your creation process\n\nWould you like to share one of your products so I can give specific feedback?",
+        {
+          hi: "यह अद्भुत है! मिट्टी के बर्तन बनाना इतनी सुंदर कला है। मैं बेहतर दृश्यता के लिए आपकी सूचियों को अनुकूलित करने में आपकी मदद करना चाहूंगी। यहां कुछ सुझाव हैं:\n\n1. उच्च गुणवत्ता वाली, अच्छी रोशनी वाली तस्वीरें उपयोग करें\n2. कीवर्ड्स के साथ विस्तृत विवरण लिखें\n3. प्रतिस्पर्धी कीमत रखें लेकिन अपने काम को कम न आंकें\n4. अपनी निर्माण प्रक्रिया साझा करें\n\nक्या आप अपने उत्पादों में से एक साझा करना चाहेंगे ताकि मैं विशिष्ट फीडबैक दे सकूं?",
+          bn: "এটা চমৎকার! মৃৎশিল্প এত সুন্দর একটি কারুশিল্প। আমি আরও ভাল দৃশ্যমানতার জন্য আপনার তালিকাগুলি অপ্টিমাইজ করতে সাহায্য করতে চাই। এখানে কয়েকটি টিপস রয়েছে:\n\n১. উচ্চ মানের, ভাল আলোকিত ছবি ব্যবহার করুন\n২. কীওয়ার্ড সহ বিস্তারিত বিবরণ লিখুন\n৩. প্রতিযোগিতামূলক মূল্য রাখুন কিন্তু আপনার কাজকে কম মূল্য দেবেন না\n৪. আপনার সৃজন প্রক্রিয়া শেয়ার করুন\n\nআপনি কি আপনার একটি পণ্য শেয়ার করতে চান যাতে আমি নির্দিষ্ট ফিডব্যাক দিতে পারি?",
+          te: "అది అద్భుతం! కుండలు తయారు చేయడం చాలా అందమైన కళ. మెరుగైన దృశ్యమానత కోసం మీ జాబితాలను ఆప్టిమైజ్ చేయడంలో నేను మీకు సహాయం చేయాలని అనుకుంటున్నాను. ఇక్కడ కొన్ని చిట్కాలు ఉన్నాయి:\n\n1. అధిక నాణ్యత, బాగా వెలుతురు ఉన్న ఫోటోలను ఉపయోగించండి\n2. కీవర్డ్స్‌తో వివరణాత్మక వివరణలు రాయండి\n3. పోటీ ధర ఉంచండి కానీ మీ పనిని తక్కువ అంచనా వేయవద్దు\n4. మీ సృష్టి ప్రక్రియను పంచుకోండి\n\nనేను నిర్దిష్ట ఫీడ్‌బ్యాక్ ఇవ్వగలిగేలా మీ ఉత్పత్తుల్లో ఒకదాన్ని పంచుకోవాలని అనుకుంటున్నారా?",
+        }
+      ),
       timestamp: new Date(Date.now() - 105 * 60 * 1000).toISOString(), // 1 hour 45 minutes ago
       status: "read",
     },
@@ -713,7 +908,19 @@ Product Data: ${JSON.stringify(product)}`;
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">Loading messages...</p>
+          <p className="text-slate-400">
+            {tl("Loading messages...", {
+              hi: "संदेश लोड हो रहे हैं...",
+              bn: "বার্তা লোড হচ্ছে...",
+              te: "సందేశాలు లోడవుతున్నాయి...",
+              mr: "संदेश लोड होत आहेत...",
+              ta: "செய்திகள் லோட்வுதல்...",
+              gu: "સંદેશા લોડ થઈ રહ્યા છે...",
+              kn: "ಸಂದೇಶಗಳು ಲೋಡ್ ಆಗುತ್ತಿವೆ...",
+              or: "ବାର୍ତ୍ତାଗୁଡ଼ିକ ଲୋଡ୍ ହେଉଛି...",
+              pa: "ਸੁਨੇਹੇ ਲੋਡ ਹੋ ਰਹੇ ਹਨ...",
+            })}
+          </p>
         </div>
       </div>
     );
@@ -727,12 +934,30 @@ Product Data: ${JSON.stringify(product)}`;
           <div>
             <h1 className="text-2xl font-bold text-white flex items-center">
               <MessageCircle className="h-6 w-6 mr-2" />
-              {isHindi ? "एडमिन सहायता" : "Admin Support"}
+              {tl("Admin Support", {
+                hi: "एडमिन सहायता",
+                bn: "প্রশাসন সহায়তা",
+                te: "నిర్వాహక మద్దతు",
+                mr: "प्रशासक सहाय्य",
+                ta: "நிர்வாக ஆதரவு",
+                gu: "એડમિન સપોર્ટ",
+                kn: "ನಿರ್ವಾಹಕ ಬೆಂಬಲ",
+                or: "ପ୍ରଶାସକ ସହାୟତା",
+                pa: "ਪ੍ਰਸ਼ਾਸਕ ਸਹਾਇਤਾ",
+              })}
             </h1>
             <p className="text-slate-400">
-              {isHindi
-                ? "अपने व्यवसाय को बढ़ाने में सहायता प्राप्त करें"
-                : "Get help to grow your business"}
+              {tl("Get help to grow your business", {
+                hi: "अपने व्यवसाय को बढ़ाने में सहायता प्राप्त करें",
+                bn: "আপনার ব্যবসা বাড়ানোর জন্য সাহায্য নিন",
+                te: "మీ వ్యాపారాన్ని పెంచడానికి సహాయం పొందండి",
+                mr: "आपला व्यवसाय वाढवण्यासाठी मदत मिळवा",
+                ta: "உங்கள் வணிகத்தை வளர்க்க உதவி பெறுங்கள்",
+                gu: "તમારા બિઝનેસને વધારવા માટે મદદ મેળવો",
+                kn: "ನಿಮ್ಮ ವ್ಯವಸಾಯವನ್ನು ಬೆಳೆಸಲು ಸಹಾಯ ಪಡೆಯಿರಿ",
+                or: "ଆପଣଙ୍କ ବ୍ୟବସାୟ ବଢ଼ାଇବା ପାଇଁ ସାହାଯ୍ୟ ପାଆନ୍ତୁ",
+                pa: "ਆਪਣਾ ਕਾਰੋਬਾਰ ਵਧਾਉਣ ਲਈ ਮਦਦ ਲਓ",
+              })}
             </p>
           </div>
           <div className="flex items-center space-x-2">
@@ -824,14 +1049,33 @@ Product Data: ${JSON.stringify(product)}`;
               <div className="text-center text-slate-400 py-12">
                 <HeartHandshake className="h-16 w-16 text-slate-600 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-white mb-2">
-                  {isHindi
-                    ? "एडमिन सहायता में आपका स्वागत है!"
-                    : "Welcome to Admin Support!"}
+                  {tl("Welcome to Admin Support!", {
+                    hi: "एडमिन सहायता में आपका स्वागत है!",
+                    bn: "প্রশাসন সহায়তায় স্বাগতম!",
+                    te: "అడ్మిన్ సపోర్ట్‌కి స్వాగతం!",
+                    mr: "प्रशासक सहाय्यामध्ये आपले स्वागत आहे!",
+                    ta: "அட்மின் சப்போர்ட்டிற்கு வருக!",
+                    gu: "એડમિન સપોર્ટમાં આપનું સ્વાગત છે!",
+                    kn: "ಅಡ್ಮಿನ್ ಬೆಂಬಲಕ್ಕೆ ಸ್ವಾಗತ!",
+                    or: "ପ୍ରଶାସକ ସହାୟତାରେ ସ୍ୱାଗତ!",
+                    pa: "ਐਡਮਿਨ ਸਪੋਰਟ ਵਿੱਚ ਤੁਹਾਡਾ ਸੁਆਗਤ ਹੈ!",
+                  })}
                 </h3>
                 <p className="text-slate-400 mb-4">
-                  {isHindi
-                    ? "हमारी टीम आपकी सफलता में मदद करने के लिए यहाँ है। ऊपर एक श्रेणी चुनें या अपना प्रश्न टाइप करना शुरू करें।"
-                    : "Our team is here to help you succeed. Choose a category above or start typing your question."}
+                  {tl(
+                    "Our team is here to help you succeed. Choose a category above or start typing your question.",
+                    {
+                      hi: "हमारी टीम आपकी सफलता में मदद करने के लिए यहाँ है। ऊपर एक श्रेणी चुनें या अपना प्रश्न टाइप करना शुरू करें।",
+                      bn: "আমাদের দল আপনার সাফল্যে সাহায্য করতে এখানে রয়েছে। উপরে একটি বিভাগ বেছে নিন বা আপনার প্রশ্ন টাইপ করা শুরু করুন।",
+                      te: "మా బృందం మీ విజయంలో సహాయపడటానికి ఇక్కడ ఉంది। పైన ఒక వర్గాన్ని ఎంచుకోండి లేదా మీ ప్రశ్నను టైప్ చేయడం ప్రారంభించండి।",
+                      mr: "आमची टीम तुमच्या यशात मदत करण्यासाठी येथे आहे। वर एक श्रेणी निवडा किंवा तुमचा प्रश्न टाइप करणे सुरू करा।",
+                      ta: "எங்கள் குழு உங்கள் வெற்றியில் உதவ இங்கே உள்ளது। மேலே ஒரு வகையைத் தேர்ந்தெடுக்கவும் அல்லது உங்கள் கேள்வியைத் தட்டச்சு செய்யத் தொடங்கவும்।",
+                      gu: "અમારી ટીમ તમારી સફળતામાં મદદ કરવા માટે અહીં છે. ઉપર એક શ્રેણી પસંદ કરો અથવા તમારો પ્રશ્ન ટાઇપ કરવાનું શરૂ કરો।",
+                      kn: "ನಮ್ಮ ತಂಡ ನಿಮ್ಮ ಯಶಸ್ಸಿನಲ್ಲಿ ಸಹಾಯ ಮಾಡಲು ಇಲ್ಲಿದೆ. ಮೇಲೆ ಒಂದು ವರ್ಗವನ್ನು ಆಯ್ಕೆ ಮಾಡಿ ಅಥವಾ ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಟೈಪ್ ಮಾಡಲು ಪ್ರಾರಂಭಿಸಿ।",
+                      or: "ଆମର ଟିମ୍ ଆପଣଙ୍କ ସଫଳତାରେ ସାହାଯ୍ୟ କରିବାକୁ ଏଠାରେ ଅଛି। ଉପରେ ଏକ ବର୍ଗ ବାଛନ୍ତୁ କିମ୍ବା ଆପଣଙ୍କ ପ୍ରଶ୍ନ ଟାଇପ୍ କରିବା ଆରମ୍ଭ କରନ୍ତୁ।",
+                      pa: "ਸਾਡੀ ਟੀਮ ਤੁਹਾਡੀ ਸਫਲਤਾ ਵਿੱਚ ਮਦਦ ਕਰਨ ਲਈ ਇੱਥੇ ਹੈ। ਉੱਪਰ ਇੱਕ ਸ਼੍ਰੇਣੀ ਚੁਣੋ ਜਾਂ ਆਪਣਾ ਸਵਾਲ ਟਾਈਪ ਕਰਨਾ ਸ਼ੁਰੂ ਕਰੋ।",
+                    }
+                  )}
                 </p>
                 {connectionStatus === "offline" && (
                   <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mt-4 max-w-md mx-auto">
@@ -863,7 +1107,17 @@ Product Data: ${JSON.stringify(product)}`;
                           <Shield className="h-3 w-3 text-white" />
                         </div>
                         <span className="text-xs font-medium text-slate-300">
-                          {isHindi ? "एडमिन सहायता" : "Admin Support"}
+                          {tl("Admin Support", {
+                            hi: "एडमिन सहायता",
+                            bn: "প্রশাসন সহায়তা",
+                            te: "నిర్వాહక మద్దతు",
+                            mr: "प्रशासक सहाय्य",
+                            ta: "நிர்வாக ஆதரவு",
+                            gu: "એડમિન સપોર્ટ",
+                            kn: "ನಿರ್ವಾಹಕ ಬೆಂಬಲ",
+                            or: "ପ୍ରଶାସକ ସହାୟତା",
+                            pa: "ਪ੍ਰਸ਼ਾਸਕ ਸਹਾਇਤਾ",
+                          })}
                         </span>
                       </div>
                     )}
@@ -1040,11 +1294,17 @@ Product Data: ${JSON.stringify(product)}`;
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-                  placeholder={
-                    isHindi
-                      ? "एडमिन सहायता के लिए अपना संदेश टाइप करें..."
-                      : "Type your message to admin support..."
-                  }
+                  placeholder={tl("Type your message to admin support...", {
+                    hi: "एडमिन सहायता के लिए अपना संदेश टाइप करें...",
+                    bn: "প্রশাসন সহায়তার জন্য আপনার বার্তা টাইপ করুন...",
+                    te: "అడ్మిన్ సపోర్ట్ కోసం మీ మెసేజ్ టైప్ చేయండి...",
+                    mr: "प्रशासक सहाय्यासाठी तुमचा संदेश टाइप करा...",
+                    ta: "நிர்வாக ஆதரவுக்காக உங்கள் செய்தியைத் தட்டச்சு செய்யுங்கள்...",
+                    gu: "એડમિન સપોર્ટ માટે તમારો સંદેશ ટાઇપ કરો...",
+                    kn: "ಅಡ್ಮಿನ್ ಬೆಂಬಲಕ್ಕಾಗಿ ನಿಮ್ಮ ಸಂದೇಶವನ್ನು ಟೈಪ್ ಮಾಡಿ...",
+                    or: "ପ୍ରଶାସକ ସହାୟତା ପାଇଁ ଆପଣଙ୍କ ବାର୍ତ୍ତା ଟାଇପ୍ କରନ୍ତୁ...",
+                    pa: "ਐਡਮਿਨ ਸਪੋਰਟ ਲਈ ਆਪਣਾ ਸੰਦੇਸ਼ ਟਾਈਪ ਕਰੋ...",
+                  })}
                   className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                 />
               </div>
@@ -1068,9 +1328,17 @@ Product Data: ${JSON.stringify(product)}`;
             <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-white">
-                  {isHindi
-                    ? "एडमिन के साथ उत्पाद साझा करें"
-                    : "Share Product with Admin"}
+                  {tl("Share Product with Admin", {
+                    hi: "एडमिन के साथ उत्पाद साझा करें",
+                    bn: "প্রশাসনের সাথে পণ্য শেয়ার করুন",
+                    te: "అడ్మిన్‌తో ఉత్పత్తిని భాగస్వామ్యం చేయండి",
+                    mr: "प्रशासकासह उत्पादन सामायिक करा",
+                    ta: "நிர்வாகியுடன் தயாரிப்பைப் பகிரவும்",
+                    gu: "એડમિન સાથે ઉત્પાદન શેર કરો",
+                    kn: "ಅಡ್ಮಿನ್‌ನೊಂದಿಗೆ ಉತ್ಪನ್ನವನ್ನು ಹಂಚಿಕೊಳ್ಳಿ",
+                    or: "ଆଡମିନଙ୍କ ସହିତ ଉତ୍ପାଦ ସେୟାର କରନ୍ତୁ",
+                    pa: "ਐਡਮਿਨ ਨਾਲ ਉਤਪਾਦ ਸਾਂਝਾ ਕਰੋ",
+                  })}
                 </h3>
                 <button
                   onClick={() => setShowProductModal(false)}
@@ -1083,21 +1351,47 @@ Product Data: ${JSON.stringify(product)}`;
                 <div className="text-center py-12">
                   <Package className="h-12 w-12 text-slate-600 mx-auto mb-4 animate-pulse" />
                   <p className="text-slate-400">
-                    {isHindi
-                      ? "आपके उत्पाद लोड हो रहे हैं..."
-                      : "Loading your products..."}
+                    {tl("Loading your products...", {
+                      hi: "आपके उत्पाद लोड हो रहे हैं...",
+                      bn: "আপনার পণ্য লোড হচ্ছে...",
+                      te: "మీ ఉత్పత్తులు లోడవుతున్నాయి...",
+                      mr: "तुमची उत्पादने लोड होत आहेत...",
+                      ta: "உங்கள் தயாரிப்புகள் லோட்வுதல்...",
+                      gu: "તમારા ઉત્પાદનો લોડ થઈ રહ્યા છે...",
+                      kn: "ನಿಮ್ಮ ಉತ್ಪನ್ನಗಳು ಲೋಡ್ ಆಗುತ್ತಿವೆ...",
+                      or: "ଆପଣଙ୍କ ଉତ୍ପାଦଗୁଡ଼ିକ ଲୋଡ୍ ହେଉଛି...",
+                      pa: "ਤੁਹਾਡੇ ਉਤਪਾਦ ਲੋਡ ਹੋ ਰਹੇ ਹਨ...",
+                    })}
                   </p>
                 </div>
               ) : products.length === 0 ? (
                 <div className="text-center py-12">
                   <Package className="h-16 w-16 text-slate-600 mx-auto mb-4" />
                   <h4 className="text-lg font-medium text-white mb-2">
-                    {isHindi ? "कोई उत्पाद नहीं मिला" : "No Products Found"}
+                    {tl("No Products Found", {
+                      hi: "कोई उत्पाद नहीं मिला",
+                      bn: "কোন পণ্য পাওয়া যায়নি",
+                      te: "ఉత్పత్తులు కనుగొనబడలేదు",
+                      mr: "कोणतेही उत्पादन सापडले नाही",
+                      ta: "பொருட்கள் கிடைக்கவில்லை",
+                      gu: "કોઈ ઉત્પાદન મળ્યું નથી",
+                      kn: "ಯಾವುದೇ ಉತ್ಪನ್ನಗಳು ಕಂಡುಬಂದಿಲ್ಲ",
+                      or: "କୌଣସି ଉତ୍ପାଦ ମିଳିଲା ନାହିଁ",
+                      pa: "ਕੋਈ ਉਤਪਾਦ ਨਹੀਂ ਮਿਲਿਆ",
+                    })}
                   </h4>
                   <p className="text-slate-400 mb-4">
-                    {isHindi
-                      ? "अभी तक आपके पास साझा करने के लिए कोई उत्पाद नहीं है।"
-                      : "You don't have any products to share yet."}
+                    {tl("You don't have any products to share yet.", {
+                      hi: "अभी तक आपके पास साझा करने के लिए कोई उत्पाद नहीं है।",
+                      bn: "আপনার এখনও শেয়ার করার জন্য কোন পণ্য নেই।",
+                      te: "మీకు ఇంకా భాగస్వామ్యం చేయడానికి ఉత్పత్తులు లేవు।",
+                      mr: "तुमच्याकडे अजून सामायिक करण्यासाठी कोणतेही उत्पादन नाही.",
+                      ta: "உங்களிடம் இன்னும் பகிர்ந்து கொள்ள எந்த தயாரிப்புகளும் இல்லை.",
+                      gu: "તમારી પાસે હજુ સુધી શેર કરવા માટે કોઈ ઉત્પાદન નથી.",
+                      kn: "ನಿಮ್ಮ ಬಳಿ ಇನ್ನೂ ಹಂಚಿಕೊಳ್ಳಲು ಯಾವುದೇ ಉತ್ಪನ್ನಗಳಿಲ್ಲ.",
+                      or: "ଆପଣଙ୍କ ପାଖରେ ଏପର୍ଯ୍ୟନ୍ତ ସେୟାର କରିବାକୁ କୌଣସି ଉତ୍ପାଦ ନାହିଁ।",
+                      pa: "ਤੁਹਾਡੇ ਕੋਲ ਅਜੇ ਤਕ ਸਾਂਝਾ ਕਰਨ ਲਈ ਕੋਈ ਉਤਪਾਦ ਨਹੀਂ ਹਨ।",
+                    })}
                   </p>
                   <button
                     onClick={() => {
@@ -1143,7 +1437,17 @@ Product Data: ${JSON.stringify(product)}`;
                           ) : (
                             <>
                               <Send className="h-5 w-5 mr-2" />
-                              {isHindi ? "यह साझा करें" : "Share This"}
+                              {tl("Share This", {
+                                hi: "यह साझा करें",
+                                bn: "এটি শেয়ার করুন",
+                                te: "దీన్ని భాగస్వామ్యం చేయండి",
+                                mr: "हे सामायिक करा",
+                                ta: "இதைப் பகிரவும்",
+                                gu: "આ શેર કરો",
+                                kn: "ಇದನ್ನು ಹಂಚಿಕೊಳ್ಳಿ",
+                                or: "ଏହାକୁ ସେୟାର କରନ୍ତୁ",
+                                pa: "ਇਸਨੂੰ ਸਾਂਝਾ ਕਰੋ",
+                              })}
                             </>
                           )}
                         </button>

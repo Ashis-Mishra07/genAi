@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { LanguageProvider } from "@/lib/language/LanguageContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,7 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "AI Artisan Marketplace - Cultural Storytelling & Smart Commerce",
-  description: "AI-powered marketplace assistant for local artisans with cultural storytelling, voice processing, and intelligent product management.",
+  description:
+    "AI-powered marketplace assistant for local artisans with cultural storytelling, voice processing, and intelligent product management.",
 };
 
 export default function RootLayout({
@@ -26,9 +28,8 @@ export default function RootLayout({
     <html lang="en" className="dark" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-orange-400`}
-        suppressHydrationWarning
-      >
-        {children}
+        suppressHydrationWarning>
+        <LanguageProvider>{children}</LanguageProvider>
       </body>
     </html>
   );

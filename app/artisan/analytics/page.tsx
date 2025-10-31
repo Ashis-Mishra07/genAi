@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/lib/i18n/hooks";
-import { useTranslateContent } from "@/lib/hooks/useTranslateContent";
 import {
   ArrowLeft,
   BarChart3,
@@ -13,9 +12,7 @@ import {
   ShoppingCart,
   DollarSign,
   Users,
-  Calendar,
   Download,
-  Filter,
   RefreshCw,
 } from "lucide-react";
 
@@ -56,8 +53,7 @@ interface AnalyticsData {
 
 export default function ArtisanAnalyticsPage() {
   const router = useRouter();
-  const { t } = useTranslation();
-  const { translateText, isHindi } = useTranslateContent();
+  const { t, currentLocale } = useTranslation();
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
     null
   );
@@ -65,11 +61,7 @@ export default function ArtisanAnalyticsPage() {
   const [timeframe, setTimeframe] = useState("7d");
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  useEffect(() => {
-    loadAnalytics();
-  }, [timeframe]);
-
-  const loadAnalytics = async () => {
+  const loadAnalytics = useCallback(async () => {
     try {
       setIsRefreshing(true);
 
@@ -86,9 +78,7 @@ export default function ArtisanAnalyticsPage() {
           customersChange: 15.2,
         },
         chartData: {
-          labels: isHindi
-            ? ["सोम", "मंगल", "बुध", "गुरु", "शुक्र", "शनि", "रवि"]
-            : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+          labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
           views: [120, 150, 180, 220, 190, 250, 200],
           orders: [2, 4, 3, 6, 4, 7, 5],
           revenue: [150, 240, 180, 320, 280, 450, 350],
@@ -96,9 +86,7 @@ export default function ArtisanAnalyticsPage() {
         topProducts: [
           {
             id: "1",
-            name: isHindi
-              ? "हस्तनिर्मित सिरेमिक कटोरा"
-              : "Handwoven Ceramic Bowl",
+            name: "Handwoven Ceramic Bowl",
             views: 245,
             orders: 8,
             revenue: 480,
@@ -106,9 +94,7 @@ export default function ArtisanAnalyticsPage() {
           },
           {
             id: "2",
-            name: isHindi
-              ? "पारंपरिक मिट्टी का फूलदान"
-              : "Traditional Pottery Vase",
+            name: "Traditional Pottery Vase",
             views: 189,
             orders: 5,
             revenue: 375,
@@ -116,7 +102,7 @@ export default function ArtisanAnalyticsPage() {
           },
           {
             id: "3",
-            name: isHindi ? "कारीगर आभूषण सेट" : "Artisan Jewelry Set",
+            name: "Artisan Jewelry Set",
             views: 156,
             orders: 4,
             revenue: 320,
@@ -127,23 +113,23 @@ export default function ArtisanAnalyticsPage() {
           {
             id: "1",
             type: "order",
-            customerName: isHindi ? "सारा जॉनसन" : "Sarah Johnson",
-            productName: isHindi ? "सिरेमिक कटोरा सेट" : "Ceramic Bowl Set",
+            customerName: "Sarah Johnson",
+            productName: "Ceramic Bowl Set",
             timestamp: "2024-01-15T10:30:00Z",
             amount: 85,
           },
           {
             id: "2",
             type: "view",
-            customerName: isHindi ? "माइकल चेन" : "Michael Chen",
-            productName: isHindi ? "मिट्टी का फूलदान" : "Pottery Vase",
+            customerName: "Michael Chen",
+            productName: "Pottery Vase",
             timestamp: "2024-01-15T09:45:00Z",
           },
           {
             id: "3",
             type: "inquiry",
-            customerName: isHindi ? "एम्मा विलियम्स" : "Emma Williams",
-            productName: isHindi ? "कस्टम रिंग" : "Custom Ring",
+            customerName: "Emma Williams",
+            productName: "Custom Ring",
             timestamp: "2024-01-15T08:20:00Z",
           },
         ],
@@ -156,18 +142,46 @@ export default function ArtisanAnalyticsPage() {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  };
+  }, []);
+
+  // Helper function to apply translations to mock data
+  const getTranslatedAnalyticsData = useCallback(() => {
+    if (!analyticsData) return null;
+    
+    return {
+      ...analyticsData,
+      chartData: {
+        ...analyticsData.chartData,
+        labels: [t("mon"), t("tue"), t("wed"), t("thu"), t("fri"), t("sat"), t("sun")],
+      },
+      topProducts: analyticsData.topProducts.map((product, index) => ({
+        ...product,
+        name: index === 0 ? t("handwovenCeramicBowl") : 
+              index === 1 ? t("traditionalPotteryVase") : 
+              t("artisanJewelrySet")
+      })),
+      recentActivity: analyticsData.recentActivity.map((activity, index) => ({
+        ...activity,
+        customerName: index === 0 ? t("sarahJohnson") : 
+                     index === 1 ? t("michaelChen") : 
+                     t("emmaWilliams"),
+        productName: index === 0 ? t("ceramicBowlSet") : 
+                    index === 1 ? t("potteryVase") : 
+                    t("customRing")
+      }))
+    };
+  }, [analyticsData, t]);
+
+  const translatedData = getTranslatedAnalyticsData();
+
+  useEffect(() => {
+    loadAnalytics();
+  }, [loadAnalytics]);
 
   const formatCurrency = (amount: number) => {
-    if (isHindi) {
-      return new Intl.NumberFormat("hi-IN", {
-        style: "currency",
-        currency: "INR",
-      }).format(amount);
-    }
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat(currentLocale === "hi" ? "hi-IN" : "en-US", {
       style: "currency",
-      currency: "USD",
+      currency: currentLocale === "hi" ? "INR" : "USD",
     }).format(amount);
   };
 
@@ -205,7 +219,7 @@ export default function ArtisanAnalyticsPage() {
         <div className="text-white text-center">
           <BarChart3 className="h-12 w-12 mx-auto mb-4 animate-pulse" />
           <p>
-            {isHindi ? "एनालिटिक्स लोड हो रहे हैं..." : "Loading analytics..."}
+            {t("loadingAnalytics")}
           </p>
         </div>
       </div>
@@ -217,16 +231,20 @@ export default function ArtisanAnalyticsPage() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-orange-900 to-slate-900 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-white mb-4">
-            {isHindi ? "एनालिटिक्स उपलब्ध नहीं" : "Analytics Not Available"}
+            {t("analyticsNotAvailable")}
           </h2>
           <button
             onClick={() => router.push("/artisan/dashboard")}
             className="text-orange-400 hover:text-orange-300">
-            {isHindi ? "डैशबोर्ड पर वापस जाएं" : "Return to Dashboard"}
+            {t("returnToDashboard")}
           </button>
         </div>
       </div>
     );
+  }
+
+  if (!translatedData) {
+    return null;
   }
 
   return (
@@ -238,18 +256,16 @@ export default function ArtisanAnalyticsPage() {
             onClick={() => router.push("/artisan/dashboard")}
             className="flex items-center text-white/70 hover:text-white transition-colors">
             <ArrowLeft className="h-5 w-5 mr-2" />
-            {isHindi ? "डैशबोर्ड पर वापस" : "Back to Dashboard"}
+            {t("backToDashboard")}
           </button>
           <div className="flex items-center text-white">
             <BarChart3 className="h-6 w-6 mr-2" />
             <div>
               <span className="text-xl font-bold">
-                {isHindi ? "एनालिटिक्स" : "Analytics"}
+                {t("analytics")}
               </span>
               <p className="text-sm text-white/70">
-                {isHindi
-                  ? "अपने व्यवसाय की प्रगति ट्रैक करें"
-                  : "Track your business performance"}
+                {t("trackBusinessPerformance")}
               </p>
             </div>
           </div>
@@ -260,13 +276,13 @@ export default function ArtisanAnalyticsPage() {
               onChange={(e) => setTimeframe(e.target.value)}
               className="px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
               <option value="7d" className="bg-slate-800">
-                {isHindi ? "पिछले 7 दिन" : "Last 7 days"}
+                {t("lastDays")}
               </option>
               <option value="30d" className="bg-slate-800">
-                {isHindi ? "पिछले 30 दिन" : "Last 30 days"}
+                {t("last30Days")}
               </option>
               <option value="90d" className="bg-slate-800">
-                {isHindi ? "पिछले 90 दिन" : "Last 90 days"}
+                {t("last90Days")}
               </option>
             </select>
 
@@ -277,12 +293,12 @@ export default function ArtisanAnalyticsPage() {
               <RefreshCw
                 className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
               />
-              {isHindi ? "रीफ्रेश" : "Refresh"}
+              {t("refresh")}
             </button>
 
             <button className="flex items-center px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white/90 hover:bg-white/20 transition-colors">
               <Download className="h-4 w-4 mr-2" />
-              {isHindi ? "निर्यात" : "Export"}
+              {t("export")}
             </button>
           </div>
         </div>
@@ -295,10 +311,10 @@ export default function ArtisanAnalyticsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-white/70">
-                  {isHindi ? "कुल दृश्य" : "Total Views"}
+                  {t("totalViews")}
                 </p>
                 <p className="text-2xl font-bold text-white">
-                  {analyticsData.overview.totalViews.toLocaleString()}
+                  {translatedData.overview.totalViews.toLocaleString()}
                 </p>
               </div>
               <div className="p-3 bg-blue-500/20 rounded-full">
@@ -312,7 +328,7 @@ export default function ArtisanAnalyticsPage() {
                   analyticsData.overview.viewsChange
                 )}`}>
                 {Math.abs(analyticsData.overview.viewsChange)}%{" "}
-                {isHindi ? "बनाम पिछली अवधि" : "vs last period"}
+                {t("vsLastPeriod")}
               </span>
             </div>
           </div>
@@ -321,7 +337,7 @@ export default function ArtisanAnalyticsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-white/70">
-                  {isHindi ? "कुल ऑर्डर" : "Total Orders"}
+                  {t("totalOrders")}
                 </p>
                 <p className="text-2xl font-bold text-white">
                   {analyticsData.overview.totalOrders}
@@ -338,7 +354,7 @@ export default function ArtisanAnalyticsPage() {
                   analyticsData.overview.ordersChange
                 )}`}>
                 {Math.abs(analyticsData.overview.ordersChange)}%{" "}
-                {isHindi ? "बनाम पिछली अवधि" : "vs last period"}
+                {t("vsLastPeriod")}
               </span>
             </div>
           </div>
@@ -347,7 +363,7 @@ export default function ArtisanAnalyticsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-white/70">
-                  {isHindi ? "कुल आय" : "Total Revenue"}
+                  {t("totalRevenue")}
                 </p>
                 <p className="text-2xl font-bold text-white">
                   {formatCurrency(analyticsData.overview.totalRevenue)}
@@ -364,7 +380,7 @@ export default function ArtisanAnalyticsPage() {
                   analyticsData.overview.revenueChange
                 )}`}>
                 {Math.abs(analyticsData.overview.revenueChange)}%{" "}
-                {isHindi ? "बनाम पिछली अवधि" : "vs last period"}
+                {t("vsLastPeriod")}
               </span>
             </div>
           </div>
@@ -373,7 +389,7 @@ export default function ArtisanAnalyticsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-white/70">
-                  {isHindi ? "कुल ग्राहक" : "Total Customers"}
+                  {t("totalCustomers")}
                 </p>
                 <p className="text-2xl font-bold text-white">
                   {analyticsData.overview.totalCustomers}
@@ -390,7 +406,7 @@ export default function ArtisanAnalyticsPage() {
                   analyticsData.overview.customersChange
                 )}`}>
                 {Math.abs(analyticsData.overview.customersChange)}%{" "}
-                {isHindi ? "बनाम पिछली अवधि" : "vs last period"}
+                {t("vsLastPeriod")}
               </span>
             </div>
           </div>
@@ -400,20 +416,16 @@ export default function ArtisanAnalyticsPage() {
           {/* Chart */}
           <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
             <h3 className="text-lg font-semibold text-white mb-6">
-              {isHindi ? "प्रदर्शन सिंहावलोकन" : "Performance Overview"}
+              {t("performanceOverview")}
             </h3>
             <div className="h-80 flex items-center justify-center bg-white/5 rounded-lg">
               <div className="text-center">
                 <BarChart3 className="h-16 w-16 text-white/30 mx-auto mb-4" />
                 <p className="text-white/70">
-                  {isHindi
-                    ? "चार्ट विज़ुअलाइज़ेशन यहाँ होगा"
-                    : "Chart visualization would go here"}
+                  {t("chartVisualization")}
                 </p>
                 <p className="text-sm text-white/50">
-                  {isHindi
-                    ? "Chart.js या समान लाइब्रेरी के साथ एकीकरण"
-                    : "Integration with Chart.js or similar library"}
+                  {t("chartIntegration")}
                 </p>
               </div>
             </div>
@@ -422,12 +434,10 @@ export default function ArtisanAnalyticsPage() {
           {/* Top Products */}
           <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
             <h3 className="text-lg font-semibold text-white mb-6">
-              {isHindi
-                ? "शीर्ष प्रदर्शनकारी उत्पाद"
-                : "Top Performing Products"}
+              {t("topPerformingProducts")}
             </h3>
             <div className="space-y-4">
-              {analyticsData.topProducts.map((product, index) => (
+              {translatedData.topProducts.map((product, index) => (
                 <div
                   key={product.id}
                   className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
@@ -438,8 +448,8 @@ export default function ArtisanAnalyticsPage() {
                     <div>
                       <h4 className="font-medium text-white">{product.name}</h4>
                       <p className="text-sm text-white/70">
-                        {product.views} {isHindi ? "दृश्य" : "views"} •{" "}
-                        {product.orders} {isHindi ? "ऑर्डर" : "orders"}
+                        {product.views} {t("views")} •{" "}
+                        {product.orders} {t("orders")}
                       </p>
                     </div>
                   </div>
@@ -448,7 +458,7 @@ export default function ArtisanAnalyticsPage() {
                       {formatCurrency(product.revenue)}
                     </p>
                     <p className="text-sm text-white/70">
-                      {isHindi ? "आय" : "revenue"}
+                      {t("revenue")}
                     </p>
                   </div>
                 </div>
@@ -460,10 +470,10 @@ export default function ArtisanAnalyticsPage() {
         {/* Recent Activity */}
         <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
           <h3 className="text-lg font-semibold text-white mb-6">
-            {isHindi ? "हाल की गतिविधि" : "Recent Activity"}
+            {t("recentActivity")}
           </h3>
           <div className="space-y-4">
-            {analyticsData.recentActivity.map((activity) => (
+            {translatedData.recentActivity.map((activity) => (
               <div
                 key={activity.id}
                 className="flex items-center justify-between p-4 hover:bg-white/5 rounded-lg transition-colors">
@@ -475,16 +485,10 @@ export default function ArtisanAnalyticsPage() {
                     <p className="font-medium text-white">
                       {activity.customerName}{" "}
                       {activity.type === "order"
-                        ? isHindi
-                          ? "ऑर्डर किया"
-                          : "ordered"
+                        ? t("ordered")
                         : activity.type === "view"
-                        ? isHindi
-                          ? "देखा"
-                          : "viewed"
-                        : isHindi
-                        ? "पूछताछ की"
-                        : "inquired about"}{" "}
+                        ? t("viewed")
+                        : t("inquiredAbout")}{" "}
                       {activity.productName}
                     </p>
                     <p className="text-sm text-white/70">

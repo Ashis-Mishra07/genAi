@@ -1,21 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/lib/i18n/hooks";
-import { useTranslateContent } from "@/lib/hooks/useTranslateContent";
 import {
   ArrowLeft,
   MessageCircle,
   Mail,
   MailOpen,
   Search,
-  Filter,
   Clock,
   Star,
   Reply,
-  MoreVertical,
-  User,
   CheckCircle,
   AlertCircle,
   Trash2,
@@ -39,68 +35,14 @@ interface Message {
 export default function ArtisanFeedbackPage() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { translateText, isHindi } = useTranslateContent();
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [showReplyModal, setShowReplyModal] = useState(false);
   const [replyMessage, setReplyMessage] = useState("");
   const [isReplying, setIsReplying] = useState(false);
-
-  // Translation cache for customer messages
-  const [translatedSubjects, setTranslatedSubjects] = useState<{
-    [key: string]: string;
-  }>({});
-  const [translatedMessages, setTranslatedMessages] = useState<{
-    [key: string]: string;
-  }>({});
-  const [translatedProductNames, setTranslatedProductNames] = useState<{
-    [key: string]: string;
-  }>({});
-
-  // Function to translate customer content
-  const translateCustomerContent = async (
-    messageId: string,
-    subject: string,
-    message: string,
-    productName?: string
-  ) => {
-    if (!isHindi) return;
-
-    try {
-      // Translate subject if not already translated
-      if (subject && !translatedSubjects[messageId]) {
-        const translatedSubject = await translateText(subject);
-        setTranslatedSubjects((prev) => ({
-          ...prev,
-          [messageId]: translatedSubject,
-        }));
-      }
-
-      // Translate message if not already translated
-      if (message && !translatedMessages[messageId]) {
-        const translatedMessage = await translateText(message);
-        setTranslatedMessages((prev) => ({
-          ...prev,
-          [messageId]: translatedMessage,
-        }));
-      }
-
-      // Translate product name if not already translated
-      if (productName && !translatedProductNames[messageId]) {
-        const translatedProductName = await translateText(productName);
-        setTranslatedProductNames((prev) => ({
-          ...prev,
-          [messageId]: translatedProductName,
-        }));
-      }
-    } catch (error) {
-      console.error("Translation failed:", error);
-    }
-  };
 
   // Mock data for demonstration
   useEffect(() => {
@@ -113,8 +55,7 @@ export default function ArtisanFeedbackPage() {
             customerName: "Sarah Johnson",
             customerEmail: "sarah@email.com",
             subject: "Question about custom pottery",
-            message:
-              "Hi! I saw your beautiful ceramic bowls and I'm interested in commissioning a custom set for my kitchen. Could you tell me more about your process and pricing?",
+            message: "Hi! I saw your beautiful ceramic bowls and I'm interested in commissioning a custom set for my kitchen. Could you tell me more about your process and pricing?",
             isRead: false,
             isImportant: true,
             productId: "p1",
@@ -127,8 +68,7 @@ export default function ArtisanFeedbackPage() {
             customerName: "Michael Chen",
             customerEmail: "michael@email.com",
             subject: "Shipping inquiry",
-            message:
-              "Hello, I ordered a handwoven scarf last week. Can you provide an update on the shipping status?",
+            message: "Hello, I ordered a handwoven scarf last week. Can you provide an update on the shipping status?",
             isRead: true,
             isImportant: false,
             productId: "p2",
@@ -142,8 +82,7 @@ export default function ArtisanFeedbackPage() {
             customerName: "Emma Williams",
             customerEmail: "emma@email.com",
             subject: "Custom jewelry request",
-            message:
-              "I'm looking for a custom engagement ring. Do you work with specific gemstones provided by the customer?",
+            message: "I'm looking for a custom engagement ring. Do you work with specific gemstones provided by the customer?",
             isRead: true,
             isImportant: true,
             createdAt: "2024-01-13T09:15:00Z",
@@ -154,8 +93,7 @@ export default function ArtisanFeedbackPage() {
             customerName: "David Brown",
             customerEmail: "david@email.com",
             subject: "Workshop inquiry",
-            message:
-              "Do you offer any pottery workshops? I'd love to learn from you!",
+            message: "Do you offer any pottery workshops? I'd love to learn from you!",
             isRead: true,
             isImportant: false,
             createdAt: "2024-01-12T11:45:00Z",
@@ -175,25 +113,60 @@ export default function ArtisanFeedbackPage() {
     loadMessages();
   }, []);
 
-  // Effect to translate customer content when language changes to Hindi
-  useEffect(() => {
-    if (isHindi && messages.length > 0) {
-      messages.forEach((message) => {
-        translateCustomerContent(
-          message.id,
-          message.subject,
-          message.message,
-          message.productName
-        );
-      });
+  // Helper functions to get translated message content
+  const getMessageSubject = useCallback((message: Message) => {
+    switch (message.subject) {
+      case "Question about custom pottery":
+        return t("sampleSubject1");
+      case "Shipping inquiry":
+        return t("sampleSubject2");
+      case "Custom jewelry request":
+        return t("sampleSubject3");
+      case "Workshop inquiry":
+        return t("sampleSubject4");
+      default:
+        return message.subject;
     }
-  }, [isHindi, messages.length]);
+  }, [t]);
+
+  const getMessageText = useCallback((message: Message) => {
+    if (message.message === "Hi! I saw your beautiful ceramic bowls and I'm interested in commissioning a custom set for my kitchen. Could you tell me more about your process and pricing?") {
+      return t("sampleMessage1");
+    }
+    if (message.message === "Hello, I ordered a handwoven scarf last week. Can you provide an update on the shipping status?") {
+      return t("sampleMessage2");
+    }
+    if (message.message === "I'm looking for a custom engagement ring. Do you work with specific gemstones provided by the customer?") {
+      return t("sampleMessage3");
+    }
+    if (message.message === "Do you offer any pottery workshops? I'd love to learn from you!") {
+      return t("sampleMessage4");
+    }
+    return message.message;
+  }, [t]);
+
+  const getProductName = useCallback((productName: string | undefined) => {
+    if (!productName) return productName;
+    switch (productName) {
+      case "Ceramic Bowl Set":
+        return t("sampleProduct1");
+      case "Handwoven Wool Scarf":
+        return t("sampleProduct2");
+      default:
+        return productName;
+    }
+  }, [t]);
 
   const filteredMessages = messages.filter((message) => {
+    const translatedSubject = getMessageSubject(message);
+    const translatedMessage = getMessageText(message);
+    const translatedProductName = getProductName(message.productName);
+    
     const matchesSearch =
       message.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      message.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      message.message.toLowerCase().includes(searchTerm.toLowerCase());
+      translatedSubject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      translatedMessage.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (translatedProductName && translatedProductName.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchesStatus =
       statusFilter === "all" || message.status === statusFilter;
@@ -216,22 +189,20 @@ export default function ArtisanFeedbackPage() {
     }
   };
 
-  const getStatusText = (status: string) => {
-    if (!isHindi) return status.charAt(0).toUpperCase() + status.slice(1);
-
+  const getStatusText = useCallback((status: string) => {
     switch (status) {
       case "new":
-        return "नई";
+        return t("new");
       case "replied":
-        return "उत्तर दिया गया";
+        return t("replied");
       case "pending":
-        return "लंबित";
+        return t("pending");
       case "closed":
-        return "बंद";
+        return t("closed");
       default:
         return status;
     }
-  };
+  }, [t]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -282,10 +253,7 @@ export default function ArtisanFeedbackPage() {
   };
 
   const handleDelete = async (messageId: string) => {
-    const confirmMessage = isHindi
-      ? "क्या आप वाकई इस संदेश को हटाना चाहते हैं?"
-      : "Are you sure you want to delete this message?";
-    if (!confirm(confirmMessage)) return;
+    if (!confirm(t("deleteConfirm"))) return;
 
     setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
     if (selectedMessage?.id === messageId) {
@@ -300,7 +268,7 @@ export default function ArtisanFeedbackPage() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-orange-900 to-slate-900 flex items-center justify-center">
         <div className="text-white text-center">
           <MessageCircle className="h-12 w-12 mx-auto mb-4 animate-pulse" />
-          <p>{isHindi ? "संदेश लोड हो रहे हैं..." : "Loading messages..."}</p>
+          <p>{t("loadingMessages")}</p>
         </div>
       </div>
     );
@@ -315,26 +283,20 @@ export default function ArtisanFeedbackPage() {
             onClick={() => router.push("/artisan/dashboard")}
             className="flex items-center text-white/70 hover:text-white transition-colors">
             <ArrowLeft className="h-5 w-5 mr-2" />
-            {isHindi ? "डैशबोर्ड पर वापस" : "Back to Dashboard"}
+            {t("backToDashboard")}
           </button>
           <div className="flex items-center text-white">
             <MessageCircle className="h-6 w-6 mr-2" />
             <div>
               <span className="text-xl font-bold">
-                {isHindi ? "ग्राहक प्रतिक्रिया" : "Customer Feedback"}
+                {t("customerFeedback")}
               </span>
               <p className="text-sm text-white/70">
                 {unreadCount > 0
-                  ? isHindi
-                    ? `${unreadCount} अपठित प्रतिक्रिया${
-                        unreadCount > 1 ? "एं" : ""
-                      }`
-                    : `${unreadCount} unread feedback${
-                        unreadCount > 1 ? "s" : ""
-                      }`
-                  : isHindi
-                  ? "सभी पूर्ण!"
-                  : "All caught up!"}
+                  ? unreadCount === 1 
+                    ? `1 ${t("unreadFeedback")}`
+                    : `${unreadCount} ${t("unreadFeedbacks")}`
+                  : t("allCaughtUp")}
               </p>
             </div>
           </div>
@@ -352,9 +314,7 @@ export default function ArtisanFeedbackPage() {
                   <Search className="absolute left-3 top-3 h-4 w-4 text-white/50" />
                   <input
                     type="text"
-                    placeholder={
-                      isHindi ? "प्रतिक्रिया खोजें..." : "Search feedback..."
-                    }
+                    placeholder={t("searchFeedback")}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
@@ -366,19 +326,19 @@ export default function ArtisanFeedbackPage() {
                   onChange={(e) => setStatusFilter(e.target.value)}
                   className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
                   <option value="all" className="bg-slate-800">
-                    {isHindi ? "सभी प्रतिक्रिया" : "All Feedback"}
+                    {t("allFeedback")}
                   </option>
                   <option value="new" className="bg-slate-800">
-                    {isHindi ? "नई" : "New"}
+                    {t("new")}
                   </option>
                   <option value="replied" className="bg-slate-800">
-                    {isHindi ? "उत्तर दिया गया" : "Replied"}
+                    {t("replied")}
                   </option>
                   <option value="pending" className="bg-slate-800">
-                    {isHindi ? "लंबित" : "Pending"}
+                    {t("pending")}
                   </option>
                   <option value="closed" className="bg-slate-800">
-                    {isHindi ? "बंद" : "Closed"}
+                    {t("closed")}
                   </option>
                 </select>
               </div>
@@ -389,7 +349,7 @@ export default function ArtisanFeedbackPage() {
                   <div className="p-8 text-center text-white/70">
                     <MessageCircle className="h-12 w-12 mx-auto mb-4 text-white/30" />
                     <p>
-                      {isHindi ? "कोई संदेश नहीं मिला" : "No messages found"}
+                      {t("noMessagesFound")}
                     </p>
                   </div>
                 ) : (
@@ -446,23 +406,16 @@ export default function ArtisanFeedbackPage() {
                             ? "font-semibold text-white"
                             : "text-white/80"
                         }`}>
-                        {isHindi && translatedSubjects[message.id]
-                          ? translatedSubjects[message.id]
-                          : message.subject}
+                        {getMessageSubject(message)}
                       </h3>
 
                       <p className="text-xs text-white/60 mb-2 line-clamp-2">
-                        {isHindi && translatedMessages[message.id]
-                          ? translatedMessages[message.id]
-                          : message.message}
+                        {getMessageText(message)}
                       </p>
 
                       {message.productName && (
                         <div className="text-xs text-orange-400 mb-2">
-                          {isHindi ? "के बारे में: " : "About: "}
-                          {isHindi && translatedProductNames[message.id]
-                            ? translatedProductNames[message.id]
-                            : message.productName}
+                          {t("about")}: {getProductName(message.productName)}
                         </div>
                       )}
 
@@ -521,17 +474,12 @@ export default function ArtisanFeedbackPage() {
 
                   <div>
                     <h3 className="text-xl font-semibold text-white mb-2">
-                      {isHindi && translatedSubjects[selectedMessage.id]
-                        ? translatedSubjects[selectedMessage.id]
-                        : selectedMessage.subject}
+                      {getMessageSubject(selectedMessage)}
                     </h3>
                     {selectedMessage.productName && (
                       <div className="flex items-center text-sm text-orange-400 mb-2">
                         <span>
-                          {isHindi ? "संबंधित: " : "Regarding: "}
-                          {isHindi && translatedProductNames[selectedMessage.id]
-                            ? translatedProductNames[selectedMessage.id]
-                            : selectedMessage.productName}
+                          {t("regarding")}: {getProductName(selectedMessage.productName)}
                         </span>
                       </div>
                     )}
@@ -544,10 +492,7 @@ export default function ArtisanFeedbackPage() {
                         <>
                           <span className="mx-2">•</span>
                           <span>
-                            {isHindi ? "उत्तर दिया " : "Replied "}
-                            {new Date(
-                              selectedMessage.repliedAt
-                            ).toLocaleString()}
+                            {t("replied")} {new Date(selectedMessage.repliedAt).toLocaleString()}
                           </span>
                         </>
                       )}
@@ -559,9 +504,7 @@ export default function ArtisanFeedbackPage() {
                 <div className="p-6">
                   <div className="prose max-w-none">
                     <p className="text-white/90 whitespace-pre-wrap">
-                      {isHindi && translatedMessages[selectedMessage.id]
-                        ? translatedMessages[selectedMessage.id]
-                        : selectedMessage.message}
+                      {getMessageText(selectedMessage)}
                     </p>
                   </div>
 
@@ -570,7 +513,7 @@ export default function ArtisanFeedbackPage() {
                       onClick={() => setShowReplyModal(true)}
                       className="flex items-center px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg transition-all duration-200">
                       <Reply className="h-4 w-4 mr-2" />
-                      {isHindi ? "उत्तर दें" : "Reply"}
+                      {t("reply")}
                     </button>
                   </div>
                 </div>
@@ -579,12 +522,10 @@ export default function ArtisanFeedbackPage() {
               <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-12 text-center">
                 <MessageCircle className="h-16 w-16 text-white/30 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-white mb-2">
-                  {isHindi ? "प्रतिक्रिया चुनें" : "Select feedback"}
+                  {t("selectFeedback")}
                 </h3>
                 <p className="text-white/70">
-                  {isHindi
-                    ? "विवरण देखने और जवाब देने के लिए सूची से ग्राहक प्रतिक्रिया चुनें।"
-                    : "Choose customer feedback from the list to view details and respond."}
+                  {t("selectFeedbackDescription")}
                 </p>
               </div>
             )}
@@ -598,15 +539,10 @@ export default function ArtisanFeedbackPage() {
           <div className="bg-slate-800 rounded-lg border border-white/20 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
             <div className="p-6 border-b border-white/20">
               <h3 className="text-lg font-semibold text-white">
-                {isHindi
-                  ? `${selectedMessage.customerName} को उत्तर दें`
-                  : `Reply to ${selectedMessage.customerName}`}
+                {t("replyTo")} {selectedMessage.customerName}
               </h3>
               <p className="text-sm text-white/70">
-                {isHindi ? "पुनः: " : "Re: "}
-                {isHindi && translatedSubjects[selectedMessage.id]
-                  ? translatedSubjects[selectedMessage.id]
-                  : selectedMessage.subject}
+                Re: {selectedMessage.subject}
               </p>
             </div>
 
@@ -616,9 +552,7 @@ export default function ArtisanFeedbackPage() {
                 onChange={(e) => setReplyMessage(e.target.value)}
                 rows={8}
                 className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 resize-none"
-                placeholder={
-                  isHindi ? "अपना उत्तर टाइप करें..." : "Type your reply..."
-                }
+                placeholder={t("typeYourReply")}
               />
             </div>
 
@@ -629,7 +563,7 @@ export default function ArtisanFeedbackPage() {
                   setReplyMessage("");
                 }}
                 className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white/90 hover:bg-white/20 transition-colors">
-                {isHindi ? "रद्द करें" : "Cancel"}
+                {t("cancel")}
               </button>
 
               <button
@@ -641,13 +575,7 @@ export default function ArtisanFeedbackPage() {
                 ) : (
                   <Reply className="h-4 w-4 mr-2" />
                 )}
-                {isReplying
-                  ? isHindi
-                    ? "भेजा जा रहा..."
-                    : "Sending..."
-                  : isHindi
-                  ? "उत्तर भेजें"
-                  : "Send Reply"}
+                {isReplying ? t("sending") : t("sendReply")}
               </button>
             </div>
           </div>

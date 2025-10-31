@@ -216,6 +216,33 @@ export default function ArtisanDashboard() {
     }
   };
 
+  const getCategoryTranslation = (category: string | undefined): string => {
+    if (!category) return t('other');
+    
+    // Map common category values to translation keys
+    const categoryMap: Record<string, string> = {
+      'handmade': 'handmade',
+      'textile': 'textile',
+      'textiles': 'textile',
+      'pottery': 'pottery',
+      'jewelry': 'jewelry',
+      'jewellery': 'jewelry',
+      'woodwork': 'woodwork',
+      'metalwork': 'metalwork',
+      'paintings': 'paintings',
+      'art': 'paintings',
+      'homeDecor': 'homeDecor',
+      'home decor': 'homeDecor',
+      'traditionalWear': 'traditionalWear',
+      'traditional wear': 'traditionalWear',
+      'sculptures': 'sculptures',
+      'other': 'other'
+    };
+    
+    const key = categoryMap[category.toLowerCase()] || 'other';
+    return t(key as any);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
@@ -523,7 +550,7 @@ export default function ArtisanDashboard() {
                         <span className="font-medium">{t("category")}</span>
                       </div>
                       <p className="text-white mt-1">
-                        {selectedProduct.category}
+                        {getCategoryTranslation(selectedProduct.category)}
                       </p>
                     </div>
                   )}
@@ -556,7 +583,7 @@ export default function ArtisanDashboard() {
                   <div className="bg-slate-700 border border-slate-600 rounded-lg p-4">
                     <div className="flex items-center text-slate-300">
                       <DollarSign className="h-5 w-5 mr-2 text-yellow-400" />
-                      <span className="font-medium">Product ID</span>
+                      <span className="font-medium">{t("productId")}</span>
                     </div>
                     <p className="text-white mt-1 text-sm font-mono">
                       {selectedProduct.id}

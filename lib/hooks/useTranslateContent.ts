@@ -17,17 +17,17 @@ export function useTranslateContent() {
 
   const translateText = useCallback(async (text: string): Promise<string> => {
     if (!text || currentLocale === 'en') return text;
-    return await translationService.translateText(text, 'hi');
+    return await translationService.translateText(text, currentLocale);
   }, [currentLocale]);
 
   const translateProduct = useCallback(async (product: any) => {
     if (currentLocale === 'en') return product;
-    return await translationService.translateProduct(product, 'hi');
+    return await translationService.translateProduct(product, currentLocale);
   }, [currentLocale]);
 
   const translateActivity = useCallback(async (activity: any) => {
     if (currentLocale === 'en') return activity;
-    return await translationService.translateActivity(activity, 'hi');
+    return await translationService.translateActivity(activity, currentLocale);
   }, [currentLocale]);
 
   return { 
@@ -35,6 +35,7 @@ export function useTranslateContent() {
     translateProduct,
     translateActivity,
     isHindi: currentLocale === 'hi',
+    isTranslating: currentLocale !== 'en',
     currentLocale 
   };
 }
@@ -59,7 +60,7 @@ export function useTranslatedProducts(products: any[]) {
 
       setIsLoading(true);
       try {
-        const translated = await translationService.translateProducts(products, 'hi');
+        const translated = await translationService.translateProducts(products, currentLocale);
         setTranslatedProducts(translated);
       } catch (error) {
         console.error('Failed to translate products:', error);
@@ -89,7 +90,7 @@ export function useTranslatedText(text: string) {
       }
 
       // Check cache first
-      const cached = translationService.getCachedTranslation(text, 'hi');
+      const cached = translationService.getCachedTranslation(text, currentLocale);
       if (cached) {
         setTranslatedText(cached);
         return;
@@ -163,14 +164,14 @@ export function useImmediateTranslation(text: string): string {
     }
 
     // Check cache first for immediate result
-    const cached = translationService.getCachedTranslation(text, 'hi');
+    const cached = translationService.getCachedTranslation(text, currentLocale);
     if (cached) {
       setTranslatedText(cached);
       return;
     }
 
     // Start translation in background
-    translationService.translateText(text, 'hi').then(translated => {
+    translationService.translateText(text, currentLocale).then(translated => {
       setTranslatedText(translated);
     }).catch(error => {
       console.error('Translation failed:', error);

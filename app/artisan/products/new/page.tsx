@@ -42,8 +42,16 @@ interface ProductFormData {
 
 export default function NewProductPage() {
   const router = useRouter();
-  const { t } = useTranslation();
-  const { translateText, isHindi } = useTranslateContent();
+  const { translateText, isHindi, currentLocale } = useTranslateContent();
+
+  // Helper function for quick translations
+  const t = (
+    englishText: string,
+    translations: Record<string, string> = {}
+  ) => {
+    if (currentLocale === "en") return englishText;
+    return translations[currentLocale] || translations["hi"] || englishText;
+  };
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -183,11 +191,23 @@ export default function NewProductPage() {
             onClick={() => router.push("/artisan/dashboard")}
             className="flex items-center text-white/70 hover:text-white transition-colors">
             <ArrowLeft className="h-5 w-5 mr-2" />
-            {t("backToDashboard")}
+            {t("Back to Dashboard", {
+              hi: "डैशबोर्ड पर वापस",
+              or: "ଡ୍ୟାସବୋର୍ଡକୁ ଫେରନ୍ତୁ",
+              te: "డ్యాష్‌బోర్డ్‌కు తిరిగి",
+              bn: "ড্যাশবোর্ডে ফিরে যান",
+            })}
           </button>
           <div className="flex items-center text-white">
             <Package className="h-6 w-6 mr-2" />
-            <span className="text-xl font-bold">{t("createNewProduct")}</span>
+            <span className="text-xl font-bold">
+              {t("Create New Product", {
+                hi: "नया उत्पाद बनाएं",
+                or: "ନୂତନ ପଣ୍ୟ ତିଆରି କରନ୍ତୁ",
+                te: "కొత్త ఉత్పత్తిని సృష్టించండి",
+                bn: "নতুন পণ্য তৈরি করুন",
+              })}
+            </span>
           </div>
         </div>
 
@@ -209,13 +229,24 @@ export default function NewProductPage() {
           <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
             <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
               <Type className="h-5 w-5 mr-2 text-orange-400" />
-              {t("basicInformation")}
+              {t("Basic Information", {
+                hi: "मूलभूत जानकारी",
+                or: "ମୂଳ ସୂଚନା",
+                te: "ప్రాథమిక సమాచారం",
+                bn: "মূল তথ্য",
+              })}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
-                  {t("productName")} *
+                  {t("Product Name", {
+                    hi: "उत्पाद का नाम",
+                    or: "ପଣ୍ୟର ନାମ",
+                    te: "ఉత్పత్తి పేరు",
+                    bn: "পণ্যের নাম",
+                  })}{" "}
+                  *
                 </label>
                 <input
                   type="text"
@@ -223,14 +254,24 @@ export default function NewProductPage() {
                   value={formData.name}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={t("enterProductName")}
+                  placeholder={t("Enter Product Name", {
+                    hi: "उत्पाद का नाम दर्ज करें",
+                    or: "ପଣ୍ୟର ନାମ ପ୍ରବେଶ କରନ୍ତୁ",
+                    te: "ఉత్పత్తి పేరు నమోదు చేయండి",
+                    bn: "পণ্যের নাম লিখুন",
+                  })}
                   required
                 />
               </div>
 
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
-                  {t("category")}
+                  {t("Category", {
+                    hi: "श्रेणी",
+                    or: "ବିଭାଗ",
+                    te: "వర్గం",
+                    bn: "বিভাগ",
+                  })}
                 </label>
                 <select
                   name="category"
@@ -238,7 +279,12 @@ export default function NewProductPage() {
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
                   <option value="" className="bg-slate-800">
-                    {t("category")}
+                    {t("Select Category", {
+                      hi: "श्रेणी चुनें",
+                      or: "ବିଭାଗ ବାଛନ୍ତୁ",
+                      te: "వర్గాన్ని ఎంచుకోండి",
+                      bn: "বিভাগ নির্বাচন করুন",
+                    })}
                   </option>
                   {categories.map((category) => (
                     <option
@@ -254,7 +300,13 @@ export default function NewProductPage() {
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
                   <DollarSign className="h-4 w-4 inline mr-1" />
-                  {t("price")} *
+                  {t("price", {
+                    hi: "मूल्य",
+                    or: "ମୂଲ୍ୟ",
+                    te: "ధర",
+                    bn: "মূল্য",
+                  })}{" "}
+                  *
                 </label>
                 <input
                   type="number"
@@ -262,7 +314,12 @@ export default function NewProductPage() {
                   value={formData.price}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={t("enterPrice")}
+                  placeholder={t("enterPrice", {
+                    hi: "मूल्य दर्ज करें",
+                    or: "ମୂଲ୍ୟ ପ୍ରବିଷ୍ଟ କରନ୍ତୁ",
+                    te: "ధరను నమోదు చేయండి",
+                    bn: "মূল্য প্রবেশ করান",
+                  })}
                   min="0"
                   step="0.01"
                   required
@@ -271,7 +328,12 @@ export default function NewProductPage() {
 
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
-                  {t("currency")}
+                  {t("currency", {
+                    hi: "मुद्रा",
+                    or: "ମୁଦ୍ରା",
+                    te: "కరెన్సీ",
+                    bn: "মুদ্রা",
+                  })}
                 </label>
                 <select
                   name="currency"
@@ -292,7 +354,12 @@ export default function NewProductPage() {
 
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
-                  {isHindi ? "स्टॉक मात्रा" : "Stock Quantity"}
+                  {t("Stock Quantity", {
+                    hi: "स्टॉक मात्रा",
+                    or: "ଷ୍ଟକ ପରିମାଣ",
+                    te: "స్టాక్ పరిమాణం",
+                    bn: "স্টক পরিমাণ",
+                  })}
                 </label>
                 <input
                   type="number"
@@ -314,7 +381,12 @@ export default function NewProductPage() {
                     className="w-4 h-4 text-orange-500 bg-white/5 border-white/20 rounded focus:ring-orange-500"
                   />
                   <span className="ml-2 text-sm text-white/90">
-                    {isHindi ? "सक्रिय" : "Active"}
+                    {t("Active", {
+                      hi: "सक्रिय",
+                      or: "ସକ୍ରିୟ",
+                      te: "చురుకైన",
+                      bn: "সক্রিয়",
+                    })}
                   </span>
                 </label>
 
@@ -327,7 +399,12 @@ export default function NewProductPage() {
                     className="w-4 h-4 text-orange-500 bg-white/5 border-white/20 rounded focus:ring-orange-500"
                   />
                   <span className="ml-2 text-sm text-white/90">
-                    {isHindi ? "फीचर्ड" : "Featured"}
+                    {t("Featured", {
+                      hi: "फीचर्ड",
+                      or: "ବିଶେଷ",
+                      te: "ప్రత్యేకమైన",
+                      bn: "বৈশিষ্ট্যযুক্ত",
+                    })}
                   </span>
                 </label>
               </div>
@@ -336,15 +413,25 @@ export default function NewProductPage() {
 
           {/* Description & Story */}
           <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
-            <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
-              <FileText className="h-5 w-5 mr-2 text-orange-400" />
-              {isHindi ? "विवरण और कहानी" : "Description & Story"}
+            <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+              <FileText className="h-5 w-5 mr-2 text-orange-500" />
+              {t("Description & Story", {
+                hi: "विवरण और कहानी",
+                or: "ବର୍ଣ୍ଣନା ଏବଂ କାହାଣୀ",
+                te: "వివరణ మరియు కథ",
+                bn: "বিবরণ এবং গল্প",
+              })}
             </h2>
 
             <div className="space-y-6">
               <div>
-                <label className="block text-white/90 text-sm font-medium mb-2">
-                  {isHindi ? "उत्पाद विवरण" : "Product Description"}
+                <label className="block text-slate-300 text-sm font-medium mb-2">
+                  {t("Product Description", {
+                    hi: "उत्पाद विवरण",
+                    or: "ପଣ୍ୟ ବର୍ଣ୍ଣନା",
+                    te: "ఉత్పత్తి వివరణ",
+                    bn: "পণ্যের বিবরণ",
+                  })}
                 </label>
                 <textarea
                   name="description"
@@ -361,8 +448,13 @@ export default function NewProductPage() {
               </div>
 
               <div>
-                <label className="block text-white/90 text-sm font-medium mb-2">
-                  {isHindi ? "सांस्कृतिक कहानी" : "Cultural Story"}
+                <label className="block text-slate-300 text-sm font-medium mb-2">
+                  {t("Cultural Story", {
+                    hi: "सांस्कृतिक कहानी",
+                    or: "ସାଂସ୍କୃତିକ କାହାଣୀ",
+                    te: "సాంస్కృతిక కథ",
+                    bn: "সাংস্কৃতিক গল্প",
+                  })}
                 </label>
                 <textarea
                   name="story"
@@ -371,9 +463,9 @@ export default function NewProductPage() {
                   rows={4}
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 resize-none"
                   placeholder={
-                    isHindi
-                      ? "अपने उत्पाद के पीछे की सांस्कृतिक कहानी बताएं..."
-                      : "Tell the cultural story behind your product..."
+                    currentLocale === "en"
+                      ? "Tell the cultural story behind your product..."
+                      : "अपने उत्पाद के पीछे की सांस्कृतिक कहानी बताएं..."
                   }
                 />
               </div>
@@ -382,16 +474,26 @@ export default function NewProductPage() {
 
           {/* Product Details */}
           <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
-            <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
-              <Tag className="h-5 w-5 mr-2 text-orange-400" />
-              {isHindi ? "उत्पाद विवरण" : "Product Details"}
+            <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+              <Package className="h-5 w-5 mr-2 text-orange-500" />
+              {t("Product Details", {
+                hi: "उत्पाद विवरण",
+                or: "ପଣ୍ୟ ବିବରଣ",
+                te: "ఉత్పత్తి వివరాలు",
+                bn: "পণ্যের বিবরণ",
+              })}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
                   <Palette className="h-4 w-4 inline mr-1" />
-                  {isHindi ? "सामग्री" : "Materials"}
+                  {t("Materials", {
+                    hi: "सामग्री",
+                    or: "ସାମଗ୍ରୀ",
+                    te: "పదార్థాలు",
+                    bn: "উপাদান",
+                  })}
                 </label>
                 <input
                   type="text"
@@ -410,7 +512,12 @@ export default function NewProductPage() {
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
                   <MapPin className="h-4 w-4 inline mr-1" />
-                  {isHindi ? "सांस्कृतिक मूल" : "Cultural Origin"}
+                  {t("Cultural Origin", {
+                    hi: "सांस्कृतिक मूल",
+                    or: "ସାଂସ୍କୃତିକ ମୂଳ",
+                    te: "సాంస్కృతిక మూలం",
+                    bn: "সাংস্কৃতিক উৎস",
+                  })}
                 </label>
                 <input
                   type="text"
@@ -428,7 +535,12 @@ export default function NewProductPage() {
 
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
-                  {isHindi ? "कलाकार का नाम" : "Artist Name"}
+                  {t("Artist Name", {
+                    hi: "कलाकार का नाम",
+                    or: "କଳାକାରଙ୍କ ନାମ",
+                    te: "కళాకారుడి పేరు",
+                    bn: "শিল্পীর নাম",
+                  })}
                 </label>
                 <input
                   type="text"
@@ -436,14 +548,24 @@ export default function NewProductPage() {
                   value={formData.artistName}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={isHindi ? "निर्माता का नाम" : "Creator's name"}
+                  placeholder={t("Creator's name", {
+                    hi: "निर्माता का नाम",
+                    or: "ସୃଷ୍ଟିକର୍ତ୍ତାଙ୍କ ନାମ",
+                    te: "సృష్టికర్త పేరు",
+                    bn: "স্রষ্টার নাম",
+                  })}
                 />
               </div>
 
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
                   <Ruler className="h-4 w-4 inline mr-1" />
-                  {isHindi ? "आयाम" : "Dimensions"}
+                  {t("Dimensions", {
+                    hi: "आयाम",
+                    or: "ଆକାର",
+                    te: "కొలతలు",
+                    bn: "মাত্রা",
+                  })}
                 </label>
                 <input
                   type="text"
@@ -462,7 +584,12 @@ export default function NewProductPage() {
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
                   <Weight className="h-4 w-4 inline mr-1" />
-                  {isHindi ? "वजन" : "Weight"}
+                  {t("Weight", {
+                    hi: "वजन",
+                    or: "ଓଜନ",
+                    te: "బరువు",
+                    bn: "ওজন",
+                  })}
                 </label>
                 <input
                   type="text"
@@ -470,7 +597,12 @@ export default function NewProductPage() {
                   value={formData.weight}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={isHindi ? "जैसे: 500ग्राम" : "e.g., 500g"}
+                  placeholder={t("e.g., 500g", {
+                    hi: "जैसे: 500ग्राम",
+                    or: "ଯେମିତି: 500 ଗ୍ରାମ",
+                    te: "ఉదా: 500 గ్రాములు",
+                    bn: "যেমন: ৫০০ গ্রাম",
+                  })}
                 />
               </div>
             </div>
@@ -478,15 +610,25 @@ export default function NewProductPage() {
 
           {/* Images & Links */}
           <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
-            <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
-              <Upload className="h-5 w-5 mr-2 text-orange-400" />
-              {isHindi ? "छवियां और लिंक" : "Images & Links"}
+            <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+              <Upload className="h-5 w-5 mr-2 text-orange-500" />
+              {t("Images & Links", {
+                hi: "छवियां और लिंक",
+                or: "ଚିତ୍ର ଏବଂ ଲିଙ୍କ",
+                te: "చిత్రాలు మరియు లింకులు",
+                bn: "ছবি এবং লিঙ্ক",
+              })}
             </h2>
 
             <div className="space-y-6">
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
-                  {isHindi ? "उत्पाद छवि URL" : "Product Image URL"}
+                  {t("Product Image URL", {
+                    hi: "उत्पाद छवि URL",
+                    or: "ପଣ୍ୟ ଚିତ୍ର URL",
+                    te: "ఉత్పత్తి చిత్రం URL",
+                    bn: "পণ্যের ছবি URL",
+                  })}
                 </label>
                 <input
                   type="url"
@@ -500,7 +642,12 @@ export default function NewProductPage() {
 
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
-                  {isHindi ? "मार्केटिंग पोस्टर URL" : "Marketing Poster URL"}
+                  {t("Marketing Poster URL", {
+                    hi: "मार्केटिंग पोस्टर URL",
+                    or: "ମାର୍କେଟିଂ ପୋଷ୍ଟର URL",
+                    te: "మార్కెటింగ్ పోస్టర్ URL",
+                    bn: "মার্কেটিং পোস্টার URL",
+                  })}
                 </label>
                 <input
                   type="url"
@@ -514,7 +661,12 @@ export default function NewProductPage() {
 
               <div>
                 <label className="block text-white/90 text-sm font-medium mb-2">
-                  {isHindi ? "इंस्टाग्राम पोस्ट URL" : "Instagram Post URL"}
+                  {t("Instagram Post URL", {
+                    hi: "इंस्टाग्राम पोस्ट URL",
+                    or: "ଇନଷ୍ଟାଗ୍ରାମ ପୋଷ୍ଟ URL",
+                    te: "ఇన్‌స్టాగ్రామ్ పోస్ట్ URL",
+                    bn: "ইনস্টাগ্রাম পোস্ট URL",
+                  })}
                 </label>
                 <input
                   type="url"
@@ -535,7 +687,12 @@ export default function NewProductPage() {
               onClick={handlePreview}
               className="flex items-center px-6 py-3 bg-white/10 border border-white/20 rounded-lg text-white/90 hover:bg-white/20 transition-colors">
               <Eye className="h-4 w-4 mr-2" />
-              {isHindi ? "पूर्वावलोकन" : "Preview"}
+              {t("Preview", {
+                hi: "पूर्वावलोकन",
+                or: "ପୂର୍ବାବଲୋକନ",
+                te: "ప్రివ్యూ",
+                bn: "প্রিভিউ",
+              })}
             </button>
 
             <div className="flex space-x-4">
@@ -543,7 +700,12 @@ export default function NewProductPage() {
                 type="button"
                 onClick={() => router.back()}
                 className="px-6 py-3 bg-white/10 border border-white/20 rounded-lg text-white/90 hover:bg-white/20 transition-colors">
-                {isHindi ? "रद्द करें" : "Cancel"}
+                {t("Cancel", {
+                  hi: "रद्द करें",
+                  or: "ବାତିଲ କରନ୍ତୁ",
+                  te: "రద్దు చేయండి",
+                  bn: "বাতিল করুন",
+                })}
               </button>
 
               <button
@@ -553,12 +715,22 @@ export default function NewProductPage() {
                 {isLoading ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    {isHindi ? "बना रहे हैं..." : "Creating..."}
+                    {t("Creating...", {
+                      hi: "बना रहे हैं...",
+                      or: "ତିଆରି କରୁଛି...",
+                      te: "సృష్టిస్తున్నాము...",
+                      bn: "তৈরি করছি...",
+                    })}
                   </>
                 ) : (
                   <>
                     <Save className="h-4 w-4 mr-2" />
-                    {t("createProduct")}
+                    {t("Create Product", {
+                      hi: "उत्पाद बनाएं",
+                      or: "ପଣ୍ୟ ତିଆରି କରନ୍ତୁ",
+                      te: "ఉత్పత్తిని సృష్టించండి",
+                      bn: "পণ্য তৈরি করুন",
+                    })}
                   </>
                 )}
               </button>
