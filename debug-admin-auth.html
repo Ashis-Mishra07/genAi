@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Admin Authentication</title>
+</head>
+<body>
+    <h1>Admin Authentication Debugger</h1>
+    <button onclick="authenticateAdmin()">Authenticate as Admin</button>
+    <button onclick="checkTokens()">Check Current Tokens</button>
+    <button onclick="clearTokens()">Clear All Tokens</button>
+    
+    <div id="output" style="margin-top: 20px; font-family: monospace; white-space: pre-wrap;"></div>
+
+    <script>
+        function log(message) {
+            document.getElementById('output').textContent += message + '\n';
+        }
+
+        async function authenticateAdmin() {
+            log('🔐 Authenticating as admin...');
+            
+            try {
+                const response = await fetch('/api/auth/admin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ passcode: '123456' })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log('✅ Authentication successful!');
+                    
+                    // Store tokens
+                    localStorage.setItem('accessToken', data.accessToken);
+                    localStorage.setItem('refreshToken', data.refreshToken);
+                    localStorage.setItem('auth_token', data.accessToken);
+                    localStorage.setItem('refresh_token', data.refreshToken);
+                    localStorage.setItem('user_role', 'ADMIN');
+                    
+                    log('💾 Tokens stored in localStorage');
+                    log('📊 Access token: ' + data.accessToken.substring(0, 20) + '...');
+                    log('🔄 You can now access the orders page!');
+                    
+                    // Redirect to orders page
+                    window.location.href = '/dashboard/orders';
+                } else {
+                    log('❌ Authentication failed: ' + data.error);
+                }
+            } catch (error) {
+                log('💥 Error: ' + error.message);
+            }
+        }
+
+        function checkTokens() {
+            log('🔍 Checking current tokens...');
+            log('accessToken: ' + (localStorage.getItem('accessToken') ? 'Present' : 'Missing'));
+            log('refreshToken: ' + (localStorage.getItem('refreshToken') ? 'Present' : 'Missing'));
+            log('auth_token: ' + (localStorage.getItem('auth_token') ? 'Present' : 'Missing'));
+            log('user_role: ' + localStorage.getItem('user_role'));
+            
+            const allKeys = Object.keys(localStorage);
+            log('All localStorage keys: ' + allKeys.join(', '));
+        }
+
+        function clearTokens() {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('user_role');
+            log('🧹 All tokens cleared');
+        }
+
+        // Check tokens on page load
+        window.onload = () => {
+            checkTokens();
+        };
+    </script>
+</body>
+</html>

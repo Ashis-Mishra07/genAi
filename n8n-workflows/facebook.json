@@ -1,0 +1,371 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "imageUrl",
+              "value": "={{ $json.body.imageURL }}"
+            },
+            {
+              "name": "videoUrl",
+              "value": "={{ $json.body.videoURL }}"
+            },
+            {
+              "name": "captionText",
+              "value": "={{ $json.body.captionText }}"
+            },
+            {
+              "name": "Node",
+              "value": "17841477359386904"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set Media & Caption",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        176,
+        -16
+      ],
+      "id": "626909bd-58dd-41fc-99a0-33536b0a9ebf"
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "={{ $json.Node }}",
+        "edge": "media",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "image_url",
+                "value": "={{ $json.imageUrl }}"
+              },
+              {
+                "name": "is_carousel_item",
+                "value": "true"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        384,
+        -96
+      ],
+      "id": "3048ca8a-fd72-41c1-8d9c-61447bfbd54e",
+      "name": "Create Image Container",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "iAeryi90YQUVadBp",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "={{ $('Set Media & Caption').item.json.Node }}",
+        "edge": "media",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "media_type",
+                "value": "VIDEO"
+              },
+              {
+                "name": "video_url",
+                "value": "={{ $('Set Media & Caption').item.json.videoUrl }}"
+              },
+              {
+                "name": "is_carousel_item",
+                "value": "true"
+              }
+            ]
+          }
+        },
+        "continueOnFail": false
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        384,
+        64
+      ],
+      "id": "video-container-node",
+      "name": "Create Video Container",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "iAeryi90YQUVadBp",
+          "name": "Facebook Graph account"
+        }
+      },
+      "continueOnFail": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// In sequential mode, we receive data from the Create Video Container node\n// We need to access both container IDs from the execution context\n\nconst items = $input.all();\nconsole.log('📦 Received items:', items.length);\n\nif (items.length === 0) {\n  throw new Error('No input received from Create Video Container');\n}\n\nconst videoData = items[0].json;\nconsole.log('🎬 Video Container Data:', videoData);\n\n// The video container ID is in the current input\nconst videoContainerId = videoData.id;\n\n// Get the setting data with the Node ID\nconst settingData = $('Set Media & Caption').first().json;\nconsole.log('⚙️ Setting Data:', settingData);\n\n// We need to get the image container ID from the parent execution\n// Try to access it from the execution context\ntry {\n  const allItems = $('Create Image Container1').all();\n  const imageData = allItems[0].json;\n  const imageContainerId = imageData.id;\n  \n  console.log('✅ Image Container ID:', imageContainerId);\n  console.log('✅ Video Container ID:', videoContainerId);\n  console.log('✅ Node (Instagram Account):', settingData.Node);\n  \n  return [{\n    json: {\n      Node: settingData.Node,\n      captionText: settingData.captionText,\n      imageUrl: settingData.imageUrl,\n      videoUrl: settingData.videoUrl,\n      imageContainerId: imageContainerId,\n      videoContainerId: videoContainerId,\n      children: [imageContainerId, videoContainerId]\n    }\n  }];\n} catch (error) {\n  console.error('❌ Error accessing Create Image Container1:', error);\n  throw new Error('Cannot access image container data. Error: ' + error.message);\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        -16
+      ],
+      "id": "merge-containers-node",
+      "name": "Merge Container IDs"
+    },
+    {
+      "parameters": {
+        "amount": 10,
+        "unit": "seconds"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        -16
+      ],
+      "id": "wait-for-containers",
+      "name": "Wait"
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "={{ $json.Node }}",
+        "edge": "media",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "media_type",
+                "value": "CAROUSEL"
+              },
+              {
+                "name": "children",
+                "value": "={{ $json.children.join(',') }}"
+              },
+              {
+                "name": "caption",
+                "value": "={{ $json.captionText }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        944,
+        -16
+      ],
+      "id": "create-carousel-container",
+      "name": "Create Carousel Container",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "iAeryi90YQUVadBp",
+          "name": "Facebook Graph account"
+        }
+      },
+      "continueOnFail": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 10000
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if carousel was created successfully\nconst carouselData = $('Create Carousel Container').item.json;\n\nif (!carouselData.id || carouselData.error) {\n  throw new Error('Carousel creation failed: ' + JSON.stringify(carouselData.error || 'No ID returned'));\n}\n\nconsole.log('✅ Carousel ID found:', carouselData.id);\n\n// Pass through all data with carousel ID\nreturn [{\n  json: {\n    Node: $('Set Media & Caption').item.json.Node,\n    carouselId: carouselData.id\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        -16
+      ],
+      "id": "validate-carousel",
+      "name": "Validate Carousel ID"
+    },
+    {
+      "parameters": {
+        "amount": 5,
+        "unit": "seconds"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1168,
+        -16
+      ],
+      "id": "wait-before-publish",
+      "name": "Wait1"
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "={{ $json.Node }}",
+        "edge": "media_publish",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "creation_id",
+                "value": "={{ $json.carouselId }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        -16
+      ],
+      "id": "d4b991af-278a-4637-8677-6ff23cc1c23b",
+      "name": "Publish Carousel Post",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "iAeryi90YQUVadBp",
+          "name": "Facebook Graph account"
+        }
+      },
+      "continueOnFail": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 10000
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "instagram-post",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -32,
+        -16
+      ],
+      "id": "53ab29e9-3e3e-450b-84fc-59e9dee828f5",
+      "name": "Webhook",
+      "webhookId": "6d586f76-fe0c-4d99-bd21-7e06213aa3d3"
+    }
+  ],
+  "connections": {
+    "Set Media & Caption": {
+      "main": [
+        [
+          {
+            "node": "Create Image Container",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Image Container": {
+      "main": [
+        [
+          {
+            "node": "Create Video Container",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Video Container": {
+      "main": [
+        [
+          {
+            "node": "Merge Container IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Container IDs": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Create Carousel Container",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Carousel Container": {
+      "main": [
+        [
+          {
+            "node": "Validate Carousel ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Carousel ID": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Publish Carousel Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set Media & Caption",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f65c35e81d7c8ed56ed8ab438a58198c3d157f187e1055a579226e47ac9a59c8"
+  }
+}

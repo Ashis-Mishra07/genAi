@@ -1,0 +1,95 @@
+{
+  "name": "Simple Video Generation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-video",
+        "responseMode": "lastNode"
+      },
+      "id": "1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "text",
+        "operation": "message",
+        "projectId": "={{ $env.GCP_PROJECT_ID }}",
+        "modelId": "gemini-pro",
+        "prompt": "={{ $json.body.prompt }}",
+        "options": {}
+      },
+      "id": "2",
+      "name": "Generate Video",
+      "type": "n8n-nodes-base.googleVertex",
+      "typeVersion": 1,
+      "position": [460, 300],
+      "credentials": {
+        "googleApi": {
+          "id": "google_service_account",
+          "name": "Google Service Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.body.callbackUrl }}",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "productId",
+              "value": "={{ $json.body.productId }}"
+            },
+            {
+              "name": "videoUrl",
+              "value": "={{ $json.videoUrl || $json.response }}"
+            },
+            {
+              "name": "status",
+              "value": "COMPLETED"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3",
+      "name": "Send Callback",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Generate Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Video": {
+      "main": [
+        [
+          {
+            "node": "Send Callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

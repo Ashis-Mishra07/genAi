@@ -1,0 +1,527 @@
+{
+  "name": "Intelligent Telegram Artisan Bot with Gemini",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "telegram-trigger",
+      "name": "Telegram Bot Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "telegram-artisan-bot",
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-creds",
+          "name": "Artisan Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract message data\nconst message = $input.item.json.message;\nconst chatId = message.chat.id;\nconst messageText = message.text || '';\nconst userId = message.from.id;\nconst userName = message.from.first_name || 'User';\n\n// Define bot commands and patterns\nconst commands = {\n  '/start': 'welcome',\n  '/help': 'help',\n  '/orders': 'list_orders',\n  '/myorders': 'my_orders',\n  '/stats': 'order_stats',\n  '/pending': 'pending_orders',\n  '/completed': 'completed_orders'\n};\n\n// Check for direct commands first\nlet commandType = 'ai_query'; // Default to AI processing\nlet orderNumber = null;\n\nif (commands[messageText.toLowerCase().trim()]) {\n  commandType = commands[messageText.toLowerCase().trim()];\n} else {\n  // Check for order number pattern (ORD-xxxxx or just numbers)\n  const orderNumberMatch = messageText.match(/(?:ord[-_]?)?(\\d{4,6})/i);\n  if (orderNumberMatch) {\n    commandType = 'order_details';\n    orderNumber = orderNumberMatch[1];\n  }\n}\n\nreturn {\n  json: {\n    chatId: chatId,\n    userId: userId,\n    userName: userName,\n    messageText: messageText,\n    originalMessage: messageText,\n    commandType: commandType,\n    orderNumber: orderNumber,\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "id": "parse-message",
+      "name": "Parse Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "welcome",
+              "leftValue": "={{ $json.commandType }}",
+              "rightValue": "welcome",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "help",
+              "leftValue": "={{ $json.commandType }}",
+              "rightValue": "help",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "order_details",
+              "leftValue": "={{ $json.commandType }}",
+              "rightValue": "order_details",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "my_orders",
+              "leftValue": "={{ $json.commandType }}",
+              "rightValue": "my_orders",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "order_stats",
+              "leftValue": "={{ $json.commandType }}",
+              "rightValue": "order_stats",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "ai_query",
+              "leftValue": "={{ $json.commandType }}",
+              "rightValue": "ai_query",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "route-commands",
+      "name": "Route Commands",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const userName = $input.item.json.userName;\n\nconst welcomeMessage = `🎨 Welcome to Artisan Intelligence Hub, ${userName}!\n\nI'm your AI-powered assistant for managing orders and business insights. Ask me anything in natural language!\n\n🤖 What I can do:\n\n📋 Order Management:\n• \"Show me order 12345 details\"\n• \"What orders do I have today?\"\n• \"List my pending orders\"\n• \"Customer contact for order 12345\"\n\n📊 Business Analytics:\n• \"What's my revenue this month?\"\n• \"How many orders did I get yesterday?\"\n• \"Which products are selling best?\"\n• \"Show me completion statistics\"\n\n💬 Smart Conversations:\n• \"Help me write a message to customer about delay\"\n• \"What should I do about a return request?\"\n• \"Explain shipping options to customer\"\n\n🚀 Quick Commands:\n• /myorders - Recent orders\n• /stats - Business overview\n• /help - Command list\n\nJust talk to me naturally - I'll understand! 🧠✨`;\n\nreturn {\n  json: {\n    chatId: $input.item.json.chatId,\n    message: welcomeMessage,\n    parse_mode: 'HTML'\n  }\n};"
+      },
+      "id": "welcome-response",
+      "name": "Welcome Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 100]
+    },
+    {
+      "parameters": {
+        "jsCode": "const helpMessage = `🆘 <b>Artisan AI Bot Help</b>\n\n<b>🤖 Natural Language Commands:</b>\nJust ask me naturally! Examples:\n\n<b>📦 Orders:</b>\n• \"Show order 12345\"\n• \"My orders today\"\n• \"Pending orders list\"\n• \"Customer details for order 12345\"\n\n<b>📊 Analytics:</b>\n• \"Revenue this month\"\n• \"Best selling products\"\n• \"How many orders yesterday?\"\n• \"Completion rate statistics\"\n\n<b>💼 Business Help:</b>\n• \"Write customer message about delay\"\n• \"Handle return request advice\"\n• \"Shipping policy explanation\"\n\n<b>⚡ Quick Commands:</b>\n• <code>/myorders</code> - Recent orders\n• <code>/stats</code> - Business stats\n• <code>/pending</code> - Pending orders\n• <code>/start</code> - Main menu\n\n<b>🎯 Pro Tips:</b>\n• I understand context - ask follow-up questions!\n• Order numbers work with or without \"ORD-\" prefix\n• I can help with customer service responses\n• Ask for explanations of business metrics\n\n<i>Powered by Gemini AI 🧠</i>`;\n\nreturn {\n  json: {\n    chatId: $input.item.json.chatId,\n    message: helpMessage,\n    parse_mode: 'HTML'\n  }\n};"
+      },
+      "id": "help-response",
+      "name": "Help Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 200]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Get comprehensive business context for AI\nSELECT \n  -- Order Statistics\n  COUNT(*) as total_orders,\n  SUM(CASE WHEN o.status = 'pending' THEN 1 ELSE 0 END) as pending_orders,\n  SUM(CASE WHEN o.status = 'completed' THEN 1 ELSE 0 END) as completed_orders,\n  SUM(CASE WHEN DATE(o.created_at) = CURRENT_DATE THEN 1 ELSE 0 END) as today_orders,\n  SUM(CASE WHEN DATE(o.created_at) = CURRENT_DATE - INTERVAL '1 day' THEN 1 ELSE 0 END) as yesterday_orders,\n  \n  -- Revenue Statistics\n  SUM(CASE WHEN EXTRACT(MONTH FROM o.created_at) = EXTRACT(MONTH FROM CURRENT_DATE) \n           AND EXTRACT(YEAR FROM o.created_at) = EXTRACT(YEAR FROM CURRENT_DATE) \n           THEN o.total ELSE 0 END) as monthly_revenue,\n  SUM(CASE WHEN EXTRACT(WEEK FROM o.created_at) = EXTRACT(WEEK FROM CURRENT_DATE) \n           AND EXTRACT(YEAR FROM o.created_at) = EXTRACT(YEAR FROM CURRENT_DATE) \n           THEN o.total ELSE 0 END) as weekly_revenue,\n  SUM(o.total) as total_revenue,\n  \n  -- Recent Order Info\n  MAX(o.created_at) as last_order_date,\n  AVG(o.total) as avg_order_value\n  \nFROM orders o\nJOIN order_items oi ON o.id = oi.order_id\nJOIN products p ON oi.product_id = p.id\nWHERE p.artisan_id = (SELECT id FROM artisans WHERE telegram_chat_id = '{{ $json.chatId }}' LIMIT 1);",
+        "options": {}
+      },
+      "id": "get-business-context",
+      "name": "Get Business Context",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [850, 600],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-db",
+          "name": "Artisan Database"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Get recent orders for context\nSELECT \n  o.id,\n  o.order_number,\n  o.status,\n  o.total,\n  o.created_at,\n  o.customer_name,\n  o.customer_email,\n  o.customer_phone,\n  array_agg(oi.product_name) as products,\n  array_agg(oi.quantity) as quantities\nFROM orders o\nJOIN order_items oi ON o.id = oi.order_id\nJOIN products p ON oi.product_id = p.id\nWHERE p.artisan_id = (SELECT id FROM artisans WHERE telegram_chat_id = '{{ $json.chatId }}' LIMIT 1)\nGROUP BY o.id, o.order_number, o.status, o.total, o.created_at, o.customer_name, o.customer_email, o.customer_phone\nORDER BY o.created_at DESC\nLIMIT 20;",
+        "options": {}
+      },
+      "id": "get-recent-orders",
+      "name": "Get Recent Orders",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [1050, 600],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-db",
+          "name": "Artisan Database"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare context for Gemini AI\nconst userQuery = $node[\"Parse Message\"].json.messageText;\nconst userName = $node[\"Parse Message\"].json.userName;\nconst businessStats = $input.item.json[0] || {};\nconst recentOrders = $node[\"Get Recent Orders\"].json || [];\n\n// Format business context\nconst businessContext = `\nBUSINESS OVERVIEW:\n- Total Orders: ${businessStats.total_orders || 0}\n- Pending Orders: ${businessStats.pending_orders || 0}\n- Completed Orders: ${businessStats.completed_orders || 0}\n- Today's Orders: ${businessStats.today_orders || 0}\n- Yesterday's Orders: ${businessStats.yesterday_orders || 0}\n- Monthly Revenue: ₹${parseFloat(businessStats.monthly_revenue || 0).toFixed(2)}\n- Weekly Revenue: ₹${parseFloat(businessStats.weekly_revenue || 0).toFixed(2)}\n- Total Revenue: ₹${parseFloat(businessStats.total_revenue || 0).toFixed(2)}\n- Average Order Value: ₹${parseFloat(businessStats.avg_order_value || 0).toFixed(2)}\n- Last Order: ${businessStats.last_order_date ? new Date(businessStats.last_order_date).toLocaleDateString('en-IN') : 'N/A'}\n`;\n\n// Format recent orders context\nlet ordersContext = \"\\nRECENT ORDERS:\\n\";\nrecentOrders.slice(0, 10).forEach((order, index) => {\n  ordersContext += `${index + 1}. Order #${order.order_number} - ${order.status.toUpperCase()} - ₹${parseFloat(order.total).toFixed(2)} - ${order.customer_name} - ${new Date(order.created_at).toLocaleDateString('en-IN')}\\n`;\n});\n\n// Create comprehensive prompt for Gemini\nconst geminiPrompt = `You are an intelligent business assistant for an artisan marketplace. You help artisans manage their orders and business.\n\nCONTEXT:\n${businessContext}\n${ordersContext}\n\nUSER: ${userName}\nQUERY: \"${userQuery}\"\n\nINSTRUCTIONS:\n1. Answer naturally and conversationally\n2. Use emojis appropriately for better UX\n3. Format numbers clearly (₹ for currency)\n4. If asked about specific orders, reference the data above\n5. For business advice, be helpful and actionable\n6. If you need more specific data, suggest what commands to use\n7. Keep responses under 300 words for Telegram\n8. Use HTML formatting for better readability\n\nFor order-specific queries, you have access to recent order data. For customer communication help, provide professional templates.\n\nRespond helpfully to: \"${userQuery}\"`;\n\nreturn {\n  json: {\n    chatId: $node[\"Parse Message\"].json.chatId,\n    userName: userName,\n    userQuery: userQuery,\n    prompt: geminiPrompt,\n    businessContext: businessStats,\n    recentOrders: recentOrders.slice(0, 5) // Send fewer orders to Gemini\n  }\n};"
+      },
+      "id": "prepare-ai-context",
+      "name": "Prepare AI Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1250, 600]
+    },
+    {
+      "parameters": {
+        "model": "gemini-2.5-flash",
+        "prompt": "={{ $json.prompt }}",
+        "options": {
+          "temperature": 0.7,
+          "maxTokens": 500
+        }
+      },
+      "id": "gemini-ai-response",
+      "name": "Gemini AI Response",
+      "type": "n8n-nodes-base.googleGemini",
+      "typeVersion": 1,
+      "position": [1450, 600],
+      "credentials": {
+        "googleGeminiApi": {
+          "id": "gemini-api",
+          "name": "Gemini API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Format AI response for Telegram\nconst aiResponse = $input.item.json.message || $input.item.json.text || 'Sorry, I couldn\\'t process that request.';\nconst userName = $node[\"Prepare AI Context\"].json.userName;\n\n// Clean up the response and ensure it's Telegram-friendly\nlet formattedResponse = aiResponse\n  .replace(/\\*\\*(.*?)\\*\\*/g, '<b>$1</b>') // Convert **bold** to <b>bold</b>\n  .replace(/\\*(.*?)\\*/g, '<i>$1</i>') // Convert *italic* to <i>italic</i>\n  .replace(/`(.*?)`/g, '<code>$1</code>') // Convert `code` to <code>code</code>\n  .replace(/\\n\\n/g, '\\n') // Remove double line breaks\n  .trim();\n\n// Add a subtle AI signature\nformattedResponse += '\\n\\n🤖 <i>AI-powered response</i>';\n\nreturn {\n  json: {\n    chatId: $node[\"Parse Message\"].json.chatId,\n    message: formattedResponse,\n    parse_mode: 'HTML'\n  }\n};"
+      },
+      "id": "format-ai-response",
+      "name": "Format AI Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1650, 600]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  o.id,\n  o.order_number,\n  o.status,\n  o.total,\n  o.created_at,\n  o.customer_name,\n  o.customer_email,\n  o.customer_phone,\n  o.shipping_address,\n  array_agg(oi.product_name) as products,\n  array_agg(oi.quantity) as quantities,\n  array_agg(oi.price) as prices\nFROM orders o\nJOIN order_items oi ON o.id = oi.order_id\nJOIN products p ON oi.product_id = p.id\nWHERE o.order_number LIKE '%{{ $json.orderNumber }}%'\nGROUP BY o.id, o.order_number, o.status, o.total, o.created_at, o.customer_name, o.customer_email, o.customer_phone, o.shipping_address\nORDER BY o.created_at DESC\nLIMIT 1;",
+        "options": {}
+      },
+      "id": "get-order-details",
+      "name": "Get Order Details",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [850, 300],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-db",
+          "name": "Artisan Database"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  o.id,\n  o.order_number,\n  o.status,\n  o.total,\n  o.created_at,\n  o.customer_name,\n  COUNT(oi.id) as item_count\nFROM orders o\nJOIN order_items oi ON o.id = oi.order_id\nJOIN products p ON oi.product_id = p.id\nWHERE p.artisan_id = (SELECT id FROM artisans WHERE telegram_chat_id = '{{ $json.chatId }}' LIMIT 1)\nGROUP BY o.id, o.order_number, o.status, o.total, o.created_at, o.customer_name\nORDER BY o.created_at DESC\nLIMIT 10;",
+        "options": {}
+      },
+      "id": "get-my-orders",
+      "name": "Get My Orders",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [850, 400],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-db",
+          "name": "Artisan Database"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  COUNT(*) as total_orders,\n  SUM(CASE WHEN o.status = 'pending' THEN 1 ELSE 0 END) as pending_orders,\n  SUM(CASE WHEN o.status = 'completed' THEN 1 ELSE 0 END) as completed_orders,\n  SUM(CASE WHEN DATE(o.created_at) = CURRENT_DATE THEN 1 ELSE 0 END) as today_orders,\n  SUM(CASE WHEN EXTRACT(MONTH FROM o.created_at) = EXTRACT(MONTH FROM CURRENT_DATE) \n           AND EXTRACT(YEAR FROM o.created_at) = EXTRACT(YEAR FROM CURRENT_DATE) \n           THEN o.total ELSE 0 END) as monthly_revenue,\n  SUM(o.total) as total_revenue,\n  AVG(o.total) as avg_order_value\nFROM orders o\nJOIN order_items oi ON o.id = oi.order_id\nJOIN products p ON oi.product_id = p.id\nWHERE p.artisan_id = (SELECT id FROM artisans WHERE telegram_chat_id = '{{ $json.chatId }}' LIMIT 1);",
+        "options": {}
+      },
+      "id": "get-order-stats",
+      "name": "Get Order Stats",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [850, 500],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-db",
+          "name": "Artisan Database"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Enhanced order details formatting\nconst orderData = $input.item.json;\n\nif (!orderData || orderData.length === 0) {\n  return {\n    json: {\n      chatId: $node[\"Parse Message\"].json.chatId,\n      message: `❌ <b>Order #${$node[\"Parse Message\"].json.orderNumber} not found</b>\\n\\nPlease check the order number and try again.\\n\\n💡 Try asking: \"Show me my recent orders\"`,\n      parse_mode: 'HTML'\n    }\n  };\n}\n\nconst order = orderData[0];\nconst orderDate = new Date(order.created_at).toLocaleDateString('en-IN', {\n  day: 'numeric',\n  month: 'short', \n  year: 'numeric',\n  hour: '2-digit',\n  minute: '2-digit'\n});\n\nconst statusEmoji = {\n  'pending': '⏳',\n  'processing': '🔄',\n  'shipped': '🚚',\n  'delivered': '✅',\n  'cancelled': '❌',\n  'completed': '🎉'\n};\n\nconst shippingAddr = order.shipping_address ? JSON.parse(order.shipping_address) : {};\n\n// Format products\nlet productsText = '';\nif (order.products && order.quantities && order.prices) {\n  for (let i = 0; i < order.products.length; i++) {\n    productsText += `• ${order.products[i]} (Qty: ${order.quantities[i]}) - ₹${parseFloat(order.prices[i]).toFixed(2)}\\n`;\n  }\n}\n\nconst message = `📦 <b>Order Details</b>\\n\\n` +\n  `🔢 <b>Order:</b> #${order.order_number}\\n` +\n  `${statusEmoji[order.status] || '📋'} <b>Status:</b> ${order.status.toUpperCase()}\\n` +\n  `💰 <b>Total:</b> ₹${parseFloat(order.total).toFixed(2)}\\n` +\n  `📅 <b>Date:</b> ${orderDate}\\n\\n` +\n  `👤 <b>Customer Details:</b>\\n` +\n  `• Name: ${order.customer_name}\\n` +\n  `• Email: ${order.customer_email}\\n` +\n  `${order.customer_phone ? `• Phone: ${order.customer_phone}\\n` : ''}\\n` +\n  `📍 <b>Shipping Address:</b>\\n` +\n  `${shippingAddr.fullName || 'N/A'}\\n` +\n  `${shippingAddr.addressLine1 || 'N/A'}\\n` +\n  `${shippingAddr.city || 'N/A'}, ${shippingAddr.state || 'N/A'} ${shippingAddr.postalCode || 'N/A'}\\n\\n` +\n  `🛍️ <b>Items:</b>\\n${productsText}\\n` +\n  `💬 <b>Need help?</b> Ask me:\\n` +\n  `• \"Write message to customer about shipping\"\\n` +\n  `• \"How to handle this order?\"\\n` +\n  `• \"Customer service response for delay\"`;\n\nreturn {\n  json: {\n    chatId: $node[\"Parse Message\"].json.chatId,\n    message: message,\n    parse_mode: 'HTML'\n  }\n};"
+      },
+      "id": "format-order-details",
+      "name": "Format Order Details",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Enhanced my orders formatting with AI suggestions\nconst orders = $input.item.json;\n\nif (!orders || orders.length === 0) {\n  return {\n    json: {\n      chatId: $node[\"Parse Message\"].json.chatId,\n      message: `📭 <b>No orders found</b>\\n\\nYou don't have any orders yet. When customers place orders for your products, they'll appear here!\\n\\n💡 <b>Ask me:</b>\\n• \"How to get more orders?\"\\n• \"Marketing tips for artisans\"\\n• \"Improve my product listings\"`,\n      parse_mode: 'HTML'\n    }\n  };\n}\n\nlet message = `📋 <b>Your Recent Orders</b> (${orders.length})\\n\\n`;\n\norders.forEach((order, index) => {\n  const orderDate = new Date(order.created_at).toLocaleDateString('en-IN', {\n    day: 'numeric',\n    month: 'short'\n  });\n  \n  const statusEmoji = {\n    'pending': '⏳',\n    'processing': '🔄', \n    'shipped': '🚚',\n    'delivered': '✅',\n    'cancelled': '❌',\n    'completed': '🎉'\n  };\n  \n  message += `${index + 1}. <b>#${order.order_number}</b>\\n` +\n    `   ${statusEmoji[order.status] || '📋'} ${order.status.toUpperCase()} | ₹${parseFloat(order.total).toFixed(2)}\\n` +\n    `   👤 ${order.customer_name} | 📅 ${orderDate}\\n` +\n    `   🛍️ ${order.item_count} item(s)\\n\\n`;\n});\n\nmessage += `🤖 <b>AI Assistant:</b>\\n` +\n  `• Ask \"${orders[0].order_number} details\" for full info\\n` +\n  `• \"Help with pending orders\" for management tips\\n` +\n  `• \"Write follow-up message for ${orders[0].customer_name}\"\\n\\n` +\n  `📊 Want insights? Ask \"Analyze my order patterns\"`;\n\nreturn {\n  json: {\n    chatId: $node[\"Parse Message\"].json.chatId,\n    message: message,\n    parse_mode: 'HTML'\n  }\n};"
+      },
+      "id": "format-my-orders",
+      "name": "Format My Orders",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Enhanced statistics with AI insights\nconst stats = $input.item.json[0];\n\nif (!stats) {\n  return {\n    json: {\n      chatId: $node[\"Parse Message\"].json.chatId,\n      message: `📊 <b>No statistics available</b>\\n\\nNo orders found for your account. Statistics will appear once you start receiving orders!\\n\\n🤖 <b>Ask me for help:</b>\\n• \"How to get my first order?\"\\n• \"Marketing strategies for artisans\"\\n• \"Optimize my product photos\"`,\n      parse_mode: 'HTML'\n    }\n  };\n}\n\nconst completionRate = stats.total_orders > 0 ? Math.round((stats.completed_orders / stats.total_orders) * 100) : 0;\nconst avgOrderValue = stats.total_orders > 0 ? (parseFloat(stats.total_revenue) / stats.total_orders).toFixed(2) : '0.00';\n\nlet performance = '';\nif (completionRate >= 90) performance = '🔥 Excellent';\nelse if (completionRate >= 75) performance = '👍 Good';\nelse if (completionRate >= 50) performance = '⚠️ Needs Improvement';\nelse performance = '🆘 Critical';\n\nconst message = `📊 <b>Your Business Statistics</b>\\n\\n` +\n  `📈 <b>Order Overview:</b>\\n` +\n  `• Total Orders: ${stats.total_orders}\\n` +\n  `• Pending: ${stats.pending_orders} ⏳\\n` +\n  `• Completed: ${stats.completed_orders} ✅\\n` +\n  `• Today's Orders: ${stats.today_orders} 📅\\n\\n` +\n  `💰 <b>Revenue:</b>\\n` +\n  `• This Month: ₹${parseFloat(stats.monthly_revenue || 0).toFixed(2)}\\n` +\n  `• All Time: ₹${parseFloat(stats.total_revenue || 0).toFixed(2)}\\n` +\n  `• Average Order: ₹${avgOrderValue}\\n\\n` +\n  `📈 <b>Performance:</b>\\n` +\n  `• Completion Rate: ${completionRate}% ${performance}\\n\\n` +\n  `🤖 <b>AI Insights:</b>\\n` +\n  `Ask me for detailed analysis:\\n` +\n  `• \"Analyze my business performance\"\\n` +\n  `• \"How to improve completion rate?\"\\n` +\n  `• \"Revenue growth strategies\"\\n` +\n  `• \"Compare with last month\"`;\n\nreturn {\n  json: {\n    chatId: $node[\"Parse Message\"].json.chatId,\n    message: message,\n    parse_mode: 'HTML'\n  }\n};"
+      },
+      "id": "format-order-stats",
+      "name": "Format Order Stats",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 500]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "parse_mode": "={{ $json.parse_mode || 'HTML' }}"
+        }
+      },
+      "id": "send-telegram-response",
+      "name": "Send Telegram Response",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1850, 400],
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-creds",
+          "name": "Artisan Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Bot Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Message": {
+      "main": [
+        [
+          {
+            "node": "Route Commands",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Commands": {
+      "main": [
+        [
+          {
+            "node": "Welcome Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Help Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Order Details",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get My Orders",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Order Stats",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Business Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Welcome Response": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Help Response": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Business Context": {
+      "main": [
+        [
+          {
+            "node": "Get Recent Orders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Orders": {
+      "main": [
+        [
+          {
+            "node": "Prepare AI Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare AI Context": {
+      "main": [
+        [
+          {
+            "node": "Gemini AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini AI Response": {
+      "main": [
+        [
+          {
+            "node": "Format AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format AI Response": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Order Details": {
+      "main": [
+        [
+          {
+            "node": "Format Order Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get My Orders": {
+      "main": [
+        [
+          {
+            "node": "Format My Orders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Order Stats": {
+      "main": [
+        [
+          {
+            "node": "Format Order Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Order Details": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format My Orders": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Order Stats": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

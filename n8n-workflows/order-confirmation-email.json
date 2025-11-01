@@ -1,0 +1,102 @@
+{
+  "name": "Order Confirmation Email Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "order-confirmation",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-order-created",
+      "name": "Webhook - Order Created",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "order-confirmation"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract order data from webhook\nconst orderData = $input.item.json.body;\n\n// Format order items for email\nconst itemsHtml = orderData.items.map(item => `\n  <tr>\n    <td style=\"padding: 12px; border-bottom: 1px solid #e5e7eb;\">\n      <div style=\"display: flex; align-items: center;\">\n        ${item.imageUrl ? `<img src=\"${item.imageUrl}\" alt=\"${item.name}\" style=\"width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin-right: 12px;\">` : ''}\n        <div>\n          <div style=\"font-weight: 600; color: #1f2937;\">${item.name}</div>\n          <div style=\"color: #6b7280; font-size: 14px;\">by ${item.artisanName || 'Artisan'}</div>\n        </div>\n      </div>\n    </td>\n    <td style=\"padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;\">${item.quantity}</td>\n    <td style=\"padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 600;\">₹${item.price.toFixed(2)}</td>\n  </tr>\n`).join('');\n\n// Format shipping address\nconst address = orderData.shippingAddress;\nconst addressHtml = `\n  ${address.fullName}<br>\n  ${address.addressLine1}<br>\n  ${address.addressLine2 ? address.addressLine2 + '<br>' : ''}\n  ${address.city}, ${address.state} ${address.postalCode}<br>\n  ${address.country}<br>\n  Phone: ${address.phone}\n`;\n\n// Create email HTML\nconst emailHtml = `\n<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Order Confirmation</title>\n</head>\n<body style=\"margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;\">\n  <div style=\"max-width: 600px; margin: 0 auto; background-color: #ffffff;\">\n    <!-- Header -->\n    <div style=\"background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center;\">\n      <h1 style=\"color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;\">🎉 Order Confirmed!</h1>\n      <p style=\"color: #e0e7ff; margin: 10px 0 0 0; font-size: 16px;\">Thank you for your purchase</p>\n    </div>\n    \n    <!-- Order Details -->\n    <div style=\"padding: 30px 20px;\">\n      <div style=\"background-color: #f9fafb; border-radius: 12px; padding: 20px; margin-bottom: 30px;\">\n        <h2 style=\"color: #1f2937; margin: 0 0 15px 0; font-size: 18px;\">Hi ${orderData.customerName},</h2>\n        <p style=\"color: #4b5563; line-height: 1.6; margin: 0;\">Your order has been confirmed and is being processed. We'll send you another email when your order ships.</p>\n      </div>\n      \n      <!-- Order Number & Date -->\n      <div style=\"display: flex; justify-content: space-between; margin-bottom: 30px; padding: 20px; background-color: #fef3c7; border-radius: 12px; border-left: 4px solid #f59e0b;\">\n        <div>\n          <div style=\"color: #92400e; font-size: 12px; text-transform: uppercase; font-weight: 600; margin-bottom: 5px;\">Order Number</div>\n          <div style=\"color: #1f2937; font-size: 20px; font-weight: 700;\">${orderData.orderNumber}</div>\n        </div>\n        <div style=\"text-align: right;\">\n          <div style=\"color: #92400e; font-size: 12px; text-transform: uppercase; font-weight: 600; margin-bottom: 5px;\">Order Date</div>\n          <div style=\"color: #1f2937; font-size: 16px; font-weight: 600;\">${new Date(orderData.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>\n        </div>\n      </div>\n      \n      <!-- Order Items -->\n      <h3 style=\"color: #1f2937; margin: 0 0 20px 0; font-size: 18px; font-weight: 600;\">Order Items</h3>\n      <table style=\"width: 100%; border-collapse: collapse; margin-bottom: 30px; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;\">\n        <thead>\n          <tr style=\"background-color: #f9fafb;\">\n            <th style=\"padding: 12px; text-align: left; color: #6b7280; font-size: 12px; text-transform: uppercase; font-weight: 600;\">Product</th>\n            <th style=\"padding: 12px; text-align: center; color: #6b7280; font-size: 12px; text-transform: uppercase; font-weight: 600;\">Qty</th>\n            <th style=\"padding: 12px; text-align: right; color: #6b7280; font-size: 12px; text-transform: uppercase; font-weight: 600;\">Price</th>\n          </tr>\n        </thead>\n        <tbody>\n          ${itemsHtml}\n        </tbody>\n      </table>\n      \n      <!-- Order Summary -->\n      <div style=\"background-color: #f9fafb; border-radius: 12px; padding: 20px; margin-bottom: 30px;\">\n        <h3 style=\"color: #1f2937; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;\">Order Summary</h3>\n        <div style=\"display: flex; justify-content: space-between; margin-bottom: 10px;\">\n          <span style=\"color: #6b7280;\">Subtotal</span>\n          <span style=\"color: #1f2937; font-weight: 500;\">₹${orderData.subtotal.toFixed(2)}</span>\n        </div>\n        <div style=\"display: flex; justify-content: space-between; margin-bottom: 10px;\">\n          <span style=\"color: #6b7280;\">Shipping</span>\n          <span style=\"color: #1f2937; font-weight: 500;\">₹${orderData.shipping.toFixed(2)}</span>\n        </div>\n        <div style=\"border-top: 2px solid #e5e7eb; margin: 15px 0; padding-top: 15px; display: flex; justify-content: space-between;\">\n          <span style=\"color: #1f2937; font-size: 18px; font-weight: 700;\">Total</span>\n          <span style=\"color: #667eea; font-size: 24px; font-weight: 700;\">₹${orderData.total.toFixed(2)}</span>\n        </div>\n        <div style=\"margin-top: 10px; padding: 10px; background-color: #dbeafe; border-radius: 8px;\">\n          <span style=\"color: #1e40af; font-size: 14px;\">Payment Method: ${orderData.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}</span>\n        </div>\n      </div>\n      \n      <!-- Shipping Address -->\n      <div style=\"background-color: #f9fafb; border-radius: 12px; padding: 20px; margin-bottom: 30px;\">\n        <h3 style=\"color: #1f2937; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;\">Shipping Address</h3>\n        <div style=\"color: #4b5563; line-height: 1.8;\">\n          ${addressHtml}\n        </div>\n      </div>\n      \n      <!-- Call to Action -->\n      <div style=\"text-align: center; margin: 30px 0;\">\n        <a href=\"${orderData.trackOrderUrl || 'https://yourwebsite.com/orders'}\" style=\"display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;\">Track Your Order</a>\n      </div>\n      \n      <!-- Support Info -->\n      <div style=\"background-color: #fef3c7; border-radius: 12px; padding: 20px; text-align: center;\">\n        <p style=\"color: #92400e; margin: 0 0 10px 0; font-weight: 600;\">Need Help?</p>\n        <p style=\"color: #78350f; margin: 0; font-size: 14px;\">Contact our support team at <a href=\"mailto:support@yourwebsite.com\" style=\"color: #f59e0b; text-decoration: none;\">support@yourwebsite.com</a></p>\n      </div>\n    </div>\n    \n    <!-- Footer -->\n    <div style=\"background-color: #1f2937; padding: 30px 20px; text-align: center;\">\n      <p style=\"color: #9ca3af; margin: 0 0 10px 0; font-size: 14px;\">Thank you for supporting artisan crafts!</p>\n      <p style=\"color: #6b7280; margin: 0; font-size: 12px;\">© 2025 Artisan Marketplace. All rights reserved.</p>\n    </div>\n  </div>\n</body>\n</html>\n`;\n\nreturn {\n  json: {\n    to: orderData.customerEmail,\n    subject: `Order Confirmed - ${orderData.orderNumber}`,\n    html: emailHtml,\n    orderData: orderData\n  }\n};"
+      },
+      "id": "format-email-data",
+      "name": "Format Email Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "message",
+        "operation": "send",
+        "toEmail": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "html",
+        "message": "={{ $json.html }}",
+        "options": {}
+      },
+      "id": "send-gmail",
+      "name": "Send Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [650, 300],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: true, message: 'Order confirmation email sent', orderNumber: $node[\"Format Email Data\"].json.orderData.orderNumber } }}"
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Webhook - Order Created": {
+      "main": [
+        [
+          {
+            "node": "Format Email Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Email Data": {
+      "main": [
+        [
+          {
+            "node": "Send Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Gmail": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

@@ -1,0 +1,379 @@
+{
+  "name": "Telegram Artisan Bot Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "telegram-trigger",
+      "name": "Telegram Bot Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "telegram-artisan-bot",
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-creds",
+          "name": "Artisan Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract message data\nconst message = $input.item.json.message;\nconst chatId = message.chat.id;\nconst messageText = message.text.toLowerCase().trim();\nconst userId = message.from.id;\nconst userName = message.from.first_name || 'User';\n\n// Define bot commands and patterns\nconst commands = {\n  '/start': 'welcome',\n  '/help': 'help',\n  '/orders': 'list_orders',\n  '/myorders': 'my_orders',\n  '/stats': 'order_stats',\n  '/pending': 'pending_orders',\n  '/completed': 'completed_orders'\n};\n\n// Check for order number pattern (ORD-xxxxx or just numbers)\nconst orderNumberMatch = messageText.match(/(?:ord[-_]?)?(\\d{4,6})/i);\n\n// Determine command type\nlet commandType = 'unknown';\nlet orderNumber = null;\n\nif (commands[messageText]) {\n  commandType = commands[messageText];\n} else if (orderNumberMatch) {\n  commandType = 'order_details';\n  orderNumber = orderNumberMatch[1];\n} else if (messageText.includes('order') && messageText.includes('status')) {\n  commandType = 'order_status_query';\n} else if (messageText.includes('customer') || messageText.includes('contact')) {\n  commandType = 'customer_query';\n} else if (messageText.includes('revenue') || messageText.includes('earning')) {\n  commandType = 'revenue_query';\n} else if (messageText.includes('product') || messageText.includes('item')) {\n  commandType = 'product_query';\n}\n\nreturn {\n  json: {\n    chatId: chatId,\n    userId: userId,\n    userName: userName,\n    messageText: messageText,\n    originalMessage: message.text,\n    commandType: commandType,\n    orderNumber: orderNumber,\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "id": "parse-message",
+      "name": "Parse Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "welcome",
+              "leftValue": "={{ $json.commandType }}",
+              "rightValue": "welcome",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "help",
+              "leftValue": "={{ $json.commandType }}",
+              "rightValue": "help",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "order_details",
+              "leftValue": "={{ $json.commandType }}",
+              "rightValue": "order_details",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "my_orders",
+              "leftValue": "={{ $json.commandType }}",
+              "rightValue": "my_orders",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "order_stats",
+              "leftValue": "={{ $json.commandType }}",
+              "rightValue": "order_stats",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "route-commands",
+      "name": "Route Commands",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const userName = $input.item.json.userName;\n\nconst welcomeMessage = `🎨 Welcome to Artisan Hub, ${userName}!\n\nI'm your personal assistant for managing orders and business insights.\n\n📋 Available Commands:\n\n🔍 Order Management:\n• Send order number (e.g., \"12345\" or \"ORD-12345\") - Get order details\n• /myorders - View your recent orders\n• /pending - Show pending orders\n• /completed - Show completed orders\n\n📊 Business Insights:\n• /stats - View your order statistics\n• Ask \"What's my revenue this month?\"\n• Ask \"How many orders today?\"\n\n💬 Natural Queries:\n• \"Show customer contact for order 12345\"\n• \"What products are selling well?\"\n• \"Order status for 12345\"\n\n❓ Need help? Send /help anytime!\n\nWhat would you like to know about your orders? 🚀`;\n\nreturn {\n  json: {\n    chatId: $input.item.json.chatId,\n    message: welcomeMessage,\n    parse_mode: 'HTML'\n  }\n};"
+      },
+      "id": "welcome-response",
+      "name": "Welcome Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 100]
+    },
+    {
+      "parameters": {
+        "jsCode": "const helpMessage = `🆘 <b>Artisan Bot Help</b>\n\n<b>🔍 Order Commands:</b>\n• <code>/myorders</code> - Your recent orders\n• <code>/pending</code> - Orders awaiting action\n• <code>/completed</code> - Completed orders\n\n<b>📊 Statistics:</b>\n• <code>/stats</code> - Business overview\n\n<b>🔢 Quick Order Lookup:</b>\nJust send an order number:\n• <code>12345</code>\n• <code>ORD-12345</code>\n\n<b>💬 Natural Language:</b>\n• \"Revenue this month\"\n• \"Customer contact for order 12345\"\n• \"Product sales today\"\n• \"Order status 12345\"\n\n<b>🚀 Pro Tips:</b>\n• Order numbers work with or without \"ORD-\" prefix\n• Ask questions in plain English\n• Use /start to see the main menu\n\nTry asking me anything about your orders! 🎨`;\n\nreturn {\n  json: {\n    chatId: $input.item.json.chatId,\n    message: helpMessage,\n    parse_mode: 'HTML'\n  }\n};"
+      },
+      "id": "help-response",
+      "name": "Help Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 200]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  o.id,\n  o.order_number,\n  o.status,\n  o.total,\n  o.created_at,\n  o.customer_name,\n  o.customer_email,\n  o.shipping_address,\n  oi.product_name,\n  oi.quantity,\n  oi.price as item_price,\n  p.artisan_id\nFROM orders o\nJOIN order_items oi ON o.id = oi.order_id\nJOIN products p ON oi.product_id = p.id\nWHERE o.order_number LIKE '%{{ $json.orderNumber }}%'\nORDER BY o.created_at DESC\nLIMIT 1;",
+        "options": {}
+      },
+      "id": "get-order-details",
+      "name": "Get Order Details",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [850, 300],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-db",
+          "name": "Artisan Database"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Get artisan's recent orders\nSELECT \n  o.id,\n  o.order_number,\n  o.status,\n  o.total,\n  o.created_at,\n  o.customer_name,\n  COUNT(oi.id) as item_count\nFROM orders o\nJOIN order_items oi ON o.id = oi.order_id\nJOIN products p ON oi.product_id = p.id\nWHERE p.artisan_id = (SELECT id FROM artisans WHERE telegram_chat_id = '{{ $json.chatId }}' LIMIT 1)\nGROUP BY o.id, o.order_number, o.status, o.total, o.created_at, o.customer_name\nORDER BY o.created_at DESC\nLIMIT 10;",
+        "options": {}
+      },
+      "id": "get-my-orders",
+      "name": "Get My Orders",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [850, 400],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-db",
+          "name": "Artisan Database"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Get artisan statistics\nSELECT \n  COUNT(*) as total_orders,\n  SUM(CASE WHEN o.status = 'pending' THEN 1 ELSE 0 END) as pending_orders,\n  SUM(CASE WHEN o.status = 'completed' THEN 1 ELSE 0 END) as completed_orders,\n  SUM(CASE WHEN DATE(o.created_at) = CURRENT_DATE THEN 1 ELSE 0 END) as today_orders,\n  SUM(CASE WHEN EXTRACT(MONTH FROM o.created_at) = EXTRACT(MONTH FROM CURRENT_DATE) \n           AND EXTRACT(YEAR FROM o.created_at) = EXTRACT(YEAR FROM CURRENT_DATE) \n           THEN o.total ELSE 0 END) as monthly_revenue,\n  SUM(o.total) as total_revenue\nFROM orders o\nJOIN order_items oi ON o.id = oi.order_id\nJOIN products p ON oi.product_id = p.id\nWHERE p.artisan_id = (SELECT id FROM artisans WHERE telegram_chat_id = '{{ $json.chatId }}' LIMIT 1);",
+        "options": {}
+      },
+      "id": "get-order-stats",
+      "name": "Get Order Stats",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [850, 500],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-db",
+          "name": "Artisan Database"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Format order details response\nconst orderData = $input.item.json;\n\nif (!orderData || orderData.length === 0) {\n  return {\n    json: {\n      chatId: $node[\"Parse Message\"].json.chatId,\n      message: `❌ Order #${$node[\"Parse Message\"].json.orderNumber} not found.\\n\\nPlease check the order number and try again.`,\n      parse_mode: 'HTML'\n    }\n  };\n}\n\nconst order = orderData[0];\nconst orderDate = new Date(order.created_at).toLocaleDateString('en-IN', {\n  day: 'numeric',\n  month: 'short', \n  year: 'numeric',\n  hour: '2-digit',\n  minute: '2-digit'\n});\n\nconst statusEmoji = {\n  'pending': '⏳',\n  'processing': '🔄',\n  'shipped': '🚚',\n  'delivered': '✅',\n  'cancelled': '❌',\n  'completed': '🎉'\n};\n\nconst shippingAddr = order.shipping_address ? JSON.parse(order.shipping_address) : {};\n\nconst message = `📦 <b>Order Details</b>\\n\\n` +\n  `🔢 <b>Order:</b> #${order.order_number}\\n` +\n  `${statusEmoji[order.status] || '📋'} <b>Status:</b> ${order.status.toUpperCase()}\\n` +\n  `💰 <b>Total:</b> ₹${parseFloat(order.total).toFixed(2)}\\n` +\n  `📅 <b>Date:</b> ${orderDate}\\n\\n` +\n  `👤 <b>Customer Details:</b>\\n` +\n  `• Name: ${order.customer_name}\\n` +\n  `• Email: ${order.customer_email}\\n\\n` +\n  `📍 <b>Shipping Address:</b>\\n` +\n  `${shippingAddr.fullName || 'N/A'}\\n` +\n  `${shippingAddr.addressLine1 || 'N/A'}\\n` +\n  `${shippingAddr.city || 'N/A'}, ${shippingAddr.state || 'N/A'} ${shippingAddr.postalCode || 'N/A'}\\n\\n` +\n  `🛍️ <b>Items:</b>\\n` +\n  `• ${order.product_name} (Qty: ${order.quantity}) - ₹${parseFloat(order.item_price).toFixed(2)}\\n\\n` +\n  `📱 Need to contact customer? Reply with:\\n<code>\"Contact customer for order ${order.order_number}\"</code>`;\n\nreturn {\n  json: {\n    chatId: $node[\"Parse Message\"].json.chatId,\n    message: message,\n    parse_mode: 'HTML'\n  }\n};"
+      },
+      "id": "format-order-details",
+      "name": "Format Order Details",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Format my orders response\nconst orders = $input.item.json;\n\nif (!orders || orders.length === 0) {\n  return {\n    json: {\n      chatId: $node[\"Parse Message\"].json.chatId,\n      message: `📭 <b>No orders found</b>\\n\\nYou don't have any orders yet. When customers place orders for your products, they'll appear here!`,\n      parse_mode: 'HTML'\n    }\n  };\n}\n\nlet message = `📋 <b>Your Recent Orders</b> (${orders.length})\\n\\n`;\n\norders.forEach((order, index) => {\n  const orderDate = new Date(order.created_at).toLocaleDateString('en-IN', {\n    day: 'numeric',\n    month: 'short'\n  });\n  \n  const statusEmoji = {\n    'pending': '⏳',\n    'processing': '🔄', \n    'shipped': '🚚',\n    'delivered': '✅',\n    'cancelled': '❌',\n    'completed': '🎉'\n  };\n  \n  message += `${index + 1}. <b>#${order.order_number}</b>\\n` +\n    `   ${statusEmoji[order.status] || '📋'} ${order.status.toUpperCase()} | ₹${parseFloat(order.total).toFixed(2)}\\n` +\n    `   👤 ${order.customer_name} | 📅 ${orderDate}\\n` +\n    `   🛍️ ${order.item_count} item(s)\\n\\n`;\n});\n\nmessage += `💡 <b>Quick Actions:</b>\\n` +\n  `• Send order number for details (e.g., \"${orders[0].order_number}\")\\n` +\n  `• /pending - View pending orders\\n` +\n  `• /stats - View your statistics`;\n\nreturn {\n  json: {\n    chatId: $node[\"Parse Message\"].json.chatId,\n    message: message,\n    parse_mode: 'HTML'\n  }\n};"
+      },
+      "id": "format-my-orders",
+      "name": "Format My Orders",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Format statistics response\nconst stats = $input.item.json[0];\n\nif (!stats) {\n  return {\n    json: {\n      chatId: $node[\"Parse Message\"].json.chatId,\n      message: `📊 <b>No statistics available</b>\\n\\nNo orders found for your account. Statistics will appear once you start receiving orders!`,\n      parse_mode: 'HTML'\n    }\n  };\n}\n\nconst message = `📊 <b>Your Business Statistics</b>\\n\\n` +\n  `📈 <b>Order Overview:</b>\\n` +\n  `• Total Orders: ${stats.total_orders}\\n` +\n  `• Pending: ${stats.pending_orders} ⏳\\n` +\n  `• Completed: ${stats.completed_orders} ✅\\n` +\n  `• Today's Orders: ${stats.today_orders} 📅\\n\\n` +\n  `💰 <b>Revenue:</b>\\n` +\n  `• This Month: ₹${parseFloat(stats.monthly_revenue || 0).toFixed(2)}\\n` +\n  `• All Time: ₹${parseFloat(stats.total_revenue || 0).toFixed(2)}\\n\\n` +\n  `📈 <b>Performance:</b>\\n` +\n  `• Completion Rate: ${stats.total_orders > 0 ? Math.round((stats.completed_orders / stats.total_orders) * 100) : 0}%\\n` +\n  `• Average Order Value: ₹${stats.total_orders > 0 ? (parseFloat(stats.total_revenue) / stats.total_orders).toFixed(2) : '0.00'}\\n\\n` +\n  `🚀 <b>Quick Actions:</b>\\n` +\n  `• /pending - View pending orders\\n` +\n  `• /myorders - Recent order list\\n` +\n  `• Ask \"Revenue this week\" for detailed insights`;\n\nreturn {\n  json: {\n    chatId: $node[\"Parse Message\"].json.chatId,\n    message: message,\n    parse_mode: 'HTML'\n  }\n};"
+      },
+      "id": "format-order-stats",
+      "name": "Format Order Stats",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 500]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "parse_mode": "={{ $json.parse_mode || 'HTML' }}"
+        }
+      },
+      "id": "send-telegram-response",
+      "name": "Send Telegram Response",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1250, 300],
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-creds",
+          "name": "Artisan Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Bot Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Message": {
+      "main": [
+        [
+          {
+            "node": "Route Commands",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Commands": {
+      "main": [
+        [
+          {
+            "node": "Welcome Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Help Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Order Details",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get My Orders",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Order Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Welcome Response": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Help Response": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Order Details": {
+      "main": [
+        [
+          {
+            "node": "Format Order Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get My Orders": {
+      "main": [
+        [
+          {
+            "node": "Format My Orders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Order Stats": {
+      "main": [
+        [
+          {
+            "node": "Format Order Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Order Details": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format My Orders": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Order Stats": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

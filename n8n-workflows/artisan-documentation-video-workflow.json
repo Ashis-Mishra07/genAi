@@ -1,0 +1,417 @@
+{
+  "name": "Artisan Documentation Video Generation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-artisan-video",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-artisan",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "project-id",
+              "name": "PROJECT_ID",
+              "type": "string",
+              "value": "genai-456413"
+            },
+            {
+              "id": "model-version",
+              "name": "MODEL_VERSION",
+              "type": "string",
+              "value": "veo-3.0-generate-preview"
+            },
+            {
+              "id": "location",
+              "name": "LOCATION",
+              "type": "string",
+              "value": "us-central1"
+            },
+            {
+              "id": "artisan-id",
+              "name": "ARTISAN_ID",
+              "type": "string",
+              "value": "={{ $json.body.artisanId }}"
+            },
+            {
+              "id": "artisan-name",
+              "name": "ARTISAN_NAME",
+              "type": "string",
+              "value": "={{ $json.body.artisanName }}"
+            },
+            {
+              "id": "gender",
+              "name": "GENDER",
+              "type": "string",
+              "value": "={{ $json.body.gender || 'person' }}"
+            },
+            {
+              "id": "specialty",
+              "name": "SPECIALTY",
+              "type": "string",
+              "value": "={{ $json.body.specialty }}"
+            },
+            {
+              "id": "origin",
+              "name": "ORIGIN_PLACE",
+              "type": "string",
+              "value": "={{ $json.body.originPlace }}"
+            },
+            {
+              "id": "story",
+              "name": "ARTISAN_STORY",
+              "type": "string",
+              "value": "={{ $json.body.artisanStory }}"
+            },
+            {
+              "id": "work-process",
+              "name": "WORK_PROCESS",
+              "type": "string",
+              "value": "={{ $json.body.workProcess }}"
+            },
+            {
+              "id": "expertise",
+              "name": "EXPERTISE_AREAS",
+              "type": "string",
+              "value": "={{ $json.body.expertiseAreas }}"
+            },
+            {
+              "id": "photograph-url",
+              "name": "PHOTOGRAPH_URL",
+              "type": "string",
+              "value": "={{ $json.body.photographUrl }}"
+            },
+            {
+              "id": "callback-url",
+              "name": "CALLBACK_URL",
+              "type": "string",
+              "value": "={{ $json.body.callbackUrl }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "extract-data",
+      "name": "Extract Artisan Data",
+      "type": "n8n-nodes-base.set",
+      "position": [460, 300],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.PHOTOGRAPH_URL }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300],
+      "id": "download-photograph",
+      "name": "Download Photograph"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the input item\nconst inputItem = $input.first();\n\nconsole.log('Input item keys:', Object.keys(inputItem));\nconsole.log('Binary keys:', inputItem.binary ? Object.keys(inputItem.binary) : 'No binary');\n\n// N8N stores binary data differently - let's handle all cases\nlet base64String;\nlet mimeType;\n\ntry {\n  // Method 1: Check if data is already base64 encoded\n  if (inputItem.binary && inputItem.binary.data) {\n    const binaryData = inputItem.binary.data;\n    \n    console.log('Binary data type:', typeof binaryData);\n    console.log('Binary data constructor:', binaryData.constructor.name);\n    \n    // If it's already a base64 string\n    if (typeof binaryData === 'string') {\n      base64String = binaryData;\n    }\n    // If it's a Buffer\n    else if (Buffer.isBuffer(binaryData)) {\n      base64String = binaryData.toString('base64');\n    }\n    // If it's an object with base64 data\n    else if (binaryData.data && typeof binaryData.data === 'string') {\n      base64String = binaryData.data;\n    }\n    // If it's a Uint8Array or similar\n    else if (binaryData.constructor.name === 'Uint8Array' || Array.isArray(binaryData)) {\n      base64String = Buffer.from(binaryData).toString('base64');\n    }\n    // Last resort: try to convert the object\n    else {\n      console.log('Attempting to convert object to Buffer');\n      const buffer = Buffer.from(Object.values(binaryData));\n      base64String = buffer.toString('base64');\n    }\n    \n    mimeType = inputItem.binary.mimeType || 'image/png';\n  }\n  // Method 2: Check if the data is in a different format\n  else if (inputItem.data) {\n    base64String = inputItem.data;\n    mimeType = 'image/png';\n  }\n  else {\n    throw new Error('No binary data found in any expected format');\n  }\n  \n  // Clean the base64 string\n  base64String = base64String.replace(/^data:image\\/[a-z]+;base64,/, '');\n  \n  // Validate the result\n  if (!base64String || typeof base64String !== 'string') {\n    throw new Error('Failed to extract valid base64 string');\n  }\n  \n} catch (error) {\n  console.error('Error processing binary data:', error);\n  console.error('Will generate video without photograph reference');\n  base64String = null;\n  mimeType = null;\n}\n\n// Get setting data\nconst settingData = $node[\"Extract Artisan Data\"].json;\n\nif (base64String) {\n  console.log('Successfully processed image');\n  console.log('Base64 length:', base64String.length);\n  console.log('MIME type:', mimeType);\n} else {\n  console.log('No photograph - will create faceless documentary');\n}\n\nreturn [{\n  json: {\n    ...settingData,\n    imageBase64: base64String,\n    imageMimeType: mimeType || 'image/jpeg'\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300],
+      "id": "process-photograph",
+      "name": "Process Photograph"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={{ $env.GEMINI_API_KEY }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"You are creating a documentary video script about {{ $json.ARTISAN_NAME }}, a {{ $json.GENDER }} artisan from {{ $json.ORIGIN_PLACE }} who specializes in {{ $json.SPECIALTY }}. Story: {{ $json.ARTISAN_STORY }}. Work process: {{ $json.WORK_PROCESS }}. Expertise: {{ $json.EXPERTISE_AREAS }}. {{ $json.imageBase64 ? 'Analyze this photograph and describe the artisan for accurate video representation.' : 'Generate a faceless representation focusing on hands crafting and the art itself.' }} Create a detailed 7-second video prompt showing their craft, struggle, and passion. Include specific visual details about the {{ $json.SPECIALTY }} work, tools, materials, and the creation process. Make it emotional and inspiring.\"\n        }{{ $json.imageBase64 ? ',\\n        {\\n          \"inline_data\": {\\n            \"mime_type\": \"' + $json.imageMimeType + '\",\\n            \"data\": \"' + $json.imageBase64 + '\"\\n          }\\n        }' : '' }}\n      ]\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 300],
+      "id": "analyze-with-gemini",
+      "name": "Analyze with Gemini"
+    },
+    {
+      "parameters": {
+        "jsCode": "const geminiResponse = $json.candidates[0].content.parts[0].text;\nconst artisanData = $node[\"Extract Artisan Data\"].json;\nconst hasPhotograph = !!$node[\"Process Photograph\"].json.imageBase64;\n\nlet videoPrompt;\n\nif (hasPhotograph) {\n  videoPrompt = `Create a professional artisan documentary video featuring ${artisanData.ARTISAN_NAME}, showing them practicing ${artisanData.SPECIALTY} from ${artisanData.ORIGIN_PLACE}. Match the person's appearance from the reference photograph. Show: 1) Close-up of skilled hands crafting ${artisanData.SPECIALTY} items, 2) The artisan's focused face showing dedication, 3) Traditional tools and materials in use, 4) The creative process from start to near-completion. Cinematic documentary style with warm, natural lighting. ${geminiResponse}. Duration: 7 seconds. Include subtle traditional background setting.`;\n} else {\n  videoPrompt = `Create a professional artisan documentary video about ${artisanData.SPECIALTY} craft from ${artisanData.ORIGIN_PLACE}. Show: 1) Close-up of skilled hands (${artisanData.GENDER === 'Female' ? 'female' : artisanData.GENDER === 'Male' ? 'male' : 'artisan'}) crafting ${artisanData.SPECIALTY} items, 2) Traditional tools and materials, 3) The creative process and techniques, 4) Detailed work showing expertise. Focus on hands and craft, warm lighting. ${geminiResponse}. Duration: 7 seconds. Cinematic documentary style.`;\n}\n\nreturn [{\n  json: {\n    ...artisanData,\n    VIDEO_PROMPT: videoPrompt,\n    GEMINI_ANALYSIS: geminiResponse\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 300],
+      "id": "build-prompt",
+      "name": "Build Video Prompt"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://us-central1-aiplatform.googleapis.com/v1/projects/{{ $json.PROJECT_ID }}/locations/{{ $json.LOCATION }}/publishers/google/models/{{ $json.MODEL_VERSION }}:predictLongRunning",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"instances\": [\n    {\n      \"prompt\": {{ JSON.stringify($json.VIDEO_PROMPT) }}\n    }\n  ],\n  \"parameters\": {\n    \"aspectRatio\": \"9:16\",\n    \"sampleCount\": 1,\n    \"durationSeconds\": \"7\",\n    \"personGeneration\": \"allow_all\",\n    \"addWatermark\": false,\n    \"generateAudio\": true\n  }\n}",
+        "options": {}
+      },
+      "id": "generate-video",
+      "name": "Vertex AI Veo 3 - Generate",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1560, 300],
+      "typeVersion": 4.2,
+      "credentials": {
+        "googleApi": {
+          "id": "TXpkmuobnviW73sU",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "minutes"
+      },
+      "id": "wait-generation",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "position": [1780, 300],
+      "typeVersion": 1.1,
+      "webhookId": "artisan-video-wait"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://us-central1-aiplatform.googleapis.com/v1/projects/{{ $('Extract Artisan Data').item.json.PROJECT_ID }}/locations/{{ $('Extract Artisan Data').item.json.LOCATION }}/publishers/google/models/{{ $('Extract Artisan Data').item.json.MODEL_VERSION }}:fetchPredictOperation",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"operationName\": \"{{ $json.name }}\"\n}",
+        "options": {}
+      },
+      "id": "fetch-video",
+      "name": "Vertex AI Veo 3 - Fetch",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [2000, 300],
+      "typeVersion": 4.2,
+      "credentials": {
+        "googleApi": {
+          "id": "TXpkmuobnviW73sU",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "response.videos[0].bytesBase64Encoded",
+        "options": {
+          "fileName": "=artisan_{{ $('Extract Artisan Data').item.json.ARTISAN_ID }}.mp4",
+          "mimeType": "video/mp4"
+        }
+      },
+      "id": "convert-to-file",
+      "name": "Convert to File",
+      "type": "n8n-nodes-base.convertToFile",
+      "position": [2220, 300],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "operation": "uploadFile",
+        "resource_type_file": "video",
+        "additionalFieldsFile": {}
+      },
+      "type": "n8n-nodes-cloudinary.cloudinary",
+      "typeVersion": 1,
+      "position": [2440, 300],
+      "id": "upload-cloudinary",
+      "name": "Upload to Cloudinary",
+      "credentials": {
+        "cloudinaryApi": {
+          "id": "VBE5VQQklKnne6h9",
+          "name": "Cloudinary account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=UPDATE users SET documentation_video_url = '{{ $json.secure_url }}', documentation_video_status = 'COMPLETED', updated_at = NOW() WHERE id = '{{ $('Extract Artisan Data').item.json.ARTISAN_ID }}'",
+        "options": {}
+      },
+      "id": "update-database",
+      "name": "Update Database",
+      "type": "n8n-nodes-base.postgres",
+      "position": [2660, 300],
+      "typeVersion": 2.4,
+      "credentials": {
+        "postgres": {
+          "id": "RjyzKYaEgAFYXtkw",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Artisan Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Artisan Data": {
+      "main": [
+        [
+          {
+            "node": "Download Photograph",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Photograph": {
+      "main": [
+        [
+          {
+            "node": "Process Photograph",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Photograph": {
+      "main": [
+        [
+          {
+            "node": "Analyze with Gemini",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze with Gemini": {
+      "main": [
+        [
+          {
+            "node": "Build Video Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Video Prompt": {
+      "main": [
+        [
+          {
+            "node": "Vertex AI Veo 3 - Generate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vertex AI Veo 3 - Generate": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Vertex AI Veo 3 - Fetch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vertex AI Veo 3 - Fetch": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Upload to Cloudinary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload to Cloudinary": {
+      "main": [
+        [
+          {
+            "node": "Update Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f65c35e81d7c8ed56ed8ab438a58198c3d157f187e1055a579226e47ac9a59c8"
+  }
+}

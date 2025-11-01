@@ -1,0 +1,83 @@
+{
+  "name": "Debug Video Generation - Step by Step",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-product-video",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-node",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "success",
+              "type": "boolean",
+              "value": true
+            },
+            {
+              "id": "2",
+              "name": "message",
+              "type": "string",
+              "value": "Workflow received request successfully"
+            },
+            {
+              "id": "3",
+              "name": "receivedProductId",
+              "type": "string",
+              "value": "={{ $json.body.productId }}"
+            },
+            {
+              "id": "4",
+              "name": "receivedPrompt",
+              "type": "string",
+              "value": "={{ $json.body.prompt }}"
+            },
+            {
+              "id": "5",
+              "name": "timestamp",
+              "type": "string",
+              "value": "={{ $now.toISO() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "response-node",
+      "name": "Build Success Response",
+      "type": "n8n-nodes-base.set",
+      "position": [460, 300],
+      "typeVersion": 3.4
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Build Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-10-19T00:00:00.000Z",
+  "versionId": "1"
+}
