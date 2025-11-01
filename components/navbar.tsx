@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { 
-  User, 
-  LogOut, 
-  Settings, 
-  ShoppingBag, 
+import * as React from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  User,
+  LogOut,
+  Settings,
+  ShoppingBag,
   Menu,
   X,
   Sparkles,
@@ -23,12 +23,13 @@ import {
   Headphones,
   ShoppingCart,
   MapPin,
-  Plus
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { ThemeToggle } from "@/components/theme-toggle"
-import LanguageSelector from "@/components/ui/language-selector"
-import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation"
+  Plus,
+  Heart,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
+import LanguageSelector from "@/components/ui/language-selector";
+import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,24 +37,24 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
 interface NavbarProps {
   user?: {
-    name: string
-    email: string
-    role: "admin" | "artisan" | "customer"
-    avatar?: string
-  } | null
-  onLogin?: () => void
-  onLogout?: () => void
+    name: string;
+    email: string;
+    role: "admin" | "artisan" | "customer";
+    avatar?: string;
+  } | null;
+  onLogin?: () => void;
+  onLogout?: () => void;
 }
 
 export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
-  const router = useRouter()
-  const { t, translateBatch, currentLocale } = useDynamicTranslation()
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
-  
+  const router = useRouter();
+  const { t, translateBatch, currentLocale } = useDynamicTranslation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+
   React.useEffect(() => {
     translateBatch([
       "Dashboard",
@@ -76,26 +77,30 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
       "Notifications",
       "Cart",
       "Settings",
-      "Maps"
+      "Maps",
+      "Recent Orders",
+      "Featured Products",
+      "Wishlist",
+      "Need Help?",
     ]);
   }, [currentLocale, translateBatch]);
 
   const handleLogout = () => {
     if (onLogout) {
-      onLogout()
+      onLogout();
     }
-    router.push("/")
-  }
+    router.push("/");
+  };
 
   const handleLogin = () => {
     if (onLogin) {
-      onLogin()
+      onLogin();
     }
-    router.push("/auth")
-  }
+    router.push("/auth");
+  };
 
   const getRoleBasedLinks = () => {
-    if (!user) return []
+    if (!user) return [];
 
     switch (user.role) {
       case "admin":
@@ -103,37 +108,96 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
           { href: "/dashboard", label: t("Dashboard"), icon: "Home" },
           { href: "/chatbot", label: t("AI Assistant"), icon: "Sparkles" },
           { href: "/chats", label: t("Chats"), icon: "MessageSquare" },
-          { href: "/dashboard/products", label: t("Products"), icon: "Package" },
+          {
+            href: "/dashboard/products",
+            label: t("Products"),
+            icon: "Package",
+          },
           { href: "/video-generation", label: t("Video Gen"), icon: "Video" },
-          { href: "/dashboard/orders", label: t("Orders"), icon: "ShoppingCart" },
-          { href: "/dashboard/analytics", label: t("Analytics"), icon: "BarChart3" },
-          { href: "/dashboard/order-locations", label: t("Maps"), icon: "MapPin" },
-          { href: "/dashboard/settings", label: t("Settings"), icon: "Settings" }
-        ]
+          {
+            href: "/dashboard/orders",
+            label: t("Orders"),
+            icon: "ShoppingCart",
+          },
+          {
+            href: "/dashboard/analytics",
+            label: t("Analytics"),
+            icon: "BarChart3",
+          },
+          {
+            href: "/dashboard/order-locations",
+            label: t("Maps"),
+            icon: "MapPin",
+          },
+          {
+            href: "/dashboard/settings",
+            label: t("Settings"),
+            icon: "Settings",
+          },
+        ];
       case "artisan":
         return [
           { href: "/artisan/dashboard", label: t("Dashboard"), icon: "Home" },
           { href: "/artisan/products", label: t("Products"), icon: "Package" },
-          { href: "/artisan/products/new", label: t("Create Product"), icon: "Plus" },
-          { href: "/artisan/analytics", label: t("Analytics"), icon: "BarChart3" },
-          { href: "/artisan/support-dashboard", label: t("Support"), icon: "HeadphonesIcon" },
-          { href: "/artisan/messages", label: t("Messages"), icon: "MessageSquare" },
-          { href: "/artisan/notifications", label: t("Notifications"), icon: "Bell" },
-          { href: "/artisan/feedback", label: t("Feedback"), icon: "MessageCircle" }
-        ]
+          {
+            href: "/artisan/products/new",
+            label: t("Create Product"),
+            icon: "Plus",
+          },
+          {
+            href: "/artisan/analytics",
+            label: t("Analytics"),
+            icon: "BarChart3",
+          },
+          {
+            href: "/artisan/support-dashboard",
+            label: t("Support"),
+            icon: "HeadphonesIcon",
+          },
+          {
+            href: "/artisan/messages",
+            label: t("Messages"),
+            icon: "MessageSquare",
+          },
+          {
+            href: "/artisan/notifications",
+            label: t("Notifications"),
+            icon: "Bell",
+          },
+          {
+            href: "/artisan/feedback",
+            label: t("Feedback"),
+            icon: "MessageCircle",
+          },
+        ];
       case "customer":
         return [
-          { href: "/customer/products", label: t("Products"), icon: "Package" },
+          { href: "/customer/dashboard", label: t("Dashboard"), icon: "Home" },
+          {
+            href: "/customer/orders",
+            label: t("Recent Orders"),
+            icon: "ShoppingBag",
+          },
+          {
+            href: "/customer/products",
+            label: t("Featured Products"),
+            icon: "Package",
+          },
           { href: "/customer/cart", label: t("Cart"), icon: "ShoppingCart" },
-          { href: "/customer/orders", label: t("My Orders"), icon: "ShoppingBag" },
-          { href: "/customer/profile", label: t("Profile"), icon: "User" }
-        ]
+          { href: "/customer/wishlist", label: t("Wishlist"), icon: "Heart" },
+          { href: "/customer/profile", label: t("Profile"), icon: "User" },
+          {
+            href: "/customer/help",
+            label: t("Need Help?"),
+            icon: "Headphones",
+          },
+        ];
       default:
-        return []
+        return [];
     }
-  }
+  };
 
-  const navLinks = getRoleBasedLinks()
+  const navLinks = getRoleBasedLinks();
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -141,14 +205,22 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
-            <svg className="h-9 w-9" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg
+              className="h-9 w-9"
+              viewBox="0 0 48 48"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg">
               {/* Google Cloud hexagon logo */}
-              <path d="M24 8L12 14.5V27.5L24 34L36 27.5V14.5L24 8Z" fill="#4285F4" opacity="0.9"/>
-              <path d="M24 8L12 14.5L24 21L36 14.5L24 8Z" fill="#4285F4"/>
-              <path d="M12 14.5V27.5L24 34V21L12 14.5Z" fill="#34A853"/>
-              <path d="M36 14.5V27.5L24 34V21L36 14.5Z" fill="#EA4335"/>
-              <circle cx="24" cy="21" r="6" fill="#FBBC04"/>
-              <circle cx="24" cy="21" r="3" fill="white" opacity="0.9"/>
+              <path
+                d="M24 8L12 14.5V27.5L24 34L36 27.5V14.5L24 8Z"
+                fill="#4285F4"
+                opacity="0.9"
+              />
+              <path d="M24 8L12 14.5L24 21L36 14.5L24 8Z" fill="#4285F4" />
+              <path d="M12 14.5V27.5L24 34V21L12 14.5Z" fill="#34A853" />
+              <path d="M36 14.5V27.5L24 34V21L36 14.5Z" fill="#EA4335" />
+              <circle cx="24" cy="21" r="6" fill="#FBBC04" />
+              <circle cx="24" cy="21" r="3" fill="white" opacity="0.9" />
             </svg>
             <span className="text-xl font-bold tracking-tight">
               <span className="text-blue-600 dark:text-blue-500">A</span>
@@ -171,31 +243,33 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md hover:bg-accent"
-                  >
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md hover:bg-accent">
                     {link.label}
                   </Link>
                 ))}
                 {navLinks.length > 3 && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-md px-3 py-2">
+                      <Button
+                        variant="ghost"
+                        className="text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-md px-3 py-2">
                         {t("More")}
                         <ChevronDown className="ml-1 h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent 
-                      align="center" 
-                      side="bottom" 
+                    <DropdownMenuContent
+                      align="center"
+                      side="bottom"
                       className="w-48 max-h-80 overflow-y-auto z-50"
                       sideOffset={8}
                       alignOffset={0}
                       avoidCollisions={true}
-                      collisionPadding={16}
-                    >
+                      collisionPadding={16}>
                       {navLinks.slice(3).map((link) => (
                         <DropdownMenuItem key={link.href} asChild>
-                          <Link href={link.href} className="flex items-center w-full">
+                          <Link
+                            href={link.href}
+                            className="flex items-center w-full">
                             <span className="truncate">{link.label}</span>
                           </Link>
                         </DropdownMenuItem>
@@ -210,8 +284,7 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                >
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                   {link.label}
                 </Link>
               ))
@@ -222,7 +295,7 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
           <div className="flex items-center space-x-3">
             <LanguageSelector />
             <ThemeToggle />
-            
+
             {user ? (
               <div className="flex items-center space-x-2">
                 {/* Cart for customers */}
@@ -238,7 +311,9 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
                 {/* User menu */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex items-center space-x-2">
+                    <Button
+                      variant="ghost"
+                      className="flex items-center space-x-2">
                       <div className="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center">
                         <User className="h-4 w-4 text-primary" />
                       </div>
@@ -247,19 +322,20 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
                       </span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent 
-                    className="w-56 z-50" 
-                    align="end" 
+                  <DropdownMenuContent
+                    className="w-56 z-50"
+                    align="end"
                     side="bottom"
                     sideOffset={8}
                     alignOffset={-4}
                     avoidCollisions={true}
                     collisionPadding={16}
-                    forceMount
-                  >
+                    forceMount>
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{user.name}</p>
+                        <p className="text-sm font-medium leading-none">
+                          {user.name}
+                        </p>
                         <p className="text-xs leading-none text-muted-foreground">
                           {user.email}
                         </p>
@@ -288,9 +364,7 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
                 <Button variant="ghost" onClick={handleLogin}>
                   {t("Sign in")}
                 </Button>
-                <Button onClick={handleLogin}>
-                  {t("Get started")}
-                </Button>
+                <Button onClick={handleLogin}>{t("Get started")}</Button>
               </div>
             )}
 
@@ -299,8 +373,7 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
               variant="ghost"
               size="icon"
               className="md:hidden"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
               {isMobileMenuOpen ? (
                 <X className="h-5 w-5" />
               ) : (
@@ -319,31 +392,28 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
                   key={link.href}
                   href={link.href}
                   className="block px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
+                  onClick={() => setIsMobileMenuOpen(false)}>
                   {link.label}
                 </Link>
               ))}
-              
+
               {!user && (
                 <div className="px-4 pt-4 space-y-2">
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start" 
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
                     onClick={() => {
-                      handleLogin()
-                      setIsMobileMenuOpen(false)
-                    }}
-                  >
+                      handleLogin();
+                      setIsMobileMenuOpen(false);
+                    }}>
                     {t("Sign in")}
                   </Button>
-                  <Button 
-                    className="w-full" 
+                  <Button
+                    className="w-full"
                     onClick={() => {
-                      handleLogin()
-                      setIsMobileMenuOpen(false)
-                    }}
-                  >
+                      handleLogin();
+                      setIsMobileMenuOpen(false);
+                    }}>
                     {t("Get started")}
                   </Button>
                 </div>
@@ -353,5 +423,5 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
         )}
       </div>
     </nav>
-  )
+  );
 }
