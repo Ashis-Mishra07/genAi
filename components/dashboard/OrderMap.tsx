@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
+import { useTheme } from "next-themes";
 
 interface Order {
   id: string;
@@ -32,11 +33,108 @@ const ORDER_STATUS_COLORS = {
 };
 
 export default function OrderMap({ orders, onOrderSelect }: OrderMapProps) {
+  const { theme } = useTheme();
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Dark mode map styles
+  const darkMapStyles = [
+    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+    {
+      featureType: "administrative.locality",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#d59563" }],
+    },
+    {
+      featureType: "poi",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#d59563" }],
+    },
+    {
+      featureType: "poi",
+      elementType: "labels",
+      stylers: [{ visibility: "off" }],
+    },
+    {
+      featureType: "poi.park",
+      elementType: "geometry",
+      stylers: [{ color: "#263c3f" }],
+    },
+    {
+      featureType: "poi.park",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#6b9a76" }],
+    },
+    {
+      featureType: "road",
+      elementType: "geometry",
+      stylers: [{ color: "#38414e" }],
+    },
+    {
+      featureType: "road",
+      elementType: "geometry.stroke",
+      stylers: [{ color: "#212a37" }],
+    },
+    {
+      featureType: "road",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#9ca5b3" }],
+    },
+    {
+      featureType: "road.highway",
+      elementType: "geometry",
+      stylers: [{ color: "#746855" }],
+    },
+    {
+      featureType: "road.highway",
+      elementType: "geometry.stroke",
+      stylers: [{ color: "#1f2835" }],
+    },
+    {
+      featureType: "road.highway",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#f3d19c" }],
+    },
+    {
+      featureType: "transit",
+      elementType: "geometry",
+      stylers: [{ color: "#2f3948" }],
+    },
+    {
+      featureType: "transit.station",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#d59563" }],
+    },
+    {
+      featureType: "water",
+      elementType: "geometry",
+      stylers: [{ color: "#17263c" }],
+    },
+    {
+      featureType: "water",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#515c6d" }],
+    },
+    {
+      featureType: "water",
+      elementType: "labels.text.stroke",
+      stylers: [{ color: "#17263c" }],
+    },
+  ];
+
+  // Light mode map styles
+  const lightMapStyles = [
+    {
+      featureType: "poi",
+      elementType: "labels",
+      stylers: [{ visibility: "off" }],
+    },
+  ];
 
   // Test data for fallback
   const testOrders: Order[] = [
@@ -91,13 +189,7 @@ export default function OrderMap({ orders, onOrderSelect }: OrderMapProps) {
           const mapInstance = new google.maps.Map(mapRef.current, {
             center: { lat: 20.5937, lng: 78.9629 }, // Center of India
             zoom: 6,
-            styles: [
-              {
-                featureType: "poi",
-                elementType: "labels",
-                stylers: [{ visibility: "off" }],
-              },
-            ],
+            styles: theme === "dark" ? darkMapStyles : lightMapStyles,
           });
 
           setMap(mapInstance);
@@ -119,13 +211,7 @@ export default function OrderMap({ orders, onOrderSelect }: OrderMapProps) {
             const mapInstance = new google.maps.Map(mapRef.current, {
               center: { lat: 20.5937, lng: 78.9629 },
               zoom: 6,
-              styles: [
-                {
-                  featureType: "poi",
-                  elementType: "labels",
-                  stylers: [{ visibility: "off" }],
-                },
-              ],
+              styles: theme === "dark" ? darkMapStyles : lightMapStyles,
             });
 
             setMap(mapInstance);
@@ -151,13 +237,7 @@ export default function OrderMap({ orders, onOrderSelect }: OrderMapProps) {
           const mapInstance = new google.maps.Map(mapRef.current, {
             center: { lat: 20.5937, lng: 78.9629 }, // Center of India
             zoom: 6,
-            styles: [
-              {
-                featureType: "poi",
-                elementType: "labels",
-                stylers: [{ visibility: "off" }],
-              },
-            ],
+            styles: theme === "dark" ? darkMapStyles : lightMapStyles,
           });
 
           setMap(mapInstance);
@@ -181,6 +261,15 @@ export default function OrderMap({ orders, onOrderSelect }: OrderMapProps) {
 
     initMap();
   }, []);
+
+  // Update map styles when theme changes
+  useEffect(() => {
+    if (map) {
+      map.setOptions({
+        styles: theme === "dark" ? darkMapStyles : lightMapStyles,
+      });
+    }
+  }, [theme, map]);
 
   useEffect(() => {
     // Use test data instead of passed orders for now
@@ -226,28 +315,22 @@ export default function OrderMap({ orders, onOrderSelect }: OrderMapProps) {
         ORDER_STATUS_COLORS[order.status as keyof typeof ORDER_STATUS_COLORS] ||
         ORDER_STATUS_COLORS.default;
 
-      // Create custom marker with better visual design
+      // Create custom marker with visible red circular design for better demography
       const marker = new google.maps.Marker({
         position,
         map,
         title: `Order #${order.order_number} - ${order.customer.name}`,
-        label: {
-          text: order.order_number.split("-")[2] || "●", // Show last part of order number
-          color: "#ffffff",
-          fontSize: "11px",
-          fontWeight: "bold",
-        },
         icon: {
-          path: "M12,2C8.13,2 5,5.13 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9C19,5.13 15.87,2 12,2ZM12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5Z",
-          fillColor: color,
-          fillOpacity: 0.9,
-          strokeColor: "#ffffff",
-          strokeWeight: 2,
-          scale: 1.8,
-          anchor: new google.maps.Point(12, 22), // Anchor at the bottom of the pin
+          path: google.maps.SymbolPath.CIRCLE,
+          fillColor: "#EF4444", // Bright red color for maximum visibility
+          fillOpacity: 0.85,
+          strokeColor: "#FFFFFF",
+          strokeWeight: 3,
+          scale: 12, // Larger size for better visibility
         },
         animation: google.maps.Animation.DROP,
         zIndex: 1000,
+        optimized: false, // Ensures markers render with better quality
       });
 
       console.log(
@@ -263,29 +346,43 @@ export default function OrderMap({ orders, onOrderSelect }: OrderMapProps) {
         marker.getMap()
       );
 
-      // Create info window
+      // Create info window with theme-aware styling
+      const isDark = theme === "dark";
+      const bgColor = isDark ? "#1f2937" : "#ffffff";
+      const textColor = isDark ? "#f9fafb" : "#1f2937";
+      const mutedColor = isDark ? "#9ca3af" : "#6b7280";
+      const borderColor = isDark ? "#374151" : "#e5e7eb";
+      
       const infoWindow = new google.maps.InfoWindow({
         content: `
-          <div style="padding: 10px; min-width: 200px;">
-            <h3 style="margin: 0 0 8px 0; color: #333;">Order #${
-              order.order_number
-            }</h3>
-            <p style="margin: 4px 0; color: #666;"><strong>Customer:</strong> ${
-              order.customer.name
-            }</p>
-            <p style="margin: 4px 0; color: #666;"><strong>Status:</strong> 
-              <span style="color: ${color}; font-weight: bold;">${order.status.toUpperCase()}</span>
-            </p>
-            <p style="margin: 4px 0; color: #666;"><strong>Amount:</strong> ₹${order.total_amount.toLocaleString()}</p>
-            <p style="margin: 4px 0; color: #666;"><strong>Date:</strong> ${new Date(
-              order.created_at
-            ).toLocaleDateString()}</p>
-            <div style="margin-top: 10px;">
+          <div style="padding: 12px; min-width: 220px; font-family: system-ui, -apple-system, sans-serif; background: ${bgColor}; color: ${textColor};">
+            <h3 style="margin: 0 0 12px 0; color: ${textColor}; font-size: 16px; font-weight: 600; border-bottom: 2px solid #EF4444; padding-bottom: 6px;">
+              Order #${order.order_number}
+            </h3>
+            <div style="display: flex; align-items: center; margin: 6px 0;">
+              <span style="color: ${mutedColor}; font-size: 13px; min-width: 70px;">Customer:</span>
+              <span style="color: ${textColor}; font-size: 13px; font-weight: 500;">${order.customer.name}</span>
+            </div>
+            <div style="display: flex; align-items: center; margin: 6px 0;">
+              <span style="color: ${mutedColor}; font-size: 13px; min-width: 70px;">Status:</span>
+              <span style="color: ${color}; font-size: 13px; font-weight: 600; text-transform: uppercase; background: ${color}15; padding: 2px 8px; border-radius: 12px;">${order.status}</span>
+            </div>
+            <div style="display: flex; align-items: center; margin: 6px 0;">
+              <span style="color: ${mutedColor}; font-size: 13px; min-width: 70px;">Amount:</span>
+              <span style="color: #059669; font-size: 14px; font-weight: 600;">₹${order.total_amount.toLocaleString()}</span>
+            </div>
+            <div style="display: flex; align-items: center; margin: 6px 0;">
+              <span style="color: ${mutedColor}; font-size: 13px; min-width: 70px;">Date:</span>
+              <span style="color: ${textColor}; font-size: 13px;">${new Date(order.created_at).toLocaleDateString()}</span>
+            </div>
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid ${borderColor};">
               <button 
                 onclick="window.viewOrderDetails('${order.id}')"
-                style="background: #4CAF50; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;"
+                style="background: #EF4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; width: 100%; transition: all 0.2s;"
+                onmouseover="this.style.background='#DC2626'"
+                onmouseout="this.style.background='#EF4444'"
               >
-                View Details
+                📍 View Full Details
               </button>
             </div>
           </div>
@@ -336,10 +433,10 @@ export default function OrderMap({ orders, onOrderSelect }: OrderMapProps) {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-96 bg-gray-100 rounded-lg">
+      <div className="flex items-center justify-center h-96 bg-accent/20 rounded-xl border-2 border-dashed border-border">
         <div className="text-center">
           <div className="text-red-500 text-xl mb-2">⚠️</div>
-          <p className="text-gray-600">{error}</p>
+          <p className="text-muted-foreground">{error}</p>
         </div>
       </div>
     );
@@ -348,10 +445,10 @@ export default function OrderMap({ orders, onOrderSelect }: OrderMapProps) {
   return (
     <div className="relative">
       {isLoading && (
-        <div className="absolute inset-0 bg-gray-100 rounded-lg flex items-center justify-center z-10">
+        <div className="absolute inset-0 bg-accent/20 rounded-xl flex items-center justify-center z-10 backdrop-blur-sm">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-            <p className="text-gray-600">Loading map...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+            <p className="text-muted-foreground font-medium">Loading map...</p>
           </div>
         </div>
       )}
@@ -363,20 +460,19 @@ export default function OrderMap({ orders, onOrderSelect }: OrderMapProps) {
       />
 
       {/* Map Legend */}
-      <div className="absolute bottom-4 left-4 bg-white p-3 rounded-lg shadow-lg border z-10">
-        <h4 className="font-semibold text-sm mb-2">Order Status</h4>
-        <div className="space-y-1">
-          {Object.entries(ORDER_STATUS_COLORS).map(
-            ([status, color]) =>
-              status !== "default" && (
-                <div key={status} className="flex items-center text-xs">
-                  <div
-                    className="w-3 h-3 rounded-full mr-2 border border-gray-300"
-                    style={{ backgroundColor: color }}></div>
-                  <span className="capitalize">{status}</span>
-                </div>
-              )
-          )}
+      <div className="absolute bottom-4 left-4 bg-card/95 backdrop-blur-sm p-4 rounded-xl shadow-2xl border-2 border-red-500/20 z-10">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>
+          <h4 className="font-bold text-sm text-foreground">Order Locations</h4>
+        </div>
+        <div className="text-xs text-muted-foreground mb-2">
+          <span className="font-semibold text-red-500">{ordersToDisplay.length}</span> orders displayed
+        </div>
+        <div className="pt-2 border-t border-border">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="w-4 h-4 rounded-full bg-red-500 border-2 border-background"></div>
+            <span>Click marker for details</span>
+          </div>
         </div>
       </div>
     </div>

@@ -1,7 +1,9 @@
-import { LanguageProvider } from "@/lib/language/LanguageContext";
+import { LanguageProvider as OldLanguageProvider } from "@/lib/language/LanguageContext";
+import { LanguageProvider } from "@/lib/i18n/provider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,11 +35,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-orange-400`}
-        suppressHydrationWarning>
-        <LanguageProvider>{children}</LanguageProvider>
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <LanguageProvider>
+            <OldLanguageProvider>{children}</OldLanguageProvider>
+          </LanguageProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

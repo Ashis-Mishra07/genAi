@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslation } from "@/lib/i18n/hooks";
+import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
 import { useTranslatedProducts } from "@/lib/hooks/useTranslateContent";
 import {
   Calendar,
@@ -39,7 +39,7 @@ interface Stats {
 
 export default function ArtisanDashboard() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { translateBatch, t } = useDynamicTranslation();
   const [user, setUser] = useState<any>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const { translatedProducts, isLoading: isTranslating } =
@@ -53,6 +53,52 @@ export default function ArtisanDashboard() {
     totalOrders: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    translateBatch([
+      "Artisan Studio",
+      "Welcome back",
+      "Total Products",
+      "Active Products",
+      "Total Views",
+      "Total Orders",
+      "Quick Actions",
+      "Create Product",
+      "Chat with Customers",
+      "Customer Feedback",
+      "View Analytics",
+      "Recent Products",
+      "No products yet",
+      "Start creating your first product",
+      "Loading dashboard...",
+      "Product Details",
+      "Description",
+      "Category",
+      "Created At",
+      "Status",
+      "Product ID",
+      "Active",
+      "Inactive",
+      "View Product",
+      "Edit Product",
+      "Delete Product",
+      "Confirm delete product?",
+      "Cancel",
+      "View Live",
+      "Translating products...",
+      "Handmade",
+      "Textile",
+      "Pottery",
+      "Jewelry",
+      "Woodwork",
+      "Metalwork",
+      "Paintings",
+      "Home Decor",
+      "Traditional Wear",
+      "Sculptures",
+      "Other",
+    ]);
+  }, [translateBatch]);
 
   useEffect(() => {
     console.log("Component mounted, checking authentication...");
@@ -194,7 +240,7 @@ export default function ArtisanDashboard() {
   };
 
   const handleDeleteProduct = async (productId: string) => {
-    if (confirm(t("confirmDeleteProduct"))) {
+    if (confirm(t("Confirm delete product?"))) {
       try {
         const response = await fetch(`/api/products/${productId}`, {
           method: "DELETE",
@@ -217,70 +263,71 @@ export default function ArtisanDashboard() {
   };
 
   const getCategoryTranslation = (category: string | undefined): string => {
-    if (!category) return t('other');
+    if (!category) return t('Other');
     
     // Map common category values to translation keys
     const categoryMap: Record<string, string> = {
-      'handmade': 'handmade',
-      'textile': 'textile',
-      'textiles': 'textile',
-      'pottery': 'pottery',
-      'jewelry': 'jewelry',
-      'jewellery': 'jewelry',
-      'woodwork': 'woodwork',
-      'metalwork': 'metalwork',
-      'paintings': 'paintings',
-      'art': 'paintings',
-      'homeDecor': 'homeDecor',
-      'home decor': 'homeDecor',
-      'traditionalWear': 'traditionalWear',
-      'traditional wear': 'traditionalWear',
-      'sculptures': 'sculptures',
-      'other': 'other'
+      'handmade': 'Handmade',
+      'textile': 'Textile',
+      'textiles': 'Textile',
+      'pottery': 'Pottery',
+      'jewelry': 'Jewelry',
+      'jewellery': 'Jewelry',
+      'woodwork': 'Woodwork',
+      'metalwork': 'Metalwork',
+      'paintings': 'Paintings',
+      'art': 'Paintings',
+      'homeDecor': 'Home Decor',
+      'home decor': 'Home Decor',
+      'traditionalWear': 'Traditional Wear',
+      'traditional wear': 'Traditional Wear',
+      'sculptures': 'Sculptures',
+      'other': 'Other'
     };
     
-    const key = categoryMap[category.toLowerCase()] || 'other';
-    return t(key as any);
+    const key = categoryMap[category.toLowerCase()] || 'Other';
+    return t(key);
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">{t("loadingDashboard")}</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">{t("Loading dashboard...")}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+      <div className="bg-card border border-border rounded-xl px-6 py-6 shadow-sm mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white">
-              {t("artisanStudio")}
+            <h1 className="text-3xl font-bold text-foreground">
+              {t("Artisan Studio")}
             </h1>
-            <p className="text-slate-400">
-              {t("welcomeBack")}, {user?.name || user?.email || "Artisan"}
+            <div className="h-1 w-32 bg-primary rounded-full mt-2 mb-2"></div>
+            <p className="text-muted-foreground text-lg">
+              {t("Welcome back")}, {user?.name || user?.email || "Artisan"}
               {user?.location && ` from ${user.location}`}
             </p>
           </div>
 
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-3 bg-slate-700 rounded-lg px-3 py-2">
-              <div className="h-8 w-8 bg-orange-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">
+            <div className="flex items-center space-x-3 bg-accent rounded-lg px-4 py-3 border border-border">
+              <div className="h-10 w-10 bg-primary rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-primary-foreground text-sm font-bold">
                   {user?.name?.charAt(0).toUpperCase() || "A"}
                 </span>
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium text-white">
+                <p className="text-sm font-semibold text-foreground">
                   {user?.name || "Artisan"}
                 </p>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-muted-foreground">
                   {user?.specialty || "Creative Artist"}
                 </p>
               </div>
@@ -290,189 +337,213 @@ export default function ArtisanDashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="p-6">
+      <div>
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-            <div className="flex items-center">
-              <Package className="h-8 w-8 text-orange-500" />
-              <div className="ml-4">
-                <p className="text-2xl font-semibold text-white">
-                  {stats.totalProducts}
-                </p>
-                <p className="text-slate-400">{t("totalProducts")}</p>
+          <div className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-all duration-300 relative overflow-hidden group">
+            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-2">
+                <div className="h-12 w-12 bg-primary rounded-xl flex items-center justify-center shadow-lg">
+                  <Package className="h-6 w-6 text-primary-foreground" />
+                </div>
               </div>
+              <p className="text-3xl font-bold text-foreground mb-1">
+                {stats.totalProducts}
+              </p>
+              <p className="text-muted-foreground text-sm">{t("Total Products")}</p>
             </div>
           </div>
 
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-            <div className="flex items-center">
-              <Heart className="h-8 w-8 text-green-500" />
-              <div className="ml-4">
-                <p className="text-2xl font-semibold text-white">
-                  {stats.activeProducts}
-                </p>
-                <p className="text-slate-400">{t("activeProducts")}</p>
+          <div className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-all duration-300 relative overflow-hidden group">
+            <div className="absolute inset-0 bg-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-2">
+                <div className="h-12 w-12 bg-green-500 dark:bg-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Heart className="h-6 w-6 text-white" />
+                </div>
               </div>
+              <p className="text-3xl font-bold text-foreground mb-1">
+                {stats.activeProducts}
+              </p>
+              <p className="text-muted-foreground text-sm">{t("Active Products")}</p>
             </div>
           </div>
 
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-            <div className="flex items-center">
-              <Eye className="h-8 w-8 text-blue-500" />
-              <div className="ml-4">
-                <p className="text-2xl font-semibold text-white">
-                  {stats.totalViews}
-                </p>
-                <p className="text-slate-400">{t("totalViews")}</p>
+          <div className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-all duration-300 relative overflow-hidden group">
+            <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-2">
+                <div className="h-12 w-12 bg-blue-500 dark:bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Eye className="h-6 w-6 text-white" />
+                </div>
               </div>
+              <p className="text-3xl font-bold text-foreground mb-1">
+                {stats.totalViews}
+              </p>
+              <p className="text-muted-foreground text-sm">{t("Total Views")}</p>
             </div>
           </div>
 
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-            <div className="flex items-center">
-              <DollarSign className="h-8 w-8 text-purple-500" />
-              <div className="ml-4">
-                <p className="text-2xl font-semibold text-white">
-                  {stats.totalOrders}
-                </p>
-                <p className="text-slate-400">{t("totalOrders")}</p>
+          <div className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-all duration-300 relative overflow-hidden group">
+            <div className="absolute inset-0 bg-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-2">
+                <div className="h-12 w-12 bg-purple-500 dark:bg-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <DollarSign className="h-6 w-6 text-white" />
+                </div>
               </div>
+              <p className="text-3xl font-bold text-foreground mb-1">
+                {stats.totalOrders}
+              </p>
+              <p className="text-muted-foreground text-sm">{t("Total Orders")}</p>
             </div>
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-slate-800 border border-slate-700 rounded-lg mb-8 p-6">
-          <h2 className="text-lg font-semibold text-white mb-4">
-            {t("quickActions")}
-          </h2>
+        <div className="bg-card border border-border rounded-xl mb-8 p-6 shadow-sm">
+          <div className="flex items-center space-x-3 mb-6">
+            <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
+              <TrendingUp className="h-5 w-5 text-primary" />
+            </div>
+            <h2 className="text-xl font-bold text-foreground">
+              {t("Quick Actions")}
+            </h2>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <button
               onClick={handleAddProduct}
-              className="flex items-center justify-center p-4 border-2 border-dashed border-orange-500/30 rounded-lg text-orange-400 hover:border-orange-500/60 hover:text-orange-300 transition-colors bg-orange-500/5">
-              <Plus className="h-6 w-6 mr-2" />
-              {t("createProduct")}
+              className="flex items-center justify-center p-5 border-2 border-dashed border-primary/30 rounded-xl text-primary hover:border-primary/60 hover:bg-primary/10 transition-all duration-300 bg-primary/5 group">
+              <Plus className="h-6 w-6 mr-2 group-hover:scale-110 transition-transform" />
+              <span className="font-medium">{t("Create Product")}</span>
             </button>
             <button
               onClick={() => router.push("/artisan/messages")}
-              className="flex items-center justify-center p-4 border-2 border-dashed border-blue-500/30 rounded-lg text-blue-400 hover:border-blue-500/60 hover:text-blue-300 transition-colors bg-blue-500/5">
-              <Users className="h-6 w-6 mr-2" />
-              {t("chatWithCustomers")}
+              className="flex items-center justify-center p-5 border-2 border-dashed border-blue-500/30 rounded-xl text-blue-600 dark:text-blue-400 hover:border-blue-500/60 hover:bg-blue-500/10 transition-all duration-300 bg-blue-500/5 group">
+              <Users className="h-6 w-6 mr-2 group-hover:scale-110 transition-transform" />
+              <span className="font-medium">{t("Chat with Customers")}</span>
             </button>
             <button
               onClick={() => router.push("/artisan/feedback")}
-              className="flex items-center justify-center p-4 border-2 border-dashed border-purple-500/30 rounded-lg text-purple-400 hover:border-purple-500/60 hover:text-purple-300 transition-colors bg-purple-500/5">
-              <Heart className="h-6 w-6 mr-2" />
-              {t("customerFeedback")}
+              className="flex items-center justify-center p-5 border-2 border-dashed border-purple-500/30 rounded-xl text-purple-600 dark:text-purple-400 hover:border-purple-500/60 hover:bg-purple-500/10 transition-all duration-300 bg-purple-500/5 group">
+              <Heart className="h-6 w-6 mr-2 group-hover:scale-110 transition-transform" />
+              <span className="font-medium">{t("Customer Feedback")}</span>
             </button>
             <button
               onClick={() => router.push("/artisan/analytics")}
-              className="flex items-center justify-center p-4 border-2 border-dashed border-green-500/30 rounded-lg text-green-400 hover:border-green-500/60 hover:text-green-300 transition-colors bg-green-500/5">
-              <TrendingUp className="h-6 w-6 mr-2" />
-              {t("viewAnalytics")}
+              className="flex items-center justify-center p-5 border-2 border-dashed border-green-500/30 rounded-xl text-green-600 dark:text-green-400 hover:border-green-500/60 hover:bg-green-500/10 transition-all duration-300 bg-green-500/5 group">
+              <TrendingUp className="h-6 w-6 mr-2 group-hover:scale-110 transition-transform" />
+              <span className="font-medium">{t("View Analytics")}</span>
             </button>
           </div>
         </div>
 
         {/* Products Grid */}
-        <div className="bg-slate-800 border border-slate-700 rounded-lg">
-          <div className="px-6 py-4 border-b border-slate-700 flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-white">
-              {t("recentProducts")}
-            </h2>
+        <div className="bg-card border border-border rounded-xl shadow-sm">
+          <div className="px-6 py-4 border-b border-border flex justify-between items-center">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                <Package className="h-5 w-5 text-primary" />
+              </div>
+              <h2 className="text-xl font-bold text-foreground">
+                {t("Recent Products")}
+              </h2>
+            </div>
             <button
               onClick={handleAddProduct}
-              className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors flex items-center">
+              className="bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary/90 transition-all duration-300 flex items-center shadow-lg transform hover:scale-105">
               <Plus className="h-4 w-4 mr-2" />
-              {t("createProduct")}
+              {t("Create Product")}
             </button>
           </div>
 
           <div className="p-6">
             {products.length === 0 ? (
-              <div className="text-center py-12">
-                <Package className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-white mb-2">
-                  {t("noProducts")}
+              <div className="text-center py-16">
+                <div className="h-20 w-20 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Package className="h-10 w-10 text-muted-foreground" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  {t("No products yet")}
                 </h3>
-                <p className="text-slate-400 mb-4">{t("startCreating")}</p>
+                <p className="text-muted-foreground mb-6">{t("Start creating your first product")}</p>
                 <button
                   onClick={handleAddProduct}
-                  className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors">
-                  {t("createProduct")}
+                  className="bg-primary text-primary-foreground px-8 py-3 rounded-lg hover:bg-primary/90 transition-all duration-300 shadow-lg transform hover:scale-105">
+                  {t("Create Product")}
                 </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {isTranslating && (
                   <div className="col-span-full text-center py-4">
-                    <div className="inline-flex items-center text-orange-400">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-400 mr-2"></div>
-                      <span className="text-sm">Translating products...</span>
+                    <div className="inline-flex items-center text-primary">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+                      <span className="text-sm">{t("Translating products...")}</span>
                     </div>
                   </div>
                 )}
                 {translatedProducts.map((product) => (
                   <div
                     key={product.id}
-                    className="bg-slate-700 border border-slate-600 rounded-lg overflow-hidden hover:border-orange-500/50 transition-all hover:shadow-lg">
-                    <div className="aspect-w-16 aspect-h-9 bg-slate-600">
+                    className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 group">
+                    <div className="aspect-w-16 aspect-h-9 bg-accent relative overflow-hidden">
                       {product.imageUrl ? (
                         <img
                           src={product.imageUrl}
                           alt={product.name}
-                          className="w-full h-48 object-cover"
+                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
-                        <div className="w-full h-48 bg-slate-600 flex items-center justify-center">
-                          <Package className="h-8 w-8 text-slate-400" />
+                        <div className="w-full h-48 bg-accent flex items-center justify-center">
+                          <Package className="h-10 w-10 text-muted-foreground" />
                         </div>
                       )}
                     </div>
 
-                    <div className="p-4">
+                    <div className="p-5">
                       <h3
-                        className="font-medium text-white mb-1 cursor-pointer hover:text-orange-400 transition-colors"
+                        className="font-semibold text-foreground mb-2 cursor-pointer hover:text-primary transition-colors text-lg"
                         onClick={() => handleViewProduct(product.id)}>
                         {product.name}
                       </h3>
                       {product.description && (
-                        <p className="text-sm text-slate-300 mb-2 line-clamp-2">
+                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                           {product.description}
                         </p>
                       )}
-                      <p className="text-lg font-semibold text-orange-400 mb-2">
+                      <p className="text-xl font-bold text-primary mb-3">
                         ₹{product.price.toLocaleString()}
                       </p>
 
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between pt-3 border-t border-border">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
                             product.isActive
-                              ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                              : "bg-slate-500/10 text-slate-400 border border-slate-500/20"
+                              ? "bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20"
+                              : "bg-muted text-muted-foreground border border-border"
                           }`}>
-                          {product.isActive ? t("active") : t("inactive")}
+                          {product.isActive ? t("Active") : t("Inactive")}
                         </span>
 
                         <div className="flex space-x-2">
                           <button
                             onClick={() => handleViewProduct(product.id)}
-                            className="p-1 text-slate-400 hover:text-blue-400 transition-colors"
-                            title={t("viewProduct")}>
+                            className="p-2 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all"
+                            title={t("View Product")}>
                             <Eye className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleEditProduct(product.id)}
-                            className="p-1 text-slate-400 hover:text-green-400 transition-colors"
-                            title={t("editProduct")}>
+                            className="p-2 text-muted-foreground hover:text-green-600 dark:hover:text-green-400 hover:bg-green-500/10 rounded-lg transition-all"
+                            title={t("Edit Product")}>
                             <Edit className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleDeleteProduct(product.id)}
-                            className="p-1 text-slate-400 hover:text-red-400 transition-colors"
-                            title={t("deleteProduct")}>
+                            className="p-2 text-muted-foreground hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                            title={t("Delete Product")}>
                             <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
@@ -489,54 +560,59 @@ export default function ArtisanDashboard() {
       {/* Product Detail Modal */}
       {showProductModal && selectedProduct && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 border border-slate-700 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-card border border-border rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-slate-700 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-white">
-                {t("productDetails")}
-              </h2>
+            <div className="px-6 py-5 border-b border-border flex items-center justify-between bg-accent/30">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <Package className="h-5 w-5 text-primary" />
+                </div>
+                <h2 className="text-2xl font-bold text-foreground">
+                  {t("Product Details")}
+                </h2>
+              </div>
               <button
                 onClick={() => setShowProductModal(false)}
-                className="p-2 text-slate-400 hover:text-white transition-colors">
-                <X className="h-5 w-5" />
+                className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all">
+                <X className="h-6 w-6" />
               </button>
             </div>
 
             {/* Modal Content */}
             <div className="p-6">
               {/* Product Image */}
-              <div className="mb-6">
+              <div className="mb-6 rounded-xl overflow-hidden">
                 {selectedProduct.imageUrl ? (
                   <img
                     src={selectedProduct.imageUrl}
                     alt={selectedProduct.name}
-                    className="w-full h-64 object-cover rounded-lg bg-slate-700"
+                    className="w-full h-72 object-cover bg-accent"
                   />
                 ) : (
-                  <div className="w-full h-64 bg-slate-700 flex items-center justify-center rounded-lg">
-                    <Package className="h-16 w-16 text-slate-400" />
+                  <div className="w-full h-72 bg-accent flex items-center justify-center rounded-xl">
+                    <Package className="h-20 w-20 text-muted-foreground" />
                   </div>
                 )}
               </div>
 
               {/* Product Info */}
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-2">
+              <div className="space-y-6">
+                <div className="pb-4 border-b border-border">
+                  <h3 className="text-3xl font-bold text-foreground mb-3">
                     {selectedProduct.name}
                   </h3>
-                  <p className="text-3xl font-bold text-orange-400">
+                  <p className="text-4xl font-bold text-primary">
                     ₹{selectedProduct.price.toLocaleString()}
                   </p>
                 </div>
 
                 {selectedProduct.description && (
-                  <div>
-                    <h4 className="text-lg font-semibold text-white mb-2 flex items-center">
-                      <Package className="h-5 w-5 mr-2" />
-                      {t("description")}
+                  <div className="bg-accent/30 rounded-xl p-5 border border-border">
+                    <h4 className="text-lg font-bold text-foreground mb-3 flex items-center">
+                      <Package className="h-5 w-5 mr-2 text-primary" />
+                      {t("Description")}
                     </h4>
-                    <p className="text-slate-300 leading-relaxed">
+                    <p className="text-muted-foreground leading-relaxed">
                       {selectedProduct.description}
                     </p>
                   </div>
@@ -544,48 +620,48 @@ export default function ArtisanDashboard() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {selectedProduct.category && (
-                    <div className="bg-slate-700 border border-slate-600 rounded-lg p-4">
-                      <div className="flex items-center text-slate-300">
-                        <Tag className="h-5 w-5 mr-2 text-blue-400" />
-                        <span className="font-medium">{t("category")}</span>
+                    <div className="bg-accent/50 border border-border rounded-xl p-4 hover:shadow-md transition-shadow">
+                      <div className="flex items-center text-muted-foreground mb-2">
+                        <Tag className="h-5 w-5 mr-2 text-blue-500" />
+                        <span className="font-semibold">{t("Category")}</span>
                       </div>
-                      <p className="text-white mt-1">
+                      <p className="text-foreground font-medium">
                         {getCategoryTranslation(selectedProduct.category)}
                       </p>
                     </div>
                   )}
 
-                  <div className="bg-slate-700 border border-slate-600 rounded-lg p-4">
-                    <div className="flex items-center text-slate-300">
-                      <Calendar className="h-5 w-5 mr-2 text-green-400" />
-                      <span className="font-medium">{t("createdAt")}</span>
+                  <div className="bg-accent/50 border border-border rounded-xl p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center text-muted-foreground mb-2">
+                      <Calendar className="h-5 w-5 mr-2 text-green-500" />
+                      <span className="font-semibold">{t("Created At")}</span>
                     </div>
-                    <p className="text-white mt-1">
+                    <p className="text-foreground font-medium">
                       {new Date(selectedProduct.createdAt).toLocaleDateString()}
                     </p>
                   </div>
 
-                  <div className="bg-slate-700 border border-slate-600 rounded-lg p-4">
-                    <div className="flex items-center text-slate-300">
-                      <Heart className="h-5 w-5 mr-2 text-purple-400" />
-                      <span className="font-medium">{t("status")}</span>
+                  <div className="bg-accent/50 border border-border rounded-xl p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center text-muted-foreground mb-2">
+                      <Heart className="h-5 w-5 mr-2 text-purple-500" />
+                      <span className="font-semibold">{t("Status")}</span>
                     </div>
                     <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
                         selectedProduct.isActive
-                          ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                          : "bg-slate-500/20 text-slate-400 border border-slate-500/30"
+                          ? "bg-green-500/20 text-green-600 dark:text-green-400 border border-green-500/30"
+                          : "bg-muted text-muted-foreground border border-border"
                       }`}>
-                      {selectedProduct.isActive ? t("active") : t("inactive")}
+                      {selectedProduct.isActive ? t("Active") : t("Inactive")}
                     </span>
                   </div>
 
-                  <div className="bg-slate-700 border border-slate-600 rounded-lg p-4">
-                    <div className="flex items-center text-slate-300">
-                      <DollarSign className="h-5 w-5 mr-2 text-yellow-400" />
-                      <span className="font-medium">{t("productId")}</span>
+                  <div className="bg-accent/50 border border-border rounded-xl p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center text-muted-foreground mb-2">
+                      <DollarSign className="h-5 w-5 mr-2 text-yellow-500" />
+                      <span className="font-semibold">{t("Product ID")}</span>
                     </div>
-                    <p className="text-white mt-1 text-sm font-mono">
+                    <p className="text-foreground font-mono text-sm break-all">
                       {selectedProduct.id}
                     </p>
                   </div>
@@ -593,11 +669,11 @@ export default function ArtisanDashboard() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-700">
+              <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
                 <button
                   onClick={() => setShowProductModal(false)}
-                  className="px-6 py-2 text-slate-400 border border-slate-600 rounded-lg hover:text-white hover:border-slate-500 transition-colors">
-                  {t("cancel")}
+                  className="px-6 py-3 text-muted-foreground border border-border rounded-lg hover:text-foreground hover:bg-accent transition-all">
+                  {t("Cancel")}
                 </button>
 
                 <div className="flex space-x-3">
@@ -606,9 +682,9 @@ export default function ArtisanDashboard() {
                       setShowProductModal(false);
                       router.push(`/products/${selectedProduct.id}`);
                     }}
-                    className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center">
+                    className="px-6 py-3 bg-blue-500 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-all duration-300 flex items-center shadow-lg transform hover:scale-105">
                     <Eye className="h-4 w-4 mr-2" />
-                    {t("viewLive")}
+                    {t("View Live")}
                   </button>
 
                   <button
@@ -616,9 +692,9 @@ export default function ArtisanDashboard() {
                       setShowProductModal(false);
                       handleEditProduct(selectedProduct.id);
                     }}
-                    className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors flex items-center">
+                    className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-300 flex items-center shadow-lg transform hover:scale-105">
                     <Edit className="h-4 w-4 mr-2" />
-                    {t("editProduct")}
+                    {t("Edit Product")}
                   </button>
                 </div>
               </div>

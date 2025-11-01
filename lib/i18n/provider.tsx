@@ -17,7 +17,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   // Load saved language from localStorage on mount
   useEffect(() => {
     const savedLocale = localStorage.getItem('artisan-locale') as Locale;
-    if (savedLocale && ['en', 'hi', 'bn', 'te', 'ta', 'ml', 'kn', 'gu', 'mr', 'or'].includes(savedLocale)) {
+    if (savedLocale && ['en', 'hi', 'bn', 'te', 'ta', 'ml', 'kn', 'gu', 'mr', 'or', 'pa'].includes(savedLocale)) {
       setCurrentLocale(savedLocale);
     }
     setIsLoaded(true);

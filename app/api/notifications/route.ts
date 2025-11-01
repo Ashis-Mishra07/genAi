@@ -96,6 +96,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const unreadOnly = searchParams.get('unread') === 'true';
     const countOnly = searchParams.get('count') === 'true';
+    const limit = parseInt(searchParams.get('limit') || '50');
+    const offset = parseInt(searchParams.get('offset') || '0');
 
     let notifications = [];
     let unreadCount = 0;
@@ -132,10 +134,13 @@ export async function GET(request: NextRequest) {
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
 
+    // Apply pagination
+    const paginatedNotifications = filteredNotifications.slice(offset, offset + limit);
+
     return NextResponse.json({
       success: true,
-      notifications: filteredNotifications,
-      totalCount: notifications.length,
+      notifications: paginatedNotifications,
+      totalCount: filteredNotifications.length,
       unreadCount
     });
   } catch (error: any) {

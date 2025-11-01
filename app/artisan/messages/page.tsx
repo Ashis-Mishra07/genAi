@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useTranslation } from "@/lib/i18n/hooks";
+import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
 import { useTranslateContent } from "@/lib/hooks/useTranslateContent";
 
 interface AdminMessage {
@@ -64,8 +64,8 @@ interface SupportCategory {
 
 export default function ArtisanAdminMessagesPage() {
   const router = useRouter();
-  const { t } = useTranslation();
-  const { translateText, isHindi, currentLocale } = useTranslateContent();
+  const { t, translateBatch, currentLocale, isTranslating } = useDynamicTranslation();
+  const { translateText, isHindi } = useTranslateContent();
 
   // Helper function for quick translations
   const tl = (
@@ -905,10 +905,10 @@ Product Data: ${JSON.stringify(product)}`;
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">
             {tl("Loading messages...", {
               hi: "संदेश लोड हो रहे हैं...",
               bn: "বার্তা লোড হচ্ছে...",
@@ -927,12 +927,12 @@ Product Data: ${JSON.stringify(product)}`;
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+      <div className="bg-card border-b border-border px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white flex items-center">
+            <h1 className="text-2xl font-bold text-foreground flex items-center">
               <MessageCircle className="h-6 w-6 mr-2" />
               {tl("Admin Support", {
                 hi: "एडमिन सहायता",
@@ -1023,15 +1023,15 @@ Product Data: ${JSON.stringify(product)}`;
                   <button
                     key={category.id}
                     onClick={() => handleCategorySelect(category)}
-                    className="bg-slate-800 border border-slate-700 rounded-lg p-4 text-left hover:bg-slate-700 hover:border-orange-500/50 transition-all duration-200 group">
+                    className="bg-card border border-border rounded-lg p-4 text-left hover:bg-accent hover:border-primary/50 transition-all duration-200 group">
                     <div
-                      className={`w-10 h-10 bg-gradient-to-r ${category.color} rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
-                      <IconComponent className="h-5 w-5 text-white" />
+                      className={`w-10 h-10 bg-primary rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
+                      <IconComponent className="h-5 w-5 text-primary-foreground" />
                     </div>
-                    <h4 className="font-semibold text-white mb-2">
+                    <h4 className="font-semibold text-foreground mb-2">
                       {category.name}
                     </h4>
-                    <p className="text-sm text-slate-400">
+                    <p className="text-sm text-muted-foreground">
                       {category.description}
                     </p>
                   </button>
@@ -1042,13 +1042,13 @@ Product Data: ${JSON.stringify(product)}`;
         )}
 
         {/* Messages Container */}
-        <div className="bg-slate-800 border border-slate-700 rounded-lg h-[600px] flex flex-col">
+        <div className="bg-card border border-border rounded-lg h-[600px] flex flex-col">
           {/* Messages Area */}
           <div className="flex-1 p-6 overflow-y-auto space-y-4">
             {messages.length === 0 ? (
-              <div className="text-center text-slate-400 py-12">
-                <HeartHandshake className="h-16 w-16 text-slate-600 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-white mb-2">
+              <div className="text-center text-muted-foreground py-12">
+                <HeartHandshake className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-foreground mb-2">
                   {tl("Welcome to Admin Support!", {
                     hi: "एडमिन सहायता में आपका स्वागत है!",
                     bn: "প্রশাসন সহায়তায় স্বাগতম!",
@@ -1098,15 +1098,15 @@ Product Data: ${JSON.stringify(product)}`;
                   <div
                     className={`max-w-[70%] ${
                       message.isFromAdmin
-                        ? "bg-slate-700 border border-slate-600 text-white"
-                        : "bg-orange-500 text-white"
+                        ? "bg-accent border border-border text-foreground"
+                        : "bg-primary text-primary-foreground"
                     } rounded-lg p-4`}>
                     {message.isFromAdmin && (
                       <div className="flex items-center mb-2">
-                        <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mr-2">
-                          <Shield className="h-3 w-3 text-white" />
+                        <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center mr-2">
+                          <Shield className="h-3 w-3 text-primary-foreground" />
                         </div>
-                        <span className="text-xs font-medium text-slate-300">
+                        <span className="text-xs font-medium text-muted-foreground">
                           {tl("Admin Support", {
                             hi: "एडमिन सहायता",
                             bn: "প্রশাসন সহায়তা",
@@ -1124,7 +1124,7 @@ Product Data: ${JSON.stringify(product)}`;
 
                     {/* Simple Product Card for Village Admin - just photo and price */}
                     {message.productData && (
-                      <div className="mb-3 bg-slate-600 rounded-lg p-3 border border-slate-500">
+                      <div className="mb-3 bg-background/50 rounded-lg p-3 border border-border">
                         <div className="flex items-center mb-2">
                           <ShoppingBag className="h-4 w-4 mr-2" />
                           <span className="font-medium text-sm">
@@ -1133,7 +1133,7 @@ Product Data: ${JSON.stringify(product)}`;
                         </div>
                         <div className="text-center">
                           {message.productData.imageUrl && (
-                            <div className="w-full max-w-48 mx-auto mb-3 rounded-lg overflow-hidden bg-slate-500">
+                            <div className="w-full max-w-48 mx-auto mb-3 rounded-lg overflow-hidden bg-background">
                               <img
                                 src={message.productData.imageUrl}
                                 alt={message.productData.name}
@@ -1179,7 +1179,7 @@ Product Data: ${JSON.stringify(product)}`;
                         {message.attachments.map((attachment, index) => (
                           <div
                             key={index}
-                            className="bg-slate-600 rounded-lg p-3 border border-slate-500">
+                            className="bg-background/50 rounded-lg p-3 border border-border">
                             {attachment.type === "file" && attachment.url && (
                               <>
                                 {attachment.url.match(
@@ -1247,7 +1247,7 @@ Product Data: ${JSON.stringify(product)}`;
                   <button
                     key={index}
                     onClick={() => handleQuickAction(action)}
-                    className="text-left p-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700 rounded transition-colors">
+                    className="text-left p-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded transition-colors">
                     {action}
                   </button>
                 ))}
@@ -1256,7 +1256,7 @@ Product Data: ${JSON.stringify(product)}`;
           )}
 
           {/* Message Input */}
-          <div className="border-t border-slate-700 p-4">
+          <div className="border-t border-border p-4">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => setShowQuickActions(!showQuickActions)}
@@ -1305,13 +1305,13 @@ Product Data: ${JSON.stringify(product)}`;
                     or: "ପ୍ରଶାସକ ସହାୟତା ପାଇଁ ଆପଣଙ୍କ ବାର୍ତ୍ତା ଟାଇପ୍ କରନ୍ତୁ...",
                     pa: "ਐਡਮਿਨ ਸਪੋਰਟ ਲਈ ਆਪਣਾ ਸੰਦੇਸ਼ ਟਾਈਪ ਕਰੋ...",
                   })}
-                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
               <button
                 onClick={handleSendMessage}
                 disabled={isSending || !newMessage.trim()}
-                className="p-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+                className="p-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
                 {isSending ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                 ) : (
@@ -1325,9 +1325,9 @@ Product Data: ${JSON.stringify(product)}`;
         {/* Product Sharing Modal */}
         {showProductModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="bg-card border border-border rounded-lg p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-white">
+                <h3 className="text-xl font-bold text-foreground">
                   {tl("Share Product with Admin", {
                     hi: "एडमिन के साथ उत्पाद साझा करें",
                     bn: "প্রশাসনের সাথে পণ্য শেয়ার করুন",
@@ -1398,7 +1398,7 @@ Product Data: ${JSON.stringify(product)}`;
                       setShowProductModal(false);
                       router.push("/artisan/products");
                     }}
-                    className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all duration-200">
+                    className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-all duration-200">
                     {t("createProduct")}
                   </button>
                 </div>
@@ -1409,9 +1409,9 @@ Product Data: ${JSON.stringify(product)}`;
                     .map((product) => (
                       <div
                         key={product.id}
-                        className="bg-slate-700 border border-slate-600 rounded-lg p-4 hover:bg-slate-600 hover:border-orange-500/50 transition-all duration-200 text-center">
+                        className="bg-card border border-border rounded-lg p-4 hover:bg-accent hover:border-primary/50 transition-all duration-200 text-center">
                         {product.imageUrl && (
-                          <div className="w-full h-40 rounded-lg overflow-hidden mb-3 bg-slate-600">
+                          <div className="w-full h-40 rounded-lg overflow-hidden mb-3 bg-background">
                             <img
                               src={product.imageUrl}
                               alt={product.name}
@@ -1422,7 +1422,7 @@ Product Data: ${JSON.stringify(product)}`;
                             />
                           </div>
                         )}
-                        <h4 className="font-bold text-white mb-2">
+                        <h4 className="font-bold text-foreground mb-2">
                           {product.name}
                         </h4>
                         <div className="text-2xl font-bold text-green-300 mb-4">
@@ -1431,9 +1431,9 @@ Product Data: ${JSON.stringify(product)}`;
                         <button
                           onClick={() => handleShareProduct(product)}
                           disabled={isSending}
-                          className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg disabled:opacity-50 transition-all duration-200 flex items-center justify-center text-lg font-medium">
+                          className="w-full py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg disabled:opacity-50 transition-all duration-200 flex items-center justify-center text-lg font-medium">
                           {isSending ? (
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground"></div>
                           ) : (
                             <>
                               <Send className="h-5 w-5 mr-2" />

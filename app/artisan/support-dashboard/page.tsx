@@ -13,8 +13,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { useTranslation } from "@/lib/i18n/hooks";
-import { useTranslateContent } from "@/lib/hooks/useTranslateContent";
+import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
 
 interface SupportTicket {
   id: string;
@@ -68,17 +67,34 @@ interface SupportStats {
 }
 
 export default function SupportDashboardPage() {
-  const { t } = useTranslation();
-  const { translateText, currentLocale } = useTranslateContent();
+  const { t, translateBatch } = useDynamicTranslation();
+  
+  // Batch translate all static strings
+  const translations = translateBatch([
+    "Support Dashboard",
+    "Loading support data...",
+    "Refresh Data",
+    "Support Tickets",
+    "Refund Requests",
+    "Analytics",
+    "All",
+    "Open",
+    "In Progress",
+    "Resolved",
+    "Closed",
+    "Pending",
+    "Approved",
+    "Rejected",
+    "Total",
+    "Active",
+    "Average",
+    "Satisfaction",
+    "Response Time",
+    "No support tickets available",
+    "No refund requests available",
+    "View Details"
+  ]);
 
-  // Helper function for quick translations
-  const quickT = (
-    englishText: string,
-    translations: Record<string, string> = {}
-  ) => {
-    if (currentLocale === "en") return englishText;
-    return translations[currentLocale] || translations["hi"] || englishText;
-  };
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [refunds, setRefunds] = useState<RefundRequest[]>([]);
   const [stats, setStats] = useState<SupportStats | null>(null);
@@ -271,32 +287,32 @@ export default function SupportDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-orange-500 border-t-transparent mx-auto mb-4"></div>
-          <p className="text-white">{t("loadingSupportDashboard")}</p>
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4"></div>
+          <p className="text-foreground">{translations["Loading support data..."]}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+      <div className="bg-card border-b border-border px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white flex items-center">
-              <MessageSquare className="h-8 w-8 text-orange-500 mr-3" />
-              {t("supportDashboard")}
+            <h1 className="text-2xl font-bold text-foreground flex items-center">
+              <MessageSquare className="h-8 w-8 text-primary mr-3" />
+              {translations["Support Dashboard"]}
             </h1>
-            <p className="text-slate-400">{t("manageCustomerSupport")}</p>
+            <p className="text-muted-foreground">Manage customer support requests</p>
           </div>
 
           <div className="flex items-center space-x-4">
             <button
               onClick={() => loadSupportData()}
-              className="flex items-center space-x-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors">
+              className="flex items-center space-x-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors">
               <RefreshCw className="h-4 w-4" />
               <span>{t("refresh")}</span>
             </button>
@@ -308,57 +324,57 @@ export default function SupportDashboardPage() {
         {/* Stats Overview */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-slate-800 rounded-lg border border-slate-700 p-6">
+            <div className="bg-card rounded-lg border border-border p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm">{t("totalTickets")}</p>
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-muted-foreground text-sm">{translations["Support Tickets"]}</p>
+                  <p className="text-2xl font-bold text-foreground">
                     {stats.tickets.total}
                   </p>
                 </div>
-                <FileText className="h-8 w-8 text-blue-500" />
+                <FileText className="h-8 w-8 text-primary" />
               </div>
-              <p className="text-slate-400 text-xs mt-2">
-                {stats.tickets.open} {t("open")}, {stats.tickets.inProgress}{" "}
-                {t("inProgress")}
+              <p className="text-muted-foreground text-xs mt-2">
+                {stats.tickets.open} {translations["Open"]}, {stats.tickets.inProgress}{" "}
+                {translations["In Progress"]}
               </p>
             </div>
 
-            <div className="bg-slate-800 rounded-lg border border-slate-700 p-6">
+            <div className="bg-card rounded-lg border border-border p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm">
-                    {t("refundRequests")}
+                  <p className="text-muted-foreground text-sm">
+                    {translations["Refund Requests"]}
                   </p>
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-2xl font-bold text-foreground">
                     {stats.refunds.total}
                   </p>
                 </div>
                 <RefreshCw className="h-8 w-8 text-green-500" />
               </div>
-              <p className="text-slate-400 text-xs mt-2">
-                {stats.refunds.pending} {t("pendingReview")}
+              <p className="text-muted-foreground text-xs mt-2">
+                {stats.refunds.pending} {translations["Pending"]}
               </p>
             </div>
 
-            <div className="bg-slate-800 rounded-lg border border-slate-700 p-6">
+            <div className="bg-card rounded-lg border border-border p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm">{t("avgResponse")}</p>
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-muted-foreground text-sm">{translations["Response Time"]}</p>
+                  <p className="text-2xl font-bold text-foreground">
                     {stats.avgResponseTime}
                   </p>
                 </div>
-                <Clock className="h-8 w-8 text-orange-500" />
+                <Clock className="h-8 w-8 text-primary" />
               </div>
-              <p className="text-slate-400 text-xs mt-2">{t("targetHours")}</p>
+              <p className="text-muted-foreground text-xs mt-2">{translations["Average"]}</p>
             </div>
 
-            <div className="bg-slate-800 rounded-lg border border-slate-700 p-6">
+            <div className="bg-card rounded-lg border border-border p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm">{t("satisfaction")}</p>
-                  <p className="text-2xl font-bold text-white flex items-center">
+                  <p className="text-muted-foreground text-sm">{translations["Satisfaction"]}</p>
+                  <p className="text-2xl font-bold text-foreground flex items-center">
                     {stats.customerSatisfaction}
                     <Star className="h-5 w-5 text-yellow-400 ml-1" />
                   </p>
@@ -376,11 +392,11 @@ export default function SupportDashboardPage() {
         )}
 
         {/* Tab Navigation */}
-        <div className="flex space-x-1 bg-slate-800 p-1 rounded-lg mb-8 max-w-md">
+        <div className="flex space-x-1 bg-card p-1 rounded-lg mb-8 max-w-md border border-border">
           {[
-            { key: "tickets", label: t("supportTickets"), icon: FileText },
-            { key: "refunds", label: t("refundRequests"), icon: RefreshCw },
-            { key: "stats", label: t("analytics"), icon: BarChart3 },
+            { key: "tickets", label: translations["Support Tickets"], icon: FileText },
+            { key: "refunds", label: translations["Refund Requests"], icon: RefreshCw },
+            { key: "stats", label: translations["Analytics"], icon: BarChart3 },
           ].map(({ key, label, icon: Icon }) => (
             <button
               key={key}
@@ -389,8 +405,8 @@ export default function SupportDashboardPage() {
               }
               className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-all ${
                 activeTab === key
-                  ? "bg-orange-500 text-white shadow-md"
-                  : "text-slate-400 hover:text-white hover:bg-slate-700"
+                  ? "bg-primary text-primary-foreground shadow-md"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
               }`}>
               <Icon className="h-4 w-4 mr-2" />
               {label}
@@ -400,11 +416,11 @@ export default function SupportDashboardPage() {
 
         {/* Support Tickets Tab */}
         {activeTab === "tickets" && (
-          <div className="bg-slate-800 rounded-lg border border-slate-700">
-            <div className="p-6 border-b border-slate-700">
+          <div className="bg-card rounded-lg border border-border">
+            <div className="p-6 border-b border-border">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-white">
-                  {t("supportTickets")}
+                <h3 className="text-xl font-bold text-foreground">
+                  {translations["Support Tickets"]}
                 </h3>
                 <div className="flex items-center space-x-3">
                   <select
@@ -412,9 +428,9 @@ export default function SupportDashboardPage() {
                     onChange={(e) =>
                       setTicketFilter(e.target.value as typeof ticketFilter)
                     }
-                    className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-orange-500">
-                    <option value="all">{t("allStatus")}</option>
-                    <option value="open">{t("active")}</option>
+                    className="bg-background border border-border rounded-lg px-3 py-2 text-foreground text-sm focus:outline-none focus:border-primary">
+                    <option value="all">{translations["All"]}</option>
+                    <option value="open">{translations["Open"]}</option>
                     <option value="in-progress">{t("inProgress")}</option>
                     <option value="resolved">{t("resolved")}</option>
                     <option value="closed">{t("closed")}</option>
@@ -426,25 +442,25 @@ export default function SupportDashboardPage() {
             <div className="p-6">
               {filteredTickets.length === 0 ? (
                 <div className="text-center py-8">
-                  <FileText className="h-16 w-16 text-slate-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-white mb-2">
-                    {t("noSupportTickets")}
+                  <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-foreground mb-2">
+                    {translations["No support tickets available"]}
                   </h3>
-                  <p className="text-slate-400">{t("noTicketsMatchFilter")}</p>
+                  <p className="text-muted-foreground">No tickets match the selected filter</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {filteredTickets.map((ticket) => (
                     <div
                       key={ticket.id}
-                      className="border border-slate-700 rounded-lg p-4 hover:border-slate-600 transition-colors">
+                      className="border border-border rounded-lg p-4 hover:border-primary/50 transition-colors bg-card">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center space-x-3 mb-2">
-                            <span className="text-sm font-mono text-slate-400">
+                            <span className="text-sm font-mono text-muted-foreground">
                               #{ticket.id}
                             </span>
-                            <h4 className="font-medium text-white">
+                            <h4 className="font-medium text-foreground">
                               {ticket.subject}
                             </h4>
                             <span
@@ -452,28 +468,28 @@ export default function SupportDashboardPage() {
                                 ticket.status
                               )}`}>
                               {ticket.status === "open"
-                                ? t("openstatus")
+                                ? translations["Open"]
                                 : ticket.status === "in-progress"
-                                ? t("inprogressstatus")
+                                ? translations["In Progress"]
                                 : ticket.status === "resolved"
-                                ? t("resolved")
+                                ? translations["Resolved"]
                                 : ticket.status === "closed"
-                                ? t("closed")
-                                : t("unknown")}
+                                ? translations["Closed"]
+                                : "Unknown"}
                             </span>
                             <span
                               className={`text-xs font-medium ${getPriorityColor(
                                 ticket.priority
                               )}`}>
-                              {t(ticket.priority)}
+                              {ticket.priority}
                             </span>
                           </div>
 
-                          <p className="text-slate-300 text-sm mb-3 line-clamp-2">
+                          <p className="text-foreground/80 text-sm mb-3 line-clamp-2">
                             {ticket.description}
                           </p>
 
-                          <div className="flex items-center space-x-4 text-sm text-slate-400">
+                          <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                             <span>
                               {t("category")}:{" "}
                               {ticket.category === "technical"
@@ -512,9 +528,9 @@ export default function SupportDashboardPage() {
                               setUpdateType("ticket");
                               setShowUpdateModal(true);
                             }}
-                            className="bg-orange-500 text-white px-3 py-1 rounded text-xs hover:bg-orange-600 transition-colors flex items-center">
+                            className="bg-primary text-primary-foreground px-3 py-1 rounded text-xs hover:bg-primary/90 transition-colors flex items-center">
                             <Settings className="h-3 w-3 mr-1" />
-                            {t("update")}
+                            {translations["View Details"]}
                           </button>
                         </div>
                       </div>
@@ -528,21 +544,21 @@ export default function SupportDashboardPage() {
 
         {/* Refunds Tab */}
         {activeTab === "refunds" && (
-          <div className="bg-slate-800 rounded-lg border border-slate-700">
-            <div className="p-6 border-b border-slate-700">
-              <h3 className="text-xl font-bold text-white">
-                {t("refundRequests")}
+          <div className="bg-card rounded-lg border border-border">
+            <div className="p-6 border-b border-border">
+              <h3 className="text-xl font-bold text-foreground">
+                {translations["Refund Requests"]}
               </h3>
             </div>
 
             <div className="p-6">
               {refunds.length === 0 ? (
                 <div className="text-center py-8">
-                  <RefreshCw className="h-16 w-16 text-slate-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-white mb-2">
-                    No Refund Requests
+                  <RefreshCw className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-foreground mb-2">
+                    {translations["No refund requests available"]}
                   </h3>
-                  <p className="text-slate-400">
+                  <p className="text-muted-foreground">
                     No refund requests have been submitted yet.
                   </p>
                 </div>
@@ -551,11 +567,11 @@ export default function SupportDashboardPage() {
                   {refunds.map((refund) => (
                     <div
                       key={refund.id}
-                      className="border border-slate-700 rounded-lg p-4 hover:border-slate-600 transition-colors">
+                      className="border border-border rounded-lg p-4 hover:border-primary/50 transition-colors bg-card">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center space-x-3">
-                            <h4 className="font-medium text-white">
+                            <h4 className="font-medium text-foreground">
                               Order #{refund.orderId}
                             </h4>
                             <span
@@ -584,15 +600,15 @@ export default function SupportDashboardPage() {
                               Priority
                             </span>
                           </div>
-                          <p className="text-slate-400 mt-1">{refund.reason}</p>
-                          <p className="text-white mt-2 font-medium">
+                          <p className="text-muted-foreground mt-1">{refund.reason}</p>
+                          <p className="text-foreground mt-2 font-medium">
                             Amount: ₹{refund.amount.toLocaleString()}
                           </p>
-                          <p className="text-slate-400 text-sm mt-1">
+                          <p className="text-muted-foreground text-sm mt-1">
                             {refund.description}
                           </p>
 
-                          <div className="flex items-center space-x-4 text-slate-400 text-sm mt-3">
+                          <div className="flex items-center space-x-4 text-muted-foreground text-sm mt-3">
                             <span className="flex items-center">
                               <Mail className="h-3 w-3 mr-1" />
                               {refund.customerEmail}
@@ -617,9 +633,9 @@ export default function SupportDashboardPage() {
                               setUpdateType("refund");
                               setShowUpdateModal(true);
                             }}
-                            className="bg-orange-500 text-white px-3 py-1 rounded text-xs hover:bg-orange-600 transition-colors flex items-center">
+                            className="bg-primary text-primary-foreground px-3 py-1 rounded text-xs hover:bg-primary/90 transition-colors flex items-center">
                             <Settings className="h-3 w-3 mr-1" />
-                            Update
+                            {translations["View Details"]}
                           </button>
                         </div>
                       </div>
@@ -633,55 +649,45 @@ export default function SupportDashboardPage() {
 
         {/* Analytics Tab */}
         {activeTab === "stats" && (
-          <div className="bg-slate-800 rounded-lg border border-slate-700">
-            <div className="p-6 border-b border-slate-700">
-              <h3 className="text-xl font-bold text-white">{t("analytics")}</h3>
+          <div className="bg-card rounded-lg border border-border">
+            <div className="p-6 border-b border-border">
+              <h3 className="text-xl font-bold text-foreground">{translations["Analytics"]}</h3>
             </div>
 
             <div className="p-6 space-y-6">
               {/* Ticket Analytics */}
               <div>
-                <h4 className="text-lg font-semibold text-white mb-4">
-                  {quickT("Support Ticket Analytics", {
-                    hi: "सहायता टिकट विश्लेषण",
-                    or: "ସହାୟତା ଟିକେଟ୍ ବିଶ୍ଳେଷଣ",
-                    te: "మద్దతు టిక్కెట్ విశ్లేషణలు",
-                    bn: "সাপোর্ট টিকিট বিশ্লেষণ",
-                  })}
+                <h4 className="text-lg font-semibold text-foreground mb-4">
+                  {translations["Support Tickets"]} {translations["Analytics"]}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="bg-slate-700 rounded-lg p-4">
-                    <h5 className="text-sm font-medium text-slate-400 mb-2">
-                      {quickT("Total Tickets", {
-                        hi: "कुल टिकट",
-                        or: "ମୋଟ ଟିକେଟ୍",
-                        te: "మొత్తం టిక్కెట్స్",
-                        bn: "মোট টিকিট",
-                      })}
+                  <div className="bg-background rounded-lg p-4 border border-border">
+                    <h5 className="text-sm font-medium text-muted-foreground mb-2">
+                      {translations["Total"]} {translations["Support Tickets"]}
                     </h5>
-                    <p className="text-2xl font-bold text-white">
+                    <p className="text-2xl font-bold text-foreground">
                       {stats?.tickets.total || 0}
                     </p>
                   </div>
-                  <div className="bg-slate-700 rounded-lg p-4">
-                    <h5 className="text-sm font-medium text-slate-400 mb-2">
-                      Open Tickets
+                  <div className="bg-background rounded-lg p-4 border border-border">
+                    <h5 className="text-sm font-medium text-muted-foreground mb-2">
+                      {translations["Open"]}
                     </h5>
-                    <p className="text-2xl font-bold text-yellow-400">
+                    <p className="text-2xl font-bold text-primary">
                       {stats?.tickets.open || 0}
                     </p>
                   </div>
-                  <div className="bg-slate-700 rounded-lg p-4">
-                    <h5 className="text-sm font-medium text-slate-400 mb-2">
-                      In Progress
+                  <div className="bg-background rounded-lg p-4 border border-border">
+                    <h5 className="text-sm font-medium text-muted-foreground mb-2">
+                      {translations["In Progress"]}
                     </h5>
-                    <p className="text-2xl font-bold text-blue-400">
+                    <p className="text-2xl font-bold text-primary">
                       {stats?.tickets.inProgress || 0}
                     </p>
                   </div>
-                  <div className="bg-slate-700 rounded-lg p-4">
-                    <h5 className="text-sm font-medium text-slate-400 mb-2">
-                      Resolved
+                  <div className="bg-background rounded-lg p-4 border border-border">
+                    <h5 className="text-sm font-medium text-muted-foreground mb-2">
+                      {translations["Resolved"]}
                     </h5>
                     <p className="text-2xl font-bold text-green-400">
                       {stats?.tickets.resolved || 0}
@@ -692,44 +698,39 @@ export default function SupportDashboardPage() {
 
               {/* Refund Analytics */}
               <div>
-                <h4 className="text-lg font-semibold text-white mb-4">
-                  {quickT("Refund Request Analytics", {
-                    hi: "वापसी अनुरोध विश्लेषण",
-                    or: "ଫେରସ୍ତ ଅନୁରୋଧ ବିଶ୍ଳେଷଣ",
-                    te: "రీఫండ్ అభ్యర్థన విశ్లేషణలు",
-                    bn: "রিফান্ড অনুরোধ বিশ্লেষণ",
-                  })}
+                <h4 className="text-lg font-semibold text-foreground mb-4">
+                  {translations["Refund Requests"]} {translations["Analytics"]}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="bg-slate-700 rounded-lg p-4">
-                    <h5 className="text-sm font-medium text-slate-400 mb-2">
-                      Total Refunds
+                  <div className="bg-background rounded-lg p-4 border border-border">
+                    <h5 className="text-sm font-medium text-muted-foreground mb-2">
+                      {translations["Total"]} {translations["Refund Requests"]}
                     </h5>
-                    <p className="text-2xl font-bold text-white">
+                    <p className="text-2xl font-bold text-foreground">
                       {stats?.refunds.total || 0}
                     </p>
                   </div>
-                  <div className="bg-slate-700 rounded-lg p-4">
-                    <h5 className="text-sm font-medium text-slate-400 mb-2">
-                      Pending
+                  <div className="bg-background rounded-lg p-4 border border-border">
+                    <h5 className="text-sm font-medium text-muted-foreground mb-2">
+                      {translations["Pending"]}
                     </h5>
                     <p className="text-2xl font-bold text-yellow-400">
                       {stats?.refunds.pending || 0}
                     </p>
                   </div>
-                  <div className="bg-slate-700 rounded-lg p-4">
-                    <h5 className="text-sm font-medium text-slate-400 mb-2">
-                      Approved
+                  <div className="bg-background rounded-lg p-4 border border-border">
+                    <h5 className="text-sm font-medium text-muted-foreground mb-2">
+                      {translations["Approved"]}
                     </h5>
                     <p className="text-2xl font-bold text-green-400">
                       {stats?.refunds.approved || 0}
                     </p>
                   </div>
-                  <div className="bg-slate-700 rounded-lg p-4">
-                    <h5 className="text-sm font-medium text-slate-400 mb-2">
+                  <div className="bg-background rounded-lg p-4 border border-border">
+                    <h5 className="text-sm font-medium text-muted-foreground mb-2">
                       Processed
                     </h5>
-                    <p className="text-2xl font-bold text-blue-400">
+                    <p className="text-2xl font-bold text-primary">
                       {stats?.refunds.processed || 0}
                     </p>
                   </div>
@@ -738,49 +739,34 @@ export default function SupportDashboardPage() {
 
               {/* Performance Metrics */}
               <div>
-                <h4 className="text-lg font-semibold text-white mb-4">
-                  {quickT("Performance Metrics", {
-                    hi: "प्रदर्शन मेट्रिक्स",
-                    or: "କାର୍ଯ୍ୟଦକ୍ଷତା ମେଟ୍ରିକ୍ସ",
-                    te: "పనితీరు కొలమానాలు",
-                    bn: "কর্মক্ষমতা মেট্রিক্স",
-                  })}
+                <h4 className="text-lg font-semibold text-foreground mb-4">
+                  Performance Metrics
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-slate-700 rounded-lg p-4 text-center">
-                    <Clock className="h-8 w-8 text-orange-400 mx-auto mb-2" />
-                    <h5 className="text-sm font-medium text-slate-400 mb-1">
-                      {quickT("Avg Response Time", {
-                        hi: "औसत प्रतिक्रिया समय",
-                        or: "ହାରାହାରି ପ୍ରତିକ୍ରିୟା ସମୟ",
-                        te: "సగటు ప్రతిస్పందన సమయం",
-                        bn: "গড় প্রতিক্রিয়ার সময়",
-                      })}
+                  <div className="bg-background rounded-lg p-4 text-center border border-border">
+                    <Clock className="h-8 w-8 text-primary mx-auto mb-2" />
+                    <h5 className="text-sm font-medium text-muted-foreground mb-1">
+                      {translations["Response Time"]}
                     </h5>
-                    <p className="text-xl font-bold text-white">
+                    <p className="text-xl font-bold text-foreground">
                       {stats?.avgResponseTime || "N/A"}
                     </p>
                   </div>
-                  <div className="bg-slate-700 rounded-lg p-4 text-center">
+                  <div className="bg-background rounded-lg p-4 text-center border border-border">
                     <Star className="h-8 w-8 text-yellow-400 mx-auto mb-2" />
-                    <h5 className="text-sm font-medium text-slate-400 mb-1">
-                      {quickT("Customer Satisfaction", {
-                        hi: "ग्राहक संतुष्टि",
-                        or: "ଗ୍ରାହକ ସନ୍ତୁଷ୍ଟି",
-                        te: "కస్టమర్ సంతృప్తి",
-                        bn: "গ্রাহক সন্তুষ্টি",
-                      })}
+                    <h5 className="text-sm font-medium text-muted-foreground mb-1">
+                      {translations["Satisfaction"]}
                     </h5>
-                    <p className="text-xl font-bold text-white">
+                    <p className="text-xl font-bold text-foreground">
                       {stats?.customerSatisfaction || 0}/5
                     </p>
                   </div>
-                  <div className="bg-slate-700 rounded-lg p-4 text-center">
+                  <div className="bg-background rounded-lg p-4 text-center border border-border">
                     <TrendingUp className="h-8 w-8 text-green-400 mx-auto mb-2" />
-                    <h5 className="text-sm font-medium text-slate-400 mb-1">
+                    <h5 className="text-sm font-medium text-muted-foreground mb-1">
                       Response Rate
                     </h5>
-                    <p className="text-xl font-bold text-white">
+                    <p className="text-xl font-bold text-foreground">
                       {stats?.responseCount
                         ? Math.round(
                             (stats.responseCount / (stats.tickets.total || 1)) *
@@ -799,22 +785,22 @@ export default function SupportDashboardPage() {
         {/* Update Modal */}
         {showUpdateModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-lg border border-slate-700 w-full max-w-md">
-              <div className="p-6 border-b border-slate-700">
-                <h3 className="text-xl font-bold text-white">
+            <div className="bg-card rounded-lg border border-border w-full max-w-md">
+              <div className="p-6 border-b border-border">
+                <h3 className="text-xl font-bold text-foreground">
                   {updateType === "ticket"
-                    ? t("updateTicket")
-                    : t("updateRefundRequest")}
+                    ? "Update Ticket"
+                    : "Update Refund Request"}
                 </h3>
               </div>
 
               <div className="p-6">
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-white mb-2">
-                    {t("status")}
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Status
                   </label>
                   <select
-                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+                    className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground focus:outline-none focus:border-primary"
                     defaultValue={
                       updateType === "ticket"
                         ? selectedTicket?.status
@@ -823,31 +809,31 @@ export default function SupportDashboardPage() {
                     id="update-status">
                     {updateType === "ticket" ? (
                       <>
-                        <option value="open">{t("active")}</option>
-                        <option value="in-progress">{t("inProgress")}</option>
-                        <option value="resolved">{t("resolved")}</option>
-                        <option value="closed">{t("closed")}</option>
+                        <option value="open">{translations["Open"]}</option>
+                        <option value="in-progress">{translations["In Progress"]}</option>
+                        <option value="resolved">{translations["Resolved"]}</option>
+                        <option value="closed">{translations["Closed"]}</option>
                       </>
                     ) : (
                       <>
-                        <option value="pending">{t("pending")}</option>
-                        <option value="approved">{t("approved")}</option>
-                        <option value="rejected">{t("rejected")}</option>
-                        <option value="processed">{t("processed")}</option>
+                        <option value="pending">{translations["Pending"]}</option>
+                        <option value="approved">{translations["Approved"]}</option>
+                        <option value="rejected">{translations["Rejected"]}</option>
+                        <option value="processed">Processed</option>
                       </>
                     )}
                   </select>
                 </div>
 
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-white mb-2">
-                    {t("adminNotes")}
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Admin Notes
                   </label>
                   <textarea
                     id="update-notes"
                     rows={3}
-                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500"
-                    placeholder={t("addNotesForCustomer")}
+                    className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+                    placeholder="Add notes for customer..."
                   />
                 </div>
 
@@ -858,8 +844,8 @@ export default function SupportDashboardPage() {
                       setSelectedTicket(null);
                       setSelectedRefund(null);
                     }}
-                    className="px-4 py-2 text-slate-400 hover:text-white transition-colors">
-                    {t("cancel")}
+                    className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors">
+                    Cancel
                   </button>
                   <button
                     onClick={() => {
@@ -880,8 +866,8 @@ export default function SupportDashboardPage() {
                         handleUpdateRefund(selectedRefund.id, status, notes);
                       }
                     }}
-                    className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors">
-                    {t("update")}
+                    className="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                    Update
                   </button>
                 </div>
               </div>

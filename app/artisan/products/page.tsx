@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslation } from "@/lib/i18n/hooks";
+import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
 import {
   useTranslatedProducts,
   useTranslateContent,
@@ -46,7 +46,7 @@ interface NewProduct {
 
 export default function ArtisanProductsPage() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { translateBatch, t } = useDynamicTranslation();
   const { translateText, isHindi } = useTranslateContent();
   const [products, setProducts] = useState<Product[]>([]);
   const { translatedProducts, isLoading: isTranslating } =
@@ -68,6 +68,43 @@ export default function ArtisanProductsPage() {
     category: "",
     imageUrl: "",
   });
+
+  useEffect(() => {
+    translateBatch([
+      "Product Management",
+      "Manage your product catalog",
+      "Add Product",
+      "Search products",
+      "All",
+      "Active",
+      "Inactive",
+      "Loading products...",
+      "No products found",
+      "Try adjusting your search or filters",
+      "Create your first product",
+      "Edit",
+      "Delete",
+      "View",
+      "Product Name",
+      "Description",
+      "Price",
+      "Category",
+      "Image URL",
+      "Save Product",
+      "Cancel",
+      "Creating product...",
+      "Confirm delete product?",
+      "Page",
+      "of",
+      "Previous",
+      "Next",
+      "Showing",
+      "to",
+      "results",
+      "Video processing",
+      "Video ready",
+    ]);
+  }, [translateBatch]);
 
   useEffect(() => {
     checkAuth();
@@ -255,17 +292,13 @@ export default function ArtisanProductsPage() {
 
   if (isLoading || isTranslating) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">
             {isTranslating
-              ? isHindi
-                ? "अनुवाद हो रहा है..."
-                : "Translating..."
-              : isHindi
-              ? "उत्पाद लोड हो रहे हैं..."
-              : "Loading products..."}
+              ? t("Translating products...")
+              : t("Loading products...")}
           </p>
         </div>
       </div>
@@ -273,39 +306,40 @@ export default function ArtisanProductsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+      <div className="bg-card border border-border rounded-xl px-6 py-6 shadow-sm mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white">{t("products")}</h1>
-            <p className="text-slate-400">
-              {products.length} {isHindi ? "उत्पाद कुल" : "products total"}
+            <h1 className="text-3xl font-bold text-foreground">{t("Product Management")}</h1>
+            <div className="h-1 w-32 bg-primary rounded-full mt-2 mb-2"></div>
+            <p className="text-muted-foreground text-lg">
+              {t("Manage your product catalog")} • {products.length} {t("products total")}
             </p>
           </div>
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors flex items-center">
-            <Plus className="h-4 w-4 mr-2" />
-            {t("createProduct")}
+            className="bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary/90 transition-all duration-300 flex items-center shadow-lg transform hover:scale-105">
+            <Plus className="h-5 w-5 mr-2" />
+            {t("Add Product")}
           </button>
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-6">
+      <div>
         {/* Filters */}
-        <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 mb-6">
+        <div className="bg-card border border-border rounded-xl p-5 mb-6 shadow-sm">
           <div className="flex items-center space-x-4">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <input
                 type="text"
-                placeholder={isHindi ? "उत्पाद खोजें..." : "Search products..."}
+                placeholder={t("Search products")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 w-full"
+                className="pl-10 pr-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 w-full transition-all"
               />
             </div>
 
@@ -314,12 +348,10 @@ export default function ArtisanProductsPage() {
               onChange={(e) =>
                 setFilterStatus(e.target.value as "all" | "active" | "inactive")
               }
-              className="bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
-              <option value="all">
-                {isHindi ? "सभी उत्पाद" : "All Products"}
-              </option>
-              <option value="active">{t("active")}</option>
-              <option value="inactive">{t("inactive")}</option>
+              className="bg-background border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
+              <option value="all">{t("All")}</option>
+              <option value="active">{t("Active")}</option>
+              <option value="inactive">{t("Inactive")}</option>
             </select>
           </div>
         </div>
@@ -334,24 +366,22 @@ export default function ArtisanProductsPage() {
         {/* Products Grid */}
         {filteredProducts.length === 0 ? (
           <div className="text-center py-12">
-            <Package className="h-16 w-16 text-slate-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">
-              {isHindi ? "कोई उत्पाद नहीं मिला" : "No products found"}
+            <div className="bg-accent/50 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4">
+              <Package className="h-12 w-12 text-muted-foreground" />
+            </div>
+            <h3 className="text-xl font-semibold text-foreground mb-2">
+              {t("No products found")}
             </h3>
-            <p className="text-slate-400 mb-6">
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
               {searchTerm || filterStatus !== "all"
-                ? isHindi
-                  ? "अपनी खोज या फ़िल्टर को समायोजित करने का प्रयास करें"
-                  : "Try adjusting your search or filter"
-                : isHindi
-                ? "अपना पहला उत्पाद बनाकर शुरुआत करें"
-                : "Start by creating your first product"}
+                ? t("Try adjusting your search or filters")
+                : t("Create your first product")}
             </p>
             {!searchTerm && filterStatus === "all" && (
               <button
                 onClick={() => setShowAddModal(true)}
-                className="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors">
-                {t("createProduct")}
+                className="bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary/90 hover:shadow-lg transform hover:scale-105 transition-all">
+                {t("Add Product")}
               </button>
             )}
           </div>
@@ -365,9 +395,9 @@ export default function ArtisanProductsPage() {
               return (
                 <div
                   key={product.id}
-                  className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden hover:border-orange-500/50 transition-all hover:shadow-lg">
+                  className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/50 transition-all hover:shadow-xl">
                   {/* Carousel Container */}
-                  <div className="relative aspect-w-16 aspect-h-9 bg-slate-700 group">
+                  <div className="relative aspect-w-16 aspect-h-9 bg-muted group">
                     {/* Image Slide */}
                     <div className={`w-full h-48 ${currentSlide === 0 ? 'block' : 'hidden'}`}>
                       {product.imageUrl ? (
@@ -377,8 +407,8 @@ export default function ArtisanProductsPage() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full bg-slate-700 flex items-center justify-center">
-                          <Package className="h-12 w-12 text-slate-400" />
+                        <div className="w-full h-full bg-muted flex items-center justify-center">
+                          <Package className="h-12 w-12 text-muted-foreground" />
                         </div>
                       )}
                     </div>
@@ -423,7 +453,7 @@ export default function ArtisanProductsPage() {
                               onClick={() => goToSlide(product.id, index)}
                               className={`w-2 h-2 rounded-full transition-all ${
                                 currentSlide === index
-                                  ? 'bg-orange-500 w-4'
+                                  ? 'bg-primary w-4'
                                   : 'bg-white/50 hover:bg-white/75'
                               }`}
                               aria-label={`Go to slide ${index + 1}`}
@@ -439,63 +469,61 @@ export default function ArtisanProductsPage() {
                     )}
                   </div>
 
-                <div className="p-4">
+                <div className="p-5">
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-white line-clamp-1">
+                    <h3 className="font-semibold text-foreground line-clamp-1 text-lg">
                       {product.name}
                     </h3>
                     <button
                       onClick={() =>
                         handleToggleStatus(product.id, product.isActive)
                       }
-                      className={`px-2 py-1 text-xs rounded-full ${
+                      className={`px-3 py-1 text-xs rounded-full font-medium transition-all ${
                         product.isActive
-                          ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                          : "bg-slate-500/20 text-slate-400 border border-slate-500/30"
+                          ? "bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30"
+                          : "bg-muted text-muted-foreground border border-border hover:bg-accent"
                       }`}>
-                      {product.isActive ? t("active") : t("inactive")}
+                      {product.isActive ? t("Active") : t("Inactive")}
                     </button>
                   </div>
 
-                  <p className="text-slate-400 text-sm mb-3 line-clamp-2">
+                  <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
                     {product.description}
                   </p>
 
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-xl font-bold text-orange-400">
+                    <span className="text-xl font-bold text-primary">
                       ₹{product.price.toLocaleString()}
                     </span>
-                    <span className="text-sm text-slate-500 bg-slate-700 px-2 py-1 rounded">
+                    <span className="text-sm text-muted-foreground bg-accent px-3 py-1 rounded-full border border-border">
                       {product.category}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-500">
+                  <div className="flex items-center justify-between border-t border-border pt-3">
+                    <span className="text-xs text-muted-foreground">
                       {new Date(product.createdAt).toLocaleDateString()}
                     </span>
 
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-1">
                       <button
                         onClick={() => router.push(`/products/${product.id}`)}
-                        className="p-2 text-slate-400 hover:text-blue-400 transition-colors"
-                        title={isHindi ? "उत्पाद देखें" : "View Product"}>
+                        className="p-2 text-muted-foreground hover:text-primary hover:bg-accent rounded-lg transition-all"
+                        title={t("View")}>
                         <Eye className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() =>
                           router.push(`/artisan/products/edit/${product.id}`)
                         }
-                        className="p-2 text-slate-400 hover:text-green-400 transition-colors"
-                        title={
-                          isHindi ? "उत्पाद संपादित करें" : "Edit Product"
-                        }>
+                        className="p-2 text-muted-foreground hover:text-green-500 hover:bg-accent rounded-lg transition-all"
+                        title={t("Edit")}>
                         <Edit className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => handleDeleteProduct(product.id)}
-                        className="p-2 text-slate-400 hover:text-red-400 transition-colors"
-                        title={isHindi ? "उत्पाद हटाएं" : "Delete Product"}>
+                        className="p-2 text-muted-foreground hover:text-red-500 hover:bg-accent rounded-lg transition-all"
+                        title={t("Delete")}>
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
@@ -510,25 +538,25 @@ export default function ArtisanProductsPage() {
 
       {/* Add Product Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-slate-700">
+        <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-card border border-border rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="p-6 border-b border-border bg-accent/30">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-white">
-                  {t("createProduct")}
+                <h2 className="text-2xl font-bold text-foreground">
+                  {t("Add Product")}
                 </h2>
                 <button
                   onClick={() => setShowAddModal(false)}
-                  className="text-slate-400 hover:text-white">
-                  <X className="h-6 w-6" />
+                  className="text-muted-foreground hover:text-foreground hover:bg-accent p-2 rounded-lg transition-all">
+                  <X className="h-5 w-5" />
                 </button>
               </div>
             </div>
 
-            <form onSubmit={handleAddProduct} className="p-6 space-y-4">
+            <form onSubmit={handleAddProduct} className="p-6 space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {isHindi ? "उत्पाद का नाम" : "Product Name"}
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t("Product Name")}
                 </label>
                 <input
                   type="text"
@@ -537,16 +565,14 @@ export default function ArtisanProductsPage() {
                   onChange={(e) =>
                     setNewProduct({ ...newProduct, name: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={
-                    isHindi ? "उत्पाद का नाम दर्ज करें" : "Enter product name"
-                  }
+                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                  placeholder={t("Product Name")}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {isHindi ? "विवरण" : "Description"}
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t("Description")}
                 </label>
                 <textarea
                   required
@@ -558,18 +584,14 @@ export default function ArtisanProductsPage() {
                     })
                   }
                   rows={3}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={
-                    isHindi
-                      ? "उत्पाद का विवरण दर्ज करें"
-                      : "Enter product description"
-                  }
+                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all resize-none"
+                  placeholder={t("Description")}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {isHindi ? "मूल्य (₹)" : "Price (₹)"}
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t("Price")} (₹)
                 </label>
                 <input
                   type="number"
@@ -580,14 +602,14 @@ export default function ArtisanProductsPage() {
                   onChange={(e) =>
                     setNewProduct({ ...newProduct, price: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                   placeholder="0.00"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {isHindi ? "श्रेणी" : "Category"}
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t("Category")}
                 </label>
                 <input
                   type="text"
@@ -596,18 +618,14 @@ export default function ArtisanProductsPage() {
                   onChange={(e) =>
                     setNewProduct({ ...newProduct, category: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={
-                    isHindi
-                      ? "जैसे: वस्त्र, मिट्टी के बर्तन, आभूषण"
-                      : "e.g., Textiles, Pottery, Jewelry"
-                  }
+                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                  placeholder={t("Category")}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {isHindi ? "छवि URL (वैकल्पिक)" : "Image URL (optional)"}
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  {t("Image URL")} (optional)
                 </label>
                 <input
                   type="url"
@@ -615,7 +633,7 @@ export default function ArtisanProductsPage() {
                   onChange={(e) =>
                     setNewProduct({ ...newProduct, imageUrl: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                   placeholder="https://example.com/image.jpg"
                 />
               </div>
@@ -626,23 +644,23 @@ export default function ArtisanProductsPage() {
                 </div>
               )}
 
-              <div className="flex space-x-3 pt-4">
+              <div className="flex space-x-3 pt-6 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 px-4 py-2 text-slate-300 border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors">
-                  {t("cancel")}
+                  className="flex-1 px-4 py-2.5 text-foreground border border-border rounded-lg hover:bg-accent transition-all font-medium">
+                  {t("Cancel")}
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
+                  className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center font-medium">
                   {isSubmitting ? (
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
                   ) : (
                     <>
-                      <Save className="h-4 w-4 mr-2" />
-                      {t("createProduct")}
+                      <Save className="h-5 w-5 mr-2" />
+                      {t("Save Product")}
                     </>
                   )}
                 </button>

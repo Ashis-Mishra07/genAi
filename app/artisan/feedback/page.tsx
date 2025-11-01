@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslation } from "@/lib/i18n/hooks";
+import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
 import {
   ArrowLeft,
   MessageCircle,
@@ -34,7 +34,7 @@ interface Message {
 
 export default function ArtisanFeedbackPage() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, translateBatch, currentLocale } = useDynamicTranslation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,6 +43,46 @@ export default function ArtisanFeedbackPage() {
   const [showReplyModal, setShowReplyModal] = useState(false);
   const [replyMessage, setReplyMessage] = useState("");
   const [isReplying, setIsReplying] = useState(false);
+
+  // Pre-load translations
+  useEffect(() => {
+    translateBatch([
+      "Customer Feedback",
+      "Back to Dashboard",
+      "unread feedback",
+      "unread feedbacks",
+      "All caught up",
+      "Search feedback",
+      "All Feedback",
+      "New",
+      "Replied",
+      "Pending",
+      "Closed",
+      "No messages found",
+      "About",
+      "Regarding",
+      "Reply",
+      "Select a message",
+      "Select a message to view details",
+      "Reply to",
+      "Type your reply",
+      "Cancel",
+      "Send Reply",
+      "Sending",
+      "Loading messages",
+      "Delete confirmation",
+      "Question about custom pottery",
+      "Shipping inquiry",
+      "Custom jewelry request",
+      "Workshop inquiry",
+      "Hi! I saw your beautiful ceramic bowls",
+      "Hello, I ordered a handwoven scarf",
+      "I'm looking for a custom engagement ring",
+      "Do you offer any pottery workshops",
+      "Ceramic Bowl Set",
+      "Handwoven Wool Scarf",
+    ]);
+  }, [currentLocale, translateBatch]);
 
   // Mock data for demonstration
   useEffect(() => {
@@ -117,30 +157,30 @@ export default function ArtisanFeedbackPage() {
   const getMessageSubject = useCallback((message: Message) => {
     switch (message.subject) {
       case "Question about custom pottery":
-        return t("sampleSubject1");
+        return t("Question about custom pottery");
       case "Shipping inquiry":
-        return t("sampleSubject2");
+        return t("Shipping inquiry");
       case "Custom jewelry request":
-        return t("sampleSubject3");
+        return t("Custom jewelry request");
       case "Workshop inquiry":
-        return t("sampleSubject4");
+        return t("Workshop inquiry");
       default:
         return message.subject;
     }
   }, [t]);
 
   const getMessageText = useCallback((message: Message) => {
-    if (message.message === "Hi! I saw your beautiful ceramic bowls and I'm interested in commissioning a custom set for my kitchen. Could you tell me more about your process and pricing?") {
-      return t("sampleMessage1");
+    if (message.message.includes("ceramic bowls")) {
+      return t("Hi! I saw your beautiful ceramic bowls");
     }
-    if (message.message === "Hello, I ordered a handwoven scarf last week. Can you provide an update on the shipping status?") {
-      return t("sampleMessage2");
+    if (message.message.includes("handwoven scarf")) {
+      return t("Hello, I ordered a handwoven scarf");
     }
-    if (message.message === "I'm looking for a custom engagement ring. Do you work with specific gemstones provided by the customer?") {
-      return t("sampleMessage3");
+    if (message.message.includes("engagement ring")) {
+      return t("I'm looking for a custom engagement ring");
     }
-    if (message.message === "Do you offer any pottery workshops? I'd love to learn from you!") {
-      return t("sampleMessage4");
+    if (message.message.includes("pottery workshops")) {
+      return t("Do you offer any pottery workshops");
     }
     return message.message;
   }, [t]);
@@ -149,9 +189,9 @@ export default function ArtisanFeedbackPage() {
     if (!productName) return productName;
     switch (productName) {
       case "Ceramic Bowl Set":
-        return t("sampleProduct1");
+        return t("Ceramic Bowl Set");
       case "Handwoven Wool Scarf":
-        return t("sampleProduct2");
+        return t("Handwoven Wool Scarf");
       default:
         return productName;
     }
@@ -177,28 +217,28 @@ export default function ArtisanFeedbackPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "new":
-        return "bg-blue-500/20 text-blue-400 border border-blue-500/30";
+        return "bg-primary/20 text-primary border border-primary/30";
       case "replied":
-        return "bg-green-500/20 text-green-400 border border-green-500/30";
+        return "bg-green-500/20 text-green-600 dark:text-green-400 border border-green-500/30";
       case "pending":
-        return "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30";
+        return "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border border-yellow-500/30";
       case "closed":
-        return "bg-gray-500/20 text-gray-400 border border-gray-500/30";
+        return "bg-muted-foreground/20 text-muted-foreground border border-border";
       default:
-        return "bg-gray-500/20 text-gray-400 border border-gray-500/30";
+        return "bg-muted-foreground/20 text-muted-foreground border border-border";
     }
   };
 
   const getStatusText = useCallback((status: string) => {
     switch (status) {
       case "new":
-        return t("new");
+        return t("New");
       case "replied":
-        return t("replied");
+        return t("Replied");
       case "pending":
-        return t("pending");
+        return t("Pending");
       case "closed":
-        return t("closed");
+        return t("Closed");
       default:
         return status;
     }
@@ -253,7 +293,7 @@ export default function ArtisanFeedbackPage() {
   };
 
   const handleDelete = async (messageId: string) => {
-    if (!confirm(t("deleteConfirm"))) return;
+    if (!confirm(t("Delete confirmation"))) return;
 
     setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
     if (selectedMessage?.id === messageId) {
@@ -265,38 +305,38 @@ export default function ArtisanFeedbackPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-orange-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-center">
-          <MessageCircle className="h-12 w-12 mx-auto mb-4 animate-pulse" />
-          <p>{t("loadingMessages")}</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-foreground text-center">
+          <MessageCircle className="h-12 w-12 mx-auto mb-4 animate-pulse text-primary" />
+          <p>{t("Loading messages")}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-orange-900 to-slate-900 p-4">
+    <div className="min-h-screen bg-background p-4">
       {/* Header */}
       <div className="max-w-7xl mx-auto mb-8">
         <div className="flex items-center justify-between">
           <button
             onClick={() => router.push("/artisan/dashboard")}
-            className="flex items-center text-white/70 hover:text-white transition-colors">
+            className="flex items-center text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-5 w-5 mr-2" />
-            {t("backToDashboard")}
+            {t("Back to Dashboard")}
           </button>
-          <div className="flex items-center text-white">
-            <MessageCircle className="h-6 w-6 mr-2" />
+          <div className="flex items-center text-foreground">
+            <MessageCircle className="h-6 w-6 mr-2 text-primary" />
             <div>
               <span className="text-xl font-bold">
-                {t("customerFeedback")}
+                {t("Customer Feedback")}
               </span>
-              <p className="text-sm text-white/70">
+              <p className="text-sm text-muted-foreground">
                 {unreadCount > 0
                   ? unreadCount === 1 
-                    ? `1 ${t("unreadFeedback")}`
-                    : `${unreadCount} ${t("unreadFeedbacks")}`
-                  : t("allCaughtUp")}
+                    ? `1 ${t("unread feedback")}`
+                    : `${unreadCount} ${t("unread feedbacks")}`
+                  : t("All caught up")}
               </p>
             </div>
           </div>
@@ -307,38 +347,38 @@ export default function ArtisanFeedbackPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Messages List */}
           <div className="lg:col-span-1">
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+            <div className="bg-card backdrop-blur-sm rounded-lg border border-border shadow-lg">
               {/* Search and Filter */}
-              <div className="p-4 border-b border-white/20">
+              <div className="p-4 border-b border-border">
                 <div className="relative mb-4">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-white/50" />
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <input
                     type="text"
-                    placeholder={t("searchFeedback")}
+                    placeholder={t("Search feedback")}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    className="w-full pl-10 pr-3 py-2 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
-                  <option value="all" className="bg-slate-800">
-                    {t("allFeedback")}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
+                  <option value="all">
+                    {t("All Feedback")}
                   </option>
-                  <option value="new" className="bg-slate-800">
-                    {t("new")}
+                  <option value="new">
+                    {t("New")}
                   </option>
-                  <option value="replied" className="bg-slate-800">
-                    {t("replied")}
+                  <option value="replied">
+                    {t("Replied")}
                   </option>
-                  <option value="pending" className="bg-slate-800">
-                    {t("pending")}
+                  <option value="pending">
+                    {t("Pending")}
                   </option>
-                  <option value="closed" className="bg-slate-800">
-                    {t("closed")}
+                  <option value="closed">
+                    {t("Closed")}
                   </option>
                 </select>
               </div>
@@ -346,10 +386,10 @@ export default function ArtisanFeedbackPage() {
               {/* Messages List */}
               <div className="max-h-[600px] overflow-y-auto">
                 {filteredMessages.length === 0 ? (
-                  <div className="p-8 text-center text-white/70">
-                    <MessageCircle className="h-12 w-12 mx-auto mb-4 text-white/30" />
+                  <div className="p-8 text-center text-muted-foreground">
+                    <MessageCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
                     <p>
-                      {t("noMessagesFound")}
+                      {t("No messages found")}
                     </p>
                   </div>
                 ) : (
@@ -362,18 +402,18 @@ export default function ArtisanFeedbackPage() {
                           handleMarkAsRead(message.id);
                         }
                       }}
-                      className={`p-4 border-b border-white/10 hover:bg-white/5 cursor-pointer transition-colors ${
+                      className={`p-4 border-b border-border hover:bg-accent cursor-pointer transition-colors ${
                         selectedMessage?.id === message.id
-                          ? "bg-orange-500/20 border-l-4 border-l-orange-500"
+                          ? "bg-primary/10 border-l-4 border-l-primary"
                           : ""
-                      } ${!message.isRead ? "bg-blue-500/20" : ""}`}>
+                      } ${!message.isRead ? "bg-primary/5" : ""}`}>
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center">
                           <div className="flex items-center">
                             {!message.isRead ? (
-                              <Mail className="h-4 w-4 text-blue-400 mr-2" />
+                              <Mail className="h-4 w-4 text-primary mr-2" />
                             ) : (
-                              <MailOpen className="h-4 w-4 text-white/50 mr-2" />
+                              <MailOpen className="h-4 w-4 text-muted-foreground mr-2" />
                             )}
                             {message.isImportant && (
                               <Star className="h-4 w-4 text-yellow-500 mr-2" />
@@ -381,7 +421,7 @@ export default function ArtisanFeedbackPage() {
                           </div>
                           <span
                             className={`text-sm font-medium ${
-                              !message.isRead ? "text-white" : "text-white/90"
+                              !message.isRead ? "text-foreground" : "text-foreground/90"
                             }`}>
                             {message.customerName}
                           </span>
@@ -403,23 +443,23 @@ export default function ArtisanFeedbackPage() {
                       <h3
                         className={`text-sm mb-1 ${
                           !message.isRead
-                            ? "font-semibold text-white"
-                            : "text-white/80"
+                            ? "font-semibold text-foreground"
+                            : "text-foreground/80"
                         }`}>
                         {getMessageSubject(message)}
                       </h3>
 
-                      <p className="text-xs text-white/60 mb-2 line-clamp-2">
+                      <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
                         {getMessageText(message)}
                       </p>
 
                       {message.productName && (
-                        <div className="text-xs text-orange-400 mb-2">
-                          {t("about")}: {getProductName(message.productName)}
+                        <div className="text-xs text-primary mb-2">
+                          {t("About")}: {getProductName(message.productName)}
                         </div>
                       )}
 
-                      <div className="flex items-center justify-between text-xs text-white/50">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
                         <span>
                           {new Date(message.createdAt).toLocaleDateString()}
                         </span>
@@ -435,19 +475,19 @@ export default function ArtisanFeedbackPage() {
           {/* Message Detail */}
           <div className="lg:col-span-2">
             {selectedMessage ? (
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+              <div className="bg-card backdrop-blur-sm rounded-lg border border-border shadow-lg">
                 {/* Message Header */}
-                <div className="p-6 border-b border-white/20">
+                <div className="p-6 border-b border-border">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center">
-                      <div className="h-10 w-10 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full flex items-center justify-center text-white font-medium mr-3">
+                      <div className="h-10 w-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-medium mr-3">
                         {selectedMessage.customerName.charAt(0)}
                       </div>
                       <div>
-                        <h2 className="text-lg font-semibold text-white">
+                        <h2 className="text-lg font-semibold text-foreground">
                           {selectedMessage.customerName}
                         </h2>
-                        <p className="text-sm text-white/70">
+                        <p className="text-sm text-muted-foreground">
                           {selectedMessage.customerEmail}
                         </p>
                       </div>
@@ -466,24 +506,24 @@ export default function ArtisanFeedbackPage() {
 
                       <button
                         onClick={() => handleDelete(selectedMessage.id)}
-                        className="p-2 text-white/50 hover:text-red-400 transition-colors">
+                        className="p-2 text-muted-foreground hover:text-destructive transition-colors">
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-semibold text-white mb-2">
+                    <h3 className="text-xl font-semibold text-foreground mb-2">
                       {getMessageSubject(selectedMessage)}
                     </h3>
                     {selectedMessage.productName && (
-                      <div className="flex items-center text-sm text-orange-400 mb-2">
+                      <div className="flex items-center text-sm text-primary mb-2">
                         <span>
-                          {t("regarding")}: {getProductName(selectedMessage.productName)}
+                          {t("Regarding")}: {getProductName(selectedMessage.productName)}
                         </span>
                       </div>
                     )}
-                    <div className="flex items-center text-sm text-white/60">
+                    <div className="flex items-center text-sm text-muted-foreground">
                       <Clock className="h-4 w-4 mr-1" />
                       <span>
                         {new Date(selectedMessage.createdAt).toLocaleString()}
@@ -492,7 +532,7 @@ export default function ArtisanFeedbackPage() {
                         <>
                           <span className="mx-2">•</span>
                           <span>
-                            {t("replied")} {new Date(selectedMessage.repliedAt).toLocaleString()}
+                            {t("Replied")} {new Date(selectedMessage.repliedAt).toLocaleString()}
                           </span>
                         </>
                       )}
@@ -503,29 +543,29 @@ export default function ArtisanFeedbackPage() {
                 {/* Message Content */}
                 <div className="p-6">
                   <div className="prose max-w-none">
-                    <p className="text-white/90 whitespace-pre-wrap">
+                    <p className="text-foreground whitespace-pre-wrap">
                       {getMessageText(selectedMessage)}
                     </p>
                   </div>
 
-                  <div className="mt-6 pt-6 border-t border-white/20">
+                  <div className="mt-6 pt-6 border-t border-border">
                     <button
                       onClick={() => setShowReplyModal(true)}
-                      className="flex items-center px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg transition-all duration-200">
+                      className="flex items-center px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
                       <Reply className="h-4 w-4 mr-2" />
-                      {t("reply")}
+                      {t("Reply")}
                     </button>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-12 text-center">
-                <MessageCircle className="h-16 w-16 text-white/30 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-white mb-2">
-                  {t("selectFeedback")}
+              <div className="bg-card backdrop-blur-sm rounded-lg border border-border shadow-lg p-12 text-center">
+                <MessageCircle className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-foreground mb-2">
+                  {t("Select a message")}
                 </h3>
-                <p className="text-white/70">
-                  {t("selectFeedbackDescription")}
+                <p className="text-muted-foreground">
+                  {t("Select a message to view details")}
                 </p>
               </div>
             )}
@@ -536,12 +576,12 @@ export default function ArtisanFeedbackPage() {
       {/* Reply Modal */}
       {showReplyModal && selectedMessage && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-800 rounded-lg border border-white/20 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="p-6 border-b border-white/20">
-              <h3 className="text-lg font-semibold text-white">
-                {t("replyTo")} {selectedMessage.customerName}
+          <div className="bg-card rounded-lg border border-border shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6 border-b border-border">
+              <h3 className="text-lg font-semibold text-foreground">
+                {t("Reply to")} {selectedMessage.customerName}
               </h3>
-              <p className="text-sm text-white/70">
+              <p className="text-sm text-muted-foreground">
                 Re: {selectedMessage.subject}
               </p>
             </div>
@@ -551,31 +591,31 @@ export default function ArtisanFeedbackPage() {
                 value={replyMessage}
                 onChange={(e) => setReplyMessage(e.target.value)}
                 rows={8}
-                className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 resize-none"
-                placeholder={t("typeYourReply")}
+                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
+                placeholder={t("Type your reply")}
               />
             </div>
 
-            <div className="p-6 border-t border-white/20 flex justify-end space-x-4">
+            <div className="p-6 border-t border-border flex justify-end space-x-4">
               <button
                 onClick={() => {
                   setShowReplyModal(false);
                   setReplyMessage("");
                 }}
-                className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white/90 hover:bg-white/20 transition-colors">
-                {t("cancel")}
+                className="px-4 py-2 bg-secondary border border-border rounded-lg text-secondary-foreground hover:bg-secondary/80 transition-colors">
+                {t("Cancel")}
               </button>
 
               <button
                 onClick={handleReply}
                 disabled={isReplying || !replyMessage.trim()}
-                className="flex items-center px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+                className="flex items-center px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg">
                 {isReplying ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground mr-2"></div>
                 ) : (
                   <Reply className="h-4 w-4 mr-2" />
                 )}
-                {isReplying ? t("sending") : t("sendReply")}
+                {isReplying ? t("Sending") : t("Send Reply")}
               </button>
             </div>
           </div>

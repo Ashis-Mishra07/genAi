@@ -18,6 +18,7 @@ import {
     XCircle
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
 
 interface Order {
   id: string;
@@ -50,10 +51,15 @@ interface OrderItem {
 }
 
 export default function OrdersPage() {
+  const { translateBatch, t } = useDynamicTranslation();
   const [orders, setOrders] = useState<Order[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [ordersPerPage] = useState(10);
 
   // Modal states
   const [showViewModal, setShowViewModal] = useState(false);
@@ -108,6 +114,46 @@ export default function OrdersPage() {
         };
     }
   };
+
+  useEffect(() => {
+    translateBatch([
+      "Orders Management",
+      "Manage and track all customer orders",
+      "Refresh Orders",
+      "Total Orders",
+      "Pending",
+      "Confirmed",
+      "Shipped",
+      "Delivered",
+      "Cancelled",
+      "Search orders...",
+      "All Status",
+      "No Orders Found",
+      "No orders have been placed yet.",
+      "No orders match your search criteria.",
+      "Order",
+      "Customer",
+      "Status",
+      "Payment",
+      "Amount",
+      "Date",
+      "Actions",
+      "Loading orders...",
+      "Order Details",
+      "Close",
+      "Online",
+      "COD",
+      "Paid",
+      "Failed",
+      "Previous",
+      "Next",
+      "Page",
+      "of",
+      "Showing",
+      "to",
+      "results",
+    ]);
+  }, [translateBatch]);
 
   useEffect(() => {
     // Check authentication on mount
@@ -231,6 +277,17 @@ export default function OrdersPage() {
     return matchesSearch && matchesStatus;
   });
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+  const indexOfLastOrder = currentPage * ordersPerPage;
+  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
+  const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
+
   const handleViewOrder = (order: Order) => {
     setSelectedOrder(order);
     setShowViewModal(true);
@@ -248,90 +305,90 @@ export default function OrdersPage() {
 
   if (isLoading) {
     return (
-      <div className="bg-black min-h-screen p-6 flex items-center justify-center">
+      <div className="bg-background min-h-screen p-6 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-400 mx-auto"></div>
-          <p className="text-white mt-4">Loading orders...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="text-foreground mt-4">{t("Loading orders...")}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-black min-h-screen p-6">
+    <div className="bg-background min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-white">Orders Management</h1>
-            <p className="text-gray-400">
-              Manage and track all customer orders
+            <h1 className="text-3xl font-bold text-foreground">{t("Orders Management")}</h1>
+            <p className="text-muted-foreground">
+              {t("Manage and track all customer orders")}
             </p>
           </div>
           <div className="flex items-center space-x-2">
             <Button
               onClick={() => loadOrders()}
-              className="bg-orange-500 hover:bg-orange-600"
+              className="bg-primary hover:bg-primary/90"
             >
               <Package className="h-4 w-4 mr-2" />
-              Refresh Orders
+              {t("Refresh Orders")}
             </Button>
           </div>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+          <div className="bg-card border border-border rounded-lg p-4 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Total Orders</p>
-                <p className="text-2xl font-bold text-white">{orders.length}</p>
+                <p className="text-muted-foreground text-sm">{t("Total Orders")}</p>
+                <p className="text-2xl font-bold text-foreground">{orders.length}</p>
               </div>
-              <ShoppingBag className="h-8 w-8 text-orange-400" />
+              <ShoppingBag className="h-8 w-8 text-primary" />
             </div>
           </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+          <div className="bg-card border border-border rounded-lg p-4 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Pending</p>
-                <p className="text-2xl font-bold text-yellow-400">
+                <p className="text-muted-foreground text-sm">{t("Pending")}</p>
+                <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
                   {orders.filter(o => o.status === "PENDING").length}
                 </p>
               </div>
-              <Clock className="h-8 w-8 text-yellow-400" />
+              <Clock className="h-8 w-8 text-yellow-600 dark:text-yellow-400" />
             </div>
           </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+          <div className="bg-card border border-border rounded-lg p-4 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Confirmed</p>
-                <p className="text-2xl font-bold text-blue-400">
+                <p className="text-muted-foreground text-sm">{t("Confirmed")}</p>
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                   {orders.filter(o => o.status === "CONFIRMED").length}
                 </p>
               </div>
-              <CheckCircle className="h-8 w-8 text-blue-400" />
+              <CheckCircle className="h-8 w-8 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+          <div className="bg-card border border-border rounded-lg p-4 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Shipped</p>
-                <p className="text-2xl font-bold text-purple-400">
+                <p className="text-muted-foreground text-sm">{t("Shipped")}</p>
+                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                   {orders.filter(o => o.status === "SHIPPED").length}
                 </p>
               </div>
-              <Truck className="h-8 w-8 text-purple-400" />
+              <Truck className="h-8 w-8 text-purple-600 dark:text-purple-400" />
             </div>
           </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+          <div className="bg-card border border-border rounded-lg p-4 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Delivered</p>
-                <p className="text-2xl font-bold text-green-400">
+                <p className="text-muted-foreground text-sm">{t("Delivered")}</p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                   {orders.filter(o => o.status === "DELIVERED").length}
                 </p>
               </div>
-              <Package className="h-8 w-8 text-green-400" />
+              <Package className="h-8 w-8 text-green-600 dark:text-green-400" />
             </div>
           </div>
         </div>
@@ -339,96 +396,96 @@ export default function OrdersPage() {
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <input
               type="text"
-              placeholder="Search orders..."
+              placeholder={t("Search orders...")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
           <div className="relative">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="pl-10 pr-8 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="pl-10 pr-8 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value="all">All Status</option>
-              <option value="PENDING">Pending</option>
-              <option value="CONFIRMED">Confirmed</option>
-              <option value="SHIPPED">Shipped</option>
-              <option value="DELIVERED">Delivered</option>
-              <option value="CANCELLED">Cancelled</option>
+              <option value="all">{t("All Status")}</option>
+              <option value="PENDING">{t("Pending")}</option>
+              <option value="CONFIRMED">{t("Confirmed")}</option>
+              <option value="SHIPPED">{t("Shipped")}</option>
+              <option value="DELIVERED">{t("Delivered")}</option>
+              <option value="CANCELLED">{t("Cancelled")}</option>
             </select>
           </div>
         </div>
 
         {/* Orders Table */}
         {filteredOrders.length === 0 ? (
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 text-center">
-            <Package className="h-16 w-16 text-gray-600 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">No Orders Found</h3>
-            <p className="text-gray-400">
+          <div className="bg-card border border-border rounded-lg p-8 text-center">
+            <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-foreground mb-2">{t("No Orders Found")}</h3>
+            <p className="text-muted-foreground">
               {orders.length === 0 
-                ? "No orders have been placed yet."
-                : "No orders match your search criteria."
+                ? t("No orders have been placed yet.")
+                : t("No orders match your search criteria.")
               }
             </p>
           </div>
         ) : (
-          <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
+          <div className="bg-card border border-border rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-800">
+                <thead className="bg-accent">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Order
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      {t("Order")}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Customer
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      {t("Customer")}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Status
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      {t("Status")}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Payment
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      {t("Payment")}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Amount
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      {t("Amount")}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Date
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      {t("Date")}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Actions
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      {t("Actions")}
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-800">
-                  {filteredOrders.map((order) => {
+                <tbody className="divide-y divide-border">
+                  {currentOrders.map((order) => {
                     const statusConfig = getStatusConfig(order.status);
                     const StatusIcon = statusConfig.icon;
                     
                     return (
-                      <tr key={order.id} className="hover:bg-gray-800">
+                      <tr key={order.id} className="hover:bg-accent/50 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div>
-                            <div className="text-sm font-medium text-white">
+                            <div className="text-sm font-medium text-foreground">
                               {order.order_number}
                             </div>
-                            <div className="text-sm text-gray-400">
+                            <div className="text-sm text-muted-foreground">
                               {order.items.length} item{order.items.length !== 1 ? 's' : ''}
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div>
-                            <div className="text-sm font-medium text-white">
+                            <div className="text-sm font-medium text-foreground">
                               {order.customer_name}
                             </div>
-                            <div className="text-sm text-gray-400">
+                            <div className="text-sm text-muted-foreground">
                               {order.customer_email}
                             </div>
                           </div>
@@ -462,12 +519,12 @@ export default function OrdersPage() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center text-sm font-medium text-white">
+                          <div className="flex items-center text-sm font-medium text-foreground">
                             {renderCurrencyIcon(order.currency)}
                             <span className="ml-1">{order.total_amount.toLocaleString()}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                           {new Date(order.created_at).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -501,16 +558,96 @@ export default function OrdersPage() {
           </div>
         )}
 
+        {/* Pagination Controls */}
+        {filteredOrders.length > 0 && (
+          <div className="mt-6 flex items-center justify-between bg-card border border-border rounded-lg px-6 py-4">
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+              <span>{t("Showing")}</span>
+              <span className="font-medium text-foreground">
+                {indexOfFirstOrder + 1}
+              </span>
+              <span>{t("to")}</span>
+              <span className="font-medium text-foreground">
+                {Math.min(indexOfLastOrder, filteredOrders.length)}
+              </span>
+              <span>{t("of")}</span>
+              <span className="font-medium text-foreground">
+                {filteredOrders.length}
+              </span>
+              <span>{t("results")}</span>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="border-border hover:bg-accent disabled:opacity-50"
+              >
+                {t("Previous")}
+              </Button>
+
+              <div className="flex items-center space-x-1">
+                {[...Array(totalPages)].map((_, index) => {
+                  const pageNumber = index + 1;
+                  
+                  // Show first page, last page, current page, and pages around current
+                  if (
+                    pageNumber === 1 ||
+                    pageNumber === totalPages ||
+                    (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+                  ) {
+                    return (
+                      <button
+                        key={pageNumber}
+                        onClick={() => setCurrentPage(pageNumber)}
+                        className={`px-3 py-1 text-sm rounded-lg transition-colors ${
+                          currentPage === pageNumber
+                            ? "bg-primary text-primary-foreground font-medium"
+                            : "bg-background text-foreground hover:bg-accent"
+                        }`}
+                      >
+                        {pageNumber}
+                      </button>
+                    );
+                  } else if (
+                    pageNumber === currentPage - 2 ||
+                    pageNumber === currentPage + 2
+                  ) {
+                    return (
+                      <span key={pageNumber} className="px-2 text-muted-foreground">
+                        ...
+                      </span>
+                    );
+                  }
+                  return null;
+                })}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="border-border hover:bg-accent disabled:opacity-50"
+              >
+                {t("Next")}
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* View Order Modal */}
         {showViewModal && selectedOrder && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-gray-900 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-white">Order Details</h2>
+                  <h2 className="text-xl font-bold text-foreground">Order Details</h2>
                   <button
                     onClick={() => setShowViewModal(false)}
-                    className="text-gray-400 hover:text-white"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <X className="h-6 w-6" />
                   </button>
@@ -519,11 +656,11 @@ export default function OrdersPage() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-gray-400 text-sm">Order Number</p>
-                      <p className="text-white font-medium">{selectedOrder.order_number}</p>
+                      <p className="text-muted-foreground text-sm">Order Number</p>
+                      <p className="text-foreground font-medium">{selectedOrder.order_number}</p>
                     </div>
                     <div>
-                      <p className="text-gray-400 text-sm">Status</p>
+                      <p className="text-muted-foreground text-sm">Status</p>
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusConfig(selectedOrder.status).color}`}>
                         {selectedOrder.status}
                       </span>
@@ -531,38 +668,38 @@ export default function OrdersPage() {
                   </div>
                   
                   <div>
-                    <p className="text-gray-400 text-sm">Customer</p>
-                    <p className="text-white font-medium">{selectedOrder.customer_name}</p>
-                    <p className="text-gray-400 text-sm">{selectedOrder.customer_email}</p>
-                    <p className="text-gray-400 text-sm">{selectedOrder.customer_phone}</p>
+                    <p className="text-muted-foreground text-sm">Customer</p>
+                    <p className="text-foreground font-medium">{selectedOrder.customer_name}</p>
+                    <p className="text-muted-foreground text-sm">{selectedOrder.customer_email}</p>
+                    <p className="text-muted-foreground text-sm">{selectedOrder.customer_phone}</p>
                   </div>
                   
                   <div>
-                    <p className="text-gray-400 text-sm">Shipping Address</p>
-                    <p className="text-white">{selectedOrder.shipping_address}</p>
+                    <p className="text-muted-foreground text-sm">Shipping Address</p>
+                    <p className="text-foreground">{selectedOrder.shipping_address}</p>
                   </div>
                   
                   <div>
-                    <p className="text-gray-400 text-sm">Items</p>
+                    <p className="text-muted-foreground text-sm">Items</p>
                     <div className="space-y-2">
                       {selectedOrder.items.map((item) => (
-                        <div key={item.id} className="flex items-center justify-between bg-gray-800 p-3 rounded">
+                        <div key={item.id} className="flex items-center justify-between bg-accent/50 p-3 rounded border border-border">
                           <div>
-                            <p className="text-white font-medium">{item.product_name}</p>
-                            <p className="text-gray-400 text-sm">Qty: {item.quantity}</p>
+                            <p className="text-foreground font-medium">{item.product_name}</p>
+                            <p className="text-muted-foreground text-sm">Qty: {item.quantity}</p>
                           </div>
                           <div className="text-right">
-                            <p className="text-white font-medium">₹{item.total.toLocaleString()}</p>
+                            <p className="text-foreground font-medium">₹{item.total.toLocaleString()}</p>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
                   
-                  <div className="border-t border-gray-700 pt-4">
+                  <div className="border-t border-border pt-4">
                     <div className="flex justify-between">
-                      <p className="text-gray-400">Total Amount</p>
-                      <p className="text-white font-bold text-lg">₹{selectedOrder.total_amount.toLocaleString()}</p>
+                      <p className="text-muted-foreground">Total Amount</p>
+                      <p className="text-foreground font-bold text-lg">₹{selectedOrder.total_amount.toLocaleString()}</p>
                     </div>
                   </div>
                 </div>

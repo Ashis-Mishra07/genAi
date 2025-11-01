@@ -320,6 +320,8 @@ export async function getAllOrders(): Promise<Order[]> {
 
 export async function getOrdersByArtisan(artisanId: string): Promise<Order[]> {
   try {
+    console.log(`🔍 Fetching orders for artisan: ${artisanId}`);
+    
     // Get orders containing products from specific artisan
     const orders = await sql`
       SELECT DISTINCT o.*, 
@@ -331,18 +333,20 @@ export async function getOrdersByArtisan(artisanId: string): Promise<Order[]> {
                  'price', oi.price,
                  'quantity', oi.quantity,
                  'artisanName', oi.artisan_name
-               )
-             ) as items,
+               ) ORDER BY oi.id
+             ) FILTER (WHERE oi.id IS NOT NULL) as items,
              u.name as customer_name,
              u.email as customer_email
       FROM orders o
-      LEFT JOIN order_items oi ON o.id = oi.order_id
-      LEFT JOIN products p ON oi.product_id = p.id
+      INNER JOIN order_items oi ON o.id = oi.order_id
+      INNER JOIN products p ON oi.product_id = p.id
       LEFT JOIN users u ON o.customer_id = u.id
       WHERE p.user_id = ${artisanId}
       GROUP BY o.id, u.name, u.email
       ORDER BY o.created_at DESC
     `;
+
+    console.log(`✅ Found ${orders.length} orders for artisan ${artisanId}`);
 
     return orders.map(order => ({
       id: order.id,
@@ -365,6 +369,7 @@ export async function getOrdersByArtisan(artisanId: string): Promise<Order[]> {
     }));
   } catch (error) {
     console.error('Error fetching artisan orders:', error);
+    console.error('Error details:', error);
     return [];
   }
 }

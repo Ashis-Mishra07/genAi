@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslation } from "@/lib/i18n/hooks";
+import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
 import {
   ArrowLeft,
   BarChart3,
@@ -53,13 +53,40 @@ interface AnalyticsData {
 
 export default function ArtisanAnalyticsPage() {
   const router = useRouter();
-  const { t, currentLocale } = useTranslation();
+  const { t, translateBatch, currentLocale, isTranslating } = useDynamicTranslation();
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
     null
   );
   const [isLoading, setIsLoading] = useState(true);
   const [timeframe, setTimeframe] = useState("7d");
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useEffect(() => {
+    translateBatch([
+      "Analytics Dashboard",
+      "View your performance metrics",
+      "Total Views",
+      "Total Orders",
+      "Total Revenue",
+      "Total Customers",
+      "Top Products",
+      "Recent Activity",
+      "Views",
+      "Orders",
+      "Revenue",
+      "Customers",
+      "Last 7 Days",
+      "Last 30 Days",
+      "Last 90 Days",
+      "Refresh",
+      "Export Data",
+      "Loading analytics...",
+      "Product",
+      "viewed",
+      "ordered",
+      "inquired about"
+    ]);
+  }, [currentLocale, translateBatch]);
 
   const loadAnalytics = useCallback(async () => {
     try {
@@ -213,14 +240,12 @@ export default function ArtisanAnalyticsPage() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isTranslating) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-orange-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-center">
-          <BarChart3 className="h-12 w-12 mx-auto mb-4 animate-pulse" />
-          <p>
-            {t("loadingAnalytics")}
-          </p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">{t("Loading analytics...")}</p>
         </div>
       </div>
     );
@@ -228,14 +253,14 @@ export default function ArtisanAnalyticsPage() {
 
   if (!analyticsData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-orange-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">
+          <h2 className="text-2xl font-bold text-foreground mb-4">
             {t("analyticsNotAvailable")}
           </h2>
           <button
             onClick={() => router.push("/artisan/dashboard")}
-            className="text-orange-400 hover:text-orange-300">
+            className="text-primary hover:text-primary/80">
             {t("returnToDashboard")}
           </button>
         </div>
@@ -248,57 +273,45 @@ export default function ArtisanAnalyticsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-orange-900 to-slate-900 p-4">
+    <div className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div className="max-w-7xl mx-auto mb-8">
+      <div className="bg-card border border-border rounded-xl px-6 py-6 shadow-sm mb-6">
         <div className="flex items-center justify-between">
-          <button
-            onClick={() => router.push("/artisan/dashboard")}
-            className="flex items-center text-white/70 hover:text-white transition-colors">
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            {t("backToDashboard")}
-          </button>
-          <div className="flex items-center text-white">
-            <BarChart3 className="h-6 w-6 mr-2" />
-            <div>
-              <span className="text-xl font-bold">
-                {t("analytics")}
-              </span>
-              <p className="text-sm text-white/70">
-                {t("trackBusinessPerformance")}
-              </p>
-            </div>
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">{t("Analytics Dashboard")}</h1>
+            <div className="h-1 w-32 bg-primary rounded-full mt-2 mb-2"></div>
+            <p className="text-muted-foreground">{t("View your performance metrics")}</p>
           </div>
 
           <div className="flex items-center space-x-4">
             <select
               value={timeframe}
               onChange={(e) => setTimeframe(e.target.value)}
-              className="px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
-              <option value="7d" className="bg-slate-800">
-                {t("lastDays")}
+              className="px-4 py-2.5 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
+              <option value="7d">
+                {t("Last 7 Days")}
               </option>
-              <option value="30d" className="bg-slate-800">
-                {t("last30Days")}
+              <option value="30d">
+                {t("Last 30 Days")}
               </option>
-              <option value="90d" className="bg-slate-800">
-                {t("last90Days")}
+              <option value="90d">
+                {t("Last 90 Days")}
               </option>
             </select>
 
             <button
               onClick={loadAnalytics}
               disabled={isRefreshing}
-              className="flex items-center px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg disabled:opacity-50 transition-all duration-200">
+              className="flex items-center px-4 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50 disabled:transform-none">
               <RefreshCw
                 className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
               />
-              {t("refresh")}
+              {t("Refresh")}
             </button>
 
-            <button className="flex items-center px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white/90 hover:bg-white/20 transition-colors">
+            <button className="flex items-center px-4 py-3 bg-secondary border border-border rounded-lg text-secondary-foreground hover:bg-secondary/80 transition-all">
               <Download className="h-4 w-4 mr-2" />
-              {t("export")}
+              {t("Export Data")}
             </button>
           </div>
         </div>
@@ -440,14 +453,14 @@ export default function ArtisanAnalyticsPage() {
               {translatedData.topProducts.map((product, index) => (
                 <div
                   key={product.id}
-                  className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                  className="flex items-center justify-between p-4 bg-accent/50 rounded-lg border border-border">
                   <div className="flex items-center">
-                    <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-pink-500 rounded-lg flex items-center justify-center text-white font-medium mr-4">
+                    <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-medium mr-4">
                       #{index + 1}
                     </div>
                     <div>
-                      <h4 className="font-medium text-white">{product.name}</h4>
-                      <p className="text-sm text-white/70">
+                      <h4 className="font-medium text-foreground">{product.name}</h4>
+                      <p className="text-sm text-muted-foreground">
                         {product.views} {t("views")} •{" "}
                         {product.orders} {t("orders")}
                       </p>

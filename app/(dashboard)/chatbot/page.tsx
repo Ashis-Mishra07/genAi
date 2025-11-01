@@ -17,6 +17,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import ThemeSelector from "@/components/ui/theme-selector";
 import ProfessionalPoster from "@/components/ui/canvas-poster-professional";
+import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
 
 interface PosterTheme {
   id: string;
@@ -48,10 +49,15 @@ interface Message {
 // Loading component for Suspense fallback
 function ChatbotLoading() {
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-        <p className="text-orange-200">Loading chatbot...</p>
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="text-center space-y-4">
+        <div className="flex items-center justify-center space-x-2">
+          <div className="w-3 h-3 bg-blue-600 dark:bg-blue-400 rounded-full animate-bounce google-dot-1"></div>
+          <div className="w-3 h-3 bg-red-600 dark:bg-red-400 rounded-full animate-bounce google-dot-2"></div>
+          <div className="w-3 h-3 bg-yellow-600 dark:bg-yellow-400 rounded-full animate-bounce google-dot-3"></div>
+          <div className="w-3 h-3 bg-green-600 dark:bg-green-400 rounded-full animate-bounce google-dot-4"></div>
+        </div>
+        <p className="text-muted-foreground">Loading chatbot...</p>
       </div>
     </div>
   );
@@ -59,6 +65,8 @@ function ChatbotLoading() {
 
 // Main component that uses useSearchParams
 function ChatbotContent() {
+  const { translateBatch, t } = useDynamicTranslation();
+  
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -72,6 +80,31 @@ function ChatbotContent() {
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  // Translate UI text
+  useEffect(() => {
+    translateBatch([
+      "AI Poster Creator",
+      "Admin Poster Creator",
+      "Create stunning storytelling posters",
+      "Creating marketing poster for artisan",
+      "Creating marketing poster for",
+      "Helping:",
+      "Choose Your Theme",
+      "Enter product name...",
+      "Type your message...",
+      "Image uploaded:",
+      "Product:",
+      "Creating your stunning poster...",
+      "Download",
+      "Copy",
+      "Create Product for",
+      "Create Product",
+      "Poster copied to clipboard!",
+      "Failed to copy poster",
+      "Loading chatbot..."
+    ]);
+  }, [translateBatch]);
 
   // Theme selection state
   const [showThemeSelector, setShowThemeSelector] = useState(false);
@@ -1092,15 +1125,15 @@ Your product is now live and ready for customers! The beautiful poster we create
       await navigator.clipboard.write([
         new ClipboardItem({ [blob.type]: blob }),
       ]);
-      alert("Poster copied to clipboard!");
+      alert(t("Poster copied to clipboard!"));
     } catch (error) {
       console.error("Error copying to clipboard:", error);
-      alert("Failed to copy poster");
+      alert(t("Failed to copy poster"));
     }
   };
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-br from-black via-gray-900 to-orange-900">
+    <div className="flex flex-col h-full bg-background">
       {/* Professional Poster Creator */}
       {showProfessionalPoster && currentPosterData && (
         <ProfessionalPoster
@@ -1113,30 +1146,30 @@ Your product is now live and ready for customers! The beautiful poster we create
       )}
 
       {/* Header */}
-      <div className="flex-shrink-0 p-6 bg-black/90 backdrop-blur-sm border-b border-orange-500/30">
+      <div className="flex-shrink-0 p-6 bg-card/95 backdrop-blur-sm border-b border-border shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/30">
-            <Palette className="w-6 h-6 text-black font-bold" />
+          <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg">
+            <Palette className="w-6 h-6 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-orange-400">
+            <h1 className="text-2xl font-bold text-foreground">
               {searchParams.get("mode") === "poster-creation"
-                ? "🎨 Admin Poster Creator"
-                : "AI Poster Creator"}
+                ? `🎨 ${t("Admin Poster Creator")}`
+                : t("AI Poster Creator")}
             </h1>
-            <p className="text-sm text-orange-200">
+            <p className="text-sm text-muted-foreground">
               {searchParams.get("mode") === "poster-creation"
                 ? artisanInfo
-                  ? `Creating marketing poster for ${artisanInfo.name}`
-                  : "Creating marketing poster for artisan"
-                : "Create stunning storytelling posters"}
+                  ? `${t("Creating marketing poster for")} ${artisanInfo.name}`
+                  : t("Creating marketing poster for artisan")
+                : t("Create stunning storytelling posters")}
             </p>
             {/* Artisan Info Badge */}
             {searchParams.get("mode") === "poster-creation" && artisanInfo && (
-              <div className="flex items-center gap-2 mt-2 px-3 py-1 bg-green-600/20 border border-green-500/30 rounded-full w-fit">
-                <User className="w-3 h-3 text-green-400" />
-                <span className="text-xs text-green-300 font-medium">
-                  Helping: {artisanInfo.name}
+              <div className="flex items-center gap-2 mt-2 px-3 py-1 bg-green-500/10 border border-green-500/30 rounded-full w-fit">
+                <User className="w-3 h-3 text-green-600 dark:text-green-400" />
+                <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                  {t("Helping:")} {artisanInfo.name}
                 </span>
               </div>
             )}
@@ -1155,26 +1188,26 @@ Your product is now live and ready for customers! The beautiful poster we create
             <div
               className={`max-w-2xl p-4 rounded-2xl ${
                 message.type === "user"
-                  ? "bg-gradient-to-r from-orange-600 to-orange-500 text-black font-medium ml-12 shadow-lg shadow-orange-500/30"
-                  : "bg-gray-800/90 backdrop-blur-sm text-orange-100 mr-12 border border-orange-500/20 shadow-lg"
+                  ? "bg-primary text-primary-foreground font-medium ml-12 shadow-lg"
+                  : "bg-card backdrop-blur-sm text-foreground mr-12 border border-border shadow-lg"
               }`}>
               <div className="whitespace-pre-wrap">{message.content}</div>
 
               {/* Canvas Poster Display */}
               {message.canvasPoster && (
-                <div className="mt-4 p-4 bg-black/60 backdrop-blur-sm rounded-xl border border-orange-500/30">
+                <div className="mt-4 p-4 bg-accent/50 backdrop-blur-sm rounded-xl border border-border">
                   <div className="flex items-center gap-2 mb-3">
-                    <Palette className="w-4 h-4 text-orange-400" />
-                    <span className="font-medium text-orange-300">
+                    <Palette className="w-4 h-4 text-primary" />
+                    <span className="font-medium text-foreground">
                       {message.canvasPoster.theme.name} Theme
                     </span>
                   </div>
 
-                  <div className="bg-gray-900/80 p-4 rounded-lg shadow-lg border border-orange-500/20">
+                  <div className="bg-background/80 p-4 rounded-lg shadow-lg border border-border">
                     <img
                       src={message.canvasPoster.dataUrl}
                       alt={`Poster for ${message.canvasPoster.productName}`}
-                      className="w-full max-w-sm mx-auto rounded-lg shadow-2xl shadow-orange-500/20 border border-orange-500/30"
+                      className="w-full max-w-sm mx-auto rounded-lg shadow-2xl border border-border"
                     />
                   </div>
 
@@ -1186,18 +1219,18 @@ Your product is now live and ready for customers! The beautiful poster we create
                           `${message.canvasPoster!.productName}-poster.png`
                         )
                       }
-                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-600 to-orange-500 text-black font-medium rounded-lg hover:from-orange-500 hover:to-orange-400 transition-all duration-200 text-sm shadow-lg shadow-orange-500/30">
+                      className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition-all duration-200 text-sm shadow-lg">
                       <Download className="w-4 h-4" />
-                      Download
+                      {t("Download")}
                     </button>
 
                     <button
                       onClick={() =>
                         copyToClipboard(message.canvasPoster!.dataUrl)
                       }
-                      className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-orange-200 rounded-lg hover:bg-gray-600 transition-all duration-200 text-sm border border-orange-500/30">
+                      className="flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg transition-all duration-200 text-sm border border-border">
                       <Copy className="w-4 h-4" />
-                      Copy
+                      {t("Copy")}
                     </button>
 
                     {/* Create Product Button - only show in poster creation mode */}
@@ -1211,7 +1244,7 @@ Your product is now live and ready for customers! The beautiful poster we create
                             return;
                           }
                           const price = prompt(
-                            "Enter the product price (in $):",
+                            t("Enter the product price (in $):") || "Enter the product price (in $):",
                             "25"
                           );
                           if (price && message.canvasPoster) {
@@ -1221,11 +1254,11 @@ Your product is now live and ready for customers! The beautiful poster we create
                             );
                           }
                         }}
-                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-500 text-white font-medium rounded-lg hover:from-green-500 hover:to-emerald-400 transition-all duration-200 text-sm shadow-lg shadow-green-500/30">
+                        className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white font-medium rounded-lg transition-all duration-200 text-sm shadow-lg">
                         <Package className="w-4 h-4" />
                         {artisanInfo
-                          ? `Create Product for ${artisanInfo.name}`
-                          : "Create Product"}
+                          ? `${t("Create Product for")} ${artisanInfo.name}`
+                          : t("Create Product")}
                       </button>
                     )}
                   </div>
@@ -1237,17 +1270,17 @@ Your product is now live and ready for customers! The beautiful poster we create
 
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-gray-800/90 backdrop-blur-sm text-orange-100 p-4 rounded-2xl mr-12 border border-orange-500/20 shadow-lg">
+            <div className="bg-card backdrop-blur-sm text-foreground p-4 rounded-2xl mr-12 border border-border shadow-lg">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
                 <div
-                  className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"
+                  className="w-2 h-2 bg-primary/80 rounded-full animate-bounce"
                   style={{ animationDelay: "0.1s" }}></div>
                 <div
-                  className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
+                  className="w-2 h-2 bg-primary rounded-full animate-bounce"
                   style={{ animationDelay: "0.2s" }}></div>
-                <span className="text-orange-200 text-sm ml-2">
-                  Creating your stunning poster...
+                <span className="text-muted-foreground text-sm ml-2">
+                  {t("Creating your stunning poster...")}
                 </span>
               </div>
             </div>
@@ -1259,15 +1292,15 @@ Your product is now live and ready for customers! The beautiful poster we create
 
       {/* Theme Selector Modal */}
       {showThemeSelector && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 border border-orange-500/30 rounded-2xl p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto shadow-2xl shadow-orange-500/20">
+        <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-card border border-border rounded-2xl p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-orange-400">
-                Choose Your Theme
+              <h2 className="text-2xl font-bold text-foreground">
+                {t("Choose Your Theme")}
               </h2>
               <button
                 onClick={() => setShowThemeSelector(false)}
-                className="text-orange-300 hover:text-orange-400 text-xl font-bold w-8 h-8 flex items-center justify-center rounded-lg hover:bg-orange-500/20 transition-all duration-200">
+                className="text-muted-foreground hover:text-foreground text-xl font-bold w-8 h-8 flex items-center justify-center rounded-lg hover:bg-accent transition-all duration-200">
                 ✕
               </button>
             </div>
@@ -1282,7 +1315,7 @@ Your product is now live and ready for customers! The beautiful poster we create
       )}
 
       {/* Input Area */}
-      <div className="flex-shrink-0 p-6 bg-black/90 backdrop-blur-sm border-t border-orange-500/30">
+      <div className="flex-shrink-0 p-6 bg-card/95 backdrop-blur-sm border-t border-border shadow-sm">
         <form onSubmit={handleSubmit} className="flex gap-3">
           <input
             type="file"
@@ -1295,7 +1328,7 @@ Your product is now live and ready for customers! The beautiful poster we create
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-orange-600 to-orange-500 text-black font-bold rounded-xl hover:from-orange-500 hover:to-orange-400 transition-all duration-200 shadow-lg shadow-orange-500/30 hover:shadow-orange-400/40 hover:scale-105">
+            className="flex items-center justify-center w-12 h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl transition-all duration-200 shadow-lg hover:scale-105">
             <Upload className="w-5 h-5" />
           </button>
 
@@ -1305,36 +1338,36 @@ Your product is now live and ready for customers! The beautiful poster we create
             onChange={(e) => setInputValue(e.target.value)}
             placeholder={
               selectedFile && !productName
-                ? "Enter product name..."
-                : "Type your message..."
+                ? t("Enter product name...")
+                : t("Type your message...")
             }
-            className="flex-1 px-4 py-3 bg-gray-800/90 border border-orange-500/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-orange-100 placeholder-orange-300/70 backdrop-blur-sm"
+            className="flex-1 px-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary text-foreground placeholder-muted-foreground backdrop-blur-sm"
             disabled={isLoading}
           />
 
           <button
             type="submit"
             disabled={isLoading || !inputValue.trim()}
-            className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-orange-600 to-orange-500 text-black font-bold rounded-xl hover:from-orange-500 hover:to-orange-400 transition-all duration-200 shadow-lg shadow-orange-500/30 hover:shadow-orange-400/40 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+            className="flex items-center justify-center w-12 h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl transition-all duration-200 shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
             <Send className="w-5 h-5" />
           </button>
         </form>
 
         {selectedFile && (
-          <div className="mt-3 flex items-center gap-2 text-sm text-orange-200 bg-gray-800/50 p-3 rounded-lg border border-orange-500/20">
-            <Camera className="w-4 h-4 text-orange-400" />
+          <div className="mt-3 flex items-center gap-2 text-sm text-foreground bg-accent/50 p-3 rounded-lg border border-border">
+            <Camera className="w-4 h-4 text-primary" />
             <span>
-              Image uploaded:{" "}
-              <span className="text-orange-300 font-medium">
+              {t("Image uploaded:")}{" "}
+              <span className="text-foreground font-medium">
                 {selectedFile.name}
               </span>
             </span>
             {productName && (
               <>
-                <span className="mx-2 text-orange-500">•</span>
+                <span className="mx-2 text-muted-foreground">•</span>
                 <span>
-                  Product:{" "}
-                  <span className="text-orange-300 font-medium">
+                  {t("Product:")}{" "}
+                  <span className="text-foreground font-medium">
                     {productName}
                   </span>
                 </span>

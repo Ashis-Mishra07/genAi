@@ -14,8 +14,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useTranslation } from "@/lib/i18n/hooks";
-import type { TranslationKey } from "@/lib/i18n/translations";
+import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
 
 interface Notification {
   id: number;
@@ -98,46 +97,57 @@ const getNotificationBgColor = (type: string) => {
   }
 };
 
-const getRelativeTime = (dateString: string, t: (key: TranslationKey) => string) => {
-  const now = new Date();
-  const date = new Date(dateString);
-  const diff = now.getTime() - date.getTime();
+const getRelativeTime = (dateString: string, t: (key: string) => string) => {
+  try {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diff = now.getTime() - date.getTime();
 
-  const seconds = Math.floor(diff / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-  const weeks = Math.floor(days / 7);
-  const months = Math.floor(days / 30);
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    const weeks = Math.floor(days / 7);
+    const months = Math.floor(days / 30);
 
-  if (months > 0) return `${months} ${months > 1 ? t('monthsAgo') : t('monthAgo')}`;
-  if (weeks > 0) return `${weeks} ${weeks > 1 ? t('weeksAgo') : t('weekAgo')}`;
-  if (days > 0) return `${days} ${days > 1 ? t('daysAgo') : t('dayAgo')}`;
-  if (hours > 0) return `${hours} ${hours > 1 ? t('hoursAgo') : t('hourAgo')}`;
-  if (minutes > 0) return `${minutes} ${minutes > 1 ? t('minutesAgo') : t('minuteAgo')}`;
-  if (seconds > 30) return `${seconds} ${t('secondsAgo')}`;
-  return t('justNow');
+    if (months > 0) return `${months} ${months > 1 ? (t('monthsAgo') || 'months ago') : (t('monthAgo') || 'month ago')}`;
+    if (weeks > 0) return `${weeks} ${weeks > 1 ? (t('weeksAgo') || 'weeks ago') : (t('weekAgo') || 'week ago')}`;
+    if (days > 0) return `${days} ${days > 1 ? (t('daysAgo') || 'days ago') : (t('dayAgo') || 'day ago')}`;
+    if (hours > 0) return `${hours} ${hours > 1 ? (t('hoursAgo') || 'hours ago') : (t('hourAgo') || 'hour ago')}`;
+    if (minutes > 0) return `${minutes} ${minutes > 1 ? (t('minutesAgo') || 'minutes ago') : (t('minuteAgo') || 'minute ago')}`;
+    if (seconds > 30) return `${seconds} ${t('secondsAgo') || 'seconds ago'}`;
+    return t('justNow') || 'Just now';
+  } catch (error) {
+    console.error('getRelativeTime error:', error);
+    return 'Just now';
+  }
 };
 
-const getNotificationTypeText = (type: string, t: (key: TranslationKey) => string) => {
-  const typeMap: { [key: string]: string } = {
-    purchase: t('purchase'),
-    ticket: t('ticket'),
-    review: t('review'),
-    system: t('system'),
-    order: t('order'),
-    payment: t('payment'),
-    message: t('message'),
-    promotion: t('promotion'),
-    settings: t('settings'),
-    urgent: t('urgent'),
-  };
-  
-  return typeMap[type] || type.charAt(0).toUpperCase() + type.slice(1);
+const getNotificationTypeText = (type: string, t: (key: string) => string) => {
+  try {
+    const typeMap: { [key: string]: string } = {
+      purchase: t('purchase') || 'Purchase',
+      ticket: t('ticket') || 'Ticket',
+      review: t('review') || 'Review',
+      system: t('system') || 'System',
+      order: t('order') || 'Order',
+      payment: t('payment') || 'Payment',
+      message: t('message') || 'Message',
+      promotion: t('promotion') || 'Promotion',
+      settings: t('settings') || 'Settings',
+      urgent: t('urgent') || 'Urgent',
+    };
+    
+    return typeMap[type] || type.charAt(0).toUpperCase() + type.slice(1);
+  } catch (error) {
+    console.error('getNotificationTypeText error:', error);
+    return type.charAt(0).toUpperCase() + type.slice(1);
+  }
 };
 
 export default function NotificationsPage() {
-  const { t } = useTranslation();
+  const { t, translateBatch } = useDynamicTranslation();
+
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -147,6 +157,70 @@ export default function NotificationsPage() {
   const [actionLoading, setActionLoading] = useState<number | string | null>(
     null
   );
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(7);
+
+  // Batch translate all static strings
+  useEffect(() => {
+    translateBatch([
+      "Notifications",
+      "No notifications",
+      "You're all caught up!",
+      "Refresh",
+      "Show unread only",
+      "Mark All as Read",
+      "Clear All",
+      "Mark as Read",
+      "Mark as Unread",
+      "Delete",
+      "Just now",
+      "Loading...",
+      "Failed to load notifications",
+      // Time translations
+      "monthsAgo",
+      "monthAgo",
+      "weeksAgo",
+      "weekAgo",
+      "daysAgo",
+      "dayAgo",
+      "hoursAgo",
+      "hourAgo",
+      "minutesAgo",
+      "minuteAgo",
+      "secondsAgo",
+      "justNow",
+      // Notification types
+      "purchase",
+      "ticket",
+      "review",
+      "system",
+      "order",
+      "payment",
+      "message",
+      "promotion",
+      "settings",
+      "urgent",
+      // Notification content translations
+      "newOrderReceived",
+      "orderReceivedMessage",
+      "forYourProducts",
+      "totalValue",
+      "newReviewReceived",
+      "customerLeftReview",
+      "newMessageReceived",
+      "customerSentMessage",
+      "paymentReceived",
+      "paymentProcessed",
+      "productViewed",
+      "someoneViewedProduct",
+      "systemNotification",
+      "importantUpdate",
+      "noUnreadNotifications",
+      "noNotificationsFound",
+      "allCaughtUp",
+      "notificationsWillAppear"
+    ]);
+  }, [translateBatch]);
 
   // Translation cache for notification content - removed since using proper translation system
 
@@ -154,56 +228,65 @@ export default function NotificationsPage() {
 
   // Function to translate notification content based on common patterns
   const translateNotificationContent = (title: string, message: string) => {
-    // Translate common notification titles
-    if (title.includes('New Order Received')) {
+    try {
+      // Translate common notification titles
+      if (title.includes('New Order Received')) {
+        return {
+          translatedTitle: t('newOrderReceived') || title,
+          translatedMessage: message.replace('You have received a new order', t('orderReceivedMessage') || 'You have received a new order')
+            .replace('for your products', t('forYourProducts') || 'for your products')
+            .replace('Total value', t('totalValue') || 'Total value')
+        };
+      }
+      
+      if (title.includes('New Review Received')) {
+        return {
+          translatedTitle: t('newReviewReceived') || title,
+          translatedMessage: message.replace('A customer left a review for your product', t('customerLeftReview') || 'A customer left a review for your product')
+        };
+      }
+      
+      if (title.includes('New Message Received')) {
+        return {
+          translatedTitle: t('newMessageReceived') || title,
+          translatedMessage: message.replace('A customer sent you a message', t('customerSentMessage') || 'A customer sent you a message')
+        };
+      }
+      
+      if (title.includes('Payment Received')) {
+        return {
+          translatedTitle: t('paymentReceived') || title,
+          translatedMessage: message.replace('Payment has been processed for order', t('paymentProcessed') || 'Payment has been processed for order')
+        };
+      }
+      
+      if (title.includes('Product Viewed')) {
+        return {
+          translatedTitle: t('productViewed') || title,
+          translatedMessage: message.replace('Someone viewed your product', t('someoneViewedProduct') || 'Someone viewed your product')
+        };
+      }
+      
+      if (title.includes('System Notification')) {
+        return {
+          translatedTitle: t('systemNotification') || title,
+          translatedMessage: message.replace('Important system update', t('importantUpdate') || 'Important system update')
+        };
+      }
+      
+      // Return original if no translation pattern matches
       return {
-        translatedTitle: t('newOrderReceived'),
-        translatedMessage: message.replace('You have received a new order', t('orderReceivedMessage'))
-          .replace('for your products', t('forYourProducts'))
-          .replace('Total value', t('totalValue'))
+        translatedTitle: title,
+        translatedMessage: message
+      };
+    } catch (error) {
+      console.error('Translation error:', error);
+      // Fallback to original content if translation fails
+      return {
+        translatedTitle: title,
+        translatedMessage: message
       };
     }
-    
-    if (title.includes('New Review Received')) {
-      return {
-        translatedTitle: t('newReviewReceived'),
-        translatedMessage: message.replace('A customer left a review for your product', t('customerLeftReview'))
-      };
-    }
-    
-    if (title.includes('New Message Received')) {
-      return {
-        translatedTitle: t('newMessageReceived'),
-        translatedMessage: message.replace('A customer sent you a message', t('customerSentMessage'))
-      };
-    }
-    
-    if (title.includes('Payment Received')) {
-      return {
-        translatedTitle: t('paymentReceived'),
-        translatedMessage: message.replace('Payment has been processed for order', t('paymentProcessed'))
-      };
-    }
-    
-    if (title.includes('Product Viewed')) {
-      return {
-        translatedTitle: t('productViewed'),
-        translatedMessage: message.replace('Someone viewed your product', t('someoneViewedProduct'))
-      };
-    }
-    
-    if (title.includes('System Notification')) {
-      return {
-        translatedTitle: t('systemNotification'),
-        translatedMessage: message.replace('Important system update', t('importantUpdate'))
-      };
-    }
-    
-    // Return original if no translation pattern matches
-    return {
-      translatedTitle: title,
-      translatedMessage: message
-    };
   };
 
   // Fetch notifications function
@@ -213,7 +296,8 @@ export default function NotificationsPage() {
     }
 
     try {
-      const response = await fetch("/api/notifications");
+      const offset = (currentPage - 1) * itemsPerPage;
+      const response = await fetch(`/api/notifications?limit=${itemsPerPage}&offset=${offset}`);
       if (response.ok) {
         const data: NotificationResponse = await response.json();
         if (data.success) {
@@ -233,7 +317,16 @@ export default function NotificationsPage() {
   // Initial fetch
   useEffect(() => {
     fetchNotifications();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage]);
+
+  // Reset to page 1 when filter changes
+  useEffect(() => {
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showUnreadOnly]);
 
   // Auto-refresh every 30 seconds
   useEffect(() => {
@@ -242,7 +335,7 @@ export default function NotificationsPage() {
     }, 30000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [currentPage]);
 
   // Mark notification as read
   const markAsRead = async (notificationId: number) => {
@@ -335,13 +428,20 @@ export default function NotificationsPage() {
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
+  // Apply pagination to filtered notifications
+  const paginatedNotifications = filteredNotifications.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  const filteredTotalCount = filteredNotifications.length;
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 p-6 flex items-center justify-center">
-        <div className="flex items-center space-x-3 text-slate-400">
+      <div className="min-h-screen bg-background p-6 flex items-center justify-center">
+        <div className="flex items-center space-x-3 text-muted-foreground">
           <RefreshCw className="h-6 w-6 animate-spin" />
           <span>
-            {t('loadingNotifications')}
+            {t("Loading...") || "Loading..."}
           </span>
         </div>
       </div>
@@ -349,22 +449,21 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-3">
-              <div className="bg-orange-500 rounded-lg p-3">
-                <Bell className="h-6 w-6 text-white" />
+              <div className="bg-primary rounded-lg p-3">
+                <Bell className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">
-                  {t('notifications')}
+                <h1 className="text-2xl font-bold text-foreground">
+                  {t("Notifications") || "Notifications"}
                 </h1>
-                <p className="text-slate-400">
-                  {totalCount} {t('total')} • {unreadCount}{" "}
-                  {t('unread')}
+                <p className="text-muted-foreground">
+                  {totalCount} total • {unreadCount} unread
                 </p>
               </div>
             </div>
@@ -373,7 +472,7 @@ export default function NotificationsPage() {
               <button
                 onClick={() => fetchNotifications()}
                 disabled={refreshing}
-                className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
+                className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors">
                 <RefreshCw
                   className={`h-5 w-5 ${refreshing ? "animate-spin" : ""}`}
                 />
@@ -383,8 +482,8 @@ export default function NotificationsPage() {
                 onClick={() => setShowUnreadOnly(!showUnreadOnly)}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   showUnreadOnly
-                    ? "bg-orange-500 text-white"
-                    : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-card text-foreground hover:bg-accent"
                 }`}>
                 {showUnreadOnly ? (
                   <div className="flex items-center space-x-2">
@@ -406,14 +505,14 @@ export default function NotificationsPage() {
             <button
               onClick={markAllAsRead}
               disabled={unreadCount === 0 || actionLoading === "all"}
-              className="px-4 py-2 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2">
+              className="px-4 py-2 bg-card text-foreground hover:bg-accent rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 border border-border">
               {actionLoading === "all" ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />
               ) : (
                 <CheckCircle2 className="h-4 w-4" />
               )}
               <span>
-                {t('markAllRead')}
+                {t("Mark All as Read") || "Mark All as Read"}
               </span>
             </button>
 
@@ -448,7 +547,7 @@ export default function NotificationsPage() {
               </p>
             </div>
           ) : (
-            filteredNotifications.map((notification) => {
+            paginatedNotifications.map((notification) => {
               const Icon = getNotificationIcon(notification.type);
               const iconColor = getNotificationColor(notification.type);
               const bgColor = getNotificationBgColor(notification.type);
@@ -456,18 +555,18 @@ export default function NotificationsPage() {
               return (
                 <div
                   key={notification.id}
-                  className={`relative bg-slate-800 rounded-lg p-4 border transition-all duration-200 hover:bg-slate-750 cursor-pointer group ${
+                  className={`relative bg-card rounded-lg p-4 border transition-all duration-200 hover:bg-accent cursor-pointer group ${
                     notification.isRead
-                      ? "border-slate-700"
-                      : "border-orange-500/30 bg-slate-800/80"
+                      ? "border-border"
+                      : "border-primary/30"
                   }`}
                   onClick={() =>
                     !notification.isRead && markAsRead(notification.id)
                   }>
                   <div className="flex items-start space-x-4">
                     {/* Icon */}
-                    <div className={`flex-shrink-0 p-2 rounded-lg ${bgColor}`}>
-                      <Icon className={`h-5 w-5 ${iconColor}`} />
+                    <div className={`flex-shrink-0 p-2 rounded-lg bg-primary/10`}>
+                      <Icon className={`h-5 w-5 text-primary`} />
                     </div>
 
                     {/* Content */}
@@ -476,17 +575,17 @@ export default function NotificationsPage() {
                         <h3
                           className={`text-sm font-medium ${
                             notification.isRead
-                              ? "text-slate-300"
-                              : "text-white"
+                              ? "text-muted-foreground"
+                              : "text-foreground font-semibold"
                           }`}>
                           {translateNotificationContent(notification.title, notification.message).translatedTitle}
                         </h3>
                         <div className="flex items-center space-x-2">
-                          <span className="text-xs text-slate-500">
+                          <span className="text-xs text-muted-foreground">
                             {getRelativeTime(notification.createdAt, t)}
                           </span>
                           {!notification.isRead && (
-                            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                            <div className="w-2 h-2 bg-primary rounded-full"></div>
                           )}
                         </div>
                       </div>
@@ -531,6 +630,57 @@ export default function NotificationsPage() {
             })
           )}
         </div>
+
+        {/* Pagination Controls */}
+        {filteredTotalCount > itemsPerPage && (
+          <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
+            <div className="text-sm text-muted-foreground">
+              Showing {Math.min((currentPage - 1) * itemsPerPage + 1, filteredTotalCount)} to{" "}
+              {Math.min(currentPage * itemsPerPage, filteredTotalCount)} of {filteredTotalCount} notifications
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-card border border-border text-foreground rounded-lg hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                Previous
+              </button>
+              <div className="flex items-center space-x-1">
+                {Array.from({ length: Math.ceil(filteredTotalCount / itemsPerPage) }, (_, i) => i + 1)
+                  .filter(page => {
+                    // Show first page, last page, current page, and pages around current
+                    const totalPages = Math.ceil(filteredTotalCount / itemsPerPage);
+                    return page === 1 || 
+                           page === totalPages || 
+                           (page >= currentPage - 1 && page <= currentPage + 1);
+                  })
+                  .map((page, index, array) => (
+                    <>
+                      {index > 0 && array[index - 1] !== page - 1 && (
+                        <span key={`ellipsis-${page}`} className="px-2 text-muted-foreground">...</span>
+                      )}
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`px-3 py-1 rounded ${
+                          currentPage === page
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-card border border-border text-foreground hover:bg-accent"
+                        } transition-colors`}>
+                        {page}
+                      </button>
+                    </>
+                  ))}
+              </div>
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(Math.ceil(filteredTotalCount / itemsPerPage), prev + 1))}
+                disabled={currentPage >= Math.ceil(filteredTotalCount / itemsPerPage)}
+                className="px-4 py-2 bg-card border border-border text-foreground rounded-lg hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

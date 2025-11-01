@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslation } from "@/lib/i18n/hooks";
-import { useTranslateContent } from "@/lib/hooks/useTranslateContent";
+import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
 import {
   ArrowLeft,
   Upload,
@@ -11,7 +10,6 @@ import {
   DollarSign,
   Type,
   FileText,
-  Tag,
   MapPin,
   Palette,
   Ruler,
@@ -42,19 +40,63 @@ interface ProductFormData {
 
 export default function NewProductPage() {
   const router = useRouter();
-  const { translateText, isHindi, currentLocale } = useTranslateContent();
-
-  // Helper function for quick translations
-  const t = (
-    englishText: string,
-    translations: Record<string, string> = {}
-  ) => {
-    if (currentLocale === "en") return englishText;
-    return translations[currentLocale] || translations["hi"] || englishText;
-  };
+  const { t, translateBatch, currentLocale } = useDynamicTranslation();
+  
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    translateBatch([
+      "Create New Product",
+      "Back to Dashboard",
+      "Basic Information",
+      "Product Name",
+      "Enter Product Name",
+      "Category",
+      "Select Category",
+      "Price",
+      "Enter Price",
+      "Currency",
+      "Stock Quantity",
+      "Active",
+      "Featured",
+      "Description & Story",
+      "Product Description",
+      "Describe your product...",
+      "Cultural Story",
+      "Tell the cultural story behind your product...",
+      "Product Details",
+      "Materials",
+      "e.g., Cotton, Silk, Wood",
+      "Cultural Origin",
+      "e.g., Rajasthani, Bengali",
+      "Artist Name",
+      "Creator's name",
+      "Dimensions",
+      "e.g., 30cm x 20cm x 5cm",
+      "Weight",
+      "e.g., 500g",
+      "Images & Links",
+      "Product Image URL",
+      "Marketing Poster URL",
+      "Instagram Post URL",
+      "Preview",
+      "Cancel",
+      "Creating...",
+      "Create Product",
+      "Textile",
+      "Jewelry",
+      "Pottery",
+      "Woodwork",
+      "Metalwork",
+      "Paintings",
+      "Home Decor",
+      "Traditional Wear",
+      "Sculptures",
+      "Other",
+    ]);
+  }, [currentLocale, translateBatch]);
 
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
@@ -77,16 +119,16 @@ export default function NewProductPage() {
   });
 
   const categories = [
-    { key: "textile", label: t("textile") },
-    { key: "jewelry", label: t("jewelry") },
-    { key: "pottery", label: t("pottery") },
-    { key: "woodwork", label: t("woodwork") },
-    { key: "metalwork", label: t("metalwork") },
-    { key: "paintings", label: t("paintings") },
-    { key: "homeDecor", label: t("homeDecor") },
-    { key: "traditionalWear", label: t("traditionalWear") },
-    { key: "sculptures", label: t("sculptures") },
-    { key: "other", label: t("other") },
+    { key: "textile", label: t("Textile") },
+    { key: "jewelry", label: t("Jewelry") },
+    { key: "pottery", label: t("Pottery") },
+    { key: "woodwork", label: t("Woodwork") },
+    { key: "metalwork", label: t("Metalwork") },
+    { key: "paintings", label: t("Paintings") },
+    { key: "homeDecor", label: t("Home Decor") },
+    { key: "traditionalWear", label: t("Traditional Wear") },
+    { key: "sculptures", label: t("Sculptures") },
+    { key: "other", label: t("Other") },
   ];
 
   const handleInputChange = (
@@ -120,16 +162,10 @@ export default function NewProductPage() {
     try {
       // Validation
       if (!formData.name.trim()) {
-        throw new Error(
-          isHindi ? "उत्पाद का नाम आवश्यक है" : "Product name is required"
-        );
+        throw new Error("Product name is required");
       }
       if (formData.price <= 0) {
-        throw new Error(
-          isHindi
-            ? "मूल्य 0 से अधिक होना चाहिए"
-            : "Price must be greater than 0"
-        );
+        throw new Error("Price must be greater than 0");
       }
 
       const response = await fetch("/api/products", {
@@ -144,29 +180,18 @@ export default function NewProductPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.error ||
-            (isHindi ? "उत्पाद बनाने में विफल" : "Failed to create product")
-        );
+        throw new Error(data.error || "Failed to create product");
       }
 
-      setSuccess(
-        isHindi
-          ? "उत्पाद सफलतापूर्वक बनाया गया!"
-          : "Product created successfully!"
-      );
+      setSuccess("Product created successfully!");
 
-      // Redirect to dashboard after a short delay
+      // Redirect to products page after a short delay
       setTimeout(() => {
-        router.push("/artisan/dashboard");
+        router.push("/artisan/products");
       }, 1500);
     } catch (error) {
       setError(
-        error instanceof Error
-          ? error.message
-          : isHindi
-          ? "एक त्रुटि हुई"
-          : "An error occurred"
+        error instanceof Error ? error.message : "An error occurred"
       );
     } finally {
       setIsLoading(false);
@@ -175,122 +200,80 @@ export default function NewProductPage() {
 
   const handlePreview = () => {
     // TODO: Implement preview functionality
-    alert(
-      isHindi
-        ? "पूर्वावलोकन सुविधा जल्द आ रही है!"
-        : "Preview functionality coming soon!"
-    );
+    alert("Preview functionality coming soon!");
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-orange-900 to-slate-900 p-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <button
-            onClick={() => router.push("/artisan/dashboard")}
-            className="flex items-center text-white/70 hover:text-white transition-colors">
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            {t("Back to Dashboard", {
-              hi: "डैशबोर्ड पर वापस",
-              or: "ଡ୍ୟାସବୋର୍ଡକୁ ଫେରନ୍ତୁ",
-              te: "డ్యాష్‌బోర్డ్‌కు తిరిగి",
-              bn: "ড্যাশবোর্ডে ফিরে যান",
-            })}
-          </button>
-          <div className="flex items-center text-white">
-            <Package className="h-6 w-6 mr-2" />
-            <span className="text-xl font-bold">
-              {t("Create New Product", {
-                hi: "नया उत्पाद बनाएं",
-                or: "ନୂତନ ପଣ୍ୟ ତିଆରି କରନ୍ତୁ",
-                te: "కొత్త ఉత్పత్తిని సృష్టించండి",
-                bn: "নতুন পণ্য তৈরি করুন",
-              })}
-            </span>
-          </div>
+    <div className="container mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="mb-8">
+        <button
+          onClick={() => router.push("/artisan/dashboard")}
+          className="flex items-center text-muted-foreground hover:text-foreground transition-colors mb-4">
+          <ArrowLeft className="h-5 w-5 mr-2" />
+          {t("Back to Dashboard")}
+        </button>
+        <div className="flex items-center">
+          <Package className="h-8 w-8 mr-3 text-primary" />
+          <h1 className="text-3xl font-bold text-foreground">
+            {t("Create New Product")}
+          </h1>
         </div>
+      </div>
 
-        {/* Status Messages */}
-        {error && (
-          <div className="mb-6 bg-red-500/20 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg">
-            {error}
-          </div>
-        )}
+      {/* Status Messages */}
+      {error && (
+        <div className="mb-6 bg-destructive/10 border border-destructive/50 text-destructive px-4 py-3 rounded-lg">
+          {error}
+        </div>
+      )}
 
-        {success && (
-          <div className="mb-6 bg-green-500/20 border border-green-500/50 text-green-400 px-4 py-3 rounded-lg">
-            {success}
-          </div>
-        )}
+      {success && (
+        <div className="mb-6 bg-green-500/10 border border-green-500/50 text-green-600 dark:text-green-400 px-4 py-3 rounded-lg">
+          {success}
+        </div>
+      )}
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
-            <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
-              <Type className="h-5 w-5 mr-2 text-orange-400" />
-              {t("Basic Information", {
-                hi: "मूलभूत जानकारी",
-                or: "ମୂଳ ସୂଚନା",
-                te: "ప్రాథమిక సమాచారం",
-                bn: "মূল তথ্য",
-              })}
+          <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+            <h2 className="text-xl font-semibold text-foreground mb-6 flex items-center">
+              <Type className="h-5 w-5 mr-2 text-primary" />
+              {t("Basic Information")}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-white/90 text-sm font-medium mb-2">
-                  {t("Product Name", {
-                    hi: "उत्पाद का नाम",
-                    or: "ପଣ୍ୟର ନାମ",
-                    te: "ఉత్పత్తి పేరు",
-                    bn: "পণ্যের নাম",
-                  })}{" "}
-                  *
+                <label className="block text-foreground text-sm font-medium mb-2">
+                  {t("Product Name")} *
                 </label>
                 <input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={t("Enter Product Name", {
-                    hi: "उत्पाद का नाम दर्ज करें",
-                    or: "ପଣ୍ୟର ନାମ ପ୍ରବେଶ କରନ୍ତୁ",
-                    te: "ఉత్పత్తి పేరు నమోదు చేయండి",
-                    bn: "পণ্যের নাম লিখুন",
-                  })}
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  placeholder={t("Enter Product Name")}
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-white/90 text-sm font-medium mb-2">
-                  {t("Category", {
-                    hi: "श्रेणी",
-                    or: "ବିଭାଗ",
-                    te: "వర్గం",
-                    bn: "বিভাগ",
-                  })}
+                <label className="block text-foreground text-sm font-medium mb-2">
+                  {t("Category")}
                 </label>
                 <select
                   name="category"
                   value={formData.category}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
-                  <option value="" className="bg-slate-800">
-                    {t("Select Category", {
-                      hi: "श्रेणी चुनें",
-                      or: "ବିଭାଗ ବାଛନ୍ତୁ",
-                      te: "వర్గాన్ని ఎంచుకోండి",
-                      bn: "বিভাগ নির্বাচন করুন",
-                    })}
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
+                  <option value="">
+                    {t("Select Category")}
                   </option>
                   {categories.map((category) => (
                     <option
                       key={category.key}
-                      value={category.key}
-                      className="bg-slate-800">
+                      value={category.key}>
                       {category.label}
                     </option>
                   ))}
@@ -298,28 +281,17 @@ export default function NewProductPage() {
               </div>
 
               <div>
-                <label className="block text-white/90 text-sm font-medium mb-2">
+                <label className="block text-foreground text-sm font-medium mb-2">
                   <DollarSign className="h-4 w-4 inline mr-1" />
-                  {t("price", {
-                    hi: "मूल्य",
-                    or: "ମୂଲ୍ୟ",
-                    te: "ధర",
-                    bn: "মূল্য",
-                  })}{" "}
-                  *
+                  {t("Price")} *
                 </label>
                 <input
                   type="number"
                   name="price"
                   value={formData.price}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={t("enterPrice", {
-                    hi: "मूल्य दर्ज करें",
-                    or: "ମୂଲ୍ୟ ପ୍ରବିଷ୍ଟ କରନ୍ତୁ",
-                    te: "ధరను నమోదు చేయండి",
-                    bn: "মূল্য প্রবেশ করান",
-                  })}
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  placeholder={t("Enter Price")}
                   min="0"
                   step="0.01"
                   required
@@ -327,353 +299,238 @@ export default function NewProductPage() {
               </div>
 
               <div>
-                <label className="block text-white/90 text-sm font-medium mb-2">
-                  {t("currency", {
-                    hi: "मुद्रा",
-                    or: "ମୁଦ୍ରା",
-                    te: "కరెన్సీ",
-                    bn: "মুদ্রা",
-                  })}
+                <label className="block text-foreground text-sm font-medium mb-2">
+                  {t("Currency")}
                 </label>
                 <select
                   name="currency"
                   value={formData.currency}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
-                  <option value="INR" className="bg-slate-800">
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
+                  <option value="INR">
                     INR (₹)
                   </option>
-                  <option value="USD" className="bg-slate-800">
+                  <option value="USD">
                     USD ($)
                   </option>
-                  <option value="EUR" className="bg-slate-800">
+                  <option value="EUR">
                     EUR (€)
                   </option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-white/90 text-sm font-medium mb-2">
-                  {t("Stock Quantity", {
-                    hi: "स्टॉक मात्रा",
-                    or: "ଷ୍ଟକ ପରିମାଣ",
-                    te: "స్టాక్ పరిమాణం",
-                    bn: "স্টক পরিমাণ",
-                  })}
+                <label className="block text-foreground text-sm font-medium mb-2">
+                  {t("Stock Quantity")}
                 </label>
                 <input
                   type="number"
                   name="stockQuantity"
                   value={formData.stockQuantity}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                   min="0"
                 />
               </div>
+            </div>
 
-              <div className="flex items-center space-x-6">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="isActive"
-                    checked={formData.isActive}
-                    onChange={handleInputChange}
-                    className="w-4 h-4 text-orange-500 bg-white/5 border-white/20 rounded focus:ring-orange-500"
-                  />
-                  <span className="ml-2 text-sm text-white/90">
-                    {t("Active", {
-                      hi: "सक्रिय",
-                      or: "ସକ୍ରିୟ",
-                      te: "చురుకైన",
-                      bn: "সক্রিয়",
-                    })}
-                  </span>
-                </label>
+            <div className="flex items-center space-x-6 mt-6">
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="isActive"
+                  checked={formData.isActive}
+                  onChange={handleInputChange}
+                  className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary"
+                />
+                <span className="ml-2 text-sm text-foreground">
+                  {t("Active")}
+                </span>
+              </label>
 
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="isFeatured"
-                    checked={formData.isFeatured}
-                    onChange={handleInputChange}
-                    className="w-4 h-4 text-orange-500 bg-white/5 border-white/20 rounded focus:ring-orange-500"
-                  />
-                  <span className="ml-2 text-sm text-white/90">
-                    {t("Featured", {
-                      hi: "फीचर्ड",
-                      or: "ବିଶେଷ",
-                      te: "ప్రత్యేకమైన",
-                      bn: "বৈশিষ্ট্যযুক্ত",
-                    })}
-                  </span>
-                </label>
-              </div>
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="isFeatured"
+                  checked={formData.isFeatured}
+                  onChange={handleInputChange}
+                  className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary"
+                />
+                <span className="ml-2 text-sm text-foreground">
+                  {t("Featured")}
+                </span>
+              </label>
             </div>
           </div>
 
           {/* Description & Story */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
-            <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
-              <FileText className="h-5 w-5 mr-2 text-orange-500" />
-              {t("Description & Story", {
-                hi: "विवरण और कहानी",
-                or: "ବର୍ଣ୍ଣନା ଏବଂ କାହାଣୀ",
-                te: "వివరణ మరియు కథ",
-                bn: "বিবরণ এবং গল্প",
-              })}
+          <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+            <h2 className="text-xl font-semibold text-foreground mb-6 flex items-center">
+              <FileText className="h-5 w-5 mr-2 text-primary" />
+              {t("Description & Story")}
             </h2>
 
             <div className="space-y-6">
               <div>
-                <label className="block text-slate-300 text-sm font-medium mb-2">
-                  {t("Product Description", {
-                    hi: "उत्पाद विवरण",
-                    or: "ପଣ୍ୟ ବର୍ଣ୍ଣନା",
-                    te: "ఉత్పత్తి వివరణ",
-                    bn: "পণ্যের বিবরণ",
-                  })}
+                <label className="block text-foreground text-sm font-medium mb-2">
+                  {t("Product Description")}
                 </label>
                 <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 resize-none"
-                  placeholder={
-                    isHindi
-                      ? "अपने उत्पाद का विवरण दें..."
-                      : "Describe your product..."
-                  }
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
+                  placeholder={t("Describe your product...")}
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 text-sm font-medium mb-2">
-                  {t("Cultural Story", {
-                    hi: "सांस्कृतिक कहानी",
-                    or: "ସାଂସ୍କୃତିକ କାହାଣୀ",
-                    te: "సాంస్కృతిక కథ",
-                    bn: "সাংস্কৃতিক গল্প",
-                  })}
+                <label className="block text-foreground text-sm font-medium mb-2">
+                  {t("Cultural Story")}
                 </label>
                 <textarea
                   name="story"
                   value={formData.story}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 resize-none"
-                  placeholder={
-                    currentLocale === "en"
-                      ? "Tell the cultural story behind your product..."
-                      : "अपने उत्पाद के पीछे की सांस्कृतिक कहानी बताएं..."
-                  }
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
+                  placeholder={t("Tell the cultural story behind your product...")}
                 />
               </div>
             </div>
           </div>
 
           {/* Product Details */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
-            <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
-              <Package className="h-5 w-5 mr-2 text-orange-500" />
-              {t("Product Details", {
-                hi: "उत्पाद विवरण",
-                or: "ପଣ୍ୟ ବିବରଣ",
-                te: "ఉత్పత్తి వివరాలు",
-                bn: "পণ্যের বিবরণ",
-              })}
+          <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+            <h2 className="text-xl font-semibold text-foreground mb-6 flex items-center">
+              <Package className="h-5 w-5 mr-2 text-primary" />
+              {t("Product Details")}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-white/90 text-sm font-medium mb-2">
+                <label className="block text-foreground text-sm font-medium mb-2">
                   <Palette className="h-4 w-4 inline mr-1" />
-                  {t("Materials", {
-                    hi: "सामग्री",
-                    or: "ସାମଗ୍ରୀ",
-                    te: "పదార్థాలు",
-                    bn: "উপাদান",
-                  })}
+                  {t("Materials")}
                 </label>
                 <input
                   type="text"
                   name="materials"
                   value={formData.materials}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={
-                    isHindi
-                      ? "जैसे: कपास, रेशम, लकड़ी"
-                      : "e.g., Cotton, Silk, Wood"
-                  }
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  placeholder={t("e.g., Cotton, Silk, Wood")}
                 />
               </div>
 
               <div>
-                <label className="block text-white/90 text-sm font-medium mb-2">
+                <label className="block text-foreground text-sm font-medium mb-2">
                   <MapPin className="h-4 w-4 inline mr-1" />
-                  {t("Cultural Origin", {
-                    hi: "सांस्कृतिक मूल",
-                    or: "ସାଂସ୍କୃତିକ ମୂଳ",
-                    te: "సాంస్కృతిక మూలం",
-                    bn: "সাংস্কৃতিক উৎস",
-                  })}
+                  {t("Cultural Origin")}
                 </label>
                 <input
                   type="text"
                   name="culture"
                   value={formData.culture}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={
-                    isHindi
-                      ? "जैसे: राजस्थानी, बंगाली"
-                      : "e.g., Rajasthani, Bengali"
-                  }
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  placeholder={t("e.g., Rajasthani, Bengali")}
                 />
               </div>
 
               <div>
-                <label className="block text-white/90 text-sm font-medium mb-2">
-                  {t("Artist Name", {
-                    hi: "कलाकार का नाम",
-                    or: "କଳାକାରଙ୍କ ନାମ",
-                    te: "కళాకారుడి పేరు",
-                    bn: "শিল্পীর নাম",
-                  })}
+                <label className="block text-foreground text-sm font-medium mb-2">
+                  {t("Artist Name")}
                 </label>
                 <input
                   type="text"
                   name="artistName"
                   value={formData.artistName}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={t("Creator's name", {
-                    hi: "निर्माता का नाम",
-                    or: "ସୃଷ୍ଟିକର୍ତ୍ତାଙ୍କ ନାମ",
-                    te: "సృష్టికర్త పేరు",
-                    bn: "স্রষ্টার নাম",
-                  })}
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  placeholder={t("Creator's name")}
                 />
               </div>
 
               <div>
-                <label className="block text-white/90 text-sm font-medium mb-2">
+                <label className="block text-foreground text-sm font-medium mb-2">
                   <Ruler className="h-4 w-4 inline mr-1" />
-                  {t("Dimensions", {
-                    hi: "आयाम",
-                    or: "ଆକାର",
-                    te: "కొలతలు",
-                    bn: "মাত্রা",
-                  })}
+                  {t("Dimensions")}
                 </label>
                 <input
                   type="text"
                   name="dimensions"
                   value={formData.dimensions}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={
-                    isHindi
-                      ? "जैसे: 30सेमी x 20सेमी x 5सेमी"
-                      : "e.g., 30cm x 20cm x 5cm"
-                  }
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  placeholder={t("e.g., 30cm x 20cm x 5cm")}
                 />
               </div>
 
               <div>
-                <label className="block text-white/90 text-sm font-medium mb-2">
+                <label className="block text-foreground text-sm font-medium mb-2">
                   <Weight className="h-4 w-4 inline mr-1" />
-                  {t("Weight", {
-                    hi: "वजन",
-                    or: "ଓଜନ",
-                    te: "బరువు",
-                    bn: "ওজন",
-                  })}
+                  {t("Weight")}
                 </label>
                 <input
                   type="text"
                   name="weight"
                   value={formData.weight}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={t("e.g., 500g", {
-                    hi: "जैसे: 500ग्राम",
-                    or: "ଯେମିତି: 500 ଗ୍ରାମ",
-                    te: "ఉదా: 500 గ్రాములు",
-                    bn: "যেমন: ৫০০ গ্রাম",
-                  })}
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  placeholder={t("e.g., 500g")}
                 />
               </div>
             </div>
           </div>
 
           {/* Images & Links */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
-            <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
-              <Upload className="h-5 w-5 mr-2 text-orange-500" />
-              {t("Images & Links", {
-                hi: "छवियां और लिंक",
-                or: "ଚିତ୍ର ଏବଂ ଲିଙ୍କ",
-                te: "చిత్రాలు మరియు లింకులు",
-                bn: "ছবি এবং লিঙ্ক",
-              })}
+          <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+            <h2 className="text-xl font-semibold text-foreground mb-6 flex items-center">
+              <Upload className="h-5 w-5 mr-2 text-primary" />
+              {t("Images & Links")}
             </h2>
 
             <div className="space-y-6">
               <div>
-                <label className="block text-white/90 text-sm font-medium mb-2">
-                  {t("Product Image URL", {
-                    hi: "उत्पाद छवि URL",
-                    or: "ପଣ୍ୟ ଚିତ୍ର URL",
-                    te: "ఉత్పత్తి చిత్రం URL",
-                    bn: "পণ্যের ছবি URL",
-                  })}
+                <label className="block text-foreground text-sm font-medium mb-2">
+                  {t("Product Image URL")}
                 </label>
                 <input
                   type="url"
                   name="imageUrl"
                   value={formData.imageUrl}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                   placeholder="https://example.com/image.jpg"
                 />
               </div>
 
               <div>
-                <label className="block text-white/90 text-sm font-medium mb-2">
-                  {t("Marketing Poster URL", {
-                    hi: "मार्केटिंग पोस्टर URL",
-                    or: "ମାର୍କେଟିଂ ପୋଷ୍ଟର URL",
-                    te: "మార్కెటింగ్ పోస్టర్ URL",
-                    bn: "মার্কেটিং পোস্টার URL",
-                  })}
+                <label className="block text-foreground text-sm font-medium mb-2">
+                  {t("Marketing Poster URL")}
                 </label>
                 <input
                   type="url"
                   name="posterUrl"
                   value={formData.posterUrl}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                   placeholder="https://example.com/poster.jpg"
                 />
               </div>
 
               <div>
-                <label className="block text-white/90 text-sm font-medium mb-2">
-                  {t("Instagram Post URL", {
-                    hi: "इंस्टाग्राम पोस्ट URL",
-                    or: "ଇନଷ୍ଟାଗ୍ରାମ ପୋଷ୍ଟ URL",
-                    te: "ఇన్‌స్టాగ్రామ్ పోస్ట్ URL",
-                    bn: "ইনস্টাগ্রাম পোস্ট URL",
-                  })}
+                <label className="block text-foreground text-sm font-medium mb-2">
+                  {t("Instagram Post URL")}
                 </label>
                 <input
                   type="url"
                   name="instagramUrl"
                   value={formData.instagramUrl}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                   placeholder="https://instagram.com/p/..."
                 />
               </div>
@@ -681,56 +538,36 @@ export default function NewProductPage() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-between">
+          <div className="flex flex-col sm:flex-row justify-between gap-4 pt-4">
             <button
               type="button"
               onClick={handlePreview}
-              className="flex items-center px-6 py-3 bg-white/10 border border-white/20 rounded-lg text-white/90 hover:bg-white/20 transition-colors">
+              className="flex items-center justify-center px-6 py-3 bg-secondary hover:bg-secondary/80 border border-border rounded-lg text-foreground transition-colors">
               <Eye className="h-4 w-4 mr-2" />
-              {t("Preview", {
-                hi: "पूर्वावलोकन",
-                or: "ପୂର୍ବାବଲୋକନ",
-                te: "ప్రివ్యూ",
-                bn: "প্রিভিউ",
-              })}
+              {t("Preview")}
             </button>
 
             <div className="flex space-x-4">
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="px-6 py-3 bg-white/10 border border-white/20 rounded-lg text-white/90 hover:bg-white/20 transition-colors">
-                {t("Cancel", {
-                  hi: "रद्द करें",
-                  or: "ବାତିଲ କରନ୍ତୁ",
-                  te: "రద్దు చేయండి",
-                  bn: "বাতিল করুন",
-                })}
+                className="flex-1 sm:flex-none px-6 py-3 bg-secondary hover:bg-secondary/80 border border-border rounded-lg text-foreground transition-colors">
+                {t("Cancel")}
               </button>
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex items-center px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+                className="flex-1 sm:flex-none flex items-center justify-center px-8 py-3 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm">
                 {isLoading ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    {t("Creating...", {
-                      hi: "बना रहे हैं...",
-                      or: "ତିଆରି କରୁଛି...",
-                      te: "సృష్టిస్తున్నాము...",
-                      bn: "তৈরি করছি...",
-                    })}
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                    {t("Creating...")}
                   </>
                 ) : (
                   <>
                     <Save className="h-4 w-4 mr-2" />
-                    {t("Create Product", {
-                      hi: "उत्पाद बनाएं",
-                      or: "ପଣ୍ୟ ତିଆରି କରନ୍ତୁ",
-                      te: "ఉత్పత్తిని సృష్టించండి",
-                      bn: "পণ্য তৈরি করুন",
-                    })}
+                    {t("Create Product")}
                   </>
                 )}
               </button>
@@ -738,6 +575,5 @@ export default function NewProductPage() {
           </div>
         </form>
       </div>
-    </div>
   );
 }

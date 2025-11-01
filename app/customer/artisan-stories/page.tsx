@@ -64,40 +64,59 @@ export default function ArtisanStoriesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <Loader className="h-12 w-12 animate-spin text-orange-500 mx-auto mb-4" />
-          <p className="text-slate-400">Loading artisan stories...</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center py-20">
+          <div className="relative">
+            <div className="animate-spin rounded-full h-20 w-20 border-4 border-muted border-t-primary mx-auto mb-6"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Users className="h-8 w-8 text-primary animate-pulse" />
+            </div>
+          </div>
+          <h2 className="text-2xl font-bold text-foreground mb-3">Discovering Artisan Stories</h2>
+          <p className="text-muted-foreground text-lg">Loading the talented creators behind our products...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-gradient-to-r from-orange-600 to-orange-500 text-white py-12 px-6">
+      <div className="bg-card border-b border-border px-6 py-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center mb-4">
-            <Users className="h-10 w-10 mr-3" />
-            <h1 className="text-4xl font-bold">Meet Our Artisans</h1>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-card-foreground mb-2">Meet Our Artisans</h1>
+              <p className="text-muted-foreground text-lg">Discover the stories, craftsmanship, and passion behind every creation</p>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3 bg-muted/50 backdrop-blur-sm rounded-xl px-4 py-3 border border-border">
+                <div className="h-10 w-10 bg-primary rounded-full flex items-center justify-center shadow-lg">
+                  <Users className="h-5 w-5 text-primary-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-card-foreground">Artisan Stories</p>
+                  <p className="text-xs text-muted-foreground">{artisans.length} talented creators</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <p className="text-orange-100 text-lg">
-            Discover the stories, craftsmanship, and passion behind every creation
-          </p>
         </div>
       </div>
 
       {/* Artisans Grid */}
       <div className="max-w-7xl mx-auto px-6 py-12">
         {artisans.length === 0 ? (
-          <div className="text-center py-16">
-            <Users className="h-16 w-16 text-slate-600 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-slate-400 mb-2">
-              No Artisan Stories Yet
-            </h3>
-            <p className="text-slate-500">
-              Check back soon to discover amazing artisan stories!
+          <div className="text-center py-20">
+            <div className="relative mb-8">
+              <div className="w-32 h-32 bg-muted/50 rounded-full flex items-center justify-center mx-auto border-4 border-border">
+                <Users className="h-16 w-16 text-muted-foreground" />
+              </div>
+            </div>
+            <h2 className="text-3xl font-bold text-foreground mb-4">No Artisan Stories Yet</h2>
+            <p className="text-muted-foreground text-lg mb-8 max-w-md mx-auto">
+              Check back soon to discover amazing artisan stories and the talented creators behind our products!
             </p>
           </div>
         ) : (
@@ -105,7 +124,7 @@ export default function ArtisanStoriesPage() {
             {artisans.map((artisan) => (
               <div
                 key={artisan.id}
-                className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 hover:border-orange-500 transition-all duration-300 group cursor-pointer"
+                className="group bg-card backdrop-blur-sm rounded-2xl overflow-hidden border border-border shadow-xl hover:border-primary/50 hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] cursor-pointer"
                 onClick={() => {
                   if (artisan.documentation_video_url && artisan.documentation_video_status === 'COMPLETED') {
                     openVideoModal(artisan);
@@ -113,7 +132,7 @@ export default function ArtisanStoriesPage() {
                 }}
               >
                 {/* Artisan Image */}
-                <div className="relative h-64 bg-gradient-to-br from-slate-700 to-slate-800 overflow-hidden">
+                <div className="relative h-64 bg-gradient-to-br from-muted via-muted to-muted/80 overflow-hidden">
                   {artisan.photograph || artisan.avatar ? (
                     <img
                       src={artisan.photograph || artisan.avatar}
@@ -122,7 +141,7 @@ export default function ArtisanStoriesPage() {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <div className="w-32 h-32 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-4xl font-bold">
+                      <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary via-primary/80 to-primary flex items-center justify-center text-primary-foreground text-4xl font-bold">
                         {artisan.name?.charAt(0).toUpperCase() || 'A'}
                       </div>
                     </div>
@@ -131,8 +150,8 @@ export default function ArtisanStoriesPage() {
                   {/* Play Button Overlay */}
                   {artisan.documentation_video_url && artisan.documentation_video_status === 'COMPLETED' && (
                     <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-all duration-300 flex items-center justify-center">
-                      <div className="bg-orange-500 rounded-full p-5 group-hover:scale-110 transition-transform duration-300">
-                        <Play className="h-8 w-8 text-white fill-white" />
+                      <div className="bg-primary rounded-full p-5 group-hover:scale-110 transition-transform duration-300">
+                        <Play className="h-8 w-8 text-primary-foreground fill-primary-foreground" />
                       </div>
                     </div>
                   )}
@@ -144,7 +163,7 @@ export default function ArtisanStoriesPage() {
                     </div>
                   )}
                   {!artisan.documentation_video_url && artisan.documentation_video_status === 'NOT_GENERATED' && (
-                    <div className="absolute top-4 right-4 bg-slate-700/90 text-slate-300 px-3 py-1 rounded-full text-xs font-medium">
+                    <div className="absolute top-4 right-4 bg-muted/90 text-muted-foreground px-3 py-1 rounded-full text-xs font-medium">
                       Story Coming Soon
                     </div>
                   )}
@@ -152,26 +171,26 @@ export default function ArtisanStoriesPage() {
 
                 {/* Artisan Info */}
                 <div className="p-6">
-                  <h3 className="text-xl font-bold text-white mb-2 group-hover:text-orange-400 transition-colors">
+                  <h3 className="text-xl font-bold text-card-foreground mb-2 group-hover:text-primary transition-colors">
                     {artisan.name}
                   </h3>
                   
                   {artisan.specialty && (
-                    <div className="flex items-center text-orange-400 mb-2">
+                    <div className="flex items-center text-primary mb-2">
                       <Palette className="h-4 w-4 mr-2" />
                       <span className="text-sm font-medium">{artisan.specialty}</span>
                     </div>
                   )}
 
                   {(artisan.location || artisan.origin_place) && (
-                    <div className="flex items-center text-slate-400 mb-3">
+                    <div className="flex items-center text-muted-foreground mb-3">
                       <MapPin className="h-4 w-4 mr-2" />
                       <span className="text-sm">{artisan.origin_place || artisan.location}</span>
                     </div>
                   )}
 
                   {artisan.bio && (
-                    <p className="text-slate-300 text-sm line-clamp-3 mb-4">
+                    <p className="text-muted-foreground text-sm line-clamp-3 mb-4">
                       {artisan.bio}
                     </p>
                   )}
@@ -181,7 +200,7 @@ export default function ArtisanStoriesPage() {
                       {artisan.expertise_areas.split(',').slice(0, 3).map((expertise, idx) => (
                         <span
                           key={idx}
-                          className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs"
+                          className="bg-muted text-muted-foreground px-2 py-1 rounded text-xs"
                         >
                           {expertise.trim()}
                         </span>
@@ -190,7 +209,7 @@ export default function ArtisanStoriesPage() {
                   )}
 
                   {artisan.documentation_video_url && artisan.documentation_video_status === 'COMPLETED' && (
-                    <button className="mt-4 w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center">
+                    <button className="mt-4 w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center">
                       <Play className="h-4 w-4 mr-2" />
                       Watch Their Story
                     </button>
@@ -209,15 +228,15 @@ export default function ArtisanStoriesPage() {
           onClick={closeVideoModal}
         >
           <div
-            className="relative max-w-5xl w-full bg-slate-800 rounded-2xl overflow-hidden shadow-2xl"
+            className="relative max-w-5xl w-full bg-card rounded-2xl overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close button */}
             <button
               onClick={closeVideoModal}
-              className="absolute top-4 right-4 z-10 p-2 bg-slate-900/80 hover:bg-slate-900 rounded-full transition-colors"
+              className="absolute top-4 right-4 z-10 p-2 bg-background/80 hover:bg-background rounded-full transition-colors"
             >
-              <X className="w-6 h-6 text-white" />
+              <X className="w-6 h-6 text-foreground" />
             </button>
 
             {/* Video Player */}
@@ -234,20 +253,20 @@ export default function ArtisanStoriesPage() {
             </div>
 
             {/* Artisan Info Below Video */}
-            <div className="p-6 bg-slate-800">
+            <div className="p-6 bg-card">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-white mb-2">
+                  <h2 className="text-2xl font-bold text-card-foreground mb-2">
                     {selectedArtisan.name}
                   </h2>
                   {selectedArtisan.specialty && (
-                    <div className="flex items-center text-orange-400 mb-2">
+                    <div className="flex items-center text-primary mb-2">
                       <Palette className="h-5 w-5 mr-2" />
                       <span className="font-medium">{selectedArtisan.specialty}</span>
                     </div>
                   )}
                   {(selectedArtisan.origin_place || selectedArtisan.location) && (
-                    <div className="flex items-center text-slate-400">
+                    <div className="flex items-center text-muted-foreground">
                       <MapPin className="h-4 w-4 mr-2" />
                       <span className="text-sm">
                         {selectedArtisan.origin_place || selectedArtisan.location}
@@ -259,8 +278,8 @@ export default function ArtisanStoriesPage() {
 
               {selectedArtisan.artisan_story && (
                 <div className="mb-4">
-                  <h3 className="text-white font-semibold mb-2">Their Story</h3>
-                  <p className="text-slate-300 text-sm leading-relaxed">
+                  <h3 className="text-card-foreground font-semibold mb-2">Their Story</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
                     {selectedArtisan.artisan_story}
                   </p>
                 </div>
@@ -268,12 +287,12 @@ export default function ArtisanStoriesPage() {
 
               {selectedArtisan.expertise_areas && (
                 <div>
-                  <h3 className="text-white font-semibold mb-2">Expertise</h3>
+                  <h3 className="text-card-foreground font-semibold mb-2">Expertise</h3>
                   <div className="flex flex-wrap gap-2">
                     {selectedArtisan.expertise_areas.split(',').map((expertise, idx) => (
                       <span
                         key={idx}
-                        className="bg-slate-700 text-slate-300 px-3 py-1 rounded-full text-sm"
+                        className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-sm"
                       >
                         {expertise.trim()}
                       </span>
@@ -284,7 +303,7 @@ export default function ArtisanStoriesPage() {
 
               <button
                 onClick={() => router.push(`/customer/products?artisan=${selectedArtisan.id}`)}
-                className="mt-6 w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+                className="mt-6 w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 px-6 rounded-lg transition-colors"
               >
                 View {selectedArtisan.name}'s Products
               </button>

@@ -17,6 +17,8 @@ import {
   Palette,
   Wand2,
 } from "lucide-react";
+import { GoogleLoaderWithText } from '@/components/ui/google-loader';
+import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
 
 // Type definitions
 interface User {
@@ -68,6 +70,7 @@ interface Message {
 }
 
 export default function ChatsPage() {
+  const { translateBatch, t } = useDynamicTranslation();
   const [users, setUsers] = useState<User[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [artisanConversations, setArtisanConversations] = useState<ArtisanConversation[]>([]);
@@ -81,6 +84,41 @@ export default function ChatsPage() {
   const [error, setError] = useState<string | null>(null);
   const [chatMode, setChatMode] = useState<'support'>('support');
   const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    translateBatch([
+      "Loading conversations...",
+      "Retry",
+      "Back to Chats",
+      "Artisan Support",
+      "Support Chat",
+      "Online",
+      "Away",
+      "Offline",
+      "Just now",
+      "minutes ago",
+      "hours ago",
+      "days ago",
+      "Message",
+      "Download",
+      "Create Poster",
+      "Support Center",
+      "Manage artisan support conversations and provide business assistance",
+      "Search artisans by name or specialty...",
+      "Active Conversations",
+      "Pending Support",
+      "Responded Today",
+      "Support Status",
+      "Active",
+      "Admin replied",
+      "Needs response",
+      "Artwork Image",
+      "Shared image",
+      "Now",
+      "Failed to load users",
+      "Failed to connect to chat service",
+    ]);
+  }, [translateBatch]);
 
   useEffect(() => {
     checkUserRole();
@@ -334,11 +372,11 @@ I'll be back with your poster soon! 📸➡️🎨`;
         setUsers(data.users);
         setAdminUser(data.admin);
       } else {
-        setError("Failed to load users");
+        setError(t("Failed to load users"));
       }
     } catch (err) {
       console.error("Error fetching users:", err);
-      setError("Failed to connect to chat service");
+      setError(t("Failed to connect to chat service"));
     } finally {
       setLoading(false);
     }
@@ -429,7 +467,7 @@ I'll be back with your poster soon! 📸➡️🎨`;
       const date = new Date(timestamp);
       if (isNaN(date.getTime())) {
         console.log("Invalid timestamp:", timestamp);
-        return "Now";
+        return t("Now");
       }
       return date.toLocaleTimeString("en-US", {
         hour: "2-digit",
@@ -437,7 +475,7 @@ I'll be back with your poster soon! 📸➡️🎨`;
       });
     } catch (error) {
       console.log("Error parsing timestamp:", timestamp, error);
-      return "Now";
+      return t("Now");
     }
   };
 
@@ -449,10 +487,10 @@ I'll be back with your poster soon! 📸➡️🎨`;
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
 
-    if (diffMins < 5) return "Just now";
-    if (diffMins < 60) return `${diffMins} minutes ago`;
-    if (diffHours < 24) return `${diffHours} hours ago`;
-    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffMins < 5) return t("Just now");
+    if (diffMins < 60) return `${diffMins} ${t("minutes ago")}`;
+    if (diffHours < 24) return `${diffHours} ${t("hours ago")}`;
+    if (diffDays < 7) return `${diffDays} ${t("days ago")}`;
     return date.toLocaleDateString();
   };
 
@@ -473,10 +511,9 @@ I'll be back with your poster soon! 📸➡️🎨`;
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-6 flex items-center justify-center">
+      <div className="min-h-screen bg-background p-6 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-white">Loading chats...</p>
+                    <GoogleLoaderWithText size="xl" text={t("Loading conversations...")} />
         </div>
       </div>
     );
@@ -484,14 +521,14 @@ I'll be back with your poster soon! 📸➡️🎨`;
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-6 flex items-center justify-center">
+      <div className="min-h-screen bg-background p-6 flex items-center justify-center">
         <div className="text-center">
-          <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
-          <p className="text-white mb-4">{error}</p>
+          <AlertCircle className="h-12 w-12 text-red-600 dark:text-red-400 mx-auto mb-4" />
+          <p className="text-foreground mb-4">{error}</p>
           <button
             onClick={fetchUsers}
-            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors">
-            Retry
+            className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors">
+            {t("Retry")}
           </button>
         </div>
       </div>
@@ -505,7 +542,7 @@ I'll be back with your poster soon! 📸➡️🎨`;
     const chatMessages = isRegularChat ? messages : adminMessages;
     
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-6">
+      <div className="min-h-screen bg-background p-6">
         <div className="max-w-4xl mx-auto">
           {/* Back Button Header */}
           <div className="mb-6">
@@ -514,14 +551,14 @@ I'll be back with your poster soon! 📸➡️🎨`;
                 setSelectedUser(null);
                 setSelectedArtisan(null);
               }}
-              className="flex items-center space-x-2 text-orange-400 hover:text-orange-300 transition-colors mb-4">
+              className="flex items-center space-x-2 text-primary hover:text-primary/80 transition-colors mb-4">
               <ArrowLeft className="h-5 w-5" />
-              <span>Back to Chats</span>
+              <span>{t("Back to Chats")}</span>
             </button>
             <div className="flex items-center space-x-3 mb-2">
               <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-semibold text-sm">
+                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                  <span className="text-primary font-semibold text-sm">
                     {isRegularChat 
                       ? selectedUserData?.name?.split(" ").map((n) => n[0]).join("")
                       : selectedArtisanData?.artisan_name?.split(" ").map((n) => n[0]).join("")
@@ -530,62 +567,62 @@ I'll be back with your poster soon! 📸➡️🎨`;
                 </div>
                 {isRegularChat && (
                   <div
-                    className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-gray-900 ${getStatusColor(
+                    className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-background ${getStatusColor(
                       selectedUserData?.status || "OFFLINE"
                     )}`}></div>
                 )}
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white bg-gradient-to-r from-orange-500 to-orange-400 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold text-foreground">
                   {isRegularChat ? selectedUserData?.name : selectedArtisanData?.artisan_name}
                 </h1>
-                <p className="text-orange-400">
-                  {isRegularChat ? selectedUserData?.specialty : 'Artisan Support'}
+                <p className="text-primary">
+                  {isRegularChat ? selectedUserData?.specialty : t('Artisan Support')}
                 </p>
-                <p className="text-gray-400 text-sm">
+                <p className="text-muted-foreground text-sm">
                   {isRegularChat ? selectedUserData?.location : selectedArtisanData?.artisan_email}
                 </p>
               </div>
             </div>
-            <div className="h-1 bg-gradient-to-r from-orange-500 to-orange-400 rounded-full w-32"></div>
+            <div className="h-1 bg-primary rounded-full w-32"></div>
           </div>
 
           {/* Chat Container */}
-          <div className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-xl border border-orange-500/20 h-[70vh] flex flex-col">
+          <div className="bg-card rounded-xl border border-border h-[70vh] flex flex-col shadow-lg">
             {/* Chat Header */}
-            <div className="p-4 border-b border-gray-700">
+            <div className="p-4 border-b border-border bg-card/95">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   {isRegularChat ? (
                     <span
                       className={`text-sm flex items-center space-x-1 ${
                         selectedUserData?.status === "ONLINE"
-                          ? "text-green-400"
+                          ? "text-green-600 dark:text-green-400"
                           : selectedUserData?.status === "AWAY"
-                          ? "text-yellow-400"
-                          : "text-gray-400"
+                          ? "text-yellow-600 dark:text-yellow-400"
+                          : "text-muted-foreground"
                       }`}>
                       <div
                         className={`w-2 h-2 rounded-full ${getStatusColor(
                           selectedUserData?.status || "OFFLINE"
                         )}`}></div>
-                      <span>{selectedUserData?.status.toLowerCase()}</span>
+                      <span>{t(selectedUserData?.status.toLowerCase() || "offline")}</span>
                     </span>
                   ) : (
-                    <span className="text-sm text-purple-400 flex items-center space-x-1">
+                    <span className="text-sm text-purple-600 dark:text-purple-400 flex items-center space-x-1">
                       <MessageSquare className="w-4 h-4" />
-                      <span>Support Chat</span>
+                      <span>{t("Support Chat")}</span>
                     </span>
                   )}
                 </div>
                 <div className="flex space-x-2">
                   {isRegularChat && (
                     <>
-                      <button className="p-2 bg-purple-500/20 hover:bg-purple-500/30 rounded-lg border border-purple-500/30 transition-all duration-200">
-                        <Sparkles className="h-4 w-4 text-purple-400" />
+                      <button className="p-2 bg-purple-500/10 hover:bg-purple-500/20 rounded-lg border border-purple-500/30 transition-all duration-200">
+                        <Sparkles className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                       </button>
-                      <button className="p-2 bg-pink-500/20 hover:bg-pink-500/30 rounded-lg border border-pink-500/30 transition-all duration-200">
-                        <Instagram className="h-4 w-4 text-pink-400" />
+                      <button className="p-2 bg-pink-500/10 hover:bg-pink-500/20 rounded-lg border border-pink-500/30 transition-all duration-200">
+                        <Instagram className="h-4 w-4 text-pink-600 dark:text-pink-400" />
                       </button>
                     </>
                   )}
@@ -594,7 +631,7 @@ I'll be back with your poster soon! 📸➡️🎨`;
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-background">
               {isRegularChat ? (
                 // Regular chat messages
                 messages.map((message) => (
@@ -608,10 +645,10 @@ I'll be back with your poster soon! 📸➡️🎨`;
                     <div
                       className={`max-w-xs lg:max-w-md ${
                         message.senderId === adminUser?.id
-                          ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white"
+                          ? "bg-primary text-primary-foreground"
                           : message.messageType === "SYSTEM"
-                          ? "bg-gradient-to-r from-purple-500/20 to-purple-600/10 border border-purple-500/30 text-purple-300"
-                          : "bg-gray-700 text-white"
+                          ? "bg-purple-500/10 border border-purple-500/30 text-purple-600 dark:text-purple-300"
+                          : "bg-card border border-border text-foreground"
                       } rounded-lg p-3 shadow-lg`}>
                       {message.messageType === "TEXT" && message.content && (
                         <p className="text-sm">{message.content}</p>
@@ -620,18 +657,18 @@ I'll be back with your poster soon! 📸➡️🎨`;
                       {message.messageType === "IMAGE" && (
                         <div className="space-y-2">
                           <div className="relative">
-                            <div className="w-full h-48 bg-gray-600 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-500">
+                            <div className="w-full h-48 bg-accent rounded-lg flex items-center justify-center border-2 border-dashed border-border">
                               {message.imageUrl ? (
                                 <img
                                   src={message.imageUrl}
-                                  alt="Shared image"
+                                  alt={t("Shared image")}
                                   className="w-full h-full object-cover rounded-lg"
                                 />
                               ) : (
                                 <div className="text-center">
-                                  <Camera className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                                  <p className="text-xs text-gray-400">
-                                    Artwork Image
+                                  <Camera className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                                  <p className="text-xs text-muted-foreground">
+                                    {t("Artwork Image")}
                                   </p>
                                 </div>
                               )}
@@ -673,8 +710,8 @@ I'll be back with your poster soon! 📸➡️🎨`;
                     <div
                       className={`max-w-xs lg:max-w-md ${
                         message.isFromAdmin
-                          ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white'
-                          : 'bg-gray-700 text-white'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-card border border-border text-foreground'
                       } rounded-lg p-3 shadow-lg`}>
                       
                       <p className="text-sm">{message.message}</p>
@@ -683,7 +720,7 @@ I'll be back with your poster soon! 📸➡️🎨`;
                       {message.attachments && message.attachments.length > 0 && (
                         <div className="mt-3">
                           {message.attachments.map((attachment, index) => (
-                            <div key={index} className="bg-black/20 rounded-lg p-2 border border-white/20">
+                            <div key={index} className={`rounded-lg p-2 border ${message.isFromAdmin ? 'bg-black/20 border-white/20' : 'bg-accent border-border'}`}>
                               {attachment.type === 'file' && attachment.url && (
                                 <>
                                   {attachment.url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
@@ -704,17 +741,17 @@ I'll be back with your poster soon! 📸➡️🎨`;
                                       <div className="flex space-x-2 mt-2">
                                         <button
                                           onClick={() => handleDownloadImage(attachment.url, attachment.name)}
-                                          className="flex items-center px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded-md text-xs font-medium transition-colors"
-                                          title="Download Image">
+                                          className="flex items-center px-3 py-1 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-md text-xs font-medium text-white transition-colors"
+                                          title={t("Download Image")}>
                                           <Download className="h-3 w-3 mr-1" />
-                                          Download
+                                          {t("Download")}
                                         </button>
                                         <button
                                           onClick={() => handleCreatePoster(attachment.url, attachment.name)}
-                                          className="flex items-center px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded-md text-xs font-medium transition-colors"
-                                          title="Create Marketing Poster">
+                                          className="flex items-center px-3 py-1 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 rounded-md text-xs font-medium text-white transition-colors"
+                                          title={t("Create Marketing Poster")}>
                                           <Wand2 className="h-3 w-3 mr-1" />
-                                          Create Poster
+                                          {t("Create Poster")}
                                         </button>
                                       </div>
                                     </div>
@@ -725,7 +762,7 @@ I'll be back with your poster soon! 📸➡️🎨`;
                                         href={attachment.url} 
                                         target="_blank" 
                                         rel="noopener noreferrer"
-                                        className="text-blue-300 hover:text-blue-200 underline text-sm">
+                                        className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline text-sm">
                                         {attachment.name}
                                       </a>
                                     </div>
@@ -747,24 +784,24 @@ I'll be back with your poster soon! 📸➡️🎨`;
             </div>
 
             {/* Message Input */}
-            <div className="p-4 border-t border-gray-700">
+            <div className="p-4 border-t border-border bg-card/95">
               <div className="flex space-x-2">
                 {isRegularChat && (
-                  <button className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg border border-gray-600 transition-all duration-200">
-                    <Camera className="h-4 w-4 text-gray-400" />
+                  <button className="p-2 bg-accent hover:bg-accent/80 rounded-lg border border-border transition-all duration-200">
+                    <Camera className="h-4 w-4 text-muted-foreground" />
                   </button>
                 )}
                 <input
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder={`Message ${isRegularChat ? selectedUserData?.name : selectedArtisanData?.artisan_name}...`}
-                  className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white placeholder-gray-400"
+                  placeholder={`${t("Message")} ${isRegularChat ? selectedUserData?.name : selectedArtisanData?.artisan_name}...`}
+                  className="flex-1 px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-foreground placeholder-muted-foreground"
                   onKeyPress={(e) => e.key === "Enter" && (isRegularChat ? sendMessage() : sendAdminMessage())}
                 />
                 <button
                   onClick={isRegularChat ? sendMessage : sendAdminMessage}
-                  className="p-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg transition-all duration-200 shadow-lg">
+                  className="p-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-all duration-200 shadow-lg">
                   <Send className="h-4 w-4" />
                 </button>
               </div>
@@ -777,68 +814,79 @@ I'll be back with your poster soon! 📸➡️🎨`;
 
   // Users List View
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center space-x-3 mb-2">
-            <MessageSquare className="h-8 w-8 text-orange-400" />
-            <h1 className="text-3xl font-bold text-white bg-gradient-to-r from-orange-500 to-orange-400 bg-clip-text text-transparent">
-              Support Center
+        <div className="mb-8">
+          <div className="flex items-center space-x-4 mb-4">
+            <MessageSquare className="h-8 w-8 text-primary" />
+            <h1 className="text-3xl font-bold text-foreground">
+              {t("Support Center")}
             </h1>
           </div>
-          <div className="h-1 bg-gradient-to-r from-orange-500 to-orange-400 rounded-full w-32"></div>
-          <p className="text-gray-400 mt-2">
-            Manage artisan support conversations and provide business assistance
+          <p className="text-muted-foreground text-lg">
+            {t("Manage artisan support conversations and provide business assistance")}
           </p>
         </div>
 
         {/* Search Bar */}
-        <div className="mb-6">
+        <div className="mb-8">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search artisans by name or specialty..."
+              placeholder={t("Search artisans by name or specialty...")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-white placeholder-gray-400"
+              className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-foreground placeholder-muted-foreground"
             />
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-4 border border-blue-500/20">
-            <div className="flex items-center space-x-2">
-              <MessageSquare className="h-4 w-4 text-blue-400" />
-              <span className="text-blue-400 font-medium">
-                Active Conversations: {artisanConversations.length}
-              </span>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-card rounded-xl p-6 border border-border hover:shadow-lg transition-all duration-300">
+            <div className="flex items-center space-x-3">
+              <MessageSquare className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              <div>
+                <p className="text-sm text-muted-foreground">{t("Active Conversations")}</p>
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  {artisanConversations.length}
+                </p>
+              </div>
             </div>
           </div>
-          <div className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-4 border border-red-500/20">
-            <div className="flex items-center space-x-2">
-              <AlertCircle className="h-4 w-4 text-red-400" />
-              <span className="text-red-400 font-medium">
-                Pending Support: {artisanConversations.reduce((sum, c) => sum + c.unread_count, 0)}
-              </span>
+          <div className="bg-card rounded-xl p-6 border border-border hover:shadow-lg transition-all duration-300">
+            <div className="flex items-center space-x-3">
+              <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+              <div>
+                <p className="text-sm text-muted-foreground">{t("Pending Support")}</p>
+                <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                  {artisanConversations.reduce((sum, c) => sum + c.unread_count, 0)}
+                </p>
+              </div>
             </div>
           </div>
-          <div className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-4 border border-green-500/20">
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="h-4 w-4 text-green-400" />
-              <span className="text-green-400 font-medium">
-                Responded Today: {artisanConversations.filter(c => c.last_sender === 'admin').length}
-              </span>
+          <div className="bg-card rounded-xl p-6 border border-border hover:shadow-lg transition-all duration-300">
+            <div className="flex items-center space-x-3">
+              <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+              <div>
+                <p className="text-sm text-muted-foreground">{t("Responded Today")}</p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  {artisanConversations.filter(c => c.last_sender === 'admin').length}
+                </p>
+              </div>
             </div>
           </div>
-          <div className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-lg p-4 border border-purple-500/20">
-            <div className="flex items-center space-x-2">
-              <Sparkles className="h-4 w-4 text-purple-400" />
-              <span className="text-purple-400 font-medium">
-                Admin Support Active
-              </span>
+          <div className="bg-card rounded-xl p-6 border border-border hover:shadow-lg transition-all duration-300">
+            <div className="flex items-center space-x-3">
+              <Sparkles className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              <div>
+                <p className="text-sm text-muted-foreground">{t("Support Status")}</p>
+                <p className="text-lg font-semibold text-purple-600 dark:text-purple-400">
+                  {t("Active")}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -849,12 +897,12 @@ I'll be back with your poster soon! 📸➡️🎨`;
               <div
                 key={conversation.artisan_id}
                 onClick={() => setSelectedArtisan(conversation.artisan_id)}
-                className="bg-gradient-to-br from-gray-800/50 to-gray-700/30 backdrop-blur-sm rounded-xl p-6 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 cursor-pointer group hover:scale-105">
+                className="bg-card rounded-2xl p-6 border border-border hover:shadow-lg transition-all duration-300 cursor-pointer group">
                 <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-4">
                     <div className="relative">
-                      <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center group-hover:from-purple-400 group-hover:to-purple-500 transition-all duration-300">
-                        <span className="text-white font-semibold">
+                      <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300">
+                        <span className="text-primary font-semibold">
                           {conversation.artisan_name
                             .split(" ")
                             .map((n) => n[0])
@@ -863,36 +911,36 @@ I'll be back with your poster soon! 📸➡️🎨`;
                       </div>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-white group-hover:text-purple-300 transition-colors">
+                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                         {conversation.artisan_name}
                       </h3>
-                      <p className="text-sm text-gray-400">{conversation.artisan_email}</p>
+                      <p className="text-sm text-muted-foreground">{conversation.artisan_email}</p>
                     </div>
                   </div>
                   {conversation.unread_count > 0 && (
-                    <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">
+                    <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                      <span className="text-primary-foreground text-xs font-bold">
                         {conversation.unread_count}
                       </span>
                     </div>
                   )}
                 </div>
 
-                <div className="mb-3">
-                  <p className="text-gray-300 text-sm line-clamp-2">
+                <div className="mb-4">
+                  <p className="text-foreground text-sm line-clamp-2">
                     {conversation.last_message}
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span>{formatLastSeen(conversation.last_message_time)}</span>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{formatLastSeen(conversation.last_message_time)}</span>
                   <span
-                    className={`px-2 py-1 rounded-full ${
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${
                       conversation.last_sender === "admin"
-                        ? "bg-green-500/20 text-green-400"
-                        : "bg-orange-500/20 text-orange-400"
+                        ? "bg-green-500/10 text-green-600 dark:text-green-400"
+                        : "bg-orange-500/10 text-orange-600 dark:text-orange-400"
                     }`}>
-                    {conversation.last_sender === "admin" ? "Admin replied" : "Needs response"}
+                    {conversation.last_sender === "admin" ? t("Admin replied") : t("Needs response")}
                   </span>
                 </div>
               </div>

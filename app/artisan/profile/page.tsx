@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useTranslation } from "@/lib/i18n/hooks";
+import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
 import {
   User,
   Mail,
@@ -28,7 +28,7 @@ interface ArtisanProfile {
 
 export default function ArtisanProfilePage() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, translateBatch, currentLocale } = useDynamicTranslation();
   const [profile, setProfile] = useState<ArtisanProfile>({
     id: "",
     name: "",
@@ -43,6 +43,29 @@ export default function ArtisanProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  // Pre-load translations
+  useEffect(() => {
+    translateBatch([
+      "My Profile",
+      "Manage your artisan profile and information",
+      "Loading profile...",
+      "Full Name",
+      "Email Address",
+      "Phone Number",
+      "Specialty",
+      "Location",
+      "Bio",
+      "Profile Picture",
+      "Change Photo",
+      "Save Changes",
+      "Saving...",
+      "Profile updated successfully",
+      "Failed to update profile",
+      "Profile Information",
+      "Update your account details",
+    ]);
+  }, [currentLocale, translateBatch]);
 
   const loadProfile = useCallback(async () => {
     try {
@@ -124,11 +147,11 @@ export default function ArtisanProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">
-            {t('loadingProfile')}
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">
+            {t('Loading profile...')}
           </p>
         </div>
       </div>
@@ -136,17 +159,17 @@ export default function ArtisanProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+      <div className="bg-card border-b border-border px-6 py-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-white">
-            {t('profileSettings')}
+          <h1 className="text-2xl font-bold text-foreground">
+            {t('My Profile')}
           </h1>
-          <div className="flex items-center text-slate-400">
+          <div className="flex items-center text-muted-foreground">
             <User className="h-5 w-5 mr-2" />
             <span>
-              {t('manageYourAccount')}
+              {t('Manage your artisan profile and information')}
             </span>
           </div>
         </div>
@@ -156,12 +179,12 @@ export default function ArtisanProfilePage() {
       <div className="p-6">
         <div className="max-w-2xl mx-auto">
           {/* Profile Form */}
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+          <div className="bg-card border border-border rounded-lg p-6 shadow-lg">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Avatar Section */}
               <div className="flex flex-col items-center mb-6">
                 <div className="relative">
-                  <div className="w-24 h-24 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-4">
+                  <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-2xl font-bold mb-4">
                     {profile.avatar ? (
                       <Image
                         src={profile.avatar}
@@ -176,7 +199,7 @@ export default function ArtisanProfilePage() {
                   </div>
                   <button
                     type="button"
-                    className="absolute bottom-0 right-0 bg-orange-500 hover:bg-orange-600 text-white rounded-full p-2 transition-colors">
+                    className="absolute bottom-0 right-0 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full p-2 transition-colors">
                     <Camera className="h-4 w-4" />
                   </button>
                 </div>
@@ -185,95 +208,95 @@ export default function ArtisanProfilePage() {
               {/* Form Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-300 text-sm font-medium mb-2">
+                  <label className="block text-foreground text-sm font-medium mb-2">
                     <User className="h-4 w-4 inline mr-1" />
-                    {t('fullName')} *
+                    {t('Full Name')} *
                   </label>
                   <input
                     type="text"
                     name="name"
                     value={profile.name}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                    placeholder={t('enterFullName')}
+                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    placeholder={t('Full Name')}
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 text-sm font-medium mb-2">
+                  <label className="block text-foreground text-sm font-medium mb-2">
                     <Mail className="h-4 w-4 inline mr-1" />
-                    {t('emailAddress')} *
+                    {t('Email Address')} *
                   </label>
                   <input
                     type="email"
                     name="email"
                     value={profile.email}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                    placeholder={t('enterEmail')}
+                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    placeholder={t('Email Address')}
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 text-sm font-medium mb-2">
+                  <label className="block text-foreground text-sm font-medium mb-2">
                     <Phone className="h-4 w-4 inline mr-1" />
-                    {t('phoneNumber')}
+                    {t('Phone Number')}
                   </label>
                   <input
                     type="tel"
                     name="phone"
                     value={profile.phone || ""}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                    placeholder={t('enterPhoneNumber')}
+                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    placeholder={t('Phone Number')}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 text-sm font-medium mb-2">
+                  <label className="block text-foreground text-sm font-medium mb-2">
                     <Palette className="h-4 w-4 inline mr-1" />
-                    {t('specialty')}
+                    {t('Specialty')}
                   </label>
                   <input
                     type="text"
                     name="specialty"
                     value={profile.specialty || ""}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                    placeholder={t('specialtyPlaceholder')}
+                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    placeholder={t('Specialty')}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-slate-300 text-sm font-medium mb-2">
+                <label className="block text-foreground text-sm font-medium mb-2">
                   <MapPin className="h-4 w-4 inline mr-1" />
-                  {t('location')}
+                  {t('Location')}
                 </label>
                 <input
                   type="text"
                   name="location"
                   value={profile.location || ""}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  placeholder={t('enterLocation')}
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  placeholder={t('Location')}
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 text-sm font-medium mb-2">
+                <label className="block text-foreground text-sm font-medium mb-2">
                   <FileText className="h-4 w-4 inline mr-1" />
-                  {t('bio')}
+                  {t('Bio')}
                 </label>
                 <textarea
                   name="bio"
                   value={profile.bio || ""}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 resize-none"
-                  placeholder={t('bioPlaceholder')}
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
+                  placeholder={t('Bio')}
                 />
               </div>
 
@@ -294,16 +317,16 @@ export default function ArtisanProfilePage() {
               <button
                 type="submit"
                 disabled={isSaving}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-4 px-6 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg hover:shadow-xl">
                 {isSaving ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    {t('saving')}
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground mr-2"></div>
+                    {t('Saving...')}
                   </>
                 ) : (
                   <>
                     <Save className="h-5 w-5 mr-2" />
-                    {t('updateProfile')}
+                    {t('Save Changes')}
                   </>
                 )}
               </button>
