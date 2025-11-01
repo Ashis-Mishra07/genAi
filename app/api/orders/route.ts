@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
     // Calculate statistics
     const stats = {
       totalOrders: orders.length,
-      totalSpent: orders.reduce((sum, order) => sum + order.total, 0),
+      totalSpent: orders.reduce((sum: number, order: any) => sum + (parseFloat(order.total.toString()) || 0), 0),
       pendingOrders: orders.filter(order => order.status === 'pending').length,
       deliveredOrders: orders.filter(order => order.status === 'delivered').length,
     };
