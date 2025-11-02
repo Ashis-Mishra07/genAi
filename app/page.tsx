@@ -13,6 +13,7 @@ import {
   Heart,
   Globe,
 } from "lucide-react";
+import { GoogleLoaderWithText } from "@/components/ui/google-loader";
 
 interface RoleCardProps {
   title: string;
@@ -36,7 +37,8 @@ const RoleCard = ({
     onClick={onClick}
     className="group bg-card border border-border rounded-2xl p-8 cursor-pointer hover:shadow-lg transition-all duration-300 hover:border-primary/50">
     <div className="flex flex-col h-full">
-      <div className={`h-16 w-16 ${color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+      <div
+        className={`h-16 w-16 ${color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
         {icon}
       </div>
 
@@ -64,13 +66,23 @@ const RoleCard = ({
   </div>
 );
 
-const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) => (
+const FeatureCard = ({
+  icon,
+  title,
+  description,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) => (
   <div className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg transition-all duration-300 group">
     <div className="h-12 w-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
       {icon}
     </div>
     <h3 className="font-semibold text-foreground mb-2">{title}</h3>
-    <p className="text-muted-foreground text-sm leading-relaxed">{description}</p>
+    <p className="text-muted-foreground text-sm leading-relaxed">
+      {description}
+    </p>
   </div>
 );
 
@@ -109,7 +121,7 @@ export default function RoleSelectionPage() {
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-primary/5"></div>
-        
+
         <div className="relative container mx-auto px-4 py-20">
           {/* Header */}
           <div className="text-center mb-20">
@@ -120,15 +132,26 @@ export default function RoleSelectionPage() {
             </div>
 
             <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-6">
-              AI Artisan
-              <span className="bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent">
+              AI{" "}
+              <span>
+                <span className="text-blue-600 dark:text-blue-400">A</span>
+                <span className="text-red-500 dark:text-red-400">r</span>
+                <span className="text-yellow-500 dark:text-yellow-400">t</span>
+                <span className="text-blue-600 dark:text-blue-400">i</span>
+                <span className="text-green-500 dark:text-green-400">s</span>
+                <span className="text-red-500 dark:text-red-400">a</span>
+                <span className="text-blue-600 dark:text-blue-400">n</span>
+              </span>
+              <span className="bg-gradient-to-r  bg-clip-text">
                 {" "}
                 Marketplace
               </span>
             </h1>
 
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-8">
-              Connect talented artisans with passionate customers, showcase cultural heritage through AI-powered storytelling, and build a thriving marketplace for authentic handmade treasures
+              Connect talented artisans with passionate customers, showcase
+              cultural heritage through AI-powered storytelling, and build a
+              thriving marketplace for authentic handmade treasures
             </p>
 
             {/* Stats */}
@@ -145,13 +168,15 @@ export default function RoleSelectionPage() {
             <RoleCard
               title="Admin"
               description="Manage the platform, oversee operations, and support the artisan community with advanced analytics and AI tools"
-              icon={<Shield className="h-8 w-8 text-blue-600 dark:text-blue-400" />}
+              icon={
+                <Shield className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+              }
               features={[
                 "Platform management & analytics",
                 "User oversight & support",
                 "AI video generation tools",
                 "Advanced reporting dashboard",
-                "System configuration"
+                "System configuration",
               ]}
               color="bg-blue-500/10"
               path="/auth/admin"
@@ -161,13 +186,15 @@ export default function RoleSelectionPage() {
             <RoleCard
               title="Artisan"
               description="Showcase your crafts, tell your story with AI assistance, and connect with customers worldwide"
-              icon={<Palette className="h-8 w-8 text-orange-600 dark:text-orange-400" />}
+              icon={
+                <Palette className="h-8 w-8 text-orange-600 dark:text-orange-400" />
+              }
               features={[
                 "Product showcase & management",
                 "AI-powered story creation",
                 "Customer chat & communication",
                 "Order management system",
-                "Cultural video generation"
+                "Cultural video generation",
               ]}
               color="bg-orange-500/10"
               path="/auth/artisan"
@@ -177,13 +204,15 @@ export default function RoleSelectionPage() {
             <RoleCard
               title="Customer"
               description="Discover unique handmade products, learn cultural stories, and connect directly with talented artisans"
-              icon={<ShoppingBag className="h-8 w-8 text-green-600 dark:text-green-400" />}
+              icon={
+                <ShoppingBag className="h-8 w-8 text-green-600 dark:text-green-400" />
+              }
               features={[
                 "Browse authentic products",
                 "Interactive artisan chat",
                 "Secure order placement",
                 "Cultural story experiences",
-                "Personalized recommendations"
+                "Personalized recommendations",
               ]}
               color="bg-green-500/10"
               path="/auth/customer"
@@ -194,9 +223,12 @@ export default function RoleSelectionPage() {
           {/* Features Section */}
           <div className="mb-20">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-foreground mb-4">Why Choose Our Platform?</h2>
+              <h2 className="text-3xl font-bold text-foreground mb-4">
+                Why Choose Our Platform?
+              </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Experience the perfect blend of traditional craftsmanship and modern AI technology
+                Experience the perfect blend of traditional craftsmanship and
+                modern AI technology
               </p>
             </div>
 
@@ -222,11 +254,11 @@ export default function RoleSelectionPage() {
           {/* Loading States */}
           {isLoading && (
             <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
-              <div className="bg-card border border-border rounded-2xl p-8 flex items-center space-x-4 shadow-xl">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                <span className="text-foreground font-medium">
-                  Loading {isLoading} portal...
-                </span>
+              <div className="bg-card border border-border rounded-2xl p-8 shadow-xl">
+                <GoogleLoaderWithText
+                  size="xl"
+                  text={`Loading ${isLoading} portal...`}
+                />
               </div>
             </div>
           )}
@@ -248,7 +280,7 @@ export default function RoleSelectionPage() {
               </div>
             </div>
             <p className="text-muted-foreground text-sm">
-              © 2024 AI Artisan Marketplace. Bridging tradition and technology.
+              © 2025 AI Artisan Marketplace. Bridging tradition and technology.
             </p>
           </div>
         </div>

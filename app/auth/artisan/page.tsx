@@ -50,7 +50,7 @@ export default function ArtisanAuthPage() {
     try {
       const endpoint =
         mode === "signin" ? "/api/auth/signin" : "/api/auth/signup";
-      
+
       if (mode === "signin") {
         // Sign in - simple JSON payload
         const response = await fetch(endpoint, {
@@ -81,7 +81,7 @@ export default function ArtisanAuthPage() {
       } else {
         // Sign up - upload photograph first if provided
         let photographUrl = "";
-        
+
         if (photographFile) {
           console.log("📸 Uploading photograph...");
           const uploadFormData = new FormData();
@@ -144,7 +144,11 @@ export default function ArtisanAuthPage() {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -165,8 +169,11 @@ export default function ArtisanAuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 py-12">
-      <div className="w-full max-w-2xl">
+    <div className="min-h-screen bg-background/50 backdrop-blur-md flex items-center justify-center p-4 py-12 relative">
+      {/* Background overlay for better blur effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-background/80 to-orange-500/5" />
+
+      <div className="w-full max-w-2xl relative z-10">
         {/* Back Button */}
         <button
           onClick={() => router.back()}
@@ -375,7 +382,9 @@ export default function ArtisanAuthPage() {
                           onChange={handleInputChange}
                           className="text-orange-600 focus:ring-orange-500"
                         />
-                        <span className="ml-2 text-foreground">{genderOption}</span>
+                        <span className="ml-2 text-foreground">
+                          {genderOption}
+                        </span>
                       </label>
                     ))}
                   </div>

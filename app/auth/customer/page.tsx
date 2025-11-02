@@ -49,7 +49,7 @@ export default function CustomerAuthPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: 'include', // Important: Include cookies
+        credentials: "include", // Important: Include cookies
         body: JSON.stringify(payload),
       });
 
@@ -67,8 +67,13 @@ export default function CustomerAuthPage() {
         localStorage.setItem("refreshToken", data.data.refreshToken);
         localStorage.setItem("user_role", "CUSTOMER");
         localStorage.setItem("user_id", data.data.user.id);
-        
-        console.log("Auth success - User ID:", data.data.user.id, "Role:", data.data.user.role);
+
+        console.log(
+          "Auth success - User ID:",
+          data.data.user.id,
+          "Role:",
+          data.data.user.role
+        );
       }
 
       router.push("/customer/dashboard");
@@ -90,8 +95,11 @@ export default function CustomerAuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-background/50 backdrop-blur-md flex items-center justify-center p-4 relative">
+      {/* Background overlay for better blur effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-background/80 to-green-500/5" />
+
+      <div className="w-full max-w-md relative z-10">
         {/* Back Button */}
         <button
           onClick={() => router.back()}

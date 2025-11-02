@@ -66,12 +66,14 @@ export default function ArtisanAnalyticsPage() {
   useEffect(() => {
     translateBatch([
       "Analytics Dashboard",
-      "View your performance metrics",
+      "View your performance metrics and insights",
       "Total Views",
       "Total Orders",
       "Total Revenue",
       "Total Customers",
-      "Top Products",
+      "Performance Overview",
+      "Monthly performance analytics",
+      "Top Performing Products",
       "Recent Activity",
       "Views",
       "Orders",
@@ -82,6 +84,10 @@ export default function ArtisanAnalyticsPage() {
       "Last 90 Days",
       "Refresh",
       "Export Data",
+      "vs last period",
+      "views",
+      "orders",
+      "revenue",
       "Loading analytics...",
       "Product",
       "viewed",
@@ -233,9 +239,9 @@ export default function ArtisanAnalyticsPage() {
 
   const getChangeIcon = (change: number) => {
     if (change > 0) {
-      return <TrendingUp className="h-4 w-4 text-green-600" />;
+      return <TrendingUp className="h-4 w-4 text-primary" />;
     } else if (change < 0) {
-      return <TrendingDown className="h-4 w-4 text-red-600" />;
+      return <TrendingDown className="h-4 w-4 text-muted-foreground" />;
     }
     return null;
   };
@@ -249,13 +255,13 @@ export default function ArtisanAnalyticsPage() {
   const getActivityIcon = (type: string) => {
     switch (type) {
       case "order":
-        return <ShoppingCart className="h-4 w-4 text-green-400" />;
+        return <ShoppingCart className="h-4 w-4 text-primary" />;
       case "view":
-        return <Eye className="h-4 w-4 text-blue-400" />;
+        return <Eye className="h-4 w-4 text-primary" />;
       case "inquiry":
-        return <Users className="h-4 w-4 text-orange-400" />;
+        return <Users className="h-4 w-4 text-primary" />;
       default:
-        return <Eye className="h-4 w-4 text-gray-600" />;
+        return <Eye className="h-4 w-4 text-primary" />;
     }
   };
 
@@ -289,183 +295,242 @@ export default function ArtisanAnalyticsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="p-6 space-y-4 bg-background min-h-screen">
       {/* Header */}
-      <div className="bg-card border border-border rounded-xl px-6 py-6 shadow-sm mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">
-              {t("Analytics Dashboard")}
-            </h1>
-            <div className="h-1 w-32 bg-primary rounded-full mt-2 mb-2"></div>
-            <p className="text-muted-foreground">
-              {t("View your performance metrics")}
-            </p>
-          </div>
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold text-foreground">
+            {t("Analytics Dashboard")}
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            {t("View your performance metrics and insights")}
+          </p>
+          <div className="h-1 w-32 bg-primary rounded-full"></div>
+        </div>
 
-          <div className="flex items-center space-x-4">
-            <select
-              value={timeframe}
-              onChange={(e) => setTimeframe(e.target.value)}
-              className="px-4 py-2.5 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
-              <option value="7d">{t("Last 7 Days")}</option>
-              <option value="30d">{t("Last 30 Days")}</option>
-              <option value="90d">{t("Last 90 Days")}</option>
-            </select>
+        <div className="flex items-center space-x-4">
+          <select
+            value={timeframe}
+            onChange={(e) => setTimeframe(e.target.value)}
+            className="px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground shadow-lg">
+            <option value="7d">{t("Last 7 Days")}</option>
+            <option value="30d">{t("Last 30 Days")}</option>
+            <option value="90d">{t("Last 90 Days")}</option>
+          </select>
 
-            <button
-              onClick={loadAnalytics}
-              disabled={isRefreshing}
-              className="flex items-center px-4 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50 disabled:transform-none">
-              <RefreshCw
-                className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
-              />
-              {t("Refresh")}
-            </button>
+          <button
+            onClick={loadAnalytics}
+            disabled={isRefreshing}
+            className="flex items-center space-x-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-all duration-300 shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:transform-none">
+            <RefreshCw
+              className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+            />
+            <span>{t("Refresh")}</span>
+          </button>
 
-            <button className="flex items-center px-4 py-3 bg-secondary border border-border rounded-lg text-secondary-foreground hover:bg-secondary/80 transition-all">
-              <Download className="h-4 w-4 mr-2" />
-              {t("Export Data")}
-            </button>
-          </div>
+          <button className="flex items-center space-x-2 px-6 py-3 bg-secondary border border-border rounded-lg text-secondary-foreground hover:bg-secondary/80 transition-all duration-300 shadow-lg">
+            <Download className="h-4 w-4" />
+            <span>{t("Export Data")}</span>
+          </button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
+          <div className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-all duration-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-white/70">
-                  {t("totalViews")}
+                <p className="text-sm font-medium text-muted-foreground mb-1">
+                  {t("Total Views")}
                 </p>
-                <p className="text-2xl font-bold text-white">
+                <p className="text-2xl font-bold text-foreground">
                   {translatedData.overview.totalViews.toLocaleString()}
                 </p>
               </div>
-              <div className="p-3 bg-blue-500/20 rounded-full">
-                <Eye className="h-6 w-6 text-blue-400" />
+              <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                <Eye className="h-6 w-6 text-primary" />
               </div>
             </div>
             <div className="mt-4 flex items-center">
               {getChangeIcon(analyticsData.overview.viewsChange)}
-              <span
-                className={`text-sm ml-1 ${getChangeColor(
-                  analyticsData.overview.viewsChange
-                )}`}>
-                {Math.abs(analyticsData.overview.viewsChange)}%{" "}
-                {t("vsLastPeriod")}
+              <span className="text-sm font-medium text-primary ml-2">
+                {Math.abs(analyticsData.overview.viewsChange)}%
+              </span>
+              <span className="text-sm text-muted-foreground ml-2">
+                {t("vs last period")}
               </span>
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
+          <div className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-all duration-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-white/70">
-                  {t("totalOrders")}
+                <p className="text-sm font-medium text-muted-foreground mb-1">
+                  {t("Total Orders")}
                 </p>
-                <p className="text-2xl font-bold text-white">
+                <p className="text-2xl font-bold text-foreground">
                   {analyticsData.overview.totalOrders}
                 </p>
               </div>
-              <div className="p-3 bg-green-500/20 rounded-full">
-                <ShoppingCart className="h-6 w-6 text-green-400" />
+              <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                <ShoppingCart className="h-6 w-6 text-primary" />
               </div>
             </div>
             <div className="mt-4 flex items-center">
               {getChangeIcon(analyticsData.overview.ordersChange)}
-              <span
-                className={`text-sm ml-1 ${getChangeColor(
-                  analyticsData.overview.ordersChange
-                )}`}>
-                {Math.abs(analyticsData.overview.ordersChange)}%{" "}
-                {t("vsLastPeriod")}
+              <span className="text-sm font-medium text-primary ml-2">
+                {Math.abs(analyticsData.overview.ordersChange)}%
+              </span>
+              <span className="text-sm text-muted-foreground ml-2">
+                {t("vs last period")}
               </span>
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
+          <div className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-all duration-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-white/70">
-                  {t("totalRevenue")}
+                <p className="text-sm font-medium text-muted-foreground mb-1">
+                  {t("Total Revenue")}
                 </p>
-                <p className="text-2xl font-bold text-white">
+                <p className="text-2xl font-bold text-foreground">
                   {formatCurrency(analyticsData.overview.totalRevenue)}
                 </p>
               </div>
-              <div className="p-3 bg-yellow-500/20 rounded-full">
-                <DollarSign className="h-6 w-6 text-yellow-400" />
+              <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                <DollarSign className="h-6 w-6 text-primary" />
               </div>
             </div>
             <div className="mt-4 flex items-center">
               {getChangeIcon(analyticsData.overview.revenueChange)}
-              <span
-                className={`text-sm ml-1 ${getChangeColor(
-                  analyticsData.overview.revenueChange
-                )}`}>
-                {Math.abs(analyticsData.overview.revenueChange)}%{" "}
-                {t("vsLastPeriod")}
+              <span className="text-sm font-medium text-primary ml-2">
+                {Math.abs(analyticsData.overview.revenueChange)}%
+              </span>
+              <span className="text-sm text-muted-foreground ml-2">
+                {t("vs last period")}
               </span>
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
+          <div className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-all duration-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-white/70">
-                  {t("totalCustomers")}
+                <p className="text-sm font-medium text-muted-foreground mb-1">
+                  {t("Total Customers")}
                 </p>
-                <p className="text-2xl font-bold text-white">
+                <p className="text-2xl font-bold text-foreground">
                   {analyticsData.overview.totalCustomers}
                 </p>
               </div>
-              <div className="p-3 bg-purple-500/20 rounded-full">
-                <Users className="h-6 w-6 text-purple-400" />
+              <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                <Users className="h-6 w-6 text-primary" />
               </div>
             </div>
             <div className="mt-4 flex items-center">
               {getChangeIcon(analyticsData.overview.customersChange)}
-              <span
-                className={`text-sm ml-1 ${getChangeColor(
-                  analyticsData.overview.customersChange
-                )}`}>
-                {Math.abs(analyticsData.overview.customersChange)}%{" "}
-                {t("vsLastPeriod")}
+              <span className="text-sm font-medium text-primary ml-2">
+                {Math.abs(analyticsData.overview.customersChange)}%
+              </span>
+              <span className="text-sm text-muted-foreground ml-2">
+                {t("vs last period")}
               </span>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Chart */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
-            <h3 className="text-lg font-semibold text-white mb-6">
-              {t("performanceOverview")}
-            </h3>
-            <div className="h-80 flex items-center justify-center bg-white/5 rounded-lg">
-              <div className="text-center">
-                <BarChart3 className="h-16 w-16 text-white/30 mx-auto mb-4" />
-                <p className="text-white/70">{t("chartVisualization")}</p>
-                <p className="text-sm text-white/50">{t("chartIntegration")}</p>
+          {/* Performance Overview Chart */}
+          <div className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-all duration-200">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <BarChart3 className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">
+                    {t("Performance Overview")}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {t("Monthly performance analytics")}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2 bg-muted rounded-lg px-3 py-2">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="h-3 w-3 bg-primary rounded-full"></div>
+                    <span className="text-sm text-muted-foreground">
+                      {t("Views")}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="h-3 w-3 bg-primary/50 rounded-full"></div>
+                    <span className="text-sm text-muted-foreground">
+                      {t("Orders")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Simple Performance Graph */}
+            <div className="relative h-64 bg-muted/50 rounded-lg p-4">
+              <div className="absolute inset-0 grid grid-cols-6 grid-rows-4 opacity-20">
+                {/* Grid lines */}
+                {[...Array(5)].map((_, i) => (
+                  <div
+                    key={`h-${i}`}
+                    className="col-span-6 border-t border-border/30"
+                    style={{ gridRow: i + 1 }}
+                  />
+                ))}
+                {[...Array(7)].map((_, i) => (
+                  <div
+                    key={`v-${i}`}
+                    className="row-span-4 border-l border-border/30"
+                    style={{ gridColumn: i + 1 }}
+                  />
+                ))}
+              </div>
+
+              {/* Chart representation */}
+              <div className="relative h-full flex items-end justify-between px-4">
+                {["Jan", "Feb", "Mar", "Apr", "May", "Jun"].map(
+                  (month, index) => (
+                    <div key={month} className="flex flex-col items-center">
+                      <div className="flex space-x-1 mb-2">
+                        <div
+                          className="w-3 bg-primary rounded-t-sm"
+                          style={{ height: `${Math.random() * 120 + 40}px` }}
+                        />
+                        <div
+                          className="w-3 bg-primary/50 rounded-t-sm"
+                          style={{ height: `${Math.random() * 80 + 20}px` }}
+                        />
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {month}
+                      </span>
+                    </div>
+                  )
+                )}
               </div>
             </div>
           </div>
 
           {/* Top Products */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
-            <h3 className="text-lg font-semibold text-white mb-6">
-              {t("topPerformingProducts")}
+          <div className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-all duration-200">
+            <h3 className="text-lg font-semibold text-foreground mb-6">
+              {t("Top Performing Products")}
             </h3>
             <div className="space-y-4">
               {translatedData.topProducts.map((product, index) => (
                 <div
                   key={product.id}
-                  className="flex items-center justify-between p-4 bg-accent/50 rounded-lg border border-border">
+                  className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border/50 hover:bg-muted/70 transition-colors">
                   <div className="flex items-center">
-                    <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-medium mr-4">
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-medium mr-4">
                       #{index + 1}
                     </div>
                     <div>
@@ -479,10 +544,12 @@ export default function ArtisanAnalyticsPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-white">
+                    <p className="font-semibold text-foreground">
                       {formatCurrency(product.revenue)}
                     </p>
-                    <p className="text-sm text-white/70">{t("revenue")}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {t("revenue")}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -491,37 +558,37 @@ export default function ArtisanAnalyticsPage() {
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
-          <h3 className="text-lg font-semibold text-white mb-6">
-            {t("recentActivity")}
+        <div className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-all duration-200">
+          <h3 className="text-lg font-semibold text-foreground mb-6">
+            {t("Recent Activity")}
           </h3>
           <div className="space-y-4">
             {translatedData.recentActivity.map((activity) => (
               <div
                 key={activity.id}
-                className="flex items-center justify-between p-4 hover:bg-white/5 rounded-lg transition-colors">
+                className="flex items-center justify-between p-4 hover:bg-muted/50 rounded-lg transition-colors border border-border/50">
                 <div className="flex items-center">
-                  <div className="p-2 bg-white/10 rounded-lg mr-4">
+                  <div className="p-2 bg-primary/10 rounded-lg mr-4">
                     {getActivityIcon(activity.type)}
                   </div>
                   <div>
-                    <p className="font-medium text-white">
+                    <p className="font-medium text-foreground">
                       {activity.customerName}{" "}
                       {activity.type === "order"
                         ? t("ordered")
                         : activity.type === "view"
                         ? t("viewed")
-                        : t("inquiredAbout")}{" "}
+                        : t("inquired about")}{" "}
                       {activity.productName}
                     </p>
-                    <p className="text-sm text-white/70">
+                    <p className="text-sm text-muted-foreground">
                       {new Date(activity.timestamp).toLocaleString()}
                     </p>
                   </div>
                 </div>
                 {activity.amount && (
                   <div className="text-right">
-                    <p className="font-semibold text-white">
+                    <p className="font-semibold text-foreground">
                       {formatCurrency(activity.amount)}
                     </p>
                   </div>

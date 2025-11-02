@@ -203,130 +203,112 @@ export default function AnalyticsPage() {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-all duration-300 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          <div className="relative z-10">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">
-                  {t("Total Revenue")}
-                </p>
-                <p className="text-3xl font-bold text-foreground">
-                  ₹{analytics.revenue.total.toLocaleString()}
-                </p>
-              </div>
-              <div className="h-14 w-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
-                <DollarSign className="h-7 w-7 text-white" />
-              </div>
+        <div className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-all duration-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                {t("Total Revenue")}
+              </p>
+              <p className="text-2xl font-bold text-foreground">
+                ₹{analytics.revenue.total.toLocaleString()}
+              </p>
             </div>
-            <div className="mt-4 flex items-center">
-              {analytics.revenue.trend === "up" ? (
-                <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
-              ) : (
-                <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
-              )}
-              <span
-                className={`text-sm font-semibold ml-2 ${
-                  analytics.revenue.trend === "up"
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-red-600 dark:text-red-400"
-                }`}>
-                {analytics.revenue.change}%
-              </span>
-              <span className="text-sm text-muted-foreground ml-2">
-                {t("vs last period")}
-              </span>
+            <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center">
+              <DollarSign className="h-6 w-6 text-primary" />
             </div>
+          </div>
+          <div className="mt-4 flex items-center">
+            {analytics.revenue.trend === "up" ? (
+              <TrendingUp className="h-4 w-4 text-primary" />
+            ) : (
+              <TrendingDown className="h-4 w-4 text-muted-foreground" />
+            )}
+            <span className="text-sm font-medium ml-2 text-primary">
+              {analytics.revenue.change}%
+            </span>
+            <span className="text-sm text-muted-foreground ml-2">
+              {t("vs last period")}
+            </span>
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-all duration-300 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          <div className="relative z-10">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">
-                  {t("Total Orders")}
-                </p>
-                <p className="text-3xl font-bold text-foreground">
-                  {analytics.orders.total}
-                </p>
-              </div>
-              <div className="h-14 w-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                <ShoppingCart className="h-7 w-7 text-white" />
-              </div>
+        <div className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-all duration-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                {t("Total Orders")}
+              </p>
+              <p className="text-2xl font-bold text-foreground">
+                {analytics.orders.total}
+              </p>
             </div>
-            <div className="mt-4 flex items-center">
-              <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
-              <span className="text-sm font-semibold text-green-600 dark:text-green-400 ml-2">
-                {analytics.orders.change}%
-              </span>
-              <span className="text-sm text-muted-foreground ml-2">
-                {t("vs last period")}
-              </span>
+            <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center">
+              <ShoppingCart className="h-6 w-6 text-primary" />
             </div>
+          </div>
+          <div className="mt-4 flex items-center">
+            <TrendingUp className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium text-primary ml-2">
+              {analytics.orders.change}%
+            </span>
+            <span className="text-sm text-muted-foreground ml-2">
+              {t("vs last period")}
+            </span>
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-all duration-300 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          <div className="relative z-10">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">
-                  {t("Active Products")}
-                </p>
-                <p className="text-3xl font-bold text-foreground">
-                  {analytics.products.total}
-                </p>
-              </div>
-              <div className="h-14 w-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Package className="h-7 w-7 text-white" />
-              </div>
+        <div className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-all duration-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                {t("Active Products")}
+              </p>
+              <p className="text-2xl font-bold text-foreground">
+                {analytics.products.total}
+              </p>
             </div>
-            <div className="mt-4">
-              <span className="text-sm text-muted-foreground bg-accent px-3 py-1 rounded-full">
-                {t("Across 5 categories")}
-              </span>
+            <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center">
+              <Package className="h-6 w-6 text-primary" />
             </div>
+          </div>
+          <div className="mt-4">
+            <span className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
+              {t("Across 5 categories")}
+            </span>
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-all duration-300 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          <div className="relative z-10">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">
-                  {t("AI Stories Generated")}
-                </p>
-                <p className="text-3xl font-bold text-foreground">
-                  {analytics.aiUsage.storiesGenerated}
-                </p>
-              </div>
-              <div className="h-14 w-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                <BarChart3 className="h-7 w-7 text-white" />
-              </div>
+        <div className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-all duration-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">
+                {t("AI Stories Generated")}
+              </p>
+              <p className="text-2xl font-bold text-foreground">
+                {analytics.aiUsage.storiesGenerated}
+              </p>
             </div>
-            <div className="mt-4">
-              <span className="text-sm text-muted-foreground bg-accent px-3 py-1 rounded-full">
-                {t("Cultural narratives")}
-              </span>
+            <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center">
+              <BarChart3 className="h-6 w-6 text-primary" />
             </div>
+          </div>
+          <div className="mt-4">
+            <span className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
+              {t("Cultural narratives")}
+            </span>
           </div>
         </div>
       </div>
 
       {/* Revenue Chart */}
-      <div className="bg-card border border-border rounded-xl p-8 hover:shadow-lg transition-all duration-300 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600"></div>
-        <div className="flex items-center justify-between mb-8">
+      <div className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-all duration-200">
+        <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
-            <div className="h-10 w-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-              <BarChart3 className="h-5 w-5 text-white" />
+            <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
+              <BarChart3 className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h3 className="text-xl font-semibold text-foreground">
+              <h3 className="text-lg font-semibold text-foreground">
                 {t("Revenue Trend")}
               </h3>
               <p className="text-sm text-muted-foreground">
@@ -334,16 +316,16 @@ export default function AnalyticsPage() {
               </p>
             </div>
           </div>
-          <div className="flex items-center space-x-2 bg-accent/50 rounded-lg px-3 py-2 border border-border">
+          <div className="flex items-center space-x-2 bg-muted rounded-lg px-3 py-2">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <div className="h-3 w-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full"></div>
+                <div className="h-3 w-3 bg-primary rounded-full"></div>
                 <span className="text-sm text-muted-foreground">
                   {t("Actual")}
                 </span>
               </div>
               <div className="flex items-center space-x-2">
-                <div className="h-3 w-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
+                <div className="h-3 w-3 bg-primary/50 rounded-full"></div>
                 <span className="text-sm text-muted-foreground">
                   {t("Estimated")}
                 </span>
@@ -399,43 +381,37 @@ export default function AnalyticsPage() {
                       <div className="flex items-end justify-center space-x-2 w-full">
                         {/* Actual Revenue Bar */}
                         <div
-                          className="w-6 bg-gradient-to-t from-orange-600 via-orange-500 to-orange-400 rounded-t-lg transition-all duration-700 ease-out hover:from-orange-500 hover:to-orange-300 shadow-xl relative overflow-hidden"
+                          className="w-6 bg-primary rounded-t-lg transition-all duration-300 hover:bg-primary/80 relative overflow-hidden"
                           style={{
                             height: `${actualHeight}px`,
-                            boxShadow: "0 0 20px rgba(251, 146, 60, 0.4)",
-                            filter:
-                              "drop-shadow(0 4px 15px rgba(251, 146, 60, 0.3))",
                           }}>
                           {/* Shimmer effect */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 transform -skew-y-12"></div>
+                          <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </div>
 
                         {/* Estimated Revenue Bar */}
                         <div
-                          className="w-6 bg-gradient-to-t from-blue-600 via-blue-500 to-blue-400 rounded-t-lg transition-all duration-700 ease-out hover:from-blue-500 hover:to-blue-300 shadow-xl relative overflow-hidden"
+                          className="w-6 bg-primary/50 rounded-t-lg transition-all duration-300 hover:bg-primary/70 relative overflow-hidden"
                           style={{
                             height: `${estimatedHeight}px`,
-                            boxShadow: "0 0 20px rgba(59, 130, 246, 0.4)",
-                            filter:
-                              "drop-shadow(0 4px 15px rgba(59, 130, 246, 0.3))",
                           }}>
                           {/* Shimmer effect */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 transform -skew-y-12"></div>
+                          <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </div>
                       </div>
 
                       {/* Tooltip */}
                       <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-4 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
-                        <div className="bg-card border border-border text-foreground px-4 py-3 rounded-xl text-sm whitespace-nowrap shadow-2xl backdrop-blur-sm">
+                        <div className="bg-card border border-border text-foreground px-4 py-3 rounded-lg text-sm whitespace-nowrap shadow-lg">
                           <div className="space-y-1">
                             <div className="flex items-center space-x-2">
-                              <div className="h-2 w-2 bg-orange-400 rounded-full"></div>
+                              <div className="h-2 w-2 bg-primary rounded-full"></div>
                               <span className="text-muted-foreground">
                                 {t("Actual")}: ₹{month.actual.toLocaleString()}
                               </span>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <div className="h-2 w-2 bg-blue-400 rounded-full"></div>
+                              <div className="h-2 w-2 bg-primary/50 rounded-full"></div>
                               <span className="text-muted-foreground">
                                 {t("Estimated")}: ₹
                                 {month.estimated.toLocaleString()}
@@ -499,18 +475,17 @@ export default function AnalyticsPage() {
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Top Selling Products */}
-        <div className="bg-card border border-border rounded-xl p-4 hover:shadow-lg transition-all duration-300 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600"></div>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-2">
-              <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                <Package className="h-4 w-4 text-white" />
+        <div className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-all duration-200">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                <Package className="h-5 w-5 text-primary dark:text-green-500" />
               </div>
               <div>
-                <h3 className="text-base font-semibold text-foreground">
+                <h3 className="text-lg font-semibold text-foreground">
                   {t("Top Selling Products")}
                 </h3>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   {t("Best performing items")}
                 </p>
               </div>
@@ -566,10 +541,9 @@ export default function AnalyticsPage() {
                     className="flex items-center justify-between p-3 bg-accent/30 rounded-lg hover:bg-accent/50 transition-all duration-300 border border-border group">
                     <div className="flex items-center space-x-3">
                       <div className="relative">
-                        <span className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center text-xs font-bold text-white shadow-lg">
+                        <span className="w-8 h-8 bg-primary/10 dark:text-green-500 rounded-lg flex items-center justify-center text-sm font-semibold text-primary">
                           {actualIndex + 1}
                         </span>
-                        <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg blur-md opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
                       </div>
                       <div>
                         <p className="font-medium text-foreground group-hover:text-primary transition-colors duration-300 text-sm">
@@ -620,18 +594,17 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Category Distribution */}
-        <div className="bg-card border border-border rounded-xl p-4 hover:shadow-lg transition-all duration-300 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600"></div>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-2">
-              <div className="h-8 w-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <PieChart className="h-4 w-4 text-white" />
+        <div className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-all duration-200">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                <PieChart className="h-5 w-5 text-primary  dark:text-orange-500" />
               </div>
               <div>
-                <h3 className="text-base font-semibold text-foreground">
+                <h3 className="text-lg font-semibold text-foreground">
                   {t("Sales by Category")}
                 </h3>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   {t("Distribution overview")}
                 </p>
               </div>
@@ -730,91 +703,74 @@ export default function AnalyticsPage() {
       </div>
 
       {/* AI Usage Stats */}
-      <div className="bg-card border border-border rounded-xl p-4 hover:shadow-lg transition-all duration-300 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 via-blue-500 to-purple-600"></div>
-        <div className="flex items-center space-x-2 mb-4">
-          <div className="h-8 w-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center">
-            <BarChart3 className="h-4 w-4 text-white" />
+      <div className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-all duration-200">
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
+            <BarChart3 className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-foreground">
+            <h3 className="text-lg font-semibold text-foreground">
               {t("AI Tool Usage")}
             </h3>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {t("Intelligent automation metrics")}
             </p>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-          <div className="text-center p-4 bg-gradient-to-br from-purple-500/10 to-purple-600/5 rounded-lg hover:from-purple-500/20 hover:to-purple-600/10 transition-all duration-300 border border-purple-500/20 group">
-            <div className="relative mb-3">
-              <div className="h-12 w-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto shadow-xl">
-                <BarChart3 className="h-6 w-6 text-white" />
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="text-center p-4 bg-muted/50 rounded-lg hover:bg-muted transition-all duration-200">
+            <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <BarChart3 className="h-6 w-6 text-primary" />
             </div>
             <div className="space-y-1">
-              <p className="text-2xl font-bold text-foreground group-hover:text-purple-500 dark:group-hover:text-purple-400 transition-colors duration-300">
+              <p className="text-2xl font-bold text-foreground">
                 {analytics.aiUsage.storiesGenerated}
               </p>
-              <p className="text-xs text-muted-foreground font-medium">
+              <p className="text-sm text-muted-foreground font-medium">
                 {t("Stories Generated")}
               </p>
-              <div className="h-0.5 w-8 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full mx-auto opacity-60"></div>
             </div>
           </div>
 
-          <div className="text-center p-4 bg-gradient-to-br from-green-500/10 to-green-600/5 rounded-lg hover:from-green-500/20 hover:to-green-600/10 transition-all duration-300 border border-green-500/20 group">
-            <div className="relative mb-3">
-              <div className="h-12 w-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mx-auto shadow-xl">
-                <Package className="h-6 w-6 text-white" />
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-green-600 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+          <div className="text-center p-4 bg-muted/50 rounded-lg hover:bg-muted transition-all duration-200">
+            <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <Package className="h-6 w-6 text-primary" />
             </div>
             <div className="space-y-1">
-              <p className="text-2xl font-bold text-foreground group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-300">
+              <p className="text-2xl font-bold text-foreground">
                 {analytics.aiUsage.imagesAnalyzed}
               </p>
-              <p className="text-xs text-muted-foreground font-medium">
+              <p className="text-sm text-muted-foreground font-medium">
                 {t("Images Analyzed")}
               </p>
-              <div className="h-0.5 w-8 bg-gradient-to-r from-green-500 to-green-600 rounded-full mx-auto opacity-60"></div>
             </div>
           </div>
 
-          <div className="text-center p-4 bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-lg hover:from-blue-500/20 hover:to-blue-600/10 transition-all duration-300 border border-blue-500/20 group">
-            <div className="relative mb-3">
-              <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto shadow-xl">
-                <Users className="h-6 w-6 text-white" />
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+          <div className="text-center p-4 bg-muted/50 rounded-lg hover:bg-muted transition-all duration-200">
+            <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <Users className="h-6 w-6 text-primary" />
             </div>
             <div className="space-y-1">
-              <p className="text-2xl font-bold text-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
+              <p className="text-2xl font-bold text-foreground">
                 {analytics.aiUsage.voiceProcessed}
               </p>
-              <p className="text-xs text-muted-foreground font-medium">
+              <p className="text-sm text-muted-foreground font-medium">
                 {t("Voice Messages")}
               </p>
-              <div className="h-0.5 w-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mx-auto opacity-60"></div>
             </div>
           </div>
 
-          <div className="text-center p-4 bg-gradient-to-br from-orange-500/10 to-orange-600/5 rounded-lg hover:from-orange-500/20 hover:to-orange-600/10 transition-all duration-300 border border-orange-500/20 group">
-            <div className="relative mb-3">
-              <div className="h-12 w-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mx-auto shadow-xl">
-                <DollarSign className="h-6 w-6 text-white" />
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+          <div className="text-center p-4 bg-muted/50 rounded-lg hover:bg-muted transition-all duration-200">
+            <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <DollarSign className="h-6 w-6 text-primary" />
             </div>
             <div className="space-y-1">
-              <p className="text-2xl font-bold text-foreground group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors duration-300">
+              <p className="text-2xl font-bold text-foreground">
                 {analytics.aiUsage.pricingSuggestions}
               </p>
-              <p className="text-xs text-muted-foreground font-medium">
+              <p className="text-sm text-muted-foreground font-medium">
                 {t("Pricing Suggestions")}
               </p>
-              <div className="h-0.5 w-8 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full mx-auto opacity-60"></div>
             </div>
           </div>
         </div>

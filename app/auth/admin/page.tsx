@@ -63,8 +63,11 @@ export default function AdminAuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-background/50 backdrop-blur-md flex items-center justify-center p-4 relative">
+      {/* Background overlay for better blur effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-background/80 to-blue-500/5" />
+
+      <div className="w-full max-w-md relative z-10">
         {/* Back Button */}
         <button
           onClick={() => router.back()}
@@ -80,8 +83,12 @@ export default function AdminAuthPage() {
             <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Shield className="h-8 w-8 text-blue-600 dark:text-blue-400" />
             </div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Admin Access</h1>
-            <p className="text-muted-foreground">Enter your 6-digit admin passcode to continue</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Admin Access
+            </h1>
+            <p className="text-muted-foreground">
+              Enter your 6-digit admin passcode to continue
+            </p>
           </div>
 
           {/* Form */}
