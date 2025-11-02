@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   Shield,
   Palette,
@@ -14,6 +15,7 @@ import {
   Globe,
 } from "lucide-react";
 import { GoogleLoaderWithText } from "@/components/ui/google-loader";
+import Pattern from "@/components/ui/bg";
 
 interface RoleCardProps {
   title: string;
@@ -117,22 +119,31 @@ export default function RoleSelectionPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 z-0">
+        <Pattern />
+      </div>
+
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-primary/5"></div>
+      <div className="relative overflow-hidden z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background/95 to-primary/5"></div>
 
         <div className="relative container mx-auto px-4 py-20">
           {/* Header */}
           <div className="text-center mb-20">
             <div className="flex items-center justify-center mb-8">
-              <div className="h-20 w-20 bg-primary/10 rounded-2xl flex items-center justify-center">
-                <Sparkles className="h-10 w-10 text-primary" />
-              </div>
+              <Image
+                src="/1000098944-removebg-preview.png"
+                alt="Artisan Marketplace Logo"
+                width={96}
+                height={96}
+                className="drop-shadow-2xl animate-pulse"
+                priority
+              />
             </div>
 
             <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-6">
-              AI{" "}
               <span>
                 <span className="text-blue-600 dark:text-blue-400">A</span>
                 <span className="text-red-500 dark:text-red-400">r</span>
@@ -280,7 +291,7 @@ export default function RoleSelectionPage() {
               </div>
             </div>
             <p className="text-muted-foreground text-sm">
-              © 2025 AI Artisan Marketplace. Bridging tradition and technology.
+              © 2025 Artisan Marketplace. Bridging tradition and technology.
             </p>
           </div>
         </div>

@@ -3,6 +3,7 @@
 import FloatingChatbot from "@/components/artisan/FloatingChatbot";
 import { Navbar } from "@/components/navbar";
 import { LanguageProvider as I18nProvider } from "@/lib/i18n/provider";
+import { ArtisanOnboardingTour } from "@/components/artisan/onboarding-tour";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -98,6 +99,9 @@ function ArtisanLayoutContent({ children }: { children: React.ReactNode }) {
 
       {/* Floating Chatbot - Available on all artisan pages */}
       <FloatingChatbot />
+
+      {/* Onboarding Tour */}
+      <ArtisanOnboardingTour />
     </div>
   );
 }

@@ -14,6 +14,7 @@ import {
   Upload,
   Image as ImageIcon,
 } from "lucide-react";
+import Pattern from "@/components/ui/bg";
 
 type AuthMode = "signin" | "signup";
 
@@ -132,6 +133,8 @@ export default function ArtisanAuthPage() {
         localStorage.setItem("refresh_token", data.data.refreshToken);
         localStorage.setItem("user_role", "ARTISAN");
         localStorage.setItem("user_id", data.data.user.id);
+        // Set first login flag to trigger onboarding tour for new signups
+        localStorage.setItem("artisan_first_login", "true");
 
         router.push("/artisan/dashboard");
       }
@@ -170,6 +173,10 @@ export default function ArtisanAuthPage() {
 
   return (
     <div className="min-h-screen bg-background/50 backdrop-blur-md flex items-center justify-center p-4 py-12 relative">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 z-0">
+        <Pattern />
+      </div>
       {/* Background overlay for better blur effect */}
       <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-background/80 to-orange-500/5" />
 

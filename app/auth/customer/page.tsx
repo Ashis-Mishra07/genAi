@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShoppingBag, ArrowLeft, Mail, Lock, User, Phone } from "lucide-react";
+import Pattern from "@/components/ui/bg";
 
 type AuthMode = "signin" | "signup";
 
@@ -96,6 +97,10 @@ export default function CustomerAuthPage() {
 
   return (
     <div className="min-h-screen bg-background/50 backdrop-blur-md flex items-center justify-center p-4 relative">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 z-0">
+        <Pattern />
+      </div>
       {/* Background overlay for better blur effect */}
       <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-background/80 to-green-500/5" />
 

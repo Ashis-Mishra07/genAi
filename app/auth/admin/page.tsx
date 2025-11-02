@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Shield, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import Pattern from "@/components/ui/bg";
 
 export default function AdminAuthPage() {
   const router = useRouter();
@@ -64,6 +65,10 @@ export default function AdminAuthPage() {
 
   return (
     <div className="min-h-screen bg-background/50 backdrop-blur-md flex items-center justify-center p-4 relative">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 z-0">
+        <Pattern />
+      </div>
       {/* Background overlay for better blur effect */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-background/80 to-blue-500/5" />
 
@@ -97,7 +102,8 @@ export default function AdminAuthPage() {
               <label
                 htmlFor="passcode"
                 className="block text-sm font-medium text-foreground mb-2">
-                Admin Passcode
+                Admin Passcode 
+                <p className="text-xsm text-muted-foreground"> (ACCESS PASSCODE 123456)</p>
               </label>
               <div className="relative">
                 <input
