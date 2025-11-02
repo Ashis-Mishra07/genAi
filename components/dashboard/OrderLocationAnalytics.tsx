@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { GoogleLoaderWithText } from "@/components/ui/google-loader";
 import { SimpleSelect, SimpleSelectItem } from "@/components/ui/select";
 import OrderMap from "./OrderMap";
 import toast from "react-hot-toast";
@@ -82,7 +83,7 @@ export default function OrderLocationAnalytics() {
       "confirmed",
       "shipped",
       "delivered",
-      "cancelled"
+      "cancelled",
     ]);
   }, [translateBatch]);
 
@@ -191,7 +192,9 @@ export default function OrderLocationAnalytics() {
       <Card className="p-6 border-border bg-card hover:shadow-lg transition-all duration-300">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2 text-foreground">{t("Start Date")}</label>
+            <label className="block text-sm font-medium mb-2 text-foreground">
+              {t("Start Date")}
+            </label>
             <Input
               type="date"
               value={startDate}
@@ -203,7 +206,9 @@ export default function OrderLocationAnalytics() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2 text-foreground">{t("End Date")}</label>
+            <label className="block text-sm font-medium mb-2 text-foreground">
+              {t("End Date")}
+            </label>
             <Input
               type="date"
               value={endDate}
@@ -215,14 +220,26 @@ export default function OrderLocationAnalytics() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2 text-foreground">{t("Status")}</label>
+            <label className="block text-sm font-medium mb-2 text-foreground">
+              {t("Status")}
+            </label>
             <SimpleSelect value={statusFilter} onValueChange={setStatusFilter}>
               <SimpleSelectItem value="all">{t("All")}</SimpleSelectItem>
-              <SimpleSelectItem value="pending">{t("Pending")}</SimpleSelectItem>
-              <SimpleSelectItem value="confirmed">{t("Confirmed")}</SimpleSelectItem>
-              <SimpleSelectItem value="shipped">{t("Shipped")}</SimpleSelectItem>
-              <SimpleSelectItem value="delivered">{t("Delivered")}</SimpleSelectItem>
-              <SimpleSelectItem value="cancelled">{t("Cancelled")}</SimpleSelectItem>
+              <SimpleSelectItem value="pending">
+                {t("Pending")}
+              </SimpleSelectItem>
+              <SimpleSelectItem value="confirmed">
+                {t("Confirmed")}
+              </SimpleSelectItem>
+              <SimpleSelectItem value="shipped">
+                {t("Shipped")}
+              </SimpleSelectItem>
+              <SimpleSelectItem value="delivered">
+                {t("Delivered")}
+              </SimpleSelectItem>
+              <SimpleSelectItem value="cancelled">
+                {t("Cancelled")}
+              </SimpleSelectItem>
             </SimpleSelect>
           </div>
 
@@ -249,7 +266,9 @@ export default function OrderLocationAnalytics() {
               <div className="text-3xl font-bold text-foreground mb-2">
                 {stats.total}
               </div>
-              <div className="text-sm text-muted-foreground font-medium">{t("Total Orders")}</div>
+              <div className="text-sm text-muted-foreground font-medium">
+                {t("Total Orders")}
+              </div>
             </div>
           </Card>
 
@@ -258,7 +277,9 @@ export default function OrderLocationAnalytics() {
               <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">
                 {stats.geocoded}
               </div>
-              <div className="text-sm text-muted-foreground font-medium">{t("Mapped Orders")}</div>
+              <div className="text-sm text-muted-foreground font-medium">
+                {t("Mapped Orders")}
+              </div>
             </div>
           </Card>
 
@@ -267,7 +288,9 @@ export default function OrderLocationAnalytics() {
               <div className="text-3xl font-bold text-orange-600 dark:text-orange-400 mb-2">
                 {stats.pending}
               </div>
-              <div className="text-sm text-muted-foreground font-medium">{t("Pending Geocoding")}</div>
+              <div className="text-sm text-muted-foreground font-medium">
+                {t("Pending Geocoding")}
+              </div>
             </div>
           </Card>
 
@@ -279,7 +302,9 @@ export default function OrderLocationAnalytics() {
                   : 0}
                 %
               </div>
-              <div className="text-sm text-muted-foreground font-medium">{t("Coverage Rate")}</div>
+              <div className="text-sm text-muted-foreground font-medium">
+                {t("Coverage Rate")}
+              </div>
             </div>
           </Card>
         </div>
@@ -288,7 +313,9 @@ export default function OrderLocationAnalytics() {
       {/* Map */}
       <Card className="p-6 border-border bg-card hover:shadow-lg transition-all duration-300">
         <div className="mb-6">
-          <h3 className="text-xl font-semibold text-foreground mb-2">{t("Order Distribution Map")}</h3>
+          <h3 className="text-xl font-semibold text-foreground mb-2">
+            {t("Order Distribution Map")}
+          </h3>
           <p className="text-sm text-muted-foreground">
             {orders.length} {t("orders displayed on map")}
           </p>
@@ -296,10 +323,10 @@ export default function OrderLocationAnalytics() {
 
         {isLoading ? (
           <div className="flex items-center justify-center h-96 bg-accent/20 rounded-xl border-2 border-dashed border-border">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-3 border-primary mx-auto mb-3"></div>
-              <p className="text-muted-foreground font-medium">{t("Loading order locations...")}</p>
-            </div>
+            <GoogleLoaderWithText
+              size="xl"
+              text={t("Loading order locations...")}
+            />
           </div>
         ) : orders.length > 0 ? (
           <OrderMap orders={orders} onOrderSelect={handleOrderSelect} />
@@ -327,41 +354,64 @@ export default function OrderLocationAnalytics() {
       {/* Selected Order Details */}
       {selectedOrder && (
         <Card className="p-6 border-2 border-primary bg-card shadow-xl hover:shadow-2xl transition-all duration-300">
-          <h3 className="text-xl font-semibold mb-6 text-foreground">{t("Selected Order Details")}</h3>
+          <h3 className="text-xl font-semibold mb-6 text-foreground">
+            {t("Selected Order Details")}
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div className="pb-3 border-b border-border">
-                <p className="text-sm text-muted-foreground font-medium mb-1">{t("Order Number")}</p>
-                <p className="text-base font-semibold text-foreground">#{selectedOrder.order_number}</p>
+                <p className="text-sm text-muted-foreground font-medium mb-1">
+                  {t("Order Number")}
+                </p>
+                <p className="text-base font-semibold text-foreground">
+                  #{selectedOrder.order_number}
+                </p>
               </div>
               <div className="pb-3 border-b border-border">
-                <p className="text-sm text-muted-foreground font-medium mb-1">{t("Customer")}</p>
-                <p className="text-base font-semibold text-foreground">{selectedOrder.customer.name}</p>
+                <p className="text-sm text-muted-foreground font-medium mb-1">
+                  {t("Customer")}
+                </p>
+                <p className="text-base font-semibold text-foreground">
+                  {selectedOrder.customer.name}
+                </p>
               </div>
               <div className="pb-3">
-                <p className="text-sm text-muted-foreground font-medium mb-1">{t("Email")}</p>
-                <p className="text-base font-medium text-foreground break-all">{selectedOrder.customer.email}</p>
+                <p className="text-sm text-muted-foreground font-medium mb-1">
+                  {t("Email")}
+                </p>
+                <p className="text-base font-medium text-foreground break-all">
+                  {selectedOrder.customer.email}
+                </p>
               </div>
             </div>
             <div className="space-y-4">
               <div className="pb-3 border-b border-border">
-                <p className="text-sm text-muted-foreground font-medium mb-1">{t("Status")}</p>
-                <span className={`capitalize inline-block px-3 py-1.5 rounded-full text-sm font-semibold ${
-                  selectedOrder.status === "delivered"
-                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                    : selectedOrder.status === "cancelled"
+                <p className="text-sm text-muted-foreground font-medium mb-1">
+                  {t("Status")}
+                </p>
+                <span
+                  className={`capitalize inline-block px-3 py-1.5 rounded-full text-sm font-semibold ${
+                    selectedOrder.status === "delivered"
+                      ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                      : selectedOrder.status === "cancelled"
                       ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
                       : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
-                }`}>
+                  }`}>
                   {t(selectedOrder.status)}
                 </span>
               </div>
               <div className="pb-3 border-b border-border">
-                <p className="text-sm text-muted-foreground font-medium mb-1">{t("Amount")}</p>
-                <p className="text-2xl font-bold text-primary">₹{selectedOrder.total_amount.toLocaleString()}</p>
+                <p className="text-sm text-muted-foreground font-medium mb-1">
+                  {t("Amount")}
+                </p>
+                <p className="text-2xl font-bold text-primary">
+                  ₹{selectedOrder.total_amount.toLocaleString()}
+                </p>
               </div>
               <div className="pb-3">
-                <p className="text-sm text-muted-foreground font-medium mb-1">{t("Date")}</p>
+                <p className="text-sm text-muted-foreground font-medium mb-1">
+                  {t("Date")}
+                </p>
                 <p className="text-base font-medium text-foreground">
                   {new Date(selectedOrder.created_at).toLocaleDateString()}
                 </p>

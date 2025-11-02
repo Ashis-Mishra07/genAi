@@ -1,21 +1,22 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { GoogleLoaderWithText } from "@/components/ui/google-loader";
 import {
-    CheckCircle,
-    Clock,
-    DollarSign,
-    Edit3,
-    Eye,
-    Filter,
-    IndianRupee,
-    Package,
-    Search,
-    ShoppingBag,
-    Trash2,
-    Truck,
-    X,
-    XCircle
+  CheckCircle,
+  Clock,
+  DollarSign,
+  Edit3,
+  Eye,
+  Filter,
+  IndianRupee,
+  Package,
+  Search,
+  ShoppingBag,
+  Trash2,
+  Truck,
+  X,
+  XCircle,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
@@ -59,7 +60,7 @@ export default function OrdersPage() {
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const [ordersPerPage] = useState(10);
+  const [ordersPerPage] = useState(7);
 
   // Modal states
   const [showViewModal, setShowViewModal] = useState(false);
@@ -158,16 +159,17 @@ export default function OrdersPage() {
   useEffect(() => {
     // Check authentication on mount
     const checkAuth = () => {
-      const token = localStorage.getItem("accessToken") || 
-                   localStorage.getItem("authToken") || 
-                   localStorage.getItem("auth_token");
-      
+      const token =
+        localStorage.getItem("accessToken") ||
+        localStorage.getItem("authToken") ||
+        localStorage.getItem("auth_token");
+
       if (!token) {
-        console.warn('No authentication token found on mount');
+        console.warn("No authentication token found on mount");
         // You can choose to redirect here or let loadOrders handle it
       }
     };
-    
+
     checkAuth();
     loadOrders();
   }, []);
@@ -176,54 +178,67 @@ export default function OrdersPage() {
     try {
       setIsLoading(true);
       const token = localStorage.getItem("accessToken");
-      console.log('Admin orders - Token found:', !!token);
-      console.log('Admin orders - All localStorage keys:', Object.keys(localStorage));
-      
+      console.log("Admin orders - Token found:", !!token);
+      console.log(
+        "Admin orders - All localStorage keys:",
+        Object.keys(localStorage)
+      );
+
       if (!token) {
-        console.error('No access token found in localStorage');
-        console.log('Checking alternative token keys...');
-        
+        console.error("No access token found in localStorage");
+        console.log("Checking alternative token keys...");
+
         // Check for alternative token keys
-        const altToken = localStorage.getItem("authToken") || localStorage.getItem("auth_token") || localStorage.getItem("token");
-        console.log('Alternative token found:', !!altToken);
-        
+        const altToken =
+          localStorage.getItem("authToken") ||
+          localStorage.getItem("auth_token") ||
+          localStorage.getItem("token");
+        console.log("Alternative token found:", !!altToken);
+
         if (!altToken) {
-          console.error('No authentication token found. Redirecting to login...');
+          console.error(
+            "No authentication token found. Redirecting to login..."
+          );
           // Redirect to login page
-          window.location.href = '/auth/admin';
+          window.location.href = "/auth/admin";
           return;
         } else {
-          console.log('Using alternative token');
+          console.log("Using alternative token");
           // Use the alternative token
           localStorage.setItem("accessToken", altToken);
         }
       }
-      
+
       const finalToken = token || localStorage.getItem("accessToken");
-      console.log('Admin orders - Final token preview:', finalToken ? finalToken.substring(0, 20) + '...' : 'No token');
-      
+      console.log(
+        "Admin orders - Final token preview:",
+        finalToken ? finalToken.substring(0, 20) + "..." : "No token"
+      );
+
       const response = await fetch("/api/orders", {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${finalToken}`,
+          Authorization: `Bearer ${finalToken}`,
           "Content-Type": "application/json",
         },
       });
 
-      console.log('Admin orders - Response status:', response.status);
-      
+      console.log("Admin orders - Response status:", response.status);
+
       if (response.status === 401) {
-        console.error('Authentication failed. Token may be expired. Redirecting to login...');
+        console.error(
+          "Authentication failed. Token may be expired. Redirecting to login..."
+        );
         localStorage.removeItem("accessToken");
         localStorage.removeItem("authToken");
         localStorage.removeItem("auth_token");
-        window.location.href = '/auth/admin';
+        window.location.href = "/auth/admin";
         return;
       }
-      
+
       if (response.ok) {
         const data = await response.json();
-        console.log('Admin orders - Response data:', data);
+        console.log("Admin orders - Response data:", data);
         if (data.success) {
           // Transform the data to match the expected format
           const transformedOrders = data.orders.map((order: any) => ({
@@ -235,21 +250,26 @@ export default function OrdersPage() {
             customer_name: order.shippingAddress?.fullName || "Customer",
             customer_email: order.shippingAddress?.email || "",
             customer_phone: order.shippingAddress?.phone || "",
-            shipping_address: `${order.shippingAddress?.address || ""}, ${order.shippingAddress?.city || ""}, ${order.shippingAddress?.state || ""} ${order.shippingAddress?.pincode || ""}`,
+            shipping_address: `${order.shippingAddress?.address || ""}, ${
+              order.shippingAddress?.city || ""
+            }, ${order.shippingAddress?.state || ""} ${
+              order.shippingAddress?.pincode || ""
+            }`,
             delivery_date: order.estimatedDelivery,
             tracking_number: order.trackingNumber,
-            items: order.items?.map((item: any, index: number) => ({
-              id: index + 1,
-              product_name: item.name,
-              product_image: item.imageUrl,
-              quantity: item.quantity,
-              price: item.price,
-              total: item.price * item.quantity,
-            })) || [],
+            items:
+              order.items?.map((item: any, index: number) => ({
+                id: index + 1,
+                product_name: item.name,
+                product_image: item.imageUrl,
+                quantity: item.quantity,
+                price: item.price,
+                total: item.price * item.quantity,
+              })) || [],
             created_at: order.createdAt,
             updated_at: order.updatedAt || order.createdAt,
           }));
-          
+
           setOrders(transformedOrders);
         }
       } else {
@@ -281,7 +301,10 @@ export default function OrdersPage() {
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
   const indexOfLastOrder = currentPage * ordersPerPage;
   const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
+  const currentOrders = filteredOrders.slice(
+    indexOfFirstOrder,
+    indexOfLastOrder
+  );
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -306,10 +329,7 @@ export default function OrdersPage() {
   if (isLoading) {
     return (
       <div className="bg-background min-h-screen p-6 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="text-foreground mt-4">{t("Loading orders...")}</p>
-        </div>
+        <GoogleLoaderWithText size="xl" text={t("Loading orders...")} />
       </div>
     );
   }
@@ -320,7 +340,9 @@ export default function OrdersPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">{t("Orders Management")}</h1>
+            <h1 className="text-3xl font-bold text-foreground">
+              {t("Orders Management")}
+            </h1>
             <p className="text-muted-foreground">
               {t("Manage and track all customer orders")}
             </p>
@@ -328,8 +350,7 @@ export default function OrdersPage() {
           <div className="flex items-center space-x-2">
             <Button
               onClick={() => loadOrders()}
-              className="bg-primary hover:bg-primary/90"
-            >
+              className="bg-primary hover:bg-primary/90">
               <Package className="h-4 w-4 mr-2" />
               {t("Refresh Orders")}
             </Button>
@@ -341,8 +362,12 @@ export default function OrdersPage() {
           <div className="bg-card border border-border rounded-lg p-4 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-muted-foreground text-sm">{t("Total Orders")}</p>
-                <p className="text-2xl font-bold text-foreground">{orders.length}</p>
+                <p className="text-muted-foreground text-sm">
+                  {t("Total Orders")}
+                </p>
+                <p className="text-2xl font-bold text-foreground">
+                  {orders.length}
+                </p>
               </div>
               <ShoppingBag className="h-8 w-8 text-primary" />
             </div>
@@ -352,7 +377,7 @@ export default function OrdersPage() {
               <div>
                 <p className="text-muted-foreground text-sm">{t("Pending")}</p>
                 <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-                  {orders.filter(o => o.status === "PENDING").length}
+                  {orders.filter((o) => o.status === "PENDING").length}
                 </p>
               </div>
               <Clock className="h-8 w-8 text-yellow-600 dark:text-yellow-400" />
@@ -361,9 +386,11 @@ export default function OrdersPage() {
           <div className="bg-card border border-border rounded-lg p-4 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-muted-foreground text-sm">{t("Confirmed")}</p>
+                <p className="text-muted-foreground text-sm">
+                  {t("Confirmed")}
+                </p>
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                  {orders.filter(o => o.status === "CONFIRMED").length}
+                  {orders.filter((o) => o.status === "CONFIRMED").length}
                 </p>
               </div>
               <CheckCircle className="h-8 w-8 text-blue-600 dark:text-blue-400" />
@@ -374,7 +401,7 @@ export default function OrdersPage() {
               <div>
                 <p className="text-muted-foreground text-sm">{t("Shipped")}</p>
                 <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                  {orders.filter(o => o.status === "SHIPPED").length}
+                  {orders.filter((o) => o.status === "SHIPPED").length}
                 </p>
               </div>
               <Truck className="h-8 w-8 text-purple-600 dark:text-purple-400" />
@@ -383,9 +410,11 @@ export default function OrdersPage() {
           <div className="bg-card border border-border rounded-lg p-4 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-muted-foreground text-sm">{t("Delivered")}</p>
+                <p className="text-muted-foreground text-sm">
+                  {t("Delivered")}
+                </p>
                 <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                  {orders.filter(o => o.status === "DELIVERED").length}
+                  {orders.filter((o) => o.status === "DELIVERED").length}
                 </p>
               </div>
               <Package className="h-8 w-8 text-green-600 dark:text-green-400" />
@@ -410,8 +439,7 @@ export default function OrdersPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="pl-10 pr-8 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            >
+              className="pl-10 pr-8 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
               <option value="all">{t("All Status")}</option>
               <option value="PENDING">{t("Pending")}</option>
               <option value="CONFIRMED">{t("Confirmed")}</option>
@@ -426,12 +454,13 @@ export default function OrdersPage() {
         {filteredOrders.length === 0 ? (
           <div className="bg-card border border-border rounded-lg p-8 text-center">
             <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-foreground mb-2">{t("No Orders Found")}</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-2">
+              {t("No Orders Found")}
+            </h3>
             <p className="text-muted-foreground">
-              {orders.length === 0 
+              {orders.length === 0
                 ? t("No orders have been placed yet.")
-                : t("No orders match your search criteria.")
-              }
+                : t("No orders match your search criteria.")}
             </p>
           </div>
         ) : (
@@ -467,16 +496,19 @@ export default function OrdersPage() {
                   {currentOrders.map((order) => {
                     const statusConfig = getStatusConfig(order.status);
                     const StatusIcon = statusConfig.icon;
-                    
+
                     return (
-                      <tr key={order.id} className="hover:bg-accent/50 transition-colors">
+                      <tr
+                        key={order.id}
+                        className="hover:bg-accent/50 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div>
                             <div className="text-sm font-medium text-foreground">
                               {order.order_number}
                             </div>
                             <div className="text-sm text-muted-foreground">
-                              {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                              {order.items.length} item
+                              {order.items.length !== 1 ? "s" : ""}
                             </div>
                           </div>
                         </td>
@@ -491,37 +523,46 @@ export default function OrdersPage() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusConfig.color}`}>
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusConfig.color}`}>
                             <StatusIcon className="h-3 w-3 mr-1" />
                             {order.status}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex flex-col">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              order.payment_method === 'online' 
-                                ? 'bg-blue-500/20 text-blue-400' 
-                                : 'bg-yellow-500/20 text-yellow-400'
-                            }`}>
-                              {order.payment_method === 'online' ? '💳 Online' : '💵 COD'}
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                order.payment_method === "online"
+                                  ? "bg-blue-500/20 text-blue-400"
+                                  : "bg-yellow-500/20 text-yellow-400"
+                              }`}>
+                              {order.payment_method === "online"
+                                ? "💳 Online"
+                                : "💵 COD"}
                             </span>
-                            <span className={`mt-1 text-xs ${
-                              order.payment_status === 'completed' 
-                                ? 'text-green-400' 
-                                : order.payment_status === 'pending'
-                                ? 'text-yellow-400'
-                                : 'text-red-400'
-                            }`}>
-                              {order.payment_status === 'completed' ? '✓ Paid' : 
-                               order.payment_status === 'pending' ? '⏳ Pending' : 
-                               '✗ Failed'}
+                            <span
+                              className={`mt-1 text-xs ${
+                                order.payment_status === "completed"
+                                  ? "text-green-400"
+                                  : order.payment_status === "pending"
+                                  ? "text-yellow-400"
+                                  : "text-red-400"
+                              }`}>
+                              {order.payment_status === "completed"
+                                ? "✓ Paid"
+                                : order.payment_status === "pending"
+                                ? "⏳ Pending"
+                                : "✗ Failed"}
                             </span>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center text-sm font-medium text-foreground">
                             {renderCurrencyIcon(order.currency)}
-                            <span className="ml-1">{order.total_amount.toLocaleString()}</span>
+                            <span className="ml-1">
+                              {order.total_amount.toLocaleString()}
+                            </span>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
@@ -531,20 +572,17 @@ export default function OrdersPage() {
                           <div className="flex items-center space-x-2">
                             <button
                               onClick={() => handleViewOrder(order)}
-                              className="text-blue-400 hover:text-blue-300"
-                            >
+                              className="text-blue-400 hover:text-blue-300">
                               <Eye className="h-4 w-4" />
                             </button>
                             <button
                               onClick={() => handleEditOrder(order)}
-                              className="text-yellow-400 hover:text-yellow-300"
-                            >
+                              className="text-yellow-400 hover:text-yellow-300">
                               <Edit3 className="h-4 w-4" />
                             </button>
                             <button
                               onClick={() => handleDeleteOrder(order)}
-                              className="text-red-400 hover:text-red-300"
-                            >
+                              className="text-red-400 hover:text-red-300">
                               <Trash2 className="h-4 w-4" />
                             </button>
                           </div>
@@ -577,37 +615,37 @@ export default function OrdersPage() {
               <span>{t("results")}</span>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-4">
               <Button
                 variant="outline"
-                size="sm"
+                size="default"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="border-border hover:bg-accent disabled:opacity-50"
-              >
-                {t("Previous")}
+                className="border-primary/20 bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-background disabled:hover:text-foreground px-6 py-2 font-medium transition-all duration-200 hover:shadow-lg dark:border-primary/30 dark:hover:bg-primary dark:hover:text-primary-foreground">
+                <span className="mr-2">←</span>
+                Previous
               </Button>
 
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-1 bg-muted/30 dark:bg-muted/20 px-3 py-1 rounded-lg border border-border/50">
                 {[...Array(totalPages)].map((_, index) => {
                   const pageNumber = index + 1;
-                  
+
                   // Show first page, last page, current page, and pages around current
                   if (
                     pageNumber === 1 ||
                     pageNumber === totalPages ||
-                    (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+                    (pageNumber >= currentPage - 1 &&
+                      pageNumber <= currentPage + 1)
                   ) {
                     return (
                       <button
                         key={pageNumber}
                         onClick={() => setCurrentPage(pageNumber)}
-                        className={`px-3 py-1 text-sm rounded-lg transition-colors ${
+                        className={`px-3 py-2 text-sm rounded-md transition-all duration-200 font-medium ${
                           currentPage === pageNumber
-                            ? "bg-primary text-primary-foreground font-medium"
-                            : "bg-background text-foreground hover:bg-accent"
-                        }`}
-                      >
+                            ? "bg-primary text-primary-foreground shadow-md scale-105 border-primary"
+                            : "bg-background text-foreground hover:bg-accent border border-border hover:shadow-sm hover:border-primary/30 dark:hover:bg-accent/80 dark:border-border/60"
+                        }`}>
                         {pageNumber}
                       </button>
                     );
@@ -616,7 +654,9 @@ export default function OrdersPage() {
                     pageNumber === currentPage + 2
                   ) {
                     return (
-                      <span key={pageNumber} className="px-2 text-muted-foreground">
+                      <span
+                        key={pageNumber}
+                        className="px-2 text-muted-foreground dark:text-muted-foreground/80 text-sm">
                         ...
                       </span>
                     );
@@ -627,12 +667,14 @@ export default function OrdersPage() {
 
               <Button
                 variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                size="default"
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
                 disabled={currentPage === totalPages}
-                className="border-border hover:bg-accent disabled:opacity-50"
-              >
-                {t("Next")}
+                className="border-primary/20 bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-background disabled:hover:text-foreground px-6 py-2 font-medium transition-all duration-200 hover:shadow-lg dark:border-primary/30 dark:hover:bg-primary dark:hover:text-primary-foreground">
+                Next
+                <span className="ml-2">→</span>
               </Button>
             </div>
           </div>
@@ -644,62 +686,90 @@ export default function OrdersPage() {
             <div className="bg-gray-900 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-foreground">Order Details</h2>
+                  <h2 className="text-xl font-bold text-foreground">
+                    Order Details
+                  </h2>
                   <button
                     onClick={() => setShowViewModal(false)}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                  >
+                    className="text-muted-foreground hover:text-foreground transition-colors">
                     <X className="h-6 w-6" />
                   </button>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-muted-foreground text-sm">Order Number</p>
-                      <p className="text-foreground font-medium">{selectedOrder.order_number}</p>
+                      <p className="text-muted-foreground text-sm">
+                        Order Number
+                      </p>
+                      <p className="text-foreground font-medium">
+                        {selectedOrder.order_number}
+                      </p>
                     </div>
                     <div>
                       <p className="text-muted-foreground text-sm">Status</p>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusConfig(selectedOrder.status).color}`}>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                          getStatusConfig(selectedOrder.status).color
+                        }`}>
                         {selectedOrder.status}
                       </span>
                     </div>
                   </div>
-                  
+
                   <div>
                     <p className="text-muted-foreground text-sm">Customer</p>
-                    <p className="text-foreground font-medium">{selectedOrder.customer_name}</p>
-                    <p className="text-muted-foreground text-sm">{selectedOrder.customer_email}</p>
-                    <p className="text-muted-foreground text-sm">{selectedOrder.customer_phone}</p>
+                    <p className="text-foreground font-medium">
+                      {selectedOrder.customer_name}
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      {selectedOrder.customer_email}
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      {selectedOrder.customer_phone}
+                    </p>
                   </div>
-                  
+
                   <div>
-                    <p className="text-muted-foreground text-sm">Shipping Address</p>
-                    <p className="text-foreground">{selectedOrder.shipping_address}</p>
+                    <p className="text-muted-foreground text-sm">
+                      Shipping Address
+                    </p>
+                    <p className="text-foreground">
+                      {selectedOrder.shipping_address}
+                    </p>
                   </div>
-                  
+
                   <div>
                     <p className="text-muted-foreground text-sm">Items</p>
                     <div className="space-y-2">
                       {selectedOrder.items.map((item) => (
-                        <div key={item.id} className="flex items-center justify-between bg-accent/50 p-3 rounded border border-border">
+                        <div
+                          key={item.id}
+                          className="flex items-center justify-between bg-accent/50 p-3 rounded border border-border">
                           <div>
-                            <p className="text-foreground font-medium">{item.product_name}</p>
-                            <p className="text-muted-foreground text-sm">Qty: {item.quantity}</p>
+                            <p className="text-foreground font-medium">
+                              {item.product_name}
+                            </p>
+                            <p className="text-muted-foreground text-sm">
+                              Qty: {item.quantity}
+                            </p>
                           </div>
                           <div className="text-right">
-                            <p className="text-foreground font-medium">₹{item.total.toLocaleString()}</p>
+                            <p className="text-foreground font-medium">
+                              ₹{item.total.toLocaleString()}
+                            </p>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
-                  
+
                   <div className="border-t border-border pt-4">
                     <div className="flex justify-between">
                       <p className="text-muted-foreground">Total Amount</p>
-                      <p className="text-foreground font-bold text-lg">₹{selectedOrder.total_amount.toLocaleString()}</p>
+                      <p className="text-foreground font-bold text-lg">
+                        ₹{selectedOrder.total_amount.toLocaleString()}
+                      </p>
                     </div>
                   </div>
                 </div>

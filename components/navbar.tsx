@@ -202,36 +202,120 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-14 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3">
-            <svg
-              className="h-9 w-9"
-              viewBox="0 0 48 48"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg">
-              {/* Google Cloud hexagon logo */}
-              <path
-                d="M24 8L12 14.5V27.5L24 34L36 27.5V14.5L24 8Z"
-                fill="#4285F4"
-                opacity="0.9"
-              />
-              <path d="M24 8L12 14.5L24 21L36 14.5L24 8Z" fill="#4285F4" />
-              <path d="M12 14.5V27.5L24 34V21L12 14.5Z" fill="#34A853" />
-              <path d="M36 14.5V27.5L24 34V21L36 14.5Z" fill="#EA4335" />
-              <circle cx="24" cy="21" r="6" fill="#FBBC04" />
-              <circle cx="24" cy="21" r="3" fill="white" opacity="0.9" />
-            </svg>
-            <span className="text-xl font-bold tracking-tight">
-              <span className="text-blue-600 dark:text-blue-500">A</span>
-              <span className="text-red-600 dark:text-red-500">r</span>
-              <span className="text-yellow-600 dark:text-yellow-500">t</span>
-              <span className="text-blue-600 dark:text-blue-500">i</span>
-              <span className="text-green-600 dark:text-green-500">s</span>
-              <span className="text-red-600 dark:text-red-500">a</span>
-              <span className="text-blue-600 dark:text-blue-500">n</span>
-              <span className="text-muted-foreground/80"> Marketplace</span>
-            </span>
+          <Link href="/" className="flex items-center space-x-4 group">
+            <div className="relative">
+              <svg
+                className="h-10 w-10 transition-transform duration-300 group-hover:scale-110"
+                viewBox="0 0 48 48"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                {/* Enhanced Google-style logo with better gradients */}
+                <defs>
+                  <linearGradient
+                    id="blueGrad"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="100%">
+                    <stop offset="0%" stopColor="#4285F4" />
+                    <stop offset="100%" stopColor="#1976D2" />
+                  </linearGradient>
+                  <linearGradient
+                    id="greenGrad"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="100%">
+                    <stop offset="0%" stopColor="#34A853" />
+                    <stop offset="100%" stopColor="#0F9D58" />
+                  </linearGradient>
+                  <linearGradient
+                    id="redGrad"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="100%">
+                    <stop offset="0%" stopColor="#EA4335" />
+                    <stop offset="100%" stopColor="#D33B2C" />
+                  </linearGradient>
+                  <linearGradient
+                    id="yellowGrad"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="100%">
+                    <stop offset="0%" stopColor="#FBBC04" />
+                    <stop offset="100%" stopColor="#F9AB00" />
+                  </linearGradient>
+                </defs>
+                {/* Main hexagon structure */}
+                <path
+                  d="M24 8L12 14.5V27.5L24 34L36 27.5V14.5L24 8Z"
+                  fill="url(#blueGrad)"
+                  className="drop-shadow-lg"
+                />
+                <path
+                  d="M24 8L12 14.5L24 21L36 14.5L24 8Z"
+                  fill="url(#blueGrad)"
+                />
+                <path
+                  d="M12 14.5V27.5L24 34V21L12 14.5Z"
+                  fill="url(#greenGrad)"
+                />
+                <path
+                  d="M36 14.5V27.5L24 34V21L36 14.5Z"
+                  fill="url(#redGrad)"
+                />
+                {/* Central circle with enhanced styling */}
+                <circle
+                  cx="24"
+                  cy="21"
+                  r="7"
+                  fill="url(#yellowGrad)"
+                  className="drop-shadow-md"
+                />
+                <circle cx="24" cy="21" r="4" fill="white" opacity="0.95" />
+                <circle
+                  cx="24"
+                  cy="21"
+                  r="2"
+                  fill="url(#blueGrad)"
+                  opacity="0.8"
+                />
+              </svg>
+              {/* Subtle glow effect on hover */}
+              <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-300" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-2xl font-bold tracking-tight leading-none transition-all duration-300 group-hover:scale-105">
+                <span className="text-blue-600 dark:text-blue-400 drop-shadow-sm">
+                  A
+                </span>
+                <span className="text-red-500 dark:text-red-400 drop-shadow-sm">
+                  r
+                </span>
+                <span className="text-yellow-500 dark:text-yellow-400 drop-shadow-sm">
+                  t
+                </span>
+                <span className="text-blue-600 dark:text-blue-400 drop-shadow-sm">
+                  i
+                </span>
+                <span className="text-green-500 dark:text-green-400 drop-shadow-sm">
+                  s
+                </span>
+                <span className="text-red-500 dark:text-red-400 drop-shadow-sm">
+                  a
+                </span>
+                <span className="text-blue-600 dark:text-blue-400 drop-shadow-sm">
+                  n
+                </span>
+              </span>
+              <span className="text-lg font-medium text-muted-foreground/90 tracking-wide leading-none -mt-1 transition-colors duration-300 group-hover:text-muted-foreground">
+                Marketplace
+              </span>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
@@ -243,7 +327,7 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md hover:bg-accent">
+                    className="text-base font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md hover:bg-accent">
                     {link.label}
                   </Link>
                 ))}
@@ -252,15 +336,15 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
-                        className="text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-md px-3 py-2">
+                        className="group relative text-base font-medium text-muted-foreground hover:text-foreground transition-all duration-200 rounded-lg px-3 py-2 hover:bg-accent/50">
                         {t("More")}
-                        <ChevronDown className="ml-1 h-4 w-4" />
+                        <ChevronDown className="ml-2 h-4 w-4 transition-transform duration-200 group-hover:rotate-180 group-data-[state=open]:rotate-180" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                       align="center"
                       side="bottom"
-                      className="w-48 max-h-80 overflow-y-auto z-50"
+                      className="w-48 z-50 bg-background/95 backdrop-blur-sm border shadow-lg rounded-lg p-1"
                       sideOffset={8}
                       alignOffset={0}
                       avoidCollisions={true}
@@ -269,7 +353,7 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
                         <DropdownMenuItem key={link.href} asChild>
                           <Link
                             href={link.href}
-                            className="flex items-center w-full">
+                            className="flex items-center w-full px-3 py-2 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
                             <span className="truncate">{link.label}</span>
                           </Link>
                         </DropdownMenuItem>
@@ -284,7 +368,7 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                  className="text-base font-medium text-muted-foreground hover:text-foreground transition-colors">
                   {link.label}
                 </Link>
               ))
@@ -313,17 +397,18 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="flex items-center space-x-2">
-                      <div className="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center">
+                      className="flex items-center space-x-2 hover:bg-accent rounded-lg px-3 py-2 transition-colors">
+                      <div className="w-7 h-7 bg-primary/20 rounded-full flex items-center justify-center">
                         <User className="h-4 w-4 text-primary" />
                       </div>
-                      <span className="hidden md:block text-sm font-medium">
+                      <span className="hidden md:block text-base font-medium">
                         {user.name}
                       </span>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
-                    className="w-56 z-50"
+                    className="w-56 z-50 bg-background/95 backdrop-blur-sm border shadow-lg rounded-lg p-2"
                     align="end"
                     side="bottom"
                     sideOffset={8}
@@ -331,7 +416,7 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
                     avoidCollisions={true}
                     collisionPadding={16}
                     forceMount>
-                    <DropdownMenuLabel className="font-normal">
+                    <DropdownMenuLabel className="font-normal px-2 py-2">
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">
                           {user.name}
@@ -345,14 +430,9 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/orders" className="flex items-center">
-                        <Settings className="h-4 w-4 mr-2" />
-                        {t("Orders")}
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout}>
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="px-2 py-2 text-sm hover:bg-accent rounded-md transition-colors text-red-600">
                       <LogOut className="h-4 w-4 mr-2" />
                       {t("Sign Out")}
                     </DropdownMenuItem>
@@ -391,7 +471,7 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="block px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors"
+                  className="block px-4 py-2 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors"
                   onClick={() => setIsMobileMenuOpen(false)}>
                   {link.label}
                 </Link>

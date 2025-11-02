@@ -18,6 +18,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { GoogleLoaderWithText } from "@/components/ui/google-loader";
 import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
 
 interface Product {
@@ -64,7 +65,9 @@ export default function ProductsPage() {
   );
 
   // Carousel state for each product
-  const [currentSlides, setCurrentSlides] = useState<{ [key: number]: number }>({});
+  const [currentSlides, setCurrentSlides] = useState<{ [key: number]: number }>(
+    {}
+  );
 
   // Add product form state
   const [newProduct, setNewProduct] = useState({
@@ -188,13 +191,17 @@ export default function ProductsPage() {
       setPostingToInstagram(product.id);
 
       console.log("📱 Starting Instagram post for product:", product.name);
-      console.log("🖼️ Product poster URL:", product.poster_url || product.image_url);
+      console.log(
+        "🖼️ Product poster URL:",
+        product.poster_url || product.image_url
+      );
       console.log("🎬 Product video URL:", product.video_url);
       console.log("💰 Product price:", product.price);
 
       // Determine poster URL (prefer poster_url, fallback to image_url)
       const posterUrl = product.poster_url || product.image_url;
-      const hasVideo = product.video_url && product.video_status === 'COMPLETED';
+      const hasVideo =
+        product.video_url && product.video_status === "COMPLETED";
 
       if (!posterUrl) {
         throw new Error("Product must have a poster image");
@@ -219,7 +226,11 @@ Discover authentic artisan crafts that tell a story! 🎭
 #handmade #artisan #traditional #authentic #craft #handcrafted #artisanal #culture #heritage #madewithlove #ArtisanAI #SupportArtisans`;
 
       console.log("📝 Generated caption:", caption.substring(0, 100) + "...");
-      console.log(`📊 Post type: ${hasVideo ? 'CAROUSEL (poster + video)' : 'SINGLE IMAGE'}`);
+      console.log(
+        `📊 Post type: ${
+          hasVideo ? "CAROUSEL (poster + video)" : "SINGLE IMAGE"
+        }`
+      );
 
       // Call the new n8n API endpoint with both poster and video
       const response = await fetch("/api/instagram/post-via-n8n", {
@@ -245,12 +256,22 @@ Discover authentic artisan crafts that tell a story! 🎭
       console.log("📊 Result:", result);
 
       // Show success message with details
-      const postType = hasVideo ? 'CAROUSEL POST (Poster + Video)' : 'SINGLE IMAGE';
-      const successMessage = `Successfully posted "${product.name}" to Instagram! 🎉
+      const postType = hasVideo
+        ? "CAROUSEL POST (Poster + Video)"
+        : "SINGLE IMAGE";
+      const successMessage = `Successfully posted "${
+        product.name
+      }" to Instagram! 🎉
 
 � Post Type: ${postType}
-📸 Poster: ${posterUrl.includes("cloudinary.com") ? "Cloudinary Poster" : "Product Image"}
-${hasVideo ? `🎬 Video: Included in carousel\n` : ''}📱 Account: ${result.data?.instagramAccountId || "Unknown"}
+📸 Poster: ${
+        posterUrl.includes("cloudinary.com")
+          ? "Cloudinary Poster"
+          : "Product Image"
+      }
+${hasVideo ? `🎬 Video: Included in carousel\n` : ""}📱 Account: ${
+        result.data?.instagramAccountId || "Unknown"
+      }
 🆔 Creation ID: ${result.data?.n8nResult?.id || "Unknown"}
 ⏰ Posted at: ${new Date().toLocaleTimeString()}`;
 
@@ -333,23 +354,23 @@ ${hasVideo ? `🎬 Video: Included in carousel\n` : ''}📱 Account: ${result.da
 
   // Carousel navigation functions
   const nextSlide = (productId: number, totalSlides: number) => {
-    setCurrentSlides(prev => ({
+    setCurrentSlides((prev) => ({
       ...prev,
-      [productId]: ((prev[productId] || 0) + 1) % totalSlides
+      [productId]: ((prev[productId] || 0) + 1) % totalSlides,
     }));
   };
 
   const prevSlide = (productId: number, totalSlides: number) => {
-    setCurrentSlides(prev => ({
+    setCurrentSlides((prev) => ({
       ...prev,
-      [productId]: ((prev[productId] || 0) - 1 + totalSlides) % totalSlides
+      [productId]: ((prev[productId] || 0) - 1 + totalSlides) % totalSlides,
     }));
   };
 
   const goToSlide = (productId: number, slideIndex: number) => {
-    setCurrentSlides(prev => ({
+    setCurrentSlides((prev) => ({
       ...prev,
-      [productId]: slideIndex
+      [productId]: slideIndex,
     }));
   };
 
@@ -416,20 +437,20 @@ ${hasVideo ? `🎬 Video: Included in carousel\n` : ''}📱 Account: ${result.da
               product.created_at ||
               new Date().toISOString(),
           }));
-          
+
           // Debug log to check video data
-          console.log('🔍 PRODUCTS LOADED:', formattedProducts.length);
+          console.log("🔍 PRODUCTS LOADED:", formattedProducts.length);
           formattedProducts.forEach((p: any) => {
             if (p.video_url) {
               console.log(`📹 Product "${p.name}" has video:`, {
                 video_url: p.video_url,
                 video_status: p.video_status,
                 poster_url: p.poster_url,
-                image_url: p.image_url
+                image_url: p.image_url,
               });
             }
           });
-          
+
           setProducts(formattedProducts);
         } else {
           console.error("Failed to load products:", data.error);
@@ -678,14 +699,15 @@ ${hasVideo ? `🎬 Video: Included in carousel\n` : ''}📱 Account: ${result.da
       {/* Products Grid */}
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="text-muted-foreground">{t("Loading products...")}</div>
+          <GoogleLoaderWithText size="xl" text={t("Loading products...")} />
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProducts.map((product) => {
             const currentSlide = currentSlides[product.id] || 0;
             const posterUrl = product.poster_url || product.image_url;
-            const hasVideo = product.video_url && product.video_status === 'COMPLETED';
+            const hasVideo =
+              product.video_url && product.video_status === "COMPLETED";
             const totalSlides = hasVideo ? 2 : 1;
 
             // Debug log for each product
@@ -694,7 +716,7 @@ ${hasVideo ? `🎬 Video: Included in carousel\n` : ''}📱 Account: ${result.da
                 video_url: product.video_url,
                 video_status: product.video_status,
                 hasVideo: hasVideo,
-                totalSlides: totalSlides
+                totalSlides: totalSlides,
               });
             }
 
@@ -706,7 +728,10 @@ ${hasVideo ? `🎬 Video: Included in carousel\n` : ''}📱 Account: ${result.da
                 {/* Carousel Container */}
                 <div className="relative h-48 bg-accent group">
                   {/* Image Slide */}
-                  <div className={`absolute inset-0 ${currentSlide === 0 ? 'block' : 'hidden'}`}>
+                  <div
+                    className={`absolute inset-0 ${
+                      currentSlide === 0 ? "block" : "hidden"
+                    }`}>
                     {posterUrl ? (
                       <img
                         src={posterUrl}
@@ -722,7 +747,10 @@ ${hasVideo ? `🎬 Video: Included in carousel\n` : ''}📱 Account: ${result.da
 
                   {/* Video Slide */}
                   {hasVideo && (
-                    <div className={`absolute inset-0 ${currentSlide === 1 ? 'block' : 'hidden'}`}>
+                    <div
+                      className={`absolute inset-0 ${
+                        currentSlide === 1 ? "block" : "hidden"
+                      }`}>
                       <video
                         src={product.video_url}
                         className="w-full h-full object-cover"
@@ -769,8 +797,8 @@ ${hasVideo ? `🎬 Video: Included in carousel\n` : ''}📱 Account: ${result.da
                             }}
                             className={`w-2 h-2 rounded-full transition-all ${
                               currentSlide === index
-                                ? 'bg-orange-500 w-4'
-                                : 'bg-white/50 hover:bg-white/75'
+                                ? "bg-orange-500 w-4"
+                                : "bg-white/50 hover:bg-white/75"
                             }`}
                             aria-label={`Go to slide ${index + 1}`}
                           />
@@ -779,115 +807,115 @@ ${hasVideo ? `🎬 Video: Included in carousel\n` : ''}📱 Account: ${result.da
 
                       {/* Media Type Badge */}
                       <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs font-medium z-10">
-                        {currentSlide === 0 ? '📸 Poster' : '🎬 Video'}
+                        {currentSlide === 0 ? "📸 Poster" : "🎬 Video"}
                       </div>
                     </>
                   )}
                 </div>
 
-              {/* Product Info */}
-              <div className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-semibold text-foreground truncate">
-                    {product.name}
-                  </h3>
-                  <span
-                    className={`px-2 py-1 text-xs rounded-full ${
-                      product.is_active
-                        ? "bg-green-500/10 text-green-600 dark:text-green-400"
-                        : "bg-gray-500/10 text-muted-foreground"
-                    }`}>
-                    {product.is_active ? t("Active") : t("Inactive")}
-                  </span>
-                </div>
-
-                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                  {product.description}
-                </p>
-
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center text-lg font-bold text-primary">
-                    {renderCurrencyIcon(product.currency)}
-                    <span className="ml-1">
-                      {product.price.toLocaleString()}
+                {/* Product Info */}
+                <div className="p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-semibold text-foreground truncate">
+                      {product.name}
+                    </h3>
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full ${
+                        product.is_active
+                          ? "bg-green-500/10 text-green-600 dark:text-green-400"
+                          : "bg-gray-500/10 text-muted-foreground"
+                      }`}>
+                      {product.is_active ? t("Active") : t("Inactive")}
                     </span>
                   </div>
-                  <span className="text-sm bg-primary/10 text-primary px-2 py-1 rounded">
-                    {t(product.category)}
-                  </span>
-                </div>
 
-                {/* Tags */}
-                {product.tags && product.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    {product.tags.slice(0, 3).map((tag, index) => (
-                      <span
-                        key={index}
-                        className="text-xs bg-accent text-foreground px-2 py-1 rounded">
-                        {tag}
+                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                    {product.description}
+                  </p>
+
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center text-lg font-bold text-primary">
+                      {renderCurrencyIcon(product.currency)}
+                      <span className="ml-1">
+                        {product.price.toLocaleString()}
                       </span>
-                    ))}
-                  </div>
-                )}
-
-                {/* AI Story Indicator */}
-                {product.story && (
-                  <div className="flex items-center text-primary text-sm mb-3">
-                    <Sparkles className="h-4 w-4 mr-1" />
-                    <span>{t(getStoryStatusText(product.name))}</span>
-                  </div>
-                )}
-
-                {/* Actions */}
-                <div className="flex justify-between items-center">
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleViewProduct(product);
-                      }}
-                      className="p-2 text-muted-foreground hover:bg-accent hover:text-primary rounded"
-                      title="View Details">
-                      <Eye className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditProduct(product);
-                      }}
-                      className="p-2 text-muted-foreground hover:bg-accent hover:text-primary rounded"
-                      title="Edit Product">
-                      <Edit3 className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteProduct(product);
-                      }}
-                      className="p-2 text-red-600 dark:text-red-400 hover:bg-red-500/10 rounded"
-                      title="Delete Product">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    </div>
+                    <span className="text-sm bg-primary/10 text-primary px-2 py-1 rounded">
+                      {t(product.category)}
+                    </span>
                   </div>
 
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handlePostToInstagram(product);
-                    }}
-                    disabled={postingToInstagram === product.id}
-                    className="border-pink-500 text-pink-600 dark:text-pink-400 hover:bg-pink-500/10 disabled:opacity-50">
-                    <Instagram className="h-3 w-3 mr-1" />
-                    {postingToInstagram === product.id
-                      ? t("Posting...")
-                      : t("Add to Instagram")}
-                  </Button>
+                  {/* Tags */}
+                  {product.tags && product.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {product.tags.slice(0, 3).map((tag, index) => (
+                        <span
+                          key={index}
+                          className="text-xs bg-accent text-foreground px-2 py-1 rounded">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* AI Story Indicator */}
+                  {product.story && (
+                    <div className="flex items-center text-primary text-sm mb-3">
+                      <Sparkles className="h-4 w-4 mr-1" />
+                      <span>{t(getStoryStatusText(product.name))}</span>
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="flex justify-between items-center">
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewProduct(product);
+                        }}
+                        className="p-2 text-muted-foreground hover:bg-accent hover:text-primary rounded"
+                        title="View Details">
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditProduct(product);
+                        }}
+                        className="p-2 text-muted-foreground hover:bg-accent hover:text-primary rounded"
+                        title="Edit Product">
+                        <Edit3 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteProduct(product);
+                        }}
+                        className="p-2 text-red-600 dark:text-red-400 hover:bg-red-500/10 rounded"
+                        title="Delete Product">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePostToInstagram(product);
+                      }}
+                      disabled={postingToInstagram === product.id}
+                      className="border-pink-500 text-pink-600 dark:text-pink-400 hover:bg-pink-500/10 disabled:opacity-50">
+                      <Instagram className="h-3 w-3 mr-1" />
+                      {postingToInstagram === product.id
+                        ? t("Posting...")
+                        : t("Add to Instagram")}
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
+            );
           })}
         </div>
       )}

@@ -1,17 +1,18 @@
 "use client";
 
 import {
-    CheckCircle,
-    Clock,
-    CreditCard,
-    DollarSign,
-    Filter,
-    IndianRupee,
-    Package,
-    Search,
-    Truck,
-    XCircle
+  CheckCircle,
+  Clock,
+  CreditCard,
+  DollarSign,
+  Filter,
+  IndianRupee,
+  Package,
+  Search,
+  Truck,
+  XCircle,
 } from "lucide-react";
+import { GoogleLoaderWithText } from "@/components/ui/google-loader";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
@@ -121,7 +122,8 @@ export default function ArtisanOrdersPage() {
     try {
       setLoading(true);
       const token =
-        localStorage.getItem("auth_token") || localStorage.getItem("accessToken");
+        localStorage.getItem("auth_token") ||
+        localStorage.getItem("accessToken");
 
       console.log("🔍 Fetching artisan orders...");
       const response = await fetch("/api/orders", {
@@ -142,7 +144,11 @@ export default function ArtisanOrdersPage() {
           console.log("❌ No orders found in response");
         }
       } else {
-        console.error("❌ Orders fetch failed:", response.status, response.statusText);
+        console.error(
+          "❌ Orders fetch failed:",
+          response.status,
+          response.statusText
+        );
       }
     } catch (error) {
       console.error("Error fetching orders:", error);
@@ -186,7 +192,8 @@ export default function ArtisanOrdersPage() {
   };
 
   const filteredOrders = orders.filter((order) => {
-    const matchesStatus = filterStatus === "all" || order.status === filterStatus;
+    const matchesStatus =
+      filterStatus === "all" || order.status === filterStatus;
     const matchesSearch =
       searchTerm === "" ||
       order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -205,10 +212,10 @@ export default function ArtisanOrdersPage() {
   if (loading || isTranslating) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">{t(loading ? "Loading orders..." : "Translating orders...")}</p>
-        </div>
+        <GoogleLoaderWithText
+          size="xl"
+          text={t(loading ? "Loading orders..." : "Translating orders...")}
+        />
       </div>
     );
   }
@@ -219,14 +226,17 @@ export default function ArtisanOrdersPage() {
       <div className="bg-card border border-border rounded-xl px-6 py-6 shadow-sm mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">{t("My Orders")}</h1>
+            <h1 className="text-3xl font-bold text-foreground">
+              {t("My Orders")}
+            </h1>
             <div className="h-1 w-32 bg-primary rounded-full mt-2 mb-2"></div>
-            <p className="text-muted-foreground">{t("Track and manage your product orders")}</p>
+            <p className="text-muted-foreground">
+              {t("Track and manage your product orders")}
+            </p>
           </div>
           <button
             onClick={fetchOrders}
-            className="bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary/90 hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
-          >
+            className="bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary/90 hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2">
             <Package className="h-4 w-4" />
             {t("Refresh")}
           </button>
@@ -239,8 +249,12 @@ export default function ArtisanOrdersPage() {
           <div className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-all group">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-muted-foreground text-sm font-medium">{t("Total Orders")}</p>
-                <p className="text-3xl font-bold text-foreground mt-2">{orders.length}</p>
+                <p className="text-muted-foreground text-sm font-medium">
+                  {t("Total Orders")}
+                </p>
+                <p className="text-3xl font-bold text-foreground mt-2">
+                  {orders.length}
+                </p>
               </div>
               <div className="bg-primary/10 p-3 rounded-xl group-hover:bg-primary/20 transition-colors">
                 <Package className="h-7 w-7 text-primary" />
@@ -250,7 +264,9 @@ export default function ArtisanOrdersPage() {
           <div className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-all group">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-muted-foreground text-sm font-medium">{t("Pending")}</p>
+                <p className="text-muted-foreground text-sm font-medium">
+                  {t("Pending")}
+                </p>
                 <p className="text-3xl font-bold text-yellow-500 mt-2">
                   {orders.filter((o) => o.status === "pending").length}
                 </p>
@@ -263,7 +279,9 @@ export default function ArtisanOrdersPage() {
           <div className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-all group">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-muted-foreground text-sm font-medium">{t("Online Paid")}</p>
+                <p className="text-muted-foreground text-sm font-medium">
+                  {t("Online Paid")}
+                </p>
                 <p className="text-3xl font-bold text-green-500 mt-2">
                   {orders.filter((o) => o.paymentStatus === "completed").length}
                 </p>
@@ -276,11 +294,15 @@ export default function ArtisanOrdersPage() {
           <div className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-all group">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-muted-foreground text-sm font-medium">{t("COD Pending")}</p>
+                <p className="text-muted-foreground text-sm font-medium">
+                  {t("COD Pending")}
+                </p>
                 <p className="text-3xl font-bold text-primary mt-2">
                   {
                     orders.filter(
-                      (o) => o.paymentMethod === "cod" && o.paymentStatus === "pending"
+                      (o) =>
+                        o.paymentMethod === "cod" &&
+                        o.paymentStatus === "pending"
                     ).length
                   }
                 </p>
@@ -309,8 +331,7 @@ export default function ArtisanOrdersPage() {
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full pl-11 pr-8 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none"
-            >
+              className="w-full pl-11 pr-8 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none">
               <option value="all">{t("All Orders")}</option>
               <option value="pending">{t("Pending")}</option>
               <option value="confirmed">{t("Confirmed")}</option>
@@ -327,7 +348,9 @@ export default function ArtisanOrdersPage() {
             <div className="bg-accent/50 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4">
               <Package className="h-12 w-12 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">{t("No orders found")}</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-2">
+              {t("No orders found")}
+            </h3>
             <p className="text-muted-foreground">
               {orders.length === 0
                 ? t("No orders found")
@@ -339,8 +362,7 @@ export default function ArtisanOrdersPage() {
             {filteredOrders.map((order) => (
               <div
                 key={order.id}
-                className="bg-card border border-border rounded-xl p-6 hover:shadow-xl hover:border-primary/50 transition-all"
-              >
+                className="bg-card border border-border rounded-xl p-6 hover:shadow-xl hover:border-primary/50 transition-all">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     {/* Order Header */}
@@ -351,32 +373,38 @@ export default function ArtisanOrdersPage() {
                       <span
                         className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium border ${getStatusBadgeColor(
                           order.status
-                        )}`}
-                      >
+                        )}`}>
                         {getStatusIcon(order.status)}
-                        <span className="ml-1.5">{order.status.toUpperCase()}</span>
+                        <span className="ml-1.5">
+                          {order.status.toUpperCase()}
+                        </span>
                       </span>
                     </div>
 
                     {/* Order Details */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                       <div>
-                        <p className="text-muted-foreground font-medium">{t("Customer")}</p>
+                        <p className="text-muted-foreground font-medium">
+                          {t("Customer")}
+                        </p>
                         <p className="text-foreground font-semibold mt-1">
                           {order.customerName || "N/A"}
                         </p>
-                        <p className="text-muted-foreground text-xs mt-0.5">{order.customerEmail}</p>
+                        <p className="text-muted-foreground text-xs mt-0.5">
+                          {order.customerEmail}
+                        </p>
                       </div>
                       <div>
-                        <p className="text-muted-foreground font-medium">{t("Payment Method")}</p>
+                        <p className="text-muted-foreground font-medium">
+                          {t("Payment Method")}
+                        </p>
                         <div className="flex items-center mt-1">
                           <span
                             className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium border ${
                               order.paymentMethod === "online"
                                 ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
                                 : "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
-                            }`}
-                          >
+                            }`}>
                             {order.paymentMethod === "online" ? (
                               <>
                                 <CreditCard className="h-3.5 w-3.5 mr-1" />
@@ -397,8 +425,7 @@ export default function ArtisanOrdersPage() {
                               : order.paymentStatus === "pending"
                               ? "text-yellow-500"
                               : "text-red-500"
-                          }`}
-                        >
+                          }`}>
                           {order.paymentStatus === "completed"
                             ? `✓ ${t("Completed")}`
                             : order.paymentStatus === "pending"
@@ -407,15 +434,20 @@ export default function ArtisanOrdersPage() {
                         </p>
                         {order.transactionId && (
                           <p className="text-muted-foreground text-xs mt-1">
-                            {t("Transaction ID")}: {order.transactionId.slice(0, 16)}...
+                            {t("Transaction ID")}:{" "}
+                            {order.transactionId.slice(0, 16)}...
                           </p>
                         )}
                       </div>
                       <div>
-                        <p className="text-muted-foreground font-medium">{t("Total")}</p>
+                        <p className="text-muted-foreground font-medium">
+                          {t("Total")}
+                        </p>
                         <div className="flex items-center text-primary font-bold text-xl mt-1">
                           {renderCurrencyIcon(order.currency)}
-                          <span className="ml-1">{order.total.toLocaleString()}</span>
+                          <span className="ml-1">
+                            {order.total.toLocaleString()}
+                          </span>
                         </div>
                         <p className="text-muted-foreground text-xs mt-1">
                           {order.items.length} {t("Items")}
@@ -425,15 +457,19 @@ export default function ArtisanOrdersPage() {
 
                     {/* Order Items */}
                     <div className="mt-4 pt-4 border-t border-border">
-                      <p className="text-muted-foreground text-sm font-medium mb-3">{t("Items")}:</p>
+                      <p className="text-muted-foreground text-sm font-medium mb-3">
+                        {t("Items")}:
+                      </p>
                       <div className="space-y-2">
                         {order.items.map((item) => (
                           <div
                             key={item.id}
-                            className="flex items-center justify-between text-sm bg-accent/30 rounded-lg p-2"
-                          >
+                            className="flex items-center justify-between text-sm bg-accent/30 rounded-lg p-2">
                             <span className="text-foreground font-medium">
-                              {item.name} <span className="text-muted-foreground">x {item.quantity}</span>
+                              {item.name}{" "}
+                              <span className="text-muted-foreground">
+                                x {item.quantity}
+                              </span>
                             </span>
                             <span className="text-muted-foreground font-semibold flex items-center">
                               {renderCurrencyIcon(order.currency)}
@@ -447,7 +483,8 @@ export default function ArtisanOrdersPage() {
                     {/* Order Date */}
                     <div className="mt-4 text-xs text-muted-foreground flex items-center gap-1.5">
                       <Clock className="h-3.5 w-3.5" />
-                      {t("Date")}: {new Date(order.createdAt).toLocaleDateString("en-IN", {
+                      {t("Date")}:{" "}
+                      {new Date(order.createdAt).toLocaleDateString("en-IN", {
                         year: "numeric",
                         month: "long",
                         day: "numeric",

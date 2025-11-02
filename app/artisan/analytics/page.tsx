@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
+import { GoogleLoaderWithText } from "@/components/ui/google-loader";
 import {
   ArrowLeft,
   BarChart3,
@@ -53,7 +54,8 @@ interface AnalyticsData {
 
 export default function ArtisanAnalyticsPage() {
   const router = useRouter();
-  const { t, translateBatch, currentLocale, isTranslating } = useDynamicTranslation();
+  const { t, translateBatch, currentLocale, isTranslating } =
+    useDynamicTranslation();
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
     null
   );
@@ -84,7 +86,7 @@ export default function ArtisanAnalyticsPage() {
       "Product",
       "viewed",
       "ordered",
-      "inquired about"
+      "inquired about",
     ]);
   }, [currentLocale, translateBatch]);
 
@@ -174,28 +176,45 @@ export default function ArtisanAnalyticsPage() {
   // Helper function to apply translations to mock data
   const getTranslatedAnalyticsData = useCallback(() => {
     if (!analyticsData) return null;
-    
+
     return {
       ...analyticsData,
       chartData: {
         ...analyticsData.chartData,
-        labels: [t("mon"), t("tue"), t("wed"), t("thu"), t("fri"), t("sat"), t("sun")],
+        labels: [
+          t("mon"),
+          t("tue"),
+          t("wed"),
+          t("thu"),
+          t("fri"),
+          t("sat"),
+          t("sun"),
+        ],
       },
       topProducts: analyticsData.topProducts.map((product, index) => ({
         ...product,
-        name: index === 0 ? t("handwovenCeramicBowl") : 
-              index === 1 ? t("traditionalPotteryVase") : 
-              t("artisanJewelrySet")
+        name:
+          index === 0
+            ? t("handwovenCeramicBowl")
+            : index === 1
+            ? t("traditionalPotteryVase")
+            : t("artisanJewelrySet"),
       })),
       recentActivity: analyticsData.recentActivity.map((activity, index) => ({
         ...activity,
-        customerName: index === 0 ? t("sarahJohnson") : 
-                     index === 1 ? t("michaelChen") : 
-                     t("emmaWilliams"),
-        productName: index === 0 ? t("ceramicBowlSet") : 
-                    index === 1 ? t("potteryVase") : 
-                    t("customRing")
-      }))
+        customerName:
+          index === 0
+            ? t("sarahJohnson")
+            : index === 1
+            ? t("michaelChen")
+            : t("emmaWilliams"),
+        productName:
+          index === 0
+            ? t("ceramicBowlSet")
+            : index === 1
+            ? t("potteryVase")
+            : t("customRing"),
+      })),
     };
   }, [analyticsData, t]);
 
@@ -243,10 +262,7 @@ export default function ArtisanAnalyticsPage() {
   if (isLoading || isTranslating) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">{t("Loading analytics...")}</p>
-        </div>
+        <GoogleLoaderWithText size="xl" text={t("Loading analytics...")} />
       </div>
     );
   }
@@ -278,9 +294,13 @@ export default function ArtisanAnalyticsPage() {
       <div className="bg-card border border-border rounded-xl px-6 py-6 shadow-sm mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">{t("Analytics Dashboard")}</h1>
+            <h1 className="text-3xl font-bold text-foreground">
+              {t("Analytics Dashboard")}
+            </h1>
             <div className="h-1 w-32 bg-primary rounded-full mt-2 mb-2"></div>
-            <p className="text-muted-foreground">{t("View your performance metrics")}</p>
+            <p className="text-muted-foreground">
+              {t("View your performance metrics")}
+            </p>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -288,15 +308,9 @@ export default function ArtisanAnalyticsPage() {
               value={timeframe}
               onChange={(e) => setTimeframe(e.target.value)}
               className="px-4 py-2.5 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
-              <option value="7d">
-                {t("Last 7 Days")}
-              </option>
-              <option value="30d">
-                {t("Last 30 Days")}
-              </option>
-              <option value="90d">
-                {t("Last 90 Days")}
-              </option>
+              <option value="7d">{t("Last 7 Days")}</option>
+              <option value="30d">{t("Last 30 Days")}</option>
+              <option value="90d">{t("Last 90 Days")}</option>
             </select>
 
             <button
@@ -434,12 +448,8 @@ export default function ArtisanAnalyticsPage() {
             <div className="h-80 flex items-center justify-center bg-white/5 rounded-lg">
               <div className="text-center">
                 <BarChart3 className="h-16 w-16 text-white/30 mx-auto mb-4" />
-                <p className="text-white/70">
-                  {t("chartVisualization")}
-                </p>
-                <p className="text-sm text-white/50">
-                  {t("chartIntegration")}
-                </p>
+                <p className="text-white/70">{t("chartVisualization")}</p>
+                <p className="text-sm text-white/50">{t("chartIntegration")}</p>
               </div>
             </div>
           </div>
@@ -459,10 +469,12 @@ export default function ArtisanAnalyticsPage() {
                       #{index + 1}
                     </div>
                     <div>
-                      <h4 className="font-medium text-foreground">{product.name}</h4>
+                      <h4 className="font-medium text-foreground">
+                        {product.name}
+                      </h4>
                       <p className="text-sm text-muted-foreground">
-                        {product.views} {t("views")} •{" "}
-                        {product.orders} {t("orders")}
+                        {product.views} {t("views")} • {product.orders}{" "}
+                        {t("orders")}
                       </p>
                     </div>
                   </div>
@@ -470,9 +482,7 @@ export default function ArtisanAnalyticsPage() {
                     <p className="font-semibold text-white">
                       {formatCurrency(product.revenue)}
                     </p>
-                    <p className="text-sm text-white/70">
-                      {t("revenue")}
-                    </p>
+                    <p className="text-sm text-white/70">{t("revenue")}</p>
                   </div>
                 </div>
               ))}

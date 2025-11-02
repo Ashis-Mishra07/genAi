@@ -2,6 +2,7 @@
 
 import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
 import { useTranslatedProducts } from "@/lib/hooks/useTranslateContent";
+import { GoogleLoaderWithText } from "@/components/ui/google-loader";
 import {
   Calendar,
   DollarSign,
@@ -263,39 +264,36 @@ export default function ArtisanDashboard() {
   };
 
   const getCategoryTranslation = (category: string | undefined): string => {
-    if (!category) return t('Other');
-    
+    if (!category) return t("Other");
+
     // Map common category values to translation keys
     const categoryMap: Record<string, string> = {
-      'handmade': 'Handmade',
-      'textile': 'Textile',
-      'textiles': 'Textile',
-      'pottery': 'Pottery',
-      'jewelry': 'Jewelry',
-      'jewellery': 'Jewelry',
-      'woodwork': 'Woodwork',
-      'metalwork': 'Metalwork',
-      'paintings': 'Paintings',
-      'art': 'Paintings',
-      'homeDecor': 'Home Decor',
-      'home decor': 'Home Decor',
-      'traditionalWear': 'Traditional Wear',
-      'traditional wear': 'Traditional Wear',
-      'sculptures': 'Sculptures',
-      'other': 'Other'
+      handmade: "Handmade",
+      textile: "Textile",
+      textiles: "Textile",
+      pottery: "Pottery",
+      jewelry: "Jewelry",
+      jewellery: "Jewelry",
+      woodwork: "Woodwork",
+      metalwork: "Metalwork",
+      paintings: "Paintings",
+      art: "Paintings",
+      homeDecor: "Home Decor",
+      "home decor": "Home Decor",
+      traditionalWear: "Traditional Wear",
+      "traditional wear": "Traditional Wear",
+      sculptures: "Sculptures",
+      other: "Other",
     };
-    
-    const key = categoryMap[category.toLowerCase()] || 'Other';
+
+    const key = categoryMap[category.toLowerCase()] || "Other";
     return t(key);
   };
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">{t("Loading dashboard...")}</p>
-        </div>
+        <GoogleLoaderWithText size="xl" text={t("Loading dashboard...")} />
       </div>
     );
   }
@@ -351,7 +349,9 @@ export default function ArtisanDashboard() {
               <p className="text-3xl font-bold text-foreground mb-1">
                 {stats.totalProducts}
               </p>
-              <p className="text-muted-foreground text-sm">{t("Total Products")}</p>
+              <p className="text-muted-foreground text-sm">
+                {t("Total Products")}
+              </p>
             </div>
           </div>
 
@@ -366,7 +366,9 @@ export default function ArtisanDashboard() {
               <p className="text-3xl font-bold text-foreground mb-1">
                 {stats.activeProducts}
               </p>
-              <p className="text-muted-foreground text-sm">{t("Active Products")}</p>
+              <p className="text-muted-foreground text-sm">
+                {t("Active Products")}
+              </p>
             </div>
           </div>
 
@@ -381,7 +383,9 @@ export default function ArtisanDashboard() {
               <p className="text-3xl font-bold text-foreground mb-1">
                 {stats.totalViews}
               </p>
-              <p className="text-muted-foreground text-sm">{t("Total Views")}</p>
+              <p className="text-muted-foreground text-sm">
+                {t("Total Views")}
+              </p>
             </div>
           </div>
 
@@ -396,7 +400,9 @@ export default function ArtisanDashboard() {
               <p className="text-3xl font-bold text-foreground mb-1">
                 {stats.totalOrders}
               </p>
-              <p className="text-muted-foreground text-sm">{t("Total Orders")}</p>
+              <p className="text-muted-foreground text-sm">
+                {t("Total Orders")}
+              </p>
             </div>
           </div>
         </div>
@@ -467,7 +473,9 @@ export default function ArtisanDashboard() {
                 <h3 className="text-xl font-semibold text-foreground mb-2">
                   {t("No products yet")}
                 </h3>
-                <p className="text-muted-foreground mb-6">{t("Start creating your first product")}</p>
+                <p className="text-muted-foreground mb-6">
+                  {t("Start creating your first product")}
+                </p>
                 <button
                   onClick={handleAddProduct}
                   className="bg-primary text-primary-foreground px-8 py-3 rounded-lg hover:bg-primary/90 transition-all duration-300 shadow-lg transform hover:scale-105">
@@ -480,7 +488,9 @@ export default function ArtisanDashboard() {
                   <div className="col-span-full text-center py-4">
                     <div className="inline-flex items-center text-primary">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
-                      <span className="text-sm">{t("Translating products...")}</span>
+                      <span className="text-sm">
+                        {t("Translating products...")}
+                      </span>
                     </div>
                   </div>
                 )}

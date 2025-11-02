@@ -17,6 +17,7 @@ import {
   Video,
   X,
 } from "lucide-react";
+import { GoogleLoaderWithText } from "@/components/ui/google-loader";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
@@ -64,7 +65,8 @@ interface SupportCategory {
 
 export default function ArtisanAdminMessagesPage() {
   const router = useRouter();
-  const { t, translateBatch, currentLocale, isTranslating } = useDynamicTranslation();
+  const { t, translateBatch, currentLocale, isTranslating } =
+    useDynamicTranslation();
   const { translateText, isHindi } = useTranslateContent();
 
   // Helper function for quick translations
@@ -907,8 +909,21 @@ Product Data: ${JSON.stringify(product)}`;
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">
+          <GoogleLoaderWithText
+            size="xl"
+            text={tl("Loading messages...", {
+              hi: "संदेश लोड हो रहे हैं...",
+              bn: "বার্তা লোড হচ্ছে...",
+              te: "సందేశాలు లোডवुतున్నాయი...",
+              mr: "संदेश लोड होत आहेत...",
+              ta: "செய்திகள் লোட्वुதল্...",
+              gu: "સંદેશા લોડ થઈ રહ્યા છે...",
+              kn: "ಸಂದೇಶಗಳು ಲೋಡ್ ಆಗುত্তিவೆ...",
+              or: "ବାର୍ତ୍ତାଗୁଡ଼ିକ ଲୋଡ୍ ହେଉଛି...",
+              pa: "ਸੁਨੇਹੇ ਲੋਡ ਹੋ ਰਹੇ ਹਨ...",
+            })}
+          />
+          {/* <p className="text-muted-foreground">
             {tl("Loading messages...", {
               hi: "संदेश लोड हो रहे हैं...",
               bn: "বার্তা লোড হচ্ছে...",
@@ -920,7 +935,7 @@ Product Data: ${JSON.stringify(product)}`;
               or: "ବାର୍ତ୍ତାଗୁଡ଼ିକ ଲୋଡ୍ ହେଉଛି...",
               pa: "ਸੁਨੇਹੇ ਲੋਡ ਹੋ ਰਹੇ ਹਨ...",
             })}
-          </p>
+          </p> */}
         </div>
       </div>
     );

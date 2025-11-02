@@ -14,6 +14,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { GoogleLoaderWithText } from "@/components/ui/google-loader";
 import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
 
 interface Notification {
@@ -110,37 +111,56 @@ const getRelativeTime = (dateString: string, t: (key: string) => string) => {
     const weeks = Math.floor(days / 7);
     const months = Math.floor(days / 30);
 
-    if (months > 0) return `${months} ${months > 1 ? (t('monthsAgo') || 'months ago') : (t('monthAgo') || 'month ago')}`;
-    if (weeks > 0) return `${weeks} ${weeks > 1 ? (t('weeksAgo') || 'weeks ago') : (t('weekAgo') || 'week ago')}`;
-    if (days > 0) return `${days} ${days > 1 ? (t('daysAgo') || 'days ago') : (t('dayAgo') || 'day ago')}`;
-    if (hours > 0) return `${hours} ${hours > 1 ? (t('hoursAgo') || 'hours ago') : (t('hourAgo') || 'hour ago')}`;
-    if (minutes > 0) return `${minutes} ${minutes > 1 ? (t('minutesAgo') || 'minutes ago') : (t('minuteAgo') || 'minute ago')}`;
-    if (seconds > 30) return `${seconds} ${t('secondsAgo') || 'seconds ago'}`;
-    return t('justNow') || 'Just now';
+    if (months > 0)
+      return `${months} ${
+        months > 1
+          ? t("monthsAgo") || "months ago"
+          : t("monthAgo") || "month ago"
+      }`;
+    if (weeks > 0)
+      return `${weeks} ${
+        weeks > 1 ? t("weeksAgo") || "weeks ago" : t("weekAgo") || "week ago"
+      }`;
+    if (days > 0)
+      return `${days} ${
+        days > 1 ? t("daysAgo") || "days ago" : t("dayAgo") || "day ago"
+      }`;
+    if (hours > 0)
+      return `${hours} ${
+        hours > 1 ? t("hoursAgo") || "hours ago" : t("hourAgo") || "hour ago"
+      }`;
+    if (minutes > 0)
+      return `${minutes} ${
+        minutes > 1
+          ? t("minutesAgo") || "minutes ago"
+          : t("minuteAgo") || "minute ago"
+      }`;
+    if (seconds > 30) return `${seconds} ${t("secondsAgo") || "seconds ago"}`;
+    return t("justNow") || "Just now";
   } catch (error) {
-    console.error('getRelativeTime error:', error);
-    return 'Just now';
+    console.error("getRelativeTime error:", error);
+    return "Just now";
   }
 };
 
 const getNotificationTypeText = (type: string, t: (key: string) => string) => {
   try {
     const typeMap: { [key: string]: string } = {
-      purchase: t('purchase') || 'Purchase',
-      ticket: t('ticket') || 'Ticket',
-      review: t('review') || 'Review',
-      system: t('system') || 'System',
-      order: t('order') || 'Order',
-      payment: t('payment') || 'Payment',
-      message: t('message') || 'Message',
-      promotion: t('promotion') || 'Promotion',
-      settings: t('settings') || 'Settings',
-      urgent: t('urgent') || 'Urgent',
+      purchase: t("purchase") || "Purchase",
+      ticket: t("ticket") || "Ticket",
+      review: t("review") || "Review",
+      system: t("system") || "System",
+      order: t("order") || "Order",
+      payment: t("payment") || "Payment",
+      message: t("message") || "Message",
+      promotion: t("promotion") || "Promotion",
+      settings: t("settings") || "Settings",
+      urgent: t("urgent") || "Urgent",
     };
-    
+
     return typeMap[type] || type.charAt(0).toUpperCase() + type.slice(1);
   } catch (error) {
-    console.error('getNotificationTypeText error:', error);
+    console.error("getNotificationTypeText error:", error);
     return type.charAt(0).toUpperCase() + type.slice(1);
   }
 };
@@ -218,7 +238,7 @@ export default function NotificationsPage() {
       "noUnreadNotifications",
       "noNotificationsFound",
       "allCaughtUp",
-      "notificationsWillAppear"
+      "notificationsWillAppear",
     ]);
   }, [translateBatch]);
 
@@ -230,61 +250,84 @@ export default function NotificationsPage() {
   const translateNotificationContent = (title: string, message: string) => {
     try {
       // Translate common notification titles
-      if (title.includes('New Order Received')) {
+      if (title.includes("New Order Received")) {
         return {
-          translatedTitle: t('newOrderReceived') || title,
-          translatedMessage: message.replace('You have received a new order', t('orderReceivedMessage') || 'You have received a new order')
-            .replace('for your products', t('forYourProducts') || 'for your products')
-            .replace('Total value', t('totalValue') || 'Total value')
+          translatedTitle: t("newOrderReceived") || title,
+          translatedMessage: message
+            .replace(
+              "You have received a new order",
+              t("orderReceivedMessage") || "You have received a new order"
+            )
+            .replace(
+              "for your products",
+              t("forYourProducts") || "for your products"
+            )
+            .replace("Total value", t("totalValue") || "Total value"),
         };
       }
-      
-      if (title.includes('New Review Received')) {
+
+      if (title.includes("New Review Received")) {
         return {
-          translatedTitle: t('newReviewReceived') || title,
-          translatedMessage: message.replace('A customer left a review for your product', t('customerLeftReview') || 'A customer left a review for your product')
+          translatedTitle: t("newReviewReceived") || title,
+          translatedMessage: message.replace(
+            "A customer left a review for your product",
+            t("customerLeftReview") ||
+              "A customer left a review for your product"
+          ),
         };
       }
-      
-      if (title.includes('New Message Received')) {
+
+      if (title.includes("New Message Received")) {
         return {
-          translatedTitle: t('newMessageReceived') || title,
-          translatedMessage: message.replace('A customer sent you a message', t('customerSentMessage') || 'A customer sent you a message')
+          translatedTitle: t("newMessageReceived") || title,
+          translatedMessage: message.replace(
+            "A customer sent you a message",
+            t("customerSentMessage") || "A customer sent you a message"
+          ),
         };
       }
-      
-      if (title.includes('Payment Received')) {
+
+      if (title.includes("Payment Received")) {
         return {
-          translatedTitle: t('paymentReceived') || title,
-          translatedMessage: message.replace('Payment has been processed for order', t('paymentProcessed') || 'Payment has been processed for order')
+          translatedTitle: t("paymentReceived") || title,
+          translatedMessage: message.replace(
+            "Payment has been processed for order",
+            t("paymentProcessed") || "Payment has been processed for order"
+          ),
         };
       }
-      
-      if (title.includes('Product Viewed')) {
+
+      if (title.includes("Product Viewed")) {
         return {
-          translatedTitle: t('productViewed') || title,
-          translatedMessage: message.replace('Someone viewed your product', t('someoneViewedProduct') || 'Someone viewed your product')
+          translatedTitle: t("productViewed") || title,
+          translatedMessage: message.replace(
+            "Someone viewed your product",
+            t("someoneViewedProduct") || "Someone viewed your product"
+          ),
         };
       }
-      
-      if (title.includes('System Notification')) {
+
+      if (title.includes("System Notification")) {
         return {
-          translatedTitle: t('systemNotification') || title,
-          translatedMessage: message.replace('Important system update', t('importantUpdate') || 'Important system update')
+          translatedTitle: t("systemNotification") || title,
+          translatedMessage: message.replace(
+            "Important system update",
+            t("importantUpdate") || "Important system update"
+          ),
         };
       }
-      
+
       // Return original if no translation pattern matches
       return {
         translatedTitle: title,
-        translatedMessage: message
+        translatedMessage: message,
       };
     } catch (error) {
-      console.error('Translation error:', error);
+      console.error("Translation error:", error);
       // Fallback to original content if translation fails
       return {
         translatedTitle: title,
-        translatedMessage: message
+        translatedMessage: message,
       };
     }
   };
@@ -297,7 +340,9 @@ export default function NotificationsPage() {
 
     try {
       const offset = (currentPage - 1) * itemsPerPage;
-      const response = await fetch(`/api/notifications?limit=${itemsPerPage}&offset=${offset}`);
+      const response = await fetch(
+        `/api/notifications?limit=${itemsPerPage}&offset=${offset}`
+      );
       if (response.ok) {
         const data: NotificationResponse = await response.json();
         if (data.success) {
@@ -438,12 +483,10 @@ export default function NotificationsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background p-6 flex items-center justify-center">
-        <div className="flex items-center space-x-3 text-muted-foreground">
-          <RefreshCw className="h-6 w-6 animate-spin" />
-          <span>
-            {t("Loading...") || "Loading..."}
-          </span>
-        </div>
+        <GoogleLoaderWithText
+          size="xl"
+          text={t("Loading notifications...") || "Loading notifications..."}
+        />
       </div>
     );
   }
@@ -488,12 +531,12 @@ export default function NotificationsPage() {
                 {showUnreadOnly ? (
                   <div className="flex items-center space-x-2">
                     <EyeOff className="h-4 w-4" />
-                    <span>{t('showAll')}</span>
+                    <span>{t("showAll")}</span>
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2">
                     <Eye className="h-4 w-4" />
-                    <span>{t('unreadOnly')}</span>
+                    <span>{t("unreadOnly")}</span>
                   </div>
                 )}
               </button>
@@ -511,9 +554,7 @@ export default function NotificationsPage() {
               ) : (
                 <CheckCircle2 className="h-4 w-4" />
               )}
-              <span>
-                {t("Mark All as Read") || "Mark All as Read"}
-              </span>
+              <span>{t("Mark All as Read") || "Mark All as Read"}</span>
             </button>
 
             <button
@@ -525,7 +566,7 @@ export default function NotificationsPage() {
               ) : (
                 <Trash2 className="h-4 w-4" />
               )}
-              <span>{t('clearAll')}</span>
+              <span>{t("clearAll")}</span>
             </button>
           </div>
         </div>
@@ -537,13 +578,13 @@ export default function NotificationsPage() {
               <Bell className="h-12 w-12 text-slate-600 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-slate-400 mb-2">
                 {showUnreadOnly
-                  ? t('noUnreadNotifications')
-                  : t('noNotificationsFound')}
+                  ? t("noUnreadNotifications")
+                  : t("noNotificationsFound")}
               </h3>
               <p className="text-slate-500">
                 {showUnreadOnly
-                  ? t('allCaughtUp')
-                  : t('notificationsWillAppear')}
+                  ? t("allCaughtUp")
+                  : t("notificationsWillAppear")}
               </p>
             </div>
           ) : (
@@ -556,16 +597,15 @@ export default function NotificationsPage() {
                 <div
                   key={notification.id}
                   className={`relative bg-card rounded-lg p-4 border transition-all duration-200 hover:bg-accent cursor-pointer group ${
-                    notification.isRead
-                      ? "border-border"
-                      : "border-primary/30"
+                    notification.isRead ? "border-border" : "border-primary/30"
                   }`}
                   onClick={() =>
                     !notification.isRead && markAsRead(notification.id)
                   }>
                   <div className="flex items-start space-x-4">
                     {/* Icon */}
-                    <div className={`flex-shrink-0 p-2 rounded-lg bg-primary/10`}>
+                    <div
+                      className={`flex-shrink-0 p-2 rounded-lg bg-primary/10`}>
                       <Icon className={`h-5 w-5 text-primary`} />
                     </div>
 
@@ -578,7 +618,12 @@ export default function NotificationsPage() {
                               ? "text-muted-foreground"
                               : "text-foreground font-semibold"
                           }`}>
-                          {translateNotificationContent(notification.title, notification.message).translatedTitle}
+                          {
+                            translateNotificationContent(
+                              notification.title,
+                              notification.message
+                            ).translatedTitle
+                          }
                         </h3>
                         <div className="flex items-center space-x-2">
                           <span className="text-xs text-muted-foreground">
@@ -596,7 +641,12 @@ export default function NotificationsPage() {
                             ? "text-slate-400"
                             : "text-slate-300"
                         }`}>
-                        {translateNotificationContent(notification.title, notification.message).translatedMessage}
+                        {
+                          translateNotificationContent(
+                            notification.title,
+                            notification.message
+                          ).translatedMessage
+                        }
                       </p>
 
                       <div className="flex items-center justify-between mt-2">
@@ -617,9 +667,7 @@ export default function NotificationsPage() {
                             ) : (
                               <Eye className="h-3 w-3" />
                             )}
-                            <span>
-                              {t('markAsRead')}
-                            </span>
+                            <span>{t("markAsRead")}</span>
                           </button>
                         )}
                       </div>
@@ -635,29 +683,45 @@ export default function NotificationsPage() {
         {filteredTotalCount > itemsPerPage && (
           <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
             <div className="text-sm text-muted-foreground">
-              Showing {Math.min((currentPage - 1) * itemsPerPage + 1, filteredTotalCount)} to{" "}
-              {Math.min(currentPage * itemsPerPage, filteredTotalCount)} of {filteredTotalCount} notifications
+              Showing{" "}
+              {Math.min(
+                (currentPage - 1) * itemsPerPage + 1,
+                filteredTotalCount
+              )}{" "}
+              to {Math.min(currentPage * itemsPerPage, filteredTotalCount)} of{" "}
+              {filteredTotalCount} notifications
             </div>
             <div className="flex items-center space-x-2">
               <button
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
                 className="px-4 py-2 bg-card border border-border text-foreground rounded-lg hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                 Previous
               </button>
               <div className="flex items-center space-x-1">
-                {Array.from({ length: Math.ceil(filteredTotalCount / itemsPerPage) }, (_, i) => i + 1)
-                  .filter(page => {
+                {Array.from(
+                  { length: Math.ceil(filteredTotalCount / itemsPerPage) },
+                  (_, i) => i + 1
+                )
+                  .filter((page) => {
                     // Show first page, last page, current page, and pages around current
-                    const totalPages = Math.ceil(filteredTotalCount / itemsPerPage);
-                    return page === 1 || 
-                           page === totalPages || 
-                           (page >= currentPage - 1 && page <= currentPage + 1);
+                    const totalPages = Math.ceil(
+                      filteredTotalCount / itemsPerPage
+                    );
+                    return (
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    );
                   })
                   .map((page, index, array) => (
                     <>
                       {index > 0 && array[index - 1] !== page - 1 && (
-                        <span key={`ellipsis-${page}`} className="px-2 text-muted-foreground">...</span>
+                        <span
+                          key={`ellipsis-${page}`}
+                          className="px-2 text-muted-foreground">
+                          ...
+                        </span>
                       )}
                       <button
                         key={page}
@@ -673,8 +737,17 @@ export default function NotificationsPage() {
                   ))}
               </div>
               <button
-                onClick={() => setCurrentPage(prev => Math.min(Math.ceil(filteredTotalCount / itemsPerPage), prev + 1))}
-                disabled={currentPage >= Math.ceil(filteredTotalCount / itemsPerPage)}
+                onClick={() =>
+                  setCurrentPage((prev) =>
+                    Math.min(
+                      Math.ceil(filteredTotalCount / itemsPerPage),
+                      prev + 1
+                    )
+                  )
+                }
+                disabled={
+                  currentPage >= Math.ceil(filteredTotalCount / itemsPerPage)
+                }
                 className="px-4 py-2 bg-card border border-border text-foreground rounded-lg hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                 Next
               </button>

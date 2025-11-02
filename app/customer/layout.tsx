@@ -89,7 +89,7 @@ export default function CustomerLayout({
   return (
     <div className="min-h-screen bg-background">
       <Navbar user={user} onLogout={handleLogout} />
-      <main className="pt-16">
+      <main className="pt-0">
         <div className="container mx-auto px-4 py-8">{children}</div>
       </main>
     </div>

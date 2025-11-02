@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { GoogleLoaderWithText } from "@/components/ui/google-loader";
 import {
   TrendingUp,
   TrendingDown,
@@ -164,11 +165,8 @@ export default function AnalyticsPage() {
 
   if (isLoading || !analytics) {
     return (
-      <div className="p-6 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">{t("Loading analytics...")}</p>
-        </div>
+      <div className="p-6 flex items-center justify-center min-h-screen">
+        <GoogleLoaderWithText size="xl" text={t("Loading analytics...")} />
       </div>
     );
   }
@@ -235,7 +233,9 @@ export default function AnalyticsPage() {
                 }`}>
                 {analytics.revenue.change}%
               </span>
-              <span className="text-sm text-muted-foreground ml-2">{t("vs last period")}</span>
+              <span className="text-sm text-muted-foreground ml-2">
+                {t("vs last period")}
+              </span>
             </div>
           </div>
         </div>
@@ -261,7 +261,9 @@ export default function AnalyticsPage() {
               <span className="text-sm font-semibold text-green-600 dark:text-green-400 ml-2">
                 {analytics.orders.change}%
               </span>
-              <span className="text-sm text-muted-foreground ml-2">{t("vs last period")}</span>
+              <span className="text-sm text-muted-foreground ml-2">
+                {t("vs last period")}
+              </span>
             </div>
           </div>
         </div>
@@ -336,11 +338,15 @@ export default function AnalyticsPage() {
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
                 <div className="h-3 w-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full"></div>
-                <span className="text-sm text-muted-foreground">{t("Actual")}</span>
+                <span className="text-sm text-muted-foreground">
+                  {t("Actual")}
+                </span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="h-3 w-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
-                <span className="text-sm text-muted-foreground">{t("Estimated")}</span>
+                <span className="text-sm text-muted-foreground">
+                  {t("Estimated")}
+                </span>
               </div>
             </div>
           </div>
@@ -431,7 +437,8 @@ export default function AnalyticsPage() {
                             <div className="flex items-center space-x-2">
                               <div className="h-2 w-2 bg-blue-400 rounded-full"></div>
                               <span className="text-muted-foreground">
-                                {t("Estimated")}: ₹{month.estimated.toLocaleString()}
+                                {t("Estimated")}: ₹
+                                {month.estimated.toLocaleString()}
                               </span>
                             </div>
                             <div className="text-center text-muted-foreground text-xs mt-2 pt-2 border-t border-border">
@@ -503,7 +510,9 @@ export default function AnalyticsPage() {
                 <h3 className="text-base font-semibold text-foreground">
                   {t("Top Selling Products")}
                 </h3>
-                <p className="text-xs text-muted-foreground">{t("Best performing items")}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t("Best performing items")}
+                </p>
               </div>
             </div>
 
@@ -581,7 +590,9 @@ export default function AnalyticsPage() {
                       <p className="font-bold text-green-600 dark:text-green-400 text-sm">
                         ₹{product.revenue.toLocaleString()}
                       </p>
-                      <p className="text-xs text-muted-foreground">{t("revenue")}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {t("revenue")}
+                      </p>
                     </div>
                   </div>
                 );
@@ -620,7 +631,9 @@ export default function AnalyticsPage() {
                 <h3 className="text-base font-semibold text-foreground">
                   {t("Sales by Category")}
                 </h3>
-                <p className="text-xs text-muted-foreground">{t("Distribution overview")}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t("Distribution overview")}
+                </p>
               </div>
             </div>
 

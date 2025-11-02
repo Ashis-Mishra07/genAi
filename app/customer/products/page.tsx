@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { GoogleLoaderWithText } from "@/components/ui/google-loader";
 import {
   Package,
   Eye,
@@ -235,16 +236,12 @@ export default function CustomerProductsPage() {
         {/* Loading State */}
         {isLoading ? (
           <div className="text-center py-20">
-            <div className="relative">
-              <div className="animate-spin rounded-full h-20 w-20 border-4 border-muted border-t-primary mx-auto mb-6"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Package className="h-8 w-8 text-primary animate-pulse" />
-              </div>
-            </div>
-            <h2 className="text-2xl font-bold text-foreground mb-3">
-              Discovering Amazing Products
-            </h2>
-            <p className="text-muted-foreground text-lg">
+            <GoogleLoaderWithText
+              size="xl"
+              text="Discovering Amazing Products"
+              textClassName="text-lg"
+            />
+            <p className="text-muted-foreground text-lg mt-4">
               Fetching the latest artisan creations for you...
             </p>
           </div>

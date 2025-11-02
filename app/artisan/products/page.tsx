@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
+import { GoogleLoaderWithText } from "@/components/ui/google-loader";
 import {
   useTranslatedProducts,
   useTranslateContent,
@@ -59,7 +60,9 @@ export default function ArtisanProductsPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currentSlides, setCurrentSlides] = useState<{ [key: string]: number }>({});
+  const [currentSlides, setCurrentSlides] = useState<{ [key: string]: number }>(
+    {}
+  );
 
   const [newProduct, setNewProduct] = useState<NewProduct>({
     name: "",
@@ -270,37 +273,37 @@ export default function ArtisanProductsPage() {
   });
 
   const nextSlide = (productId: string, totalSlides: number) => {
-    setCurrentSlides(prev => ({
+    setCurrentSlides((prev) => ({
       ...prev,
-      [productId]: ((prev[productId] || 0) + 1) % totalSlides
+      [productId]: ((prev[productId] || 0) + 1) % totalSlides,
     }));
   };
 
   const prevSlide = (productId: string, totalSlides: number) => {
-    setCurrentSlides(prev => ({
+    setCurrentSlides((prev) => ({
       ...prev,
-      [productId]: ((prev[productId] || 0) - 1 + totalSlides) % totalSlides
+      [productId]: ((prev[productId] || 0) - 1 + totalSlides) % totalSlides,
     }));
   };
 
   const goToSlide = (productId: string, slideIndex: number) => {
-    setCurrentSlides(prev => ({
+    setCurrentSlides((prev) => ({
       ...prev,
-      [productId]: slideIndex
+      [productId]: slideIndex,
     }));
   };
 
   if (isLoading || isTranslating) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">
-            {isTranslating
+        <GoogleLoaderWithText
+          size="xl"
+          text={
+            isTranslating
               ? t("Translating products...")
-              : t("Loading products...")}
-          </p>
-        </div>
+              : t("Loading products...")
+          }
+        />
       </div>
     );
   }
@@ -311,10 +314,13 @@ export default function ArtisanProductsPage() {
       <div className="bg-card border border-border rounded-xl px-6 py-6 shadow-sm mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">{t("Product Management")}</h1>
+            <h1 className="text-3xl font-bold text-foreground">
+              {t("Product Management")}
+            </h1>
             <div className="h-1 w-32 bg-primary rounded-full mt-2 mb-2"></div>
             <p className="text-muted-foreground text-lg">
-              {t("Manage your product catalog")} • {products.length} {t("products total")}
+              {t("Manage your product catalog")} • {products.length}{" "}
+              {t("products total")}
             </p>
           </div>
 
@@ -389,7 +395,8 @@ export default function ArtisanProductsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map((product) => {
               const currentSlide = currentSlides[product.id] || 0;
-              const hasVideo = product.videoUrl && product.videoStatus === 'COMPLETED';
+              const hasVideo =
+                product.videoUrl && product.videoStatus === "COMPLETED";
               const totalSlides = hasVideo ? 2 : 1;
 
               return (
@@ -399,7 +406,10 @@ export default function ArtisanProductsPage() {
                   {/* Carousel Container */}
                   <div className="relative aspect-w-16 aspect-h-9 bg-muted group">
                     {/* Image Slide */}
-                    <div className={`w-full h-48 ${currentSlide === 0 ? 'block' : 'hidden'}`}>
+                    <div
+                      className={`w-full h-48 ${
+                        currentSlide === 0 ? "block" : "hidden"
+                      }`}>
                       {product.imageUrl ? (
                         <img
                           src={product.imageUrl}
@@ -415,7 +425,10 @@ export default function ArtisanProductsPage() {
 
                     {/* Video Slide */}
                     {hasVideo && (
-                      <div className={`w-full h-48 ${currentSlide === 1 ? 'block' : 'hidden'}`}>
+                      <div
+                        className={`w-full h-48 ${
+                          currentSlide === 1 ? "block" : "hidden"
+                        }`}>
                         <video
                           src={product.videoUrl}
                           className="w-full h-full object-cover"
@@ -453,8 +466,8 @@ export default function ArtisanProductsPage() {
                               onClick={() => goToSlide(product.id, index)}
                               className={`w-2 h-2 rounded-full transition-all ${
                                 currentSlide === index
-                                  ? 'bg-primary w-4'
-                                  : 'bg-white/50 hover:bg-white/75'
+                                  ? "bg-primary w-4"
+                                  : "bg-white/50 hover:bg-white/75"
                               }`}
                               aria-label={`Go to slide ${index + 1}`}
                             />
@@ -463,74 +476,74 @@ export default function ArtisanProductsPage() {
 
                         {/* Media Type Badge */}
                         <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs font-medium">
-                          {currentSlide === 0 ? '📸 Poster' : '🎬 Video'}
+                          {currentSlide === 0 ? "📸 Poster" : "🎬 Video"}
                         </div>
                       </>
                     )}
                   </div>
 
-                <div className="p-5">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-foreground line-clamp-1 text-lg">
-                      {product.name}
-                    </h3>
-                    <button
-                      onClick={() =>
-                        handleToggleStatus(product.id, product.isActive)
-                      }
-                      className={`px-3 py-1 text-xs rounded-full font-medium transition-all ${
-                        product.isActive
-                          ? "bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30"
-                          : "bg-muted text-muted-foreground border border-border hover:bg-accent"
-                      }`}>
-                      {product.isActive ? t("Active") : t("Inactive")}
-                    </button>
-                  </div>
-
-                  <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
-                    {product.description}
-                  </p>
-
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-xl font-bold text-primary">
-                      ₹{product.price.toLocaleString()}
-                    </span>
-                    <span className="text-sm text-muted-foreground bg-accent px-3 py-1 rounded-full border border-border">
-                      {product.category}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between border-t border-border pt-3">
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(product.createdAt).toLocaleDateString()}
-                    </span>
-
-                    <div className="flex space-x-1">
-                      <button
-                        onClick={() => router.push(`/products/${product.id}`)}
-                        className="p-2 text-muted-foreground hover:text-primary hover:bg-accent rounded-lg transition-all"
-                        title={t("View")}>
-                        <Eye className="h-4 w-4" />
-                      </button>
+                  <div className="p-5">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-semibold text-foreground line-clamp-1 text-lg">
+                        {product.name}
+                      </h3>
                       <button
                         onClick={() =>
-                          router.push(`/artisan/products/edit/${product.id}`)
+                          handleToggleStatus(product.id, product.isActive)
                         }
-                        className="p-2 text-muted-foreground hover:text-green-500 hover:bg-accent rounded-lg transition-all"
-                        title={t("Edit")}>
-                        <Edit className="h-4 w-4" />
+                        className={`px-3 py-1 text-xs rounded-full font-medium transition-all ${
+                          product.isActive
+                            ? "bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30"
+                            : "bg-muted text-muted-foreground border border-border hover:bg-accent"
+                        }`}>
+                        {product.isActive ? t("Active") : t("Inactive")}
                       </button>
-                      <button
-                        onClick={() => handleDeleteProduct(product.id)}
-                        className="p-2 text-muted-foreground hover:text-red-500 hover:bg-accent rounded-lg transition-all"
-                        title={t("Delete")}>
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                    </div>
+
+                    <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+                      {product.description}
+                    </p>
+
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-xl font-bold text-primary">
+                        ₹{product.price.toLocaleString()}
+                      </span>
+                      <span className="text-sm text-muted-foreground bg-accent px-3 py-1 rounded-full border border-border">
+                        {product.category}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between border-t border-border pt-3">
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(product.createdAt).toLocaleDateString()}
+                      </span>
+
+                      <div className="flex space-x-1">
+                        <button
+                          onClick={() => router.push(`/products/${product.id}`)}
+                          className="p-2 text-muted-foreground hover:text-primary hover:bg-accent rounded-lg transition-all"
+                          title={t("View")}>
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() =>
+                            router.push(`/artisan/products/edit/${product.id}`)
+                          }
+                          className="p-2 text-muted-foreground hover:text-green-500 hover:bg-accent rounded-lg transition-all"
+                          title={t("Edit")}>
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProduct(product.id)}
+                          className="p-2 text-muted-foreground hover:text-red-500 hover:bg-accent rounded-lg transition-all"
+                          title={t("Delete")}>
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
+              );
             })}
           </div>
         )}
