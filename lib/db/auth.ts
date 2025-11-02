@@ -174,6 +174,7 @@ export async function createUser(userData: CreateUserData): Promise<User> {
       work_process,
       expertise_areas,
       artistry_description,
+      documentation_video_status,
       is_active, 
       created_at, 
       updated_at
@@ -194,6 +195,7 @@ export async function createUser(userData: CreateUserData): Promise<User> {
       ${work_process},
       ${expertise_areas},
       ${artistry_description},
+      ${role === 'ARTISAN' ? 'NOT_GENERATED' : null},
       true, 
       NOW(), 
       NOW()

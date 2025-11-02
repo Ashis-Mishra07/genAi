@@ -83,24 +83,27 @@ export default function ArtisanAuthPage() {
         let photographUrl = "";
         
         if (photographFile) {
+          console.log("📸 Uploading photograph...");
           const uploadFormData = new FormData();
           uploadFormData.append("file", photographFile);
-          uploadFormData.append("upload_preset", "artisan_photos");
+          uploadFormData.append("folder", "artisan-photos");
 
-          const uploadResponse = await fetch(
-            `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'swasthik'}/image/upload`,
-            {
-              method: "POST",
-              body: uploadFormData,
-            }
-          );
+          const uploadResponse = await fetch("/api/upload/photograph", {
+            method: "POST",
+            body: uploadFormData,
+          });
 
           if (uploadResponse.ok) {
             const uploadData = await uploadResponse.json();
-            photographUrl = uploadData.secure_url;
+            photographUrl = uploadData.url;
+            console.log("✅ Photograph uploaded:", photographUrl);
           } else {
-            console.warn("Failed to upload photograph");
+            const errorData = await uploadResponse.json();
+            console.error("❌ Failed to upload photograph:", errorData);
+            throw new Error("Failed to upload photograph. Please try again.");
           }
+        } else {
+          console.warn("⚠️ No photograph file selected");
         }
 
         // Sign up with all artisan data

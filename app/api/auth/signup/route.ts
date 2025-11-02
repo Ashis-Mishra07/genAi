@@ -133,24 +133,38 @@ export async function POST(request: NextRequest) {
     // Auto-trigger documentation video generation for artisans with photograph
     if (role === 'ARTISAN' && photograph) {
       try {
-        console.log('Triggering artisan documentation video generation for:', user.email);
+        console.log('🎬 Triggering artisan documentation video generation for:', user.email);
+        console.log('📸 Photograph URL:', photograph);
+        console.log('🆔 Artisan ID:', user.id);
         
-        // Trigger video generation in background (don't wait for response)
-        fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/artisan/generate-documentation-video`, {
+        // Trigger video generation in background
+        const videoGenUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/artisan/generate-documentation-video`;
+        console.log('🌐 Video generation endpoint:', videoGenUrl);
+        
+        fetch(videoGenUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${tokens.accessToken}`,
           },
           body: JSON.stringify({ artisanId: user.id }),
-        }).catch(err => {
-          console.error('Failed to trigger video generation:', err);
+        })
+        .then(async (res) => {
+          const videoGenResponse = await res.json();
+          if (res.ok) {
+            console.log('✅ Video generation triggered successfully:', videoGenResponse);
+          } else {
+            console.error('❌ Video generation failed:', res.status, videoGenResponse);
+          }
+        })
+        .catch(err => {
+          console.error('❌ Failed to trigger video generation:', err);
           // Don't fail signup if video generation fails
         });
         
-        console.log('Artisan documentation video generation triggered successfully');
+        console.log('🚀 Artisan documentation video generation request sent');
       } catch (error) {
-        console.error('Error triggering video generation:', error);
+        console.error('❌ Error triggering video generation:', error);
         // Don't fail signup if video generation fails
       }
     }

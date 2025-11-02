@@ -1,336 +1,242 @@
-"use client";
+﻿"use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
-import {
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  FileText,
-  Camera,
-  Save,
-  Palette,
-} from "lucide-react";
+import { User, MapPin, Mail, Phone, Briefcase, FileText, Edit, Camera, Video } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-interface ArtisanProfile {
+interface Profile {
   id: string;
   name: string;
   email: string;
   phone?: string;
   specialty?: string;
   location?: string;
+  origin_place?: string;
   bio?: string;
+  artisan_story?: string;
+  work_process?: string;
+  expertise_areas?: string;
+  artistry_description?: string;
+  photograph?: string;
   avatar?: string;
+  gender?: string;
+  documentation_video_url?: string;
+  documentation_video_status?: string;
 }
 
 export default function ArtisanProfilePage() {
   const router = useRouter();
-  const { t, translateBatch, currentLocale } = useDynamicTranslation();
-  const [profile, setProfile] = useState<ArtisanProfile>({
-    id: "",
-    name: "",
-    email: "",
-    phone: "",
-    specialty: "",
-    location: "",
-    bio: "",
-    avatar: "",
-  });
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-
-  // Pre-load translations
-  useEffect(() => {
-    translateBatch([
-      "My Profile",
-      "Manage your artisan profile and information",
-      "Loading profile...",
-      "Full Name",
-      "Email Address",
-      "Phone Number",
-      "Specialty",
-      "Location",
-      "Bio",
-      "Profile Picture",
-      "Change Photo",
-      "Save Changes",
-      "Saving...",
-      "Profile updated successfully",
-      "Failed to update profile",
-      "Profile Information",
-      "Update your account details",
-    ]);
-  }, [currentLocale, translateBatch]);
-
-  const loadProfile = useCallback(async () => {
-    try {
-      const token = localStorage.getItem("auth_token");
-      if (!token) {
-        router.push("/auth/artisan");
-        return;
-      }
-
-      const response = await fetch("/api/auth/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(t('failedToLoadProfile'));
-      }
-
-      const data = await response.json();
-      setProfile(data.user);
-    } catch (error) {
-      setError(t('failedToLoadProfile'));
-      console.error("Profile load error:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [router, t]);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadProfile();
-  }, [loadProfile]);
+    fetchProfile();
+  }, []);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setProfile({
-      ...profile,
-      [e.target.name]: e.target.value,
-    });
-    setError("");
-    setSuccess("");
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSaving(true);
-    setError("");
-    setSuccess("");
-
+  const fetchProfile = async () => {
     try {
-      const token = localStorage.getItem("auth_token");
-      if (!token) {
-        router.push("/auth/artisan");
-        return;
-      }
-
+      const token = localStorage.getItem("auth_token") || localStorage.getItem("accessToken");
       const response = await fetch("/api/auth/profile", {
-        method: "PUT",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(profile),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to update profile");
+      if (response.ok) {
+        const data = await response.json();
+        setProfile(data.user);
       }
-
-      setSuccess(t('profileUpdatedSuccessfully'));
     } catch (error) {
-      setError(t('failedToUpdateProfile'));
-      console.error("Profile update error:", error);
+      console.error("Failed to fetch profile:", error);
     } finally {
-      setIsSaving(false);
+      setLoading(false);
     }
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">
-            {t('Loading profile...')}
-          </p>
-        </div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-card border-b border-border px-6 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-foreground">
-            {t('My Profile')}
-          </h1>
-          <div className="flex items-center text-muted-foreground">
-            <User className="h-5 w-5 mr-2" />
-            <span>
-              {t('Manage your artisan profile and information')}
-            </span>
-          </div>
-        </div>
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Failed to load profile</p>
       </div>
+    );
+  }
 
-      {/* Content */}
-      <div className="p-6">
-        <div className="max-w-2xl mx-auto">
-          {/* Profile Form */}
-          <div className="bg-card border border-border rounded-lg p-6 shadow-lg">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Avatar Section */}
-              <div className="flex flex-col items-center mb-6">
-                <div className="relative">
-                  <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-2xl font-bold mb-4">
-                    {profile.avatar ? (
-                      <Image
-                        src={profile.avatar}
-                        alt="Profile"
-                        width={96}
-                        height={96}
-                        className="w-full h-full rounded-full object-cover"
-                      />
-                    ) : (
-                      profile.name.charAt(0).toUpperCase() || "A"
-                    )}
+  const getVideoStatusBadge = () => {
+    switch (profile.documentation_video_status) {
+      case "COMPLETED":
+        return (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-600 dark:text-green-400">
+            <Video className="w-3 h-3 mr-1" />
+            Video Ready
+          </span>
+        );
+      case "PROCESSING":
+        return (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 animate-pulse">
+            <Video className="w-3 h-3 mr-1" />
+            Generating...
+          </span>
+        );
+      case "FAILED":
+        return (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-500/20 text-red-600 dark:text-red-400">
+            Failed
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-500/20 text-gray-600 dark:text-gray-400">
+            No Video
+          </span>
+        );
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background p-6">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">My Profile</h1>
+            <p className="text-muted-foreground mt-1">View your artisan profile information</p>
+          </div>
+          <Button onClick={() => router.push("/artisan/profile/edit")} className="flex items-center gap-2">
+            <Edit className="h-4 w-4" />
+            Edit Profile
+          </Button>
+        </div>
+        <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-lg">
+          <div className="h-32 bg-gradient-to-r from-primary/20 to-primary/10"></div>
+          <div className="p-8">
+            <div className="flex flex-col md:flex-row gap-6 -mt-20 mb-8">
+              <div className="relative">
+                <div className="w-32 h-32 rounded-full border-4 border-card bg-muted overflow-hidden">
+                  {profile.photograph || profile.avatar ? (
+                    <img src={profile.photograph || profile.avatar} alt={profile.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Camera className="h-12 w-12 text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex-1 pt-16 md:pt-12">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold text-foreground">{profile.name}</h2>
+                    <p className="text-primary font-medium mt-1">{profile.specialty || "Artisan"}</p>
                   </div>
-                  <button
-                    type="button"
-                    className="absolute bottom-0 right-0 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full p-2 transition-colors">
-                    <Camera className="h-4 w-4" />
-                  </button>
+                  {getVideoStatusBadge()}
                 </div>
-              </div>
-
-              {/* Form Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-foreground text-sm font-medium mb-2">
-                    <User className="h-4 w-4 inline mr-1" />
-                    {t('Full Name')} *
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={profile.name}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                    placeholder={t('Full Name')}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-foreground text-sm font-medium mb-2">
-                    <Mail className="h-4 w-4 inline mr-1" />
-                    {t('Email Address')} *
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={profile.email}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                    placeholder={t('Email Address')}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-foreground text-sm font-medium mb-2">
-                    <Phone className="h-4 w-4 inline mr-1" />
-                    {t('Phone Number')}
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={profile.phone || ""}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                    placeholder={t('Phone Number')}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-foreground text-sm font-medium mb-2">
-                    <Palette className="h-4 w-4 inline mr-1" />
-                    {t('Specialty')}
-                  </label>
-                  <input
-                    type="text"
-                    name="specialty"
-                    value={profile.specialty || ""}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                    placeholder={t('Specialty')}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-foreground text-sm font-medium mb-2">
-                  <MapPin className="h-4 w-4 inline mr-1" />
-                  {t('Location')}
-                </label>
-                <input
-                  type="text"
-                  name="location"
-                  value={profile.location || ""}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                  placeholder={t('Location')}
-                />
-              </div>
-
-              <div>
-                <label className="block text-foreground text-sm font-medium mb-2">
-                  <FileText className="h-4 w-4 inline mr-1" />
-                  {t('Bio')}
-                </label>
-                <textarea
-                  name="bio"
-                  value={profile.bio || ""}
-                  onChange={handleInputChange}
-                  rows={4}
-                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
-                  placeholder={t('Bio')}
-                />
-              </div>
-
-              {/* Error and Success Messages */}
-              {error && (
-                <div className="bg-red-500/20 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg">
-                  {error}
-                </div>
-              )}
-
-              {success && (
-                <div className="bg-green-500/20 border border-green-500/50 text-green-400 px-4 py-3 rounded-lg">
-                  {success}
-                </div>
-              )}
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isSaving}
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-4 px-6 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg hover:shadow-xl">
-                {isSaving ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground mr-2"></div>
-                    {t('Saving...')}
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-5 w-5 mr-2" />
-                    {t('Save Changes')}
-                  </>
+                {profile.location && (
+                  <div className="flex items-center text-muted-foreground mt-3">
+                    <MapPin className="h-4 w-4 mr-2" />
+                    {profile.location}
+                  </div>
                 )}
-              </button>
-            </form>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Contact Information</h3>
+                <div className="flex items-start gap-3">
+                  <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Email</p>
+                    <p className="text-foreground">{profile.email}</p>
+                  </div>
+                </div>
+                {profile.phone && (
+                  <div className="flex items-start gap-3">
+                    <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Phone</p>
+                      <p className="text-foreground">{profile.phone}</p>
+                    </div>
+                  </div>
+                )}
+                {profile.origin_place && (
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Origin Place</p>
+                      <p className="text-foreground">{profile.origin_place}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Craft Details</h3>
+                <div className="flex items-start gap-3">
+                  <Briefcase className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Specialty</p>
+                    <p className="text-foreground">{profile.specialty || "Not specified"}</p>
+                  </div>
+                </div>
+                {profile.expertise_areas && (
+                  <div className="flex items-start gap-3">
+                    <FileText className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Expertise Areas</p>
+                      <p className="text-foreground">{profile.expertise_areas}</p>
+                    </div>
+                  </div>
+                )}
+                {profile.gender && (
+                  <div className="flex items-start gap-3">
+                    <User className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Gender</p>
+                      <p className="text-foreground">{profile.gender}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            {profile.bio && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-foreground mb-3">About</h3>
+                <p className="text-muted-foreground whitespace-pre-wrap">{profile.bio}</p>
+              </div>
+            )}
+            {profile.artisan_story && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-foreground mb-3">My Story</h3>
+                <p className="text-muted-foreground whitespace-pre-wrap">{profile.artisan_story}</p>
+              </div>
+            )}
+            {profile.work_process && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Work Process</h3>
+                <p className="text-muted-foreground whitespace-pre-wrap">{profile.work_process}</p>
+              </div>
+            )}
+            {profile.artistry_description && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Artistry Description</h3>
+                <p className="text-muted-foreground whitespace-pre-wrap">{profile.artistry_description}</p>
+              </div>
+            )}
+            {profile.documentation_video_url && profile.documentation_video_status === "COMPLETED" && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Documentation Video</h3>
+                <div className="aspect-video bg-muted rounded-lg overflow-hidden">
+                  <video src={profile.documentation_video_url} controls className="w-full h-full">
+                    Your browser does not support video playback.
+                  </video>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

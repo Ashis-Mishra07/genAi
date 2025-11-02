@@ -1,0 +1,11 @@
+{
+  "contents": [
+    {
+      "parts": [
+        {
+          "text": "You are creating a professional craft documentary video script about traditional {{ $json.SPECIALTY }} from {{ $json.ORIGIN_PLACE }}. This is a 7-second educational video showcasing the craft process. Focus on: 1) Traditional {{ $json.SPECIALTY }} tools and materials, 2) Hands demonstrating crafting techniques, 3) The creation process and methodology, 4) Workspace and workshop setting. Generate a detailed video prompt that describes: Close-up shots of hands working with {{ $json.SPECIALTY }} tools, traditional materials being shaped and formed, the step-by-step creation process, workshop environment with natural lighting, and finished craft items. Style: Educational craft documentary. Tone: Professional and informative. DO NOT include any descriptions of people's faces, emotions, or personal characteristics. Focus ONLY on hands, tools, materials, workspace, and the craft process itself."
+        }
+      ]
+    }
+  ]
+}

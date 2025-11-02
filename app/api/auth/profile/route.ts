@@ -4,6 +4,62 @@ import { verifyAccessToken } from '@/lib/utils/jwt';
 
 const sql = neon(process.env.DATABASE_URL!);
 
+export async function GET(request: NextRequest) {
+  try {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const token = authHeader.substring(7);
+    const decoded = verifyAccessToken(token);
+    
+    if (!decoded || !decoded.userId) {
+      return NextResponse.json(
+        { error: 'Invalid token' },
+        { status: 401 }
+      );
+    }
+
+    // Fetch user profile
+    const result = await sql`
+      SELECT 
+        id, name, email, phone, specialty, location, bio, role, avatar,
+        photograph, gender, origin_place, artisan_story, artistry_description,
+        work_process, expertise_areas, documentation_video_url, documentation_video_status,
+        created_at, updated_at
+      FROM users 
+      WHERE id = ${decoded.userId}
+    `;
+
+    if (result.length === 0) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      user: result[0]
+    });
+
+  } catch (error: any) {
+    console.error('Profile fetch error:', error);
+    return NextResponse.json(
+      { 
+        success: false,
+        error: 'Failed to fetch profile',
+        details: error.message 
+      },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PUT(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization');

@@ -80,6 +80,7 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
       "Maps",
       "Recent Orders",
       "Featured Products",
+      "Know Your Artisan",
       "Wishlist",
       "Need Help?",
     ]);
@@ -182,6 +183,11 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
             href: "/customer/products",
             label: t("Featured Products"),
             icon: "Package",
+          },
+          {
+            href: "/customer/artisan-stories",
+            label: t("Know Your Artisan"),
+            icon: "Video",
           },
           { href: "/customer/cart", label: t("Cart"), icon: "ShoppingCart" },
           { href: "/customer/wishlist", label: t("Wishlist"), icon: "Heart" },
@@ -429,6 +435,23 @@ export function Navbar({ user, onLogin, onLogout }: NavbarProps) {
                         </p>
                       </div>
                     </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {user.role === "artisan" && (
+                      <DropdownMenuItem
+                        onClick={() => router.push("/artisan/profile")}
+                        className="px-2 py-2 text-sm hover:bg-accent rounded-md transition-colors cursor-pointer">
+                        <User className="h-4 w-4 mr-2" />
+                        {t("View Profile")}
+                      </DropdownMenuItem>
+                    )}
+                    {user.role === "customer" && (
+                      <DropdownMenuItem
+                        onClick={() => router.push("/customer/profile")}
+                        className="px-2 py-2 text-sm hover:bg-accent rounded-md transition-colors cursor-pointer">
+                        <User className="h-4 w-4 mr-2" />
+                        {t("View Profile")}
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={handleLogout}
