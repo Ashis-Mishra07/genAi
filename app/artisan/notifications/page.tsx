@@ -492,269 +492,262 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center space-x-3">
-              <div className="bg-primary rounded-lg p-3">
-                <Bell className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">
-                  {t("Notifications") || "Notifications"}
-                </h1>
-                <p className="text-muted-foreground">
-                  {totalCount} total • {unreadCount} unread
-                </p>
-              </div>
+    <div className="container mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="bg-card border border-border rounded-xl px-6 py-6 shadow-sm mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center space-x-3">
+            <div className="bg-primary rounded-lg p-3">
+              <Bell className="h-8 w-8 text-primary-foreground" />
             </div>
-
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={() => fetchNotifications()}
-                disabled={refreshing}
-                className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors">
-                <RefreshCw
-                  className={`h-5 w-5 ${refreshing ? "animate-spin" : ""}`}
-                />
-              </button>
-
-              <button
-                onClick={() => setShowUnreadOnly(!showUnreadOnly)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  showUnreadOnly
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-card text-foreground hover:bg-accent"
-                }`}>
-                {showUnreadOnly ? (
-                  <div className="flex items-center space-x-2">
-                    <EyeOff className="h-4 w-4" />
-                    <span>{t("showAll")}</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-2">
-                    <Eye className="h-4 w-4" />
-                    <span>{t("unreadOnly")}</span>
-                  </div>
-                )}
-              </button>
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">
+                {t("Notifications") || "Notifications"}
+              </h1>
+              <div className="h-1 w-32 bg-primary rounded-full mt-2 mb-2"></div>
+              <p className="text-muted-foreground text-lg">
+                {totalCount} total • {unreadCount} unread
+              </p>
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex items-center space-x-3">
             <button
-              onClick={markAllAsRead}
-              disabled={unreadCount === 0 || actionLoading === "all"}
-              className="px-4 py-2 bg-card text-foreground hover:bg-accent rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 border border-border">
-              {actionLoading === "all" ? (
-                <RefreshCw className="h-4 w-4 animate-spin" />
-              ) : (
-                <CheckCircle2 className="h-4 w-4" />
-              )}
-              <span>{t("Mark All as Read") || "Mark All as Read"}</span>
+              onClick={() => fetchNotifications()}
+              disabled={refreshing}
+              className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors">
+              <RefreshCw
+                className={`h-5 w-5 ${refreshing ? "animate-spin" : ""}`}
+              />
             </button>
 
             <button
-              onClick={clearAllNotifications}
-              disabled={totalCount === 0 || actionLoading === "clear"}
-              className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2">
-              {actionLoading === "clear" ? (
-                <RefreshCw className="h-4 w-4 animate-spin" />
+              onClick={() => setShowUnreadOnly(!showUnreadOnly)}
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                showUnreadOnly
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-card text-foreground hover:bg-accent"
+              }`}>
+              {showUnreadOnly ? (
+                <div className="flex items-center space-x-2">
+                  <EyeOff className="h-4 w-4" />
+                  <span>{t("showAll")}</span>
+                </div>
               ) : (
-                <Trash2 className="h-4 w-4" />
+                <div className="flex items-center space-x-2">
+                  <Eye className="h-4 w-4" />
+                  <span>{t("unreadOnly")}</span>
+                </div>
               )}
-              <span>{t("clearAll")}</span>
             </button>
           </div>
         </div>
 
-        {/* Notifications List */}
-        <div className="space-y-3">
-          {filteredNotifications.length === 0 ? (
-            <div className="text-center py-12">
-              <Bell className="h-12 w-12 text-slate-600 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-slate-400 mb-2">
-                {showUnreadOnly
-                  ? t("noUnreadNotifications")
-                  : t("noNotificationsFound")}
-              </h3>
-              <p className="text-slate-500">
-                {showUnreadOnly
-                  ? t("allCaughtUp")
-                  : t("notificationsWillAppear")}
-              </p>
-            </div>
-          ) : (
-            paginatedNotifications.map((notification) => {
-              const Icon = getNotificationIcon(notification.type);
-              const iconColor = getNotificationColor(notification.type);
-              const bgColor = getNotificationBgColor(notification.type);
+        {/* Action Buttons */}
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={markAllAsRead}
+            disabled={unreadCount === 0 || actionLoading === "all"}
+            className="px-4 py-2 bg-card text-foreground hover:bg-accent rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 border border-border">
+            {actionLoading === "all" ? (
+              <RefreshCw className="h-4 w-4 animate-spin" />
+            ) : (
+              <CheckCircle2 className="h-4 w-4" />
+            )}
+            <span>{t("Mark All as Read") || "Mark All as Read"}</span>
+          </button>
 
-              return (
-                <div
-                  key={notification.id}
-                  className={`relative bg-card rounded-lg p-4 border transition-all duration-200 hover:bg-accent cursor-pointer group ${
-                    notification.isRead ? "border-border" : "border-primary/30"
-                  }`}
-                  onClick={() =>
-                    !notification.isRead && markAsRead(notification.id)
-                  }>
-                  <div className="flex items-start space-x-4">
-                    {/* Icon */}
-                    <div
-                      className={`flex-shrink-0 p-2 rounded-lg bg-primary/10`}>
-                      <Icon className={`h-5 w-5 text-primary`} />
-                    </div>
+          <button
+            onClick={clearAllNotifications}
+            disabled={totalCount === 0 || actionLoading === "clear"}
+            className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2">
+            {actionLoading === "clear" ? (
+              <RefreshCw className="h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="h-4 w-4" />
+            )}
+            <span>{t("clearAll")}</span>
+          </button>
+        </div>
+      </div>
 
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <h3
-                          className={`text-sm font-medium ${
-                            notification.isRead
-                              ? "text-muted-foreground"
-                              : "text-foreground font-semibold"
-                          }`}>
-                          {
-                            translateNotificationContent(
-                              notification.title,
-                              notification.message
-                            ).translatedTitle
-                          }
-                        </h3>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-xs text-muted-foreground">
-                            {getRelativeTime(notification.createdAt, t)}
-                          </span>
-                          {!notification.isRead && (
-                            <div className="w-2 h-2 bg-primary rounded-full"></div>
-                          )}
-                        </div>
-                      </div>
+      {/* Notifications List */}
+      <div className="space-y-3">
+        {filteredNotifications.length === 0 ? (
+          <div className="text-center py-12">
+            <Bell className="h-12 w-12 text-slate-600 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-slate-400 mb-2">
+              {showUnreadOnly
+                ? t("noUnreadNotifications")
+                : t("noNotificationsFound")}
+            </h3>
+            <p className="text-slate-500">
+              {showUnreadOnly ? t("allCaughtUp") : t("notificationsWillAppear")}
+            </p>
+          </div>
+        ) : (
+          paginatedNotifications.map((notification) => {
+            const Icon = getNotificationIcon(notification.type);
+            const iconColor = getNotificationColor(notification.type);
+            const bgColor = getNotificationBgColor(notification.type);
 
-                      <p
-                        className={`text-sm mt-1 ${
+            return (
+              <div
+                key={notification.id}
+                className={`relative bg-card rounded-lg p-4 border transition-all duration-200 hover:bg-accent cursor-pointer group ${
+                  notification.isRead ? "border-border" : "border-primary/30"
+                }`}
+                onClick={() =>
+                  !notification.isRead && markAsRead(notification.id)
+                }>
+                <div className="flex items-start space-x-4">
+                  {/* Icon */}
+                  <div className={`flex-shrink-0 p-2 rounded-lg bg-primary/10`}>
+                    <Icon className={`h-5 w-5 text-primary`} />
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <h3
+                        className={`text-sm font-medium ${
                           notification.isRead
-                            ? "text-slate-400"
-                            : "text-slate-300"
+                            ? "text-muted-foreground"
+                            : "text-foreground font-semibold"
                         }`}>
                         {
                           translateNotificationContent(
                             notification.title,
                             notification.message
-                          ).translatedMessage
+                          ).translatedTitle
                         }
-                      </p>
-
-                      <div className="flex items-center justify-between mt-2">
-                        <span className="text-xs text-slate-500">
-                          {getNotificationTypeText(notification.type, t)}
+                      </h3>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xs text-muted-foreground">
+                          {getRelativeTime(notification.createdAt, t)}
                         </span>
-
                         {!notification.isRead && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              markAsRead(notification.id);
-                            }}
-                            disabled={actionLoading === notification.id}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-orange-400 hover:text-orange-300 flex items-center space-x-1">
-                            {actionLoading === notification.id ? (
-                              <RefreshCw className="h-3 w-3 animate-spin" />
-                            ) : (
-                              <Eye className="h-3 w-3" />
-                            )}
-                            <span>{t("markAsRead")}</span>
-                          </button>
+                          <div className="w-2 h-2 bg-primary rounded-full"></div>
                         )}
                       </div>
                     </div>
+
+                    <p
+                      className={`text-sm mt-1 ${
+                        notification.isRead
+                          ? "text-slate-400"
+                          : "text-slate-300"
+                      }`}>
+                      {
+                        translateNotificationContent(
+                          notification.title,
+                          notification.message
+                        ).translatedMessage
+                      }
+                    </p>
+
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-xs text-slate-500">
+                        {getNotificationTypeText(notification.type, t)}
+                      </span>
+
+                      {!notification.isRead && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            markAsRead(notification.id);
+                          }}
+                          disabled={actionLoading === notification.id}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-orange-400 hover:text-orange-300 flex items-center space-x-1">
+                          {actionLoading === notification.id ? (
+                            <RefreshCw className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <Eye className="h-3 w-3" />
+                          )}
+                          <span>{t("markAsRead")}</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-              );
-            })
-          )}
-        </div>
-
-        {/* Pagination Controls */}
-        {filteredTotalCount > itemsPerPage && (
-          <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
-            <div className="text-sm text-muted-foreground">
-              Showing{" "}
-              {Math.min(
-                (currentPage - 1) * itemsPerPage + 1,
-                filteredTotalCount
-              )}{" "}
-              to {Math.min(currentPage * itemsPerPage, filteredTotalCount)} of{" "}
-              {filteredTotalCount} notifications
-            </div>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-                className="px-4 py-2 bg-card border border-border text-foreground rounded-lg hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                Previous
-              </button>
-              <div className="flex items-center space-x-1">
-                {Array.from(
-                  { length: Math.ceil(filteredTotalCount / itemsPerPage) },
-                  (_, i) => i + 1
-                )
-                  .filter((page) => {
-                    // Show first page, last page, current page, and pages around current
-                    const totalPages = Math.ceil(
-                      filteredTotalCount / itemsPerPage
-                    );
-                    return (
-                      page === 1 ||
-                      page === totalPages ||
-                      (page >= currentPage - 1 && page <= currentPage + 1)
-                    );
-                  })
-                  .map((page, index, array) => (
-                    <>
-                      {index > 0 && array[index - 1] !== page - 1 && (
-                        <span
-                          key={`ellipsis-${page}`}
-                          className="px-2 text-muted-foreground">
-                          ...
-                        </span>
-                      )}
-                      <button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        className={`px-3 py-1 rounded ${
-                          currentPage === page
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-card border border-border text-foreground hover:bg-accent"
-                        } transition-colors`}>
-                        {page}
-                      </button>
-                    </>
-                  ))}
               </div>
-              <button
-                onClick={() =>
-                  setCurrentPage((prev) =>
-                    Math.min(
-                      Math.ceil(filteredTotalCount / itemsPerPage),
-                      prev + 1
-                    )
-                  )
-                }
-                disabled={
-                  currentPage >= Math.ceil(filteredTotalCount / itemsPerPage)
-                }
-                className="px-4 py-2 bg-card border border-border text-foreground rounded-lg hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                Next
-              </button>
-            </div>
-          </div>
+            );
+          })
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {filteredTotalCount > itemsPerPage && (
+        <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
+          <div className="text-sm text-muted-foreground">
+            Showing{" "}
+            {Math.min((currentPage - 1) * itemsPerPage + 1, filteredTotalCount)}{" "}
+            to {Math.min(currentPage * itemsPerPage, filteredTotalCount)} of{" "}
+            {filteredTotalCount} notifications
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 bg-card border border-border text-foreground rounded-lg hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+              Previous
+            </button>
+            <div className="flex items-center space-x-1">
+              {Array.from(
+                { length: Math.ceil(filteredTotalCount / itemsPerPage) },
+                (_, i) => i + 1
+              )
+                .filter((page) => {
+                  // Show first page, last page, current page, and pages around current
+                  const totalPages = Math.ceil(
+                    filteredTotalCount / itemsPerPage
+                  );
+                  return (
+                    page === 1 ||
+                    page === totalPages ||
+                    (page >= currentPage - 1 && page <= currentPage + 1)
+                  );
+                })
+                .map((page, index, array) => (
+                  <>
+                    {index > 0 && array[index - 1] !== page - 1 && (
+                      <span
+                        key={`ellipsis-${page}`}
+                        className="px-2 text-muted-foreground">
+                        ...
+                      </span>
+                    )}
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-1 rounded ${
+                        currentPage === page
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-card border border-border text-foreground hover:bg-accent"
+                      } transition-colors`}>
+                      {page}
+                    </button>
+                  </>
+                ))}
+            </div>
+            <button
+              onClick={() =>
+                setCurrentPage((prev) =>
+                  Math.min(
+                    Math.ceil(filteredTotalCount / itemsPerPage),
+                    prev + 1
+                  )
+                )
+              }
+              disabled={
+                currentPage >= Math.ceil(filteredTotalCount / itemsPerPage)
+              }
+              className="px-4 py-2 bg-card border border-border text-foreground rounded-lg hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

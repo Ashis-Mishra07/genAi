@@ -159,6 +159,7 @@ export default function ArtisanAnalyticsPage() {
             customerName: "Michael Chen",
             productName: "Pottery Vase",
             timestamp: "2024-01-15T09:45:00Z",
+            amount: 80,
           },
           {
             id: "3",
@@ -166,6 +167,7 @@ export default function ArtisanAnalyticsPage() {
             customerName: "Emma Williams",
             productName: "Custom Ring",
             timestamp: "2024-01-15T08:20:00Z",
+            amount: 700,
           },
         ],
       };
@@ -201,25 +203,25 @@ export default function ArtisanAnalyticsPage() {
         ...product,
         name:
           index === 0
-            ? t("handwovenCeramicBowl")
+            ? t("Handwoven Ceramic Bowl")
             : index === 1
-            ? t("traditionalPotteryVase")
-            : t("artisanJewelrySet"),
+            ? t("Traditional Pottery Vase")
+            : t("Artisan Jewelry Set"),
       })),
       recentActivity: analyticsData.recentActivity.map((activity, index) => ({
         ...activity,
         customerName:
           index === 0
-            ? t("sarahJohnson")
+            ? t("Sarah Johnson")
             : index === 1
-            ? t("michaelChen")
-            : t("emmaWilliams"),
+            ? t("Michael Chen")
+            : t("Emma Williams"),
         productName:
           index === 0
-            ? t("ceramicBowlSet")
+            ? t("Ceramic Bowl Set")
             : index === 1
-            ? t("potteryVase")
-            : t("customRing"),
+            ? t("Pottery Vase")
+            : t("Custom Ring"),
       })),
     };
   }, [analyticsData, t]);
@@ -296,46 +298,45 @@ export default function ArtisanAnalyticsPage() {
 
   return (
     <div className="p-6 space-y-4 bg-background min-h-screen">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold text-foreground">
-            {t("Analytics Dashboard")}
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            {t("View your performance metrics and insights")}
-          </p>
-          <div className="h-1 w-32 bg-primary rounded-full"></div>
-        </div>
-
-        <div className="flex items-center space-x-4">
-          <select
-            value={timeframe}
-            onChange={(e) => setTimeframe(e.target.value)}
-            className="px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground shadow-lg">
-            <option value="7d">{t("Last 7 Days")}</option>
-            <option value="30d">{t("Last 30 Days")}</option>
-            <option value="90d">{t("Last 90 Days")}</option>
-          </select>
-
-          <button
-            onClick={loadAnalytics}
-            disabled={isRefreshing}
-            className="flex items-center space-x-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-all duration-300 shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:transform-none">
-            <RefreshCw
-              className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
-            />
-            <span>{t("Refresh")}</span>
-          </button>
-
-          <button className="flex items-center space-x-2 px-6 py-3 bg-secondary border border-border rounded-lg text-secondary-foreground hover:bg-secondary/80 transition-all duration-300 shadow-lg">
-            <Download className="h-4 w-4" />
-            <span>{t("Export Data")}</span>
-          </button>
-        </div>
-      </div>
-
       <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold text-foreground">
+              {t("Analytics Dashboard")}
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              {t("View your performance metrics and insights")}
+            </p>
+            <div className="h-1 w-32 bg-primary rounded-full"></div>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <select
+              value={timeframe}
+              onChange={(e) => setTimeframe(e.target.value)}
+              className="px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground shadow-lg">
+              <option value="7d">{t("Last 7 Days")}</option>
+              <option value="30d">{t("Last 30 Days")}</option>
+              <option value="90d">{t("Last 90 Days")}</option>
+            </select>
+
+            <button
+              onClick={loadAnalytics}
+              disabled={isRefreshing}
+              className="flex items-center space-x-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-all duration-300 shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:transform-none">
+              <RefreshCw
+                className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+              />
+              <span>{t("Refresh")}</span>
+            </button>
+
+            <button className="flex items-center space-x-2 px-6 py-3 bg-secondary border border-border rounded-lg text-secondary-foreground hover:bg-secondary/80 transition-all duration-300 shadow-lg">
+              <Download className="h-4 w-4" />
+              <span>{t("Export Data")}</span>
+            </button>
+          </div>
+        </div>
         {/* Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-all duration-200">
@@ -475,46 +476,58 @@ export default function ArtisanAnalyticsPage() {
             </div>
 
             {/* Simple Performance Graph */}
-            <div className="relative h-64 bg-muted/50 rounded-lg p-4">
-              <div className="absolute inset-0 grid grid-cols-6 grid-rows-4 opacity-20">
-                {/* Grid lines */}
-                {[...Array(5)].map((_, i) => (
-                  <div
-                    key={`h-${i}`}
-                    className="col-span-6 border-t border-border/30"
-                    style={{ gridRow: i + 1 }}
-                  />
-                ))}
-                {[...Array(7)].map((_, i) => (
-                  <div
-                    key={`v-${i}`}
-                    className="row-span-4 border-l border-border/30"
-                    style={{ gridColumn: i + 1 }}
-                  />
-                ))}
+            <div className="relative h-64 bg-card rounded-lg p-6">
+              {/* Y-axis labels */}
+              <div className="absolute left-2 top-6 bottom-12 flex flex-col justify-between text-xs text-muted-foreground">
+                <span>500</span>
+                <span>400</span>
+                <span>300</span>
+                <span>200</span>
+                <span>100</span>
+                <span>0</span>
               </div>
 
-              {/* Chart representation */}
-              <div className="relative h-full flex items-end justify-between px-4">
-                {["Jan", "Feb", "Mar", "Apr", "May", "Jun"].map(
-                  (month, index) => (
+              {/* Chart area */}
+              <div className="ml-8 mr-4 h-full relative">
+                {/* Grid lines */}
+                <div className="absolute inset-0 grid grid-rows-5 opacity-10">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={`grid-${i}`} className="border-t border-border" />
+                  ))}
+                </div>
+
+                {/* Simple Chart bars */}
+                <div className="relative h-full flex items-end justify-between px-4 pb-8">
+                  {[
+                    { month: "Jan", views: 280, orders: 45 },
+                    { month: "Feb", views: 420, orders: 65 },
+                    { month: "Mar", views: 380, orders: 52 },
+                    { month: "Apr", views: 450, orders: 78 },
+                    { month: "May", views: 320, orders: 48 },
+                    { month: "Jun", views: 380, orders: 62 },
+                  ].map(({ month, views, orders }) => (
                     <div key={month} className="flex flex-col items-center">
-                      <div className="flex space-x-1 mb-2">
+                      {/* Bar container with bottom alignment */}
+                      <div
+                        className="flex items-end space-x-1 mb-3"
+                        style={{ height: "140px" }}>
+                        {/* Views bar */}
                         <div
-                          className="w-3 bg-primary rounded-t-sm"
-                          style={{ height: `${Math.random() * 120 + 40}px` }}
+                          className="w-4 bg-primary rounded-t-sm"
+                          style={{ height: `${(views / 500) * 140}px` }}
                         />
+                        {/* Orders bar */}
                         <div
-                          className="w-3 bg-primary/50 rounded-t-sm"
-                          style={{ height: `${Math.random() * 80 + 20}px` }}
+                          className="w-4 bg-primary/60 rounded-t-sm"
+                          style={{ height: `${(orders / 500) * 140}px` }}
                         />
                       </div>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-muted-foreground font-medium">
                         {month}
                       </span>
                     </div>
-                  )
-                )}
+                  ))}
+                </div>
               </div>
             </div>
           </div>

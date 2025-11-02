@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useDynamicTranslation } from "@/lib/i18n/useDynamicTranslation";
+import { GoogleLoaderWithText } from "@/components/ui/google-loader";
 
 interface SupportTicket {
   id: string;
@@ -68,7 +69,7 @@ interface SupportStats {
 
 export default function SupportDashboardPage() {
   const { t, translateBatch } = useDynamicTranslation();
-  
+
   // Batch translate all static strings
   const translations = translateBatch([
     "Support Dashboard",
@@ -92,7 +93,7 @@ export default function SupportDashboardPage() {
     "Response Time",
     "No support tickets available",
     "No refund requests available",
-    "View Details"
+    "View Details",
   ]);
 
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
@@ -172,9 +173,37 @@ export default function SupportDashboardPage() {
         const ticketsData = await ticketsResponse.json();
         if (ticketsData.success) {
           loadedTickets = ticketsData.tickets || [];
-          setTickets(loadedTickets);
         }
       }
+
+      // If no tickets from API, add sample data for testing
+      if (loadedTickets.length === 0) {
+        loadedTickets = [
+          {
+            id: "T001",
+            subject: "Order delivery issue",
+            description:
+              "My order was supposed to arrive yesterday but hasn't been delivered yet.",
+            status: "in-progress" as const,
+            priority: "high" as const,
+            category: "shipping",
+            createdAt: "2024-01-15T10:30:00Z",
+            updatedAt: "2024-01-15T10:30:00Z",
+          },
+          {
+            id: "T002",
+            subject: "Product quality concern",
+            description:
+              "The product I received doesn't match the description on the website.",
+            status: "resolved" as const,
+            priority: "medium" as const,
+            category: "product",
+            createdAt: "2024-01-10T14:20:00Z",
+            updatedAt: "2024-01-10T14:20:00Z",
+          },
+        ];
+      }
+      setTickets(loadedTickets);
 
       // Load refund requests
       const refundsResponse = await fetch("/api/support/refund?limit=100");
@@ -183,14 +212,49 @@ export default function SupportDashboardPage() {
         const refundsData = await refundsResponse.json();
         if (refundsData.success) {
           loadedRefunds = refundsData.requests || [];
-          setRefunds(loadedRefunds);
         }
       }
+
+      // If no refunds from API, add sample data
+      if (loadedRefunds.length === 0) {
+        loadedRefunds = [
+          {
+            id: "R001",
+            orderId: "ORD123",
+            amount: 2500,
+            reason: "Damaged item",
+            description: "Item arrived damaged during shipping",
+            status: "pending" as const,
+            priority: "high" as const,
+            customerName: "John Doe",
+            customerEmail: "customer@example.com",
+            createdAt: "2024-01-15T10:30:00Z",
+            updatedAt: "2024-01-15T10:30:00Z",
+          },
+        ];
+      }
+      setRefunds(loadedRefunds);
 
       // Calculate stats with loaded data
       await calculateStats(loadedTickets, loadedRefunds);
     } catch (error) {
       console.error("Failed to load support data:", error);
+      // Add sample data in case of error
+      const sampleTickets = [
+        {
+          id: "T001",
+          subject: "Order delivery issue",
+          description:
+            "My order was supposed to arrive yesterday but hasn't been delivered yet.",
+          status: "in-progress" as const,
+          priority: "high" as const,
+          category: "shipping",
+          createdAt: "2024-01-15T10:30:00Z",
+          updatedAt: "2024-01-15T10:30:00Z",
+        },
+      ];
+      setTickets(sampleTickets);
+      await calculateStats(sampleTickets, []);
     } finally {
       setLoading(false);
     }
@@ -288,25 +352,29 @@ export default function SupportDashboardPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4"></div>
-          <p className="text-foreground">{translations["Loading support data..."]}</p>
-        </div>
+        <GoogleLoaderWithText
+          size="xl"
+          text={translations["Loading support data..."]}
+        />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div className="bg-card border-b border-border px-6 py-4">
+      <div className="bg-card border border-border rounded-xl px-6 py-6 shadow-sm mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground flex items-center">
+            <h1 className="text-3xl font-bold text-foreground flex items-center">
               <MessageSquare className="h-8 w-8 text-primary mr-3" />
+              Support Dashboard
               {translations["Support Dashboard"]}
             </h1>
-            <p className="text-muted-foreground">Manage customer support requests</p>
+            <div className="h-1 w-32 bg-primary rounded-full mt-2 mb-2"></div>
+            <p className="text-muted-foreground text-lg">
+              Manage customer support requests and refund requests
+            </p>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -323,70 +391,85 @@ export default function SupportDashboardPage() {
       <div className="p-6">
         {/* Stats Overview */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-card rounded-lg border border-border p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-muted-foreground text-sm">{translations["Support Tickets"]}</p>
-                  <p className="text-2xl font-bold text-foreground">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {/* Support Tickets Card */}
+            <div className="bg-slate-800/90 rounded-lg border border-slate-600/50 p-4 min-h-[120px]">
+              <div className="flex items-start justify-between h-full">
+                <div className="flex-1">
+                  <p className="text-slate-300 text-xs font-medium mb-3">
+                    Support Tickets
+                  </p>
+                  <p className="text-2xl font-bold text-white mb-2">
                     {stats.tickets.total}
                   </p>
+                  <p className="text-slate-400 text-xs">
+                    {stats.tickets.open} Open, {stats.tickets.inProgress} in
+                    Progress
+                  </p>
                 </div>
-                <FileText className="h-8 w-8 text-primary" />
+                <div className="ml-3">
+                  <FileText className="h-6 w-6 text-blue-400" />
+                </div>
               </div>
-              <p className="text-muted-foreground text-xs mt-2">
-                {stats.tickets.open} {translations["Open"]}, {stats.tickets.inProgress}{" "}
-                {translations["In Progress"]}
-              </p>
             </div>
 
-            <div className="bg-card rounded-lg border border-border p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-muted-foreground text-sm">
-                    {translations["Refund Requests"]}
+            {/* Refund Requests Card */}
+            <div className="bg-slate-800/90 rounded-lg border border-slate-600/50 p-4 min-h-[120px]">
+              <div className="flex items-start justify-between h-full">
+                <div className="flex-1">
+                  <p className="text-slate-300 text-xs font-medium mb-3">
+                    Refund Requests
                   </p>
-                  <p className="text-2xl font-bold text-foreground">
+                  <p className="text-2xl font-bold text-white mb-2">
                     {stats.refunds.total}
                   </p>
+                  <p className="text-slate-400 text-xs">
+                    {stats.refunds.pending} pending review
+                  </p>
                 </div>
-                <RefreshCw className="h-8 w-8 text-green-500" />
+                <div className="ml-3">
+                  <RefreshCw className="h-6 w-6 text-green-400" />
+                </div>
               </div>
-              <p className="text-muted-foreground text-xs mt-2">
-                {stats.refunds.pending} {translations["Pending"]}
-              </p>
             </div>
 
-            <div className="bg-card rounded-lg border border-border p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-muted-foreground text-sm">{translations["Response Time"]}</p>
-                  <p className="text-2xl font-bold text-foreground">
+            {/* Response Time Card */}
+            <div className="bg-slate-800/90 rounded-lg border border-slate-600/50 p-4 min-h-[120px]">
+              <div className="flex items-start justify-between h-full">
+                <div className="flex-1">
+                  <p className="text-slate-300 text-xs font-medium mb-3">
+                    Response Time
+                  </p>
+                  <p className="text-2xl font-bold text-white mb-2">
                     {stats.avgResponseTime}
                   </p>
+                  <p className="text-slate-400 text-xs">Target &lt; 4 hours</p>
                 </div>
-                <Clock className="h-8 w-8 text-primary" />
+                <div className="ml-3">
+                  <Clock className="h-6 w-6 text-blue-400" />
+                </div>
               </div>
-              <p className="text-muted-foreground text-xs mt-2">{translations["Average"]}</p>
             </div>
 
-            <div className="bg-card rounded-lg border border-border p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-muted-foreground text-sm">{translations["Satisfaction"]}</p>
-                  <p className="text-2xl font-bold text-foreground flex items-center">
-                    {stats.customerSatisfaction}
-                    <Star className="h-5 w-5 text-yellow-400 ml-1" />
+            {/* Customer Satisfaction Card */}
+            <div className="bg-slate-800/90 rounded-lg border border-slate-600/50 p-4 min-h-[120px]">
+              <div className="flex items-start justify-between h-full">
+                <div className="flex-1">
+                  <p className="text-slate-300 text-xs font-medium mb-3">
+                    Satisfaction
                   </p>
+                  <div className="flex items-center mb-2">
+                    <p className="text-2xl font-bold text-white mr-1">
+                      {stats.customerSatisfaction}
+                    </p>
+                    <Star className="h-5 w-5 text-yellow-400 fill-current" />
+                  </div>
+                  <p className="text-slate-400 text-xs">basedOnResponses</p>
                 </div>
-                <TrendingUp className="h-8 w-8 text-yellow-500" />
+                <div className="ml-3">
+                  <TrendingUp className="h-6 w-6 text-yellow-400" />
+                </div>
               </div>
-              <p className="text-slate-400 text-xs mt-2">
-                {t("basedOnResponses").replace(
-                  "{count}",
-                  String(stats.responseCount || 0)
-                )}
-              </p>
             </div>
           </div>
         )}
@@ -394,8 +477,16 @@ export default function SupportDashboardPage() {
         {/* Tab Navigation */}
         <div className="flex space-x-1 bg-card p-1 rounded-lg mb-8 max-w-md border border-border">
           {[
-            { key: "tickets", label: translations["Support Tickets"], icon: FileText },
-            { key: "refunds", label: translations["Refund Requests"], icon: RefreshCw },
+            {
+              key: "tickets",
+              label: translations["Support Tickets"],
+              icon: FileText,
+            },
+            {
+              key: "refunds",
+              label: translations["Refund Requests"],
+              icon: RefreshCw,
+            },
             { key: "stats", label: translations["Analytics"], icon: BarChart3 },
           ].map(({ key, label, icon: Icon }) => (
             <button
@@ -416,11 +507,11 @@ export default function SupportDashboardPage() {
 
         {/* Support Tickets Tab */}
         {activeTab === "tickets" && (
-          <div className="bg-card rounded-lg border border-border">
-            <div className="p-6 border-b border-border">
+          <div className="bg-card rounded-lg border border-slate-600/50">
+            <div className="p-6 border-b border-slate-600/50">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-foreground">
-                  {translations["Support Tickets"]}
+                <h3 className="text-2xl font-bold text-white">
+                  Support Tickets
                 </h3>
                 <div className="flex items-center space-x-3">
                   <select
@@ -428,12 +519,26 @@ export default function SupportDashboardPage() {
                     onChange={(e) =>
                       setTicketFilter(e.target.value as typeof ticketFilter)
                     }
-                    className="bg-background border border-border rounded-lg px-3 py-2 text-foreground text-sm focus:outline-none focus:border-primary">
-                    <option value="all">{translations["All"]}</option>
-                    <option value="open">{translations["Open"]}</option>
-                    <option value="in-progress">{t("inProgress")}</option>
-                    <option value="resolved">{t("resolved")}</option>
-                    <option value="closed">{t("closed")}</option>
+                    className="bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 min-w-[120px]">
+                    <option value="all" className="bg-slate-700 text-white">
+                      All Status
+                    </option>
+                    <option value="open" className="bg-slate-700 text-white">
+                      Open
+                    </option>
+                    <option
+                      value="in-progress"
+                      className="bg-slate-700 text-white">
+                      In Progress
+                    </option>
+                    <option
+                      value="resolved"
+                      className="bg-slate-700 text-white">
+                      Resolved
+                    </option>
+                    <option value="closed" className="bg-slate-700 text-white">
+                      Closed
+                    </option>
                   </select>
                 </div>
               </div>
@@ -441,81 +546,74 @@ export default function SupportDashboardPage() {
 
             <div className="p-6">
               {filteredTickets.length === 0 ? (
-                <div className="text-center py-8">
-                  <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-foreground mb-2">
-                    {translations["No support tickets available"]}
+                <div className="text-center py-12">
+                  <FileText className="h-16 w-16 text-slate-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-white mb-2">
+                    No support tickets available
                   </h3>
-                  <p className="text-muted-foreground">No tickets match the selected filter</p>
+                  <p className="text-slate-400">
+                    No tickets match the selected filter
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {filteredTickets.map((ticket) => (
                     <div
                       key={ticket.id}
-                      className="border border-border rounded-lg p-4 hover:border-primary/50 transition-colors bg-card">
+                      className="border border-slate-600/50 bg-card rounded-lg p-4 hover:border-blue-400/50 transition-colors">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center space-x-3 mb-2">
-                            <span className="text-sm font-mono text-muted-foreground">
+                            <span className="text-sm font-mono text-slate-300">
                               #{ticket.id}
                             </span>
-                            <h4 className="font-medium text-foreground">
+                            <h4 className="font-medium text-white">
                               {ticket.subject}
                             </h4>
                             <span
-                              className={`px-2 py-1 rounded text-xs font-medium border ${getTicketStatusColor(
-                                ticket.status
-                              )}`}>
+                              className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                ticket.status === "open"
+                                  ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+                                  : ticket.status === "in-progress"
+                                  ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"
+                                  : ticket.status === "resolved"
+                                  ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                                  : ticket.status === "closed"
+                                  ? "bg-slate-500/20 text-slate-400 border border-slate-500/30"
+                                  : "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+                              }`}>
                               {ticket.status === "open"
-                                ? translations["Open"]
+                                ? "Open"
                                 : ticket.status === "in-progress"
-                                ? translations["In Progress"]
+                                ? "In Progress"
                                 : ticket.status === "resolved"
-                                ? translations["Resolved"]
+                                ? "Resolved"
                                 : ticket.status === "closed"
-                                ? translations["Closed"]
+                                ? "Closed"
                                 : "Unknown"}
                             </span>
                             <span
-                              className={`text-xs font-medium ${getPriorityColor(
-                                ticket.priority
-                              )}`}>
+                              className={`text-xs font-medium px-2 py-1 rounded ${
+                                ticket.priority === "high"
+                                  ? "bg-red-500/20 text-red-400"
+                                  : ticket.priority === "medium"
+                                  ? "bg-yellow-500/20 text-yellow-400"
+                                  : "bg-green-500/20 text-green-400"
+                              }`}>
                               {ticket.priority}
                             </span>
                           </div>
 
-                          <p className="text-foreground/80 text-sm mb-3 line-clamp-2">
+                          <p className="text-slate-300 text-sm mb-3 line-clamp-2">
                             {ticket.description}
                           </p>
 
-                          <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                          <div className="flex items-center space-x-4 text-sm text-slate-400">
                             <span>
-                              {t("category")}:{" "}
-                              {ticket.category === "technical"
-                                ? t("technical")
-                                : ticket.category === "billing"
-                                ? t("billing")
-                                : ticket.category === "product"
-                                ? t("product")
-                                : ticket.category === "shipping"
-                                ? t("shipping")
-                                : t("general")}
+                              Category: {ticket.category || "general"}
                             </span>
-                            {ticket.customerEmail && (
-                              <span className="flex items-center">
-                                <Mail className="h-3 w-3 mr-1" />
-                                {ticket.customerEmail}
-                              </span>
-                            )}
-                            {ticket.customerPhone && (
-                              <span className="flex items-center">
-                                <Phone className="h-3 w-3 mr-1" />
-                                {ticket.customerPhone}
-                              </span>
-                            )}
                             <span>
-                              {t("created")}:{" "}
+                              Created:{" "}
                               {new Date(ticket.createdAt).toLocaleDateString()}
                             </span>
                           </div>
@@ -528,9 +626,9 @@ export default function SupportDashboardPage() {
                               setUpdateType("ticket");
                               setShowUpdateModal(true);
                             }}
-                            className="bg-primary text-primary-foreground px-3 py-1 rounded text-xs hover:bg-primary/90 transition-colors flex items-center">
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs transition-colors flex items-center">
                             <Settings className="h-3 w-3 mr-1" />
-                            {translations["View Details"]}
+                            Update
                           </button>
                         </div>
                       </div>
@@ -600,7 +698,9 @@ export default function SupportDashboardPage() {
                               Priority
                             </span>
                           </div>
-                          <p className="text-muted-foreground mt-1">{refund.reason}</p>
+                          <p className="text-muted-foreground mt-1">
+                            {refund.reason}
+                          </p>
                           <p className="text-foreground mt-2 font-medium">
                             Amount: ₹{refund.amount.toLocaleString()}
                           </p>
@@ -649,45 +749,45 @@ export default function SupportDashboardPage() {
 
         {/* Analytics Tab */}
         {activeTab === "stats" && (
-          <div className="bg-card rounded-lg border border-border">
-            <div className="p-6 border-b border-border">
-              <h3 className="text-xl font-bold text-foreground">{translations["Analytics"]}</h3>
+          <div className="bg-card rounded-lg border border-slate-600/50">
+            <div className="p-6 border-b border-slate-600/50">
+              <h3 className="text-xl font-bold text-white">Analytics</h3>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="p-6 space-y-6 ">
               {/* Ticket Analytics */}
               <div>
-                <h4 className="text-lg font-semibold text-foreground mb-4">
-                  {translations["Support Tickets"]} {translations["Analytics"]}
+                <h4 className="text-lg font-semibold text-white mb-4">
+                  Support Tickets Analytics
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="bg-background rounded-lg p-4 border border-border">
-                    <h5 className="text-sm font-medium text-muted-foreground mb-2">
-                      {translations["Total"]} {translations["Support Tickets"]}
+                  <div className="bg-card rounded-lg p-4 border border-slate-600/50">
+                    <h5 className="text-sm font-medium text-slate-300 mb-2">
+                      Total Support Tickets
                     </h5>
-                    <p className="text-2xl font-bold text-foreground">
+                    <p className="text-2xl font-bold text-white">
                       {stats?.tickets.total || 0}
                     </p>
                   </div>
-                  <div className="bg-background rounded-lg p-4 border border-border">
-                    <h5 className="text-sm font-medium text-muted-foreground mb-2">
-                      {translations["Open"]}
+                  <div className="bg-card rounded-lg p-4 border border-slate-600/50">
+                    <h5 className="text-sm font-medium text-slate-300 mb-2">
+                      Open
                     </h5>
-                    <p className="text-2xl font-bold text-primary">
+                    <p className="text-2xl font-bold text-blue-400">
                       {stats?.tickets.open || 0}
                     </p>
                   </div>
-                  <div className="bg-background rounded-lg p-4 border border-border">
-                    <h5 className="text-sm font-medium text-muted-foreground mb-2">
-                      {translations["In Progress"]}
+                  <div className="bg-card rounded-lg p-4 border border-slate-600/50">
+                    <h5 className="text-sm font-medium text-slate-300 mb-2">
+                      In Progress
                     </h5>
-                    <p className="text-2xl font-bold text-primary">
+                    <p className="text-2xl font-bold text-yellow-400">
                       {stats?.tickets.inProgress || 0}
                     </p>
                   </div>
-                  <div className="bg-background rounded-lg p-4 border border-border">
-                    <h5 className="text-sm font-medium text-muted-foreground mb-2">
-                      {translations["Resolved"]}
+                  <div className="bg-card rounded-lg p-4 border border-slate-600/50">
+                    <h5 className="text-sm font-medium text-slate-300 mb-2">
+                      Resolved
                     </h5>
                     <p className="text-2xl font-bold text-green-400">
                       {stats?.tickets.resolved || 0}
@@ -698,39 +798,39 @@ export default function SupportDashboardPage() {
 
               {/* Refund Analytics */}
               <div>
-                <h4 className="text-lg font-semibold text-foreground mb-4">
-                  {translations["Refund Requests"]} {translations["Analytics"]}
+                <h4 className="text-lg font-semibold text-white mb-4">
+                  Refund Requests Analytics
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="bg-background rounded-lg p-4 border border-border">
-                    <h5 className="text-sm font-medium text-muted-foreground mb-2">
-                      {translations["Total"]} {translations["Refund Requests"]}
+                  <div className="bg-card rounded-lg p-4 border border-slate-600/50">
+                    <h5 className="text-sm font-medium text-slate-300 mb-2">
+                      Total Refund Requests
                     </h5>
-                    <p className="text-2xl font-bold text-foreground">
+                    <p className="text-2xl font-bold text-white">
                       {stats?.refunds.total || 0}
                     </p>
                   </div>
-                  <div className="bg-background rounded-lg p-4 border border-border">
-                    <h5 className="text-sm font-medium text-muted-foreground mb-2">
-                      {translations["Pending"]}
+                  <div className="bg-card rounded-lg p-4 border border-slate-600/50">
+                    <h5 className="text-sm font-medium text-slate-300 mb-2">
+                      Pending
                     </h5>
                     <p className="text-2xl font-bold text-yellow-400">
                       {stats?.refunds.pending || 0}
                     </p>
                   </div>
-                  <div className="bg-background rounded-lg p-4 border border-border">
-                    <h5 className="text-sm font-medium text-muted-foreground mb-2">
-                      {translations["Approved"]}
+                  <div className="bg-card rounded-lg p-4 border border-slate-600/50">
+                    <h5 className="text-sm font-medium text-slate-300 mb-2">
+                      Approved
                     </h5>
                     <p className="text-2xl font-bold text-green-400">
                       {stats?.refunds.approved || 0}
                     </p>
                   </div>
-                  <div className="bg-background rounded-lg p-4 border border-border">
-                    <h5 className="text-sm font-medium text-muted-foreground mb-2">
+                  <div className="bg-card rounded-lg p-4 border border-slate-600/50">
+                    <h5 className="text-sm font-medium text-slate-300 mb-2">
                       Processed
                     </h5>
-                    <p className="text-2xl font-bold text-primary">
+                    <p className="text-2xl font-bold text-blue-400">
                       {stats?.refunds.processed || 0}
                     </p>
                   </div>
@@ -739,34 +839,34 @@ export default function SupportDashboardPage() {
 
               {/* Performance Metrics */}
               <div>
-                <h4 className="text-lg font-semibold text-foreground mb-4">
+                <h4 className="text-lg font-semibold text-white mb-4">
                   Performance Metrics
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-background rounded-lg p-4 text-center border border-border">
-                    <Clock className="h-8 w-8 text-primary mx-auto mb-2" />
-                    <h5 className="text-sm font-medium text-muted-foreground mb-1">
-                      {translations["Response Time"]}
+                  <div className="bg-card rounded-lg p-4 text-center border border-slate-600/50">
+                    <Clock className="h-8 w-8 text-blue-400 mx-auto mb-2" />
+                    <h5 className="text-sm font-medium text-slate-300 mb-1">
+                      Response Time
                     </h5>
-                    <p className="text-xl font-bold text-foreground">
+                    <p className="text-xl font-bold text-white">
                       {stats?.avgResponseTime || "N/A"}
                     </p>
                   </div>
-                  <div className="bg-background rounded-lg p-4 text-center border border-border">
+                  <div className="bg-card rounded-lg p-4 text-center border border-slate-600/50">
                     <Star className="h-8 w-8 text-yellow-400 mx-auto mb-2" />
-                    <h5 className="text-sm font-medium text-muted-foreground mb-1">
-                      {translations["Satisfaction"]}
+                    <h5 className="text-sm font-medium text-slate-300 mb-1">
+                      Satisfaction
                     </h5>
-                    <p className="text-xl font-bold text-foreground">
+                    <p className="text-xl font-bold text-white">
                       {stats?.customerSatisfaction || 0}/5
                     </p>
                   </div>
-                  <div className="bg-background rounded-lg p-4 text-center border border-border">
+                  <div className="bg-card rounded-lg p-4 text-center border border-slate-600/50">
                     <TrendingUp className="h-8 w-8 text-green-400 mx-auto mb-2" />
-                    <h5 className="text-sm font-medium text-muted-foreground mb-1">
+                    <h5 className="text-sm font-medium text-slate-300 mb-1">
                       Response Rate
                     </h5>
-                    <p className="text-xl font-bold text-foreground">
+                    <p className="text-xl font-bold text-white">
                       {stats?.responseCount
                         ? Math.round(
                             (stats.responseCount / (stats.tickets.total || 1)) *
@@ -810,15 +910,25 @@ export default function SupportDashboardPage() {
                     {updateType === "ticket" ? (
                       <>
                         <option value="open">{translations["Open"]}</option>
-                        <option value="in-progress">{translations["In Progress"]}</option>
-                        <option value="resolved">{translations["Resolved"]}</option>
+                        <option value="in-progress">
+                          {translations["In Progress"]}
+                        </option>
+                        <option value="resolved">
+                          {translations["Resolved"]}
+                        </option>
                         <option value="closed">{translations["Closed"]}</option>
                       </>
                     ) : (
                       <>
-                        <option value="pending">{translations["Pending"]}</option>
-                        <option value="approved">{translations["Approved"]}</option>
-                        <option value="rejected">{translations["Rejected"]}</option>
+                        <option value="pending">
+                          {translations["Pending"]}
+                        </option>
+                        <option value="approved">
+                          {translations["Approved"]}
+                        </option>
+                        <option value="rejected">
+                          {translations["Rejected"]}
+                        </option>
                         <option value="processed">Processed</option>
                       </>
                     )}

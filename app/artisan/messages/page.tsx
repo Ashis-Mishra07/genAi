@@ -942,13 +942,13 @@ Product Data: ${JSON.stringify(product)}`;
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div className="bg-card border-b border-border px-6 py-4">
+      <div className="bg-card border border-border rounded-xl px-6 py-6 shadow-sm mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground flex items-center">
-              <MessageCircle className="h-6 w-6 mr-2" />
+            <h1 className="text-3xl font-bold text-foreground flex items-center">
+              <MessageCircle className="h-8 w-8 text-primary mr-3" />
               {tl("Admin Support", {
                 hi: "एडमिन सहायता",
                 bn: "প্রশাসন সহায়তা",
@@ -961,7 +961,8 @@ Product Data: ${JSON.stringify(product)}`;
                 pa: "ਪ੍ਰਸ਼ਾਸਕ ਸਹਾਇਤਾ",
               })}
             </h1>
-            <p className="text-slate-400">
+            <div className="h-1 w-32 bg-primary rounded-full mt-2 mb-2"></div>
+            <p className="text-muted-foreground text-lg">
               {tl("Get help to grow your business", {
                 hi: "अपने व्यवसाय को बढ़ाने में सहायता प्राप्त करें",
                 bn: "আপনার ব্যবসা বাড়ানোর জন্য সাহায্য নিন",

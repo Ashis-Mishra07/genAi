@@ -15,6 +15,8 @@ import {
   Search,
   ChevronDown,
   X,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { GoogleLoaderWithText } from "@/components/ui/google-loader";
 
@@ -56,6 +58,10 @@ export default function CustomerOrdersPage() {
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const ordersPerPage = 5;
 
   // Fetch actual orders from database
   useEffect(() => {
@@ -189,6 +195,17 @@ export default function CustomerOrdersPage() {
     return matchesStatus && matchesSearch;
   });
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+  const startIndex = (currentPage - 1) * ordersPerPage;
+  const endIndex = startIndex + ordersPerPage;
+  const paginatedOrders = filteredOrders.slice(startIndex, endIndex);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterStatus, searchTerm]);
+
   // Calculate order statistics
   const orderStats = {
     total: orders.length,
@@ -238,7 +255,11 @@ export default function CustomerOrdersPage() {
                   My Orders
                 </h1>
                 <p className="text-muted-foreground">
-                  {orders.length} orders placed
+                  {filteredOrders.length}{" "}
+                  {filteredOrders.length === orders.length
+                    ? "orders placed"
+                    : `of ${orders.length} orders`}
+                  {totalPages > 1 && ` • Page ${currentPage} of ${totalPages}`}
                 </p>
               </div>
 
@@ -351,93 +372,142 @@ export default function CustomerOrdersPage() {
                 </button>
               </div>
             ) : (
-              <div className="space-y-4">
-                {filteredOrders.map((order) => (
-                  <div
-                    key={order.id}
-                    className="bg-card rounded-2xl p-6 border border-border hover:border-primary/20 transition-colors shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-4">
-                        <div className="flex items-center space-x-2">
-                          {getStatusIcon(order.status)}
-                          <div>
-                            <h3 className="font-semibold text-card-foreground">
-                              {order.orderNumber}
-                            </h3>
-                            <p className="text-muted-foreground text-sm">
-                              {new Date(order.date).toLocaleDateString()}
-                            </p>
+              <>
+                <div className="space-y-4">
+                  {paginatedOrders.map((order) => (
+                    <div
+                      key={order.id}
+                      className="bg-card rounded-2xl p-6 border border-border hover:border-primary/20 transition-colors shadow-sm">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-4">
+                          <div className="flex items-center space-x-2">
+                            {getStatusIcon(order.status)}
+                            <div>
+                              <h3 className="font-semibold text-card-foreground">
+                                {order.orderNumber}
+                              </h3>
+                              <p className="text-muted-foreground text-sm">
+                                {new Date(order.date).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <span
+                            className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+                              order.status
+                            )}`}>
+                            {order.status.charAt(0).toUpperCase() +
+                              order.status.slice(1)}
+                          </span>
+                        </div>
+
+                        <div className="text-right">
+                          <div className="text-xl font-bold text-card-foreground">
+                            ₹{Number(order.total).toLocaleString()}
+                          </div>
+                          <div className="text-muted-foreground text-sm">
+                            {order.items.length} items
                           </div>
                         </div>
-                        <span
-                          className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
-                            order.status
-                          )}`}>
-                          {order.status.charAt(0).toUpperCase() +
-                            order.status.slice(1)}
-                        </span>
                       </div>
 
-                      <div className="text-right">
-                        <div className="text-xl font-bold text-card-foreground">
-                          ₹{Number(order.total).toLocaleString()}
+                      {order.trackingNumber && (
+                        <div className="mb-4 flex items-center space-x-2 text-sm text-muted-foreground">
+                          <Truck className="h-4 w-4" />
+                          <span>Tracking: {order.trackingNumber}</span>
                         </div>
-                        <div className="text-muted-foreground text-sm">
-                          {order.items.length} items
+                      )}
+
+                      {order.estimatedDelivery && (
+                        <div className="mb-4 flex items-center space-x-2 text-sm text-muted-foreground">
+                          <Calendar className="h-4 w-4" />
+                          <span>
+                            Expected:{" "}
+                            {new Date(
+                              order.estimatedDelivery
+                            ).toLocaleDateString()}
+                          </span>
                         </div>
+                      )}
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex space-x-2">
+                          {order.items.slice(0, 3).map((item, index) => (
+                            <div
+                              key={index}
+                              className="text-sm text-muted-foreground">
+                              {item.name}
+                              {index < Math.min(order.items.length - 1, 2) &&
+                                ", "}
+                            </div>
+                          ))}
+                          {order.items.length > 3 && (
+                            <span className="text-sm text-muted-foreground">
+                              +{order.items.length - 3} more
+                            </span>
+                          )}
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            setSelectedOrder(order);
+                            setShowOrderDetails(true);
+                          }}
+                          className="flex items-center space-x-2 text-primary hover:text-primary/80 transition-colors">
+                          <Eye className="h-4 w-4" />
+                          <span>Track Order</span>
+                        </button>
                       </div>
                     </div>
+                  ))}
+                </div>
 
-                    {order.trackingNumber && (
-                      <div className="mb-4 flex items-center space-x-2 text-sm text-muted-foreground">
-                        <Truck className="h-4 w-4" />
-                        <span>Tracking: {order.trackingNumber}</span>
-                      </div>
-                    )}
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="mt-8 flex items-center justify-between bg-card border border-border rounded-lg p-4">
+                    <div className="text-sm text-muted-foreground">
+                      Showing {startIndex + 1} to{" "}
+                      {Math.min(endIndex, filteredOrders.length)} of{" "}
+                      {filteredOrders.length} orders
+                    </div>
 
-                    {order.estimatedDelivery && (
-                      <div className="mb-4 flex items-center space-x-2 text-sm text-muted-foreground">
-                        <Calendar className="h-4 w-4" />
-                        <span>
-                          Expected:{" "}
-                          {new Date(
-                            order.estimatedDelivery
-                          ).toLocaleDateString()}
-                        </span>
-                      </div>
-                    )}
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="flex items-center space-x-1 px-3 py-1.5 text-sm rounded-lg border border-border bg-background hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        <ChevronLeft className="h-4 w-4" />
+                        <span>Previous</span>
+                      </button>
 
-                    <div className="flex items-center justify-between">
-                      <div className="flex space-x-2">
-                        {order.items.slice(0, 3).map((item, index) => (
-                          <div
-                            key={index}
-                            className="text-sm text-muted-foreground">
-                            {item.name}
-                            {index < Math.min(order.items.length - 1, 2) &&
-                              ", "}
-                          </div>
+                      <div className="flex space-x-1">
+                        {Array.from(
+                          { length: totalPages },
+                          (_, i) => i + 1
+                        ).map((page) => (
+                          <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                              currentPage === page
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-background border border-border hover:bg-accent"
+                            }`}>
+                            {page}
+                          </button>
                         ))}
-                        {order.items.length > 3 && (
-                          <span className="text-sm text-muted-foreground">
-                            +{order.items.length - 3} more
-                          </span>
-                        )}
                       </div>
 
                       <button
-                        onClick={() => {
-                          setSelectedOrder(order);
-                          setShowOrderDetails(true);
-                        }}
-                        className="flex items-center space-x-2 text-primary hover:text-primary/80 transition-colors">
-                        <Eye className="h-4 w-4" />
-                        <span>Track Order</span>
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className="flex items-center space-x-1 px-3 py-1.5 text-sm rounded-lg border border-border bg-background hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        <span>Next</span>
+                        <ChevronRight className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
           </div>
         </>
